@@ -1,0 +1,68 @@
+export const nbDict: Record<string, string> = {
+  "{fieldLabel} has an invalid format.": "{fieldLabel} har et ugyldig format.",
+  "{fieldLabel} is required.": "{fieldLabel} er påkrevd.",
+  "{fieldLabel} must be a valid email address.":
+    "{fieldLabel} må være en gyldig e-postadresse.",
+  "{fieldLabel} must be a valid phone number.":
+    "{fieldLabel} må være et gyldig telefonnummer.",
+  "{fieldLabel} must be a valid URL.": "{fieldLabel} må være en gyldig URL.",
+  "{fieldLabel} must be at least {min}.": "{fieldLabel} må være minst {min}.",
+  "{fieldLabel} must be at least {minLength} characters.":
+    "{fieldLabel} må være minst {minLength} tegn.",
+  "{fieldLabel} must be at most {max}.": "{fieldLabel} må være høyst {max}.",
+  "{fieldLabel} must be at most {maxLength} characters.":
+    "{fieldLabel} må være høyst {maxLength} tegn.",
+  "{fieldLabel} must contain only letters and numbers.":
+    "{fieldLabel} må bare inneholde bokstaver og tall.",
+  "{fieldLabel} must contain only numbers.":
+    "{fieldLabel} må bare inneholde tall.",
+  Accepted: "Godtatt",
+  "Accept this answer?": "Godta dette svaret?",
+  "Action not configured": "Handling ikke konfigurert",
+  "An error occurred": "Det oppsto en feil",
+  "Continue a saved form": "Fortsett et lagret skjema",
+  Copied: "Kopiert",
+  "Copied!": "Kopiert!",
+  Copy: "Kopier",
+  "Copy both": "Kopier begge",
+  "Copy value": "Kopier verdi",
+  Delete: "Slett",
+  "Direct submission": "Direkte innsending",
+  "Draft deleted.": "Utkast slettet.",
+  "Draft ID": "Utkast-ID",
+  "Draft information": "Utkastinformasjon",
+  "Draft loaded successfully.": "Utkast lastet inn.",
+  "Draft saved successfully.": "Utkast lagret.",
+  "Enter your draft ID and password to continue, or start a new form.":
+    "Skriv inn utkast-ID og passord for å fortsette, eller start et nytt skjema.",
+  "Form definition not found": "Skjemadefinisjon ikke funnet",
+  "Form ID is missing. Please ensure the form is properly synced with the backend.":
+    "Skjema-ID mangler. Kontroller at skjemaet er riktig synkronisert med backend.",
+  "Form not found": "Skjema ikke funnet",
+  "Internal server error": "Intern serverfeil",
+  Load: "Last inn",
+  "New form": "Nytt skjema",
+  Next: "Neste",
+  No: "Nei",
+  "No backend configured for form submissions":
+    "Ingen backend konfigurert for skjemainnsendinger",
+  "Not accepted": "Ikke godtatt",
+  Password: "Passord",
+  Previous: "Forrige",
+  "Route not found": "Rute ikke funnet",
+  "Save draft": "Lagre utkast",
+  "Save these details to continue later:":
+    "Lagre disse opplysningene for å fortsette senere:",
+  "Saved draft": "Lagret utkast",
+  "Submission accepted": "Innsending godtatt",
+  "Submission ID": "Innsendings-ID",
+  "Submission not found": "Innsending ikke funnet",
+  "Submission rejected": "Innsending avvist",
+  "Submission submitted": "Innsending sendt",
+  Submit: "Send inn",
+  "Template not found": "Mal ikke funnet",
+  "Webhook endpoint not found": "Webhook-endepunkt ikke funnet",
+  "Workflow not found": "Arbeidsflyt ikke funnet",
+  "Used sources": "Brukte kilder",
+  Yes: "Ja",
+};

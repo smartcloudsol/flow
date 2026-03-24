@@ -1,0 +1,458 @@
+.smartcloud-flow-shadow-root {
+  --flow-field-gap: var(--mantine-spacing-xs);
+  --flow-field-padding: 0;
+  --flow-field-radius: 0;
+  --flow-field-bg: transparent;
+  --flow-field-border: none;
+  --flow-field-shadow: none;
+
+  --flow-field-label-color: inherit;
+  --flow-field-label-size: var(--mantine-font-size-sm);
+  --flow-field-label-weight: 500;
+
+  --flow-field-description-color: var(--mantine-color-dimmed);
+  --flow-field-description-size: var(--mantine-font-size-sm);
+
+  --flow-field-error-color: var(--mantine-color-error);
+  --flow-field-error-size: 12px;
+
+  --flow-field-caption-color: var(--mantine-color-dimmed);
+  --flow-field-caption-size: 12px;
+
+  --flow-control-min-height: 2.25rem;
+  --flow-control-radius: var(--mantine-radius-md);
+  --flow-control-bg: var(--mantine-color-body);
+  --flow-control-border-width: 1px;
+  --flow-control-border-color: var(--mantine-color-gray-4);
+  --flow-control-color: inherit;
+  --flow-control-placeholder-color: var(--mantine-color-placeholder);
+  --flow-control-padding-inline: 0.875rem;
+  --flow-control-padding-block: 0.625rem;
+  --flow-control-focus-border-color: var(--mantine-primary-color-filled);
+  --flow-control-focus-shadow: 0 0 0 1px var(--flow-control-focus-border-color);
+  --flow-control-disabled-opacity: 0.65;
+
+  --flow-choice-size: 1.125rem;
+  --flow-choice-color: var(--mantine-primary-color-filled);
+  --flow-choice-label-color: inherit;
+
+  --flow-slider-track-size: 0.375rem;
+  --flow-slider-track-bg: var(--mantine-color-gray-2);
+  --flow-slider-bar-color: var(--mantine-primary-color-filled);
+  --flow-slider-thumb-size: 1rem;
+  --flow-slider-thumb-bg: var(--mantine-color-body);
+  --flow-slider-thumb-border: 2px solid var(--mantine-primary-color-filled);
+
+  --flow-rating-size: 1.5rem;
+  --flow-rating-active-color: var(--mantine-color-yellow-5);
+  --flow-rating-inactive-color: var(--mantine-color-gray-4);
+
+  --flow-pin-gap: var(--mantine-spacing-xs);
+  --flow-pin-input-size: 2.75rem;
+
+  --flow-fieldset-border: 1px solid var(--mantine-color-gray-3);
+  --flow-fieldset-radius: var(--mantine-radius-md);
+  --flow-fieldset-padding: var(--mantine-spacing-md);
+  --flow-fieldset-legend-color: inherit;
+
+  --flow-collapse-toggle-bg: var(--mantine-color-body);
+  --flow-collapse-toggle-border: 1px solid var(--mantine-color-gray-3);
+  --flow-collapse-toggle-radius: var(--mantine-radius-md);
+  --flow-collapse-toggle-padding: 10px 12px;
+  --flow-collapse-toggle-color: inherit;
+
+  --flow-action-button-radius: var(--mantine-radius-md);
+  --flow-action-button-padding: 0.625rem 1rem;
+  --flow-submit-bg: var(--mantine-primary-color-filled);
+  --flow-submit-color: white;
+  --flow-submit-border: none;
+  --flow-save-draft-bg: transparent;
+  --flow-save-draft-color: var(--mantine-color-gray-7);
+  --flow-save-draft-border: 1px solid var(--mantine-color-gray-3);
+
+  --flow-submission-meta-bg: color-mix(
+    in srgb,
+    var(--mantine-primary-color-filled) 8%,
+    white
+  );
+  --flow-submission-meta-border: 1px solid
+    color-mix(in srgb, var(--mantine-primary-color-filled) 18%, white);
+  --flow-submission-meta-radius: var(--mantine-radius-md);
+  --flow-submission-meta-padding: 0.75rem 0.875rem;
+  --flow-submission-meta-gap: 0.625rem;
+  --flow-submission-meta-label-color: var(--mantine-color-dimmed);
+  --flow-submission-meta-value-color: inherit;
+  --flow-submission-meta-value-font: ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  --flow-submission-meta-copy-bg: transparent;
+  --flow-submission-meta-copy-border: 1px solid var(--mantine-color-gray-3);
+  --flow-submission-meta-copy-color: inherit;
+  --flow-submission-meta-shadow: 0 10px 30px -24px color-mix(in srgb, var(
+          --mantine-primary-color-filled
+        )
+        60%, transparent);
+}
+
+.smartcloud-flow-shadow-root .flow-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flow-field-gap);
+  padding: var(--flow-field-padding);
+  border: var(--flow-field-border);
+  border-radius: var(--flow-field-radius);
+  background: var(--flow-field-bg);
+  box-shadow: var(--flow-field-shadow);
+}
+
+.smartcloud-flow-shadow-root .flow-block :where(label) {
+  color: var(--flow-field-label-color);
+  font-size: var(--flow-field-label-size);
+  font-weight: var(--flow-field-label-weight);
+}
+
+.smartcloud-flow-shadow-root
+  .flow-block
+  :where([data-description], .flow-block-caption) {
+  color: var(--flow-field-description-color);
+  font-size: var(--flow-field-description-size);
+}
+
+.smartcloud-flow-shadow-root .flow-block :where(input, textarea, select) {
+  min-height: var(--flow-control-min-height);
+  border-radius: var(--flow-control-radius);
+  border-width: var(--flow-control-border-width);
+  border-color: var(--flow-control-border-color);
+  background: var(--flow-control-bg);
+  color: var(--flow-control-color);
+  padding-inline: var(--flow-control-padding-inline);
+  padding-block: var(--flow-control-padding-block);
+}
+
+.smartcloud-flow-shadow-root
+  .flow-block
+  :where(input, textarea, select)::placeholder {
+  color: var(--flow-control-placeholder-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block :where(input, textarea, select):focus {
+  border-color: var(--flow-control-focus-border-color);
+  box-shadow: var(--flow-control-focus-shadow);
+}
+
+.smartcloud-flow-shadow-root
+  .flow-block
+  :where(input:disabled, textarea:disabled, select:disabled, button:disabled) {
+  opacity: var(--flow-control-disabled-opacity);
+}
+
+.smartcloud-flow-shadow-root .flow-control--checkbox input,
+.smartcloud-flow-shadow-root .flow-control--radio input,
+.smartcloud-flow-shadow-root .flow-control--switch input {
+  accent-color: var(--flow-choice-color);
+}
+
+.smartcloud-flow-shadow-root .flow-control--checkbox :where(label),
+.smartcloud-flow-shadow-root .flow-control--radio :where(label),
+.smartcloud-flow-shadow-root .flow-control--switch :where(label) {
+  color: var(--flow-choice-label-color);
+}
+
+.smartcloud-flow-shadow-root .flow-control--pin {
+  gap: var(--flow-pin-gap);
+}
+
+.smartcloud-flow-shadow-root .flow-control--pin input {
+  width: var(--flow-pin-input-size);
+  height: var(--flow-pin-input-size);
+  text-align: center;
+}
+
+.smartcloud-flow-shadow-root .flow-control--slider [role="slider"],
+.smartcloud-flow-shadow-root .flow-control--rangeslider [role="slider"] {
+  width: var(--flow-slider-thumb-size);
+  height: var(--flow-slider-thumb-size);
+  border: var(--flow-slider-thumb-border);
+  background: var(--flow-slider-thumb-bg);
+}
+
+.smartcloud-flow-shadow-root .flow-control--slider [data-filled],
+.smartcloud-flow-shadow-root .flow-control--rangeslider [data-filled] {
+  background: var(--flow-slider-bar-color);
+}
+
+.smartcloud-flow-shadow-root .flow-control--slider [data-track],
+.smartcloud-flow-shadow-root .flow-control--rangeslider [data-track] {
+  height: var(--flow-slider-track-size);
+  background: var(--flow-slider-track-bg);
+}
+
+.smartcloud-flow-shadow-root .flow-control--rating svg {
+  width: var(--flow-rating-size);
+  height: var(--flow-rating-size);
+}
+
+.smartcloud-flow-shadow-root .flow-control--rating button[data-active] svg {
+  fill: var(--flow-rating-active-color);
+  color: var(--flow-rating-active-color);
+}
+
+.smartcloud-flow-shadow-root
+  .flow-control--rating
+  button:not([data-active])
+  svg {
+  color: var(--flow-rating-inactive-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block--fieldset fieldset {
+  border: var(--flow-fieldset-border);
+  border-radius: var(--flow-fieldset-radius);
+  padding: var(--flow-fieldset-padding);
+}
+
+.smartcloud-flow-shadow-root .flow-block--fieldset legend {
+  color: var(--flow-fieldset-legend-color);
+}
+
+.smartcloud-flow-shadow-root .flow-collapse-toggle {
+  border: var(--flow-collapse-toggle-border);
+  border-radius: var(--flow-collapse-toggle-radius);
+  padding: var(--flow-collapse-toggle-padding);
+  background: var(--flow-collapse-toggle-bg);
+  color: var(--flow-collapse-toggle-color);
+}
+
+.smartcloud-flow-shadow-root .flow-action-button {
+  border-radius: var(--flow-action-button-radius);
+  padding: var(--flow-action-button-padding);
+}
+
+.smartcloud-flow-shadow-root .flow-action-button--submit {
+  background: var(--flow-submit-bg);
+  color: var(--flow-submit-color);
+  border: var(--flow-submit-border);
+}
+
+.smartcloud-flow-shadow-root .flow-action-button--save-draft {
+  background: var(--flow-save-draft-bg);
+  color: var(--flow-save-draft-color);
+  border: var(--flow-save-draft-border);
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions {
+  gap: 0.875rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__title {
+  font-size: 1.125rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__description {
+  max-width: 42rem;
+  line-height: 1.55;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__trigger {
+  min-height: 2.75rem;
+  font-weight: 600;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__card {
+  border-radius: calc(var(--mantine-radius-md) + 2px);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__card-title {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__card-description {
+  line-height: 1.65;
+  color: var(--mantine-color-text);
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__confidence {
+  font-weight: 700;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__confidence-bar {
+  margin-top: 0.125rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__empty-state {
+  border-radius: calc(var(--mantine-radius-md) + 2px);
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__continue {
+  padding-top: 0.125rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__continue-description {
+  max-width: 40rem;
+  line-height: 1.55;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__continue-button {
+  min-width: 6.5rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources {
+  border-radius: calc(var(--mantine-radius-md) + 2px);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources__title {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources__item {
+  gap: 0.625rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources__index {
+  flex: 0 0 auto;
+  min-width: 1.9rem;
+  justify-content: center;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources__body {
+  min-width: 0;
+  padding-top: 0.1rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources__link,
+.smartcloud-flow-shadow-root .flow-ai-suggestions-sources__text {
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.smartcloud-flow-shadow-root .flow-block-message--error {
+  color: var(--flow-field-error-color);
+  font-size: var(--flow-field-error-size);
+}
+
+.smartcloud-flow-shadow-root .flow-block-message--required,
+.smartcloud-flow-shadow-root .flow-block-caption {
+  color: var(--flow-field-caption-color);
+  font-size: var(--flow-field-caption-size);
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--flow-submission-meta-gap);
+  flex-wrap: wrap;
+  width: min(100%, 36rem);
+  max-width: 100%;
+  margin: 0.25rem 0;
+  padding: var(--flow-submission-meta-padding);
+  border: var(--flow-submission-meta-border);
+  border-radius: var(--flow-submission-meta-radius);
+  background: var(--flow-submission-meta-bg);
+  box-shadow: var(--flow-submission-meta-shadow);
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__content {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__label {
+  color: var(--flow-submission-meta-label-color);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__value {
+  color: var(--flow-submission-meta-value-color);
+  font-family: var(--flow-submission-meta-value-font);
+  font-size: 0.98rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.smartcloud-flow-shadow-root
+  .flow-submission-meta--responseMessage
+  .flow-submission-meta__value,
+.smartcloud-flow-shadow-root
+  .flow-submission-meta--formName
+  .flow-submission-meta__value,
+.smartcloud-flow-shadow-root
+  .flow-submission-meta--aiSuggestionTitle
+  .flow-submission-meta__value,
+.smartcloud-flow-shadow-root
+  .flow-submission-meta--aiSuggestionDescription
+  .flow-submission-meta__value,
+.smartcloud-flow-shadow-root
+  .flow-submission-meta--status
+  .flow-submission-meta__value,
+.smartcloud-flow-shadow-root
+  .flow-submission-meta--submissionSource
+  .flow-submission-meta__value {
+  font-family: inherit;
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta--aiSuggestionDescription {
+  width: min(100%, 44rem);
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__copy {
+  appearance: none;
+  border: var(--flow-submission-meta-copy-border);
+  border-radius: 999px;
+  background: var(--flow-submission-meta-copy-bg);
+  color: var(--flow-submission-meta-copy-color);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease,
+    color 120ms ease;
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__copy:hover {
+  background: color-mix(in srgb, var(--mantine-color-body) 70%, white);
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__copy:active {
+  transform: translateY(1px);
+}
+
+.smartcloud-flow-shadow-root .flow-submission-meta__copy:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.smartcloud-flow-shadow-root
+  .flow-submission-meta__copy[data-flow-copied="true"] {
+  border-color: var(--mantine-color-teal-5);
+  color: var(--mantine-color-teal-7);
+}
+
+@media (max-width: 40rem) {
+  .smartcloud-flow-shadow-root .flow-submission-meta {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .smartcloud-flow-shadow-root .flow-submission-meta__copy {
+    width: 100%;
+    justify-content: center;
+  }
+}

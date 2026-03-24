@@ -1,0 +1,53 @@
+.container {
+  width: 100%;
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+}
+
+.bullets {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.bullets li {
+  margin: 4px 0;
+}
+
+.thumbCard {
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease;
+}
+
+.thumbCard:hover {
+  transform: translateY(-1px);
+}
+
+.thumbImage :global(img) {
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.thumbPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 140px;
+  border: 1px dashed
+    light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
+  border-radius: var(--mantine-radius-sm);
+  padding: 18px 10px;
+  background: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-6)
+  );
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/textarea-field",
+  "version": "0.1.0",
+  "title": "Textarea field",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "editor-table",
+  "description": "Field block for WP Suite Forms.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": "message"
+    },
+    "label": {
+      "type": "string",
+      "default": "Textarea"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "placeholder": {
+      "type": "string",
+      "default": ""
+    },
+    "minRows": {
+      "type": "number",
+      "default": 4
+    },
+    "validationType": {
+      "type": "string",
+      "default": "none"
+    },
+    "validationPattern": {
+      "type": "string",
+      "default": ""
+    },
+    "validationMessage": {
+      "type": "string",
+      "default": ""
+    },
+    "minLength": {
+      "type": "number"
+    },
+    "maxLength": {
+      "type": "number"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}

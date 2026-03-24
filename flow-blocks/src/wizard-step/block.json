@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/wizard-step",
+  "version": "1.0.0",
+  "title": "Wizard Step",
+  "category": "smartcloud-flow",
+  "parent": ["smartcloud-flow/wizard"],
+  "icon": "editor-removeformatting",
+  "description": "A single step in a wizard container.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Step"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}

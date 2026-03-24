@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/grid",
+  "version": "1.0.0",
+  "title": "Grid",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "grid-view",
+  "description": "Responsive grid layout container for Flow Form fields.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "columns": {
+      "type": "number",
+      "default": 2
+    },
+    "spacing": {
+      "type": "string",
+      "default": "md"
+    },
+    "verticalSpacing": {
+      "type": "string",
+      "default": "md"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}

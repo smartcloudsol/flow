@@ -1,0 +1,113 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/select-field",
+  "version": "1.0.0",
+  "title": "Select field",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "editor-table",
+  "description": "Field block for Flow Form.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": "topic"
+    },
+    "label": {
+      "type": "string",
+      "default": "Select"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "placeholder": {
+      "type": "string",
+      "default": "Select an option"
+    },
+    "optionsText": {
+      "type": "string",
+      "default": "Sales|sales\nSupport|support\nPartnership|partnership"
+    },
+    "optionsSource": {
+      "type": "string",
+      "default": "static",
+      "enum": [
+        "static",
+        "api",
+        "autocomplete"
+      ]
+    },
+    "apiEndpoint": {
+      "type": "string",
+      "default": ""
+    },
+    "apiMethod": {
+      "type": "string",
+      "default": "GET"
+    },
+    "apiHeaders": {
+      "type": "string",
+      "default": "{}"
+    },
+    "apiParams": {
+      "type": "string",
+      "default": "{}"
+    },
+    "apiResponsePath": {
+      "type": "string",
+      "default": ""
+    },
+    "cacheEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "cacheTTL": {
+      "type": "number",
+      "default": 3600
+    },
+    "autocompleteMinChars": {
+      "type": "number",
+      "default": 2
+    },
+    "autocompleteDebounce": {
+      "type": "number",
+      "default": 300
+    },
+    "searchParam": {
+      "type": "string",
+      "default": "q"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}

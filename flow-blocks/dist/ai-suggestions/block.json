@@ -1,0 +1,74 @@
+{
+  "apiVersion": 3,
+  "name": "smartcloud-flow/ai-suggestions",
+  "title": "AI Suggestions",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "lightbulb",
+  "description": "Generate AI-powered suggestions from current form values.",
+  "attributes": {
+    "presetId": {
+      "type": "string",
+      "default": ""
+    },
+    "title": {
+      "type": "string",
+      "default": "AI suggestions"
+    },
+    "description": {
+      "type": "string",
+      "default": "Review the generated suggestions before continuing."
+    },
+    "mode": {
+      "type": "string",
+      "default": "manual"
+    },
+    "buttonLabel": {
+      "type": "string",
+      "default": "Generate suggestions"
+    },
+    "acceptLabel": {
+      "type": "string",
+      "default": "Accept this answer?"
+    },
+    "continueLabel": {
+      "type": "string",
+      "default": "Continue"
+    },
+    "emptyStateText": {
+      "type": "string",
+      "default": "No suggestions available."
+    },
+    "fallbackToRawText": {
+      "type": "boolean",
+      "default": true
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "continueDescription": {
+      "type": "string",
+      "default": ""
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "supports": {
+    "html": false
+  }
+}

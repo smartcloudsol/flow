@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/success-state",
+  "version": "1.0.0",
+  "title": "Success State",
+  "category": "smartcloud-flow",
+  "parent": ["smartcloud-flow/form"],
+  "icon": "yes-alt",
+  "description": "Content shown after a successful form submission.",
+  "attributes": {
+    "trigger": {
+      "type": "string",
+      "default": "submit-success"
+    }
+  },
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}

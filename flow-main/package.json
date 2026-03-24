@@ -1,0 +1,43 @@
+{
+  "name": "@smart-cloud/flow-main",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "scripts": {
+    "build": "tsup --minify",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0",
+    "build-wp": "wp-scripts build --config=webpack.config.cjs --webpack-copy-php --output-path",
+    "format": "wp-scripts format",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js",
+    "packages-update": "wp-scripts packages-update",
+    "plugin-zip": "wp-scripts plugin-zip",
+    "start": "wp-scripts start --webpack-copy-php --output-path",
+    "check-licenses": "wp-scripts check-licenses --prod"
+  },
+  "dependencies": {
+    "@smart-cloud/flow-core": "^1.0.4",
+    "@smart-cloud/wpsuite-core": "^2.2.10"
+  },
+  "peerDependencies": {
+    "@wordpress/data": "^10.41.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/jquery": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
+    "@wordpress/data": "^10.41.0",
+    "@wordpress/scripts": "^31.6.0",
+    "ajv": "^8.18.0",
+    "eslint": "^10.0.0",
+    "globals": "^17.4.0",
+    "jquery": "^4.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.59.0"
+  }
+}

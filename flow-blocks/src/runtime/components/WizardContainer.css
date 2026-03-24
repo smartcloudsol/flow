@@ -1,0 +1,222 @@
+/**
+ * Flow Wizard Container CSS Tokens
+ * 
+ * These CSS variables can be overridden in your themeOverrides to customize
+ * the wizard container appearance.
+ * 
+ * Example usage in FormAttributes.themeOverrides:
+ * ```css
+ * .flow-wizard-container {
+ *   --flow-wizard-gap: 1.5rem;
+ *   --flow-wizard-header-spacing: 1rem;
+ * }
+ * 
+ * .flow-wizard-title {
+ *   --flow-wizard-title-color: #1a1a1a;
+ *   --flow-wizard-title-size: 1.5rem;
+ *   --flow-wizard-title-weight: 600;
+ * }
+ * ```
+ */
+
+/* Container */
+.flow-wizard-container {
+  --flow-wizard-gap: var(--mantine-spacing-md);
+  --flow-wizard-border-radius: var(--mantine-radius-md);
+  --flow-wizard-padding: var(--mantine-spacing-md);
+
+  gap: var(--flow-wizard-gap);
+  border-radius: var(--flow-wizard-border-radius);
+}
+
+/* Header */
+.flow-wizard-header {
+  --flow-wizard-header-spacing: var(--mantine-spacing-sm);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--flow-wizard-header-spacing);
+}
+
+.flow-wizard-title {
+  --flow-wizard-title-color: inherit;
+  --flow-wizard-title-size: 1.5rem;
+  --flow-wizard-title-weight: 600;
+  --flow-wizard-title-line-height: 1.3;
+
+  color: var(--flow-wizard-title-color);
+  font-size: var(--flow-wizard-title-size);
+  font-weight: var(--flow-wizard-title-weight);
+  line-height: var(--flow-wizard-title-line-height);
+  margin: 0;
+}
+
+.flow-wizard-subtitle {
+  --flow-wizard-subtitle-color: var(--mantine-color-dimmed);
+  --flow-wizard-subtitle-size: 0.875rem;
+  --flow-wizard-subtitle-line-height: 1.5;
+
+  color: var(--flow-wizard-subtitle-color);
+  font-size: var(--flow-wizard-subtitle-size);
+  line-height: var(--flow-wizard-subtitle-line-height);
+  margin: 0;
+}
+
+/* Progress indicators */
+.flow-wizard-progress {
+  --flow-wizard-progress-margin: var(--mantine-spacing-md) 0;
+
+  margin: var(--flow-wizard-progress-margin);
+}
+
+.flow-wizard-progress-bar {
+  --flow-wizard-bar-height: 6px;
+  --flow-wizard-bar-color: var(--mantine-primary-color-filled);
+  --flow-wizard-bar-bg: var(--mantine-color-gray-2);
+
+  height: var(--flow-wizard-bar-height);
+}
+
+.flow-wizard-stepper {
+  --flow-wizard-stepper-gap: var(--mantine-spacing-lg);
+
+  gap: var(--flow-wizard-stepper-gap);
+}
+
+.flow-wizard-step-numbers {
+  --flow-wizard-numbers-gap: var(--mantine-spacing-xs);
+
+  gap: var(--flow-wizard-numbers-gap);
+}
+
+.flow-wizard-step-number {
+  --flow-wizard-number-size: 32px;
+  --flow-wizard-number-active-bg: var(--mantine-primary-color-filled);
+  --flow-wizard-number-inactive-bg: var(--mantine-color-gray-1);
+  --flow-wizard-number-active-color: white;
+  --flow-wizard-number-inactive-color: var(--mantine-color-dark-6);
+
+  min-width: var(--flow-wizard-number-size);
+  min-height: var(--flow-wizard-number-size);
+}
+
+.flow-wizard-step-number.flow-wizard-step-active {
+  background-color: var(--flow-wizard-number-active-bg);
+  color: var(--flow-wizard-number-active-color);
+}
+
+/* Step content */
+.flow-wizard-step-content {
+  --flow-wizard-step-gap: var(--mantine-spacing-md);
+  --flow-wizard-step-padding: var(--mantine-spacing-md) 0;
+
+  gap: var(--flow-wizard-step-gap);
+  padding: var(--flow-wizard-step-padding);
+}
+
+.flow-wizard-step-title {
+  --flow-wizard-step-title-color: inherit;
+  --flow-wizard-step-title-size: 1.25rem;
+  --flow-wizard-step-title-weight: 600;
+
+  color: var(--flow-wizard-step-title-color);
+  font-size: var(--flow-wizard-step-title-size);
+  font-weight: var(--flow-wizard-step-title-weight);
+  margin: 0;
+}
+
+.flow-wizard-step-description {
+  --flow-wizard-step-desc-color: var(--mantine-color-dimmed);
+  --flow-wizard-step-desc-size: 0.875rem;
+
+  color: var(--flow-wizard-step-desc-color);
+  font-size: var(--flow-wizard-step-desc-size);
+  margin: 0;
+}
+
+.flow-wizard-step-fields {
+  --flow-wizard-fields-gap: var(--mantine-spacing-md);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--flow-wizard-fields-gap);
+}
+
+/* Navigation controls */
+.flow-wizard-controls {
+  --flow-wizard-controls-gap: var(--mantine-spacing-sm);
+  --flow-wizard-controls-margin: var(--mantine-spacing-lg) 0 0;
+  --flow-wizard-controls-padding: var(--mantine-spacing-md) 0 0;
+  --flow-wizard-controls-border-top: 1px solid var(--mantine-color-gray-2);
+
+  gap: var(--flow-wizard-controls-gap);
+  margin: var(--flow-wizard-controls-margin);
+  padding: var(--flow-wizard-controls-padding);
+  border-top: var(--flow-wizard-controls-border-top);
+}
+
+.flow-wizard-prev-button {
+  --flow-wizard-prev-color: var(--mantine-color-gray-7);
+  --flow-wizard-prev-bg: transparent;
+  --flow-wizard-prev-border: 1px solid var(--mantine-color-gray-3);
+
+  color: var(--flow-wizard-prev-color);
+  background: var(--flow-wizard-prev-bg);
+  border: var(--flow-wizard-prev-border);
+}
+
+.flow-wizard-next-button {
+  --flow-wizard-next-color: white;
+  --flow-wizard-next-bg: var(--mantine-primary-color-filled);
+
+  color: var(--flow-wizard-next-color);
+  background: var(--flow-wizard-next-bg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flow-wizard-container {
+    --flow-wizard-padding: var(--mantine-spacing-sm);
+  }
+
+  .flow-wizard-title {
+    --flow-wizard-title-size: 1.25rem;
+  }
+
+  .flow-wizard-stepper {
+    font-size: 0.875rem;
+  }
+
+  .flow-wizard-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .flow-wizard-controls > * {
+    width: 100%;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .flow-wizard-title {
+    --flow-wizard-title-color: var(--mantine-color-dark-0);
+  }
+
+  .flow-wizard-progress-bar {
+    --flow-wizard-bar-bg: var(--mantine-color-dark-4);
+  }
+
+  .flow-wizard-step-number {
+    --flow-wizard-number-inactive-bg: var(--mantine-color-dark-5);
+    --flow-wizard-number-inactive-color: var(--mantine-color-dark-1);
+  }
+
+  .flow-wizard-controls {
+    --flow-wizard-controls-border-top: 1px solid var(--mantine-color-dark-4);
+  }
+
+  .flow-wizard-prev-button {
+    --flow-wizard-prev-border: 1px solid var(--mantine-color-dark-4);
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/form",
+  "version": "1.0.0",
+  "title": "Flow Form",
+  "category": "smartcloud-flow",
+  "icon": "feedback",
+  "description": "Form container block rendered as a single React tree.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "formId": {
+      "type": "string"
+    },
+    "formName": {
+      "type": "string",
+      "default": "Contact us"
+    },
+    "submitLabel": {
+      "type": "string",
+      "default": "Send"
+    },
+    "successMessage": {
+      "type": "string",
+      "default": "Thanks, we received your message."
+    },
+    "errorMessage": {
+      "type": "string",
+      "default": "Unable to send the form right now."
+    },
+    "hideFormOnSuccess": {
+      "type": "boolean",
+      "default": true
+    },
+    "endpointPath": {
+      "type": "string",
+      "default": "/frontend/forms/contact-form/submit"
+    },
+    "language": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string"
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "light"
+    },
+    "primaryColor": {
+      "type": "string",
+      "default": ""
+    },
+    "primaryShade": {
+      "type": "object",
+      "default": {}
+    },
+    "colors": {
+      "type": "object",
+      "default": {}
+    },
+    "themeOverrides": {
+      "type": "string",
+      "default": ""
+    },
+    "allowDrafts": {
+      "type": "boolean",
+      "default": false
+    },
+    "showDraftResumePanel": {
+      "type": "boolean",
+      "default": true
+    },
+    "draftExpiryDays": {
+      "type": "number",
+      "default": 30
+    },
+    "draftAllowDelete": {
+      "type": "boolean",
+      "default": true
+    },
+    "draftResumeTitle": {
+      "type": "string",
+      "default": "Continue a saved form"
+    },
+    "draftResumeDescription": {
+      "type": "string",
+      "default": "Enter your draft ID and password to continue, or start a new form."
+    },
+    "draftSaveSuccessMessage": {
+      "type": "string",
+      "default": "Draft saved. Keep your draft ID and password to continue later."
+    }
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js",
+  "viewScript": "file:../index.js",
+  "render": "file:./render.php"
+}

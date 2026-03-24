@@ -1,0 +1,103 @@
+:root {
+  --mantine-cursor-type: pointer;
+  --switch-cursor: pointer;
+}
+
+input[readonly].mantine-Select-input {
+  background-color: #fff;
+}
+
+.wpc-container {
+  padding: 1rem;
+}
+
+.wpc-tabs-label {
+  display: flex;
+  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.wpc-tabs-panel {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  padding: 0rem 1rem;
+  max-width: 800px;
+}
+
+.wpc-tabs-panel-mobile {
+  display: flex;
+  gap: 0rem;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  max-width: 600px;
+}
+
+.wpc-title {
+  margin: 1rem 0;
+}
+
+.wpc-form-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.7rem;
+}
+
+.wpc-form-row > * {
+  flex: 1;
+  width: 50%;
+}
+
+.wpc-wp-login-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.highlighted-doc-item {
+  background-color: rgba(255, 255, 0, 0.3);
+}
+
+.form-field-label {
+  display: flex !important;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  border-radius: var(--mantine-radius-md);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-lg);
+  padding-left: calc(var(--mantine-spacing-xl) - var(--mantine-spacing-md));
+  background-color: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-dark-5)
+  );
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.itemDragging {
+  box-shadow: var(--mantine-shadow-sm);
+}
+
+.symbol {
+  font-size: 30px;
+  font-weight: 700;
+  width: 60px;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-1));
+  margin-right: var(--mantine-spacing-lg);
+}
+
+.notification {
+  z-index: 10000;
+}

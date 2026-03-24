@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/submission-meta",
+  "version": "1.0.0",
+  "title": "Submission Meta",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/success-state"
+  ],
+  "icon": "admin-network",
+  "description": "Display runtime metadata such as submission details or accepted AI suggestion information in a success state.",
+  "attributes": {
+    "field": {
+      "type": "string",
+      "default": "submissionId"
+    },
+    "label": {
+      "type": "string",
+      "default": ""
+    },
+    "fallbackText": {
+      "type": "string",
+      "default": ""
+    },
+    "copyable": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateFormat": {
+      "type": "string",
+      "default": "localized"
+    }
+  },
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}

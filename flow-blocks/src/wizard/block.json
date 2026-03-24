@@ -1,0 +1,65 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/wizard",
+  "version": "1.0.0",
+  "title": "Wizard",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form"
+  ],
+  "icon": "editor-ol-rtl",
+  "description": "Multi-step wizard container with step-by-step validation.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "subtitle": {
+      "type": "string",
+      "default": ""
+    },
+    "showProgress": {
+      "type": "boolean",
+      "default": true
+    },
+    "progressType": {
+      "type": "string",
+      "default": "numbers"
+    },
+    "allowStepNavigation": {
+      "type": "boolean",
+      "default": false
+    },
+    "nextButtonLabel": {
+      "type": "string",
+      "default": ""
+    },
+    "prevButtonLabel": {
+      "type": "string",
+      "default": ""
+    },
+    "gap": {
+      "type": "string",
+      "default": "md"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "file:../index.js",
+  "script": "file:../index.js"
+}
