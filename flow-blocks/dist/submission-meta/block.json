@@ -36,6 +36,5 @@
     "html": false,
     "reusable": false
   },
-  "editorScript": "file:../index.js",
-  "script": "file:../index.js"
+  "editorScript": "file:../editor.js"
 }

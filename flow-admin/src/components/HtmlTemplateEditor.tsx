@@ -9,6 +9,7 @@ import Underline from "@tiptap/extension-underline";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import type { editor } from "monaco-editor";
+import type { Selection } from "monaco-editor";
 import { useEffect, useRef, useState } from "react";
 import type { FormDefinition } from "../api/types";
 import MonacoEditor from "./MonacoEditor";
@@ -17,6 +18,7 @@ import {
   convertTemplateVariablesToSpans,
 } from "./tiptap/TemplateVariable";
 import TemplateVariablePicker from "./tiptap/TemplateVariablePicker";
+import { t } from "../operations/i18n";
 
 export interface HtmlTemplateEditorProps {
   value: string;
@@ -35,7 +37,11 @@ export default function HtmlTemplateEditor({
 }: HtmlTemplateEditorProps) {
   const [mode, setMode] = useState<"visual" | "code">("visual");
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const previousMode = useRef<"visual" | "code">(mode);
+  const codeSelectionRef = useRef<Selection | null>(null);
+  const modeRef = useRef<"visual" | "code">(mode);
+  const lastEmittedVisualValue = useRef<string>("");
+
+  const normalizeHtml = (html: string) => html.replace(/\s+/g, " ").trim();
 
   // Tiptap editor for visual mode
   const tiptapEditor = useEditor({
@@ -51,7 +57,7 @@ export default function HtmlTemplateEditor({
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({
-        placeholder: placeholder || "Write your email template here...",
+        placeholder: placeholder || t("Write your email template here..."),
       }),
       TextStyle,
       Color,
@@ -59,50 +65,61 @@ export default function HtmlTemplateEditor({
     ],
     content: convertTemplateVariablesToSpans(value || ""),
     onUpdate: ({ editor }) => {
-      if (mode === "visual") {
-        onChange?.(editor.getHTML());
+      if (modeRef.current === "visual") {
+        const nextHtml = editor.getHTML();
+        lastEmittedVisualValue.current = normalizeHtml(nextHtml);
+        onChange?.(nextHtml);
       }
     },
   });
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
   // Sync value changes when switching modes or external value changes
   useEffect(() => {
     if (!tiptapEditor) return;
 
     if (mode === "visual") {
-      console.log("Sync effect triggered (visual mode)");
-      console.log("value:", value);
-
       // Always convert {{...}} patterns to spans for visual mode
       const convertedValue = convertTemplateVariablesToSpans(value || "");
+      const normalizedConverted = normalizeHtml(convertedValue);
       const currentContent = tiptapEditor.getHTML();
 
-      console.log("convertedValue:", convertedValue);
-      console.log("currentContent:", currentContent);
+      // Skip self-originated updates to preserve the caret position.
+      if (normalizedConverted === lastEmittedVisualValue.current) {
+        return;
+      }
 
-      // Normalize HTML for comparison (remove extra whitespace, etc.)
-      const normalizedConverted = convertedValue.replace(/\s+/g, " ").trim();
-      const normalizedCurrent = currentContent.replace(/\s+/g, " ").trim();
+      const normalizedCurrent = normalizeHtml(currentContent);
 
       if (normalizedConverted !== normalizedCurrent) {
-        console.log("Updating content");
-        tiptapEditor.commands.setContent(convertedValue);
-      } else {
-        console.log("Content is same, skipping update");
+        tiptapEditor.commands.setContent(convertedValue, {
+          emitUpdate: false,
+        });
       }
     }
-
-    previousMode.current = mode;
   }, [value, tiptapEditor, mode]);
 
   const insertText = (text: string, offsetBefore = 0, offsetAfter = 0) => {
     const editor = editorRef.current;
     if (!editor) return;
 
-    const selection = editor.getSelection();
-    if (!selection) return;
+    const model = editor.getModel();
+    if (!model) return;
 
-    const selectedText = editor.getModel()?.getValueInRange(selection) || "";
+    const lineNumber = model.getLineCount();
+    const column = model.getLineMaxColumn(lineNumber);
+    const selection = editor.getSelection() ||
+      codeSelectionRef.current || {
+        startLineNumber: lineNumber,
+        startColumn: column,
+        endLineNumber: lineNumber,
+        endColumn: column,
+      };
+
+    const selectedText = model.getValueInRange(selection) || "";
     const textToInsert = text.replace("{{selection}}", selectedText);
 
     editor.executeEdits("", [
@@ -138,6 +155,11 @@ export default function HtmlTemplateEditor({
     monaco: typeof import("monaco-editor"),
   ) => {
     editorRef.current = editor;
+    codeSelectionRef.current = editor.getSelection();
+
+    editor.onDidChangeCursorSelection((event) => {
+      codeSelectionRef.current = event.selection;
+    });
 
     // Add custom keyboard shortcuts
     const KeyMod = monaco.KeyMod;
@@ -170,8 +192,8 @@ export default function HtmlTemplateEditor({
           value={mode}
           onChange={(value) => setMode(value as "visual" | "code")}
           data={[
-            { label: "Visual", value: "visual" },
-            { label: "Code", value: "code" },
+            { label: t("Visual"), value: "visual" },
+            { label: t("Code"), value: "code" },
           ]}
           size="xs"
         />

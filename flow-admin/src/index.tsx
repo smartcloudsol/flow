@@ -7,6 +7,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { getStore, getFlowPlugin } from "@smart-cloud/flow-core";
 import Main from "./main";
+import { initWordPressOperationsI18n } from "./operations/i18n";
 
 const theme = createTheme({
   respectReducedMotion: true,
@@ -37,6 +38,8 @@ const validatedFlow = {
   nonce: flow.nonce,
   settings: flow.settings,
 };
+
+initWordPressOperationsI18n();
 
 async function init() {
   const store = await getStore();

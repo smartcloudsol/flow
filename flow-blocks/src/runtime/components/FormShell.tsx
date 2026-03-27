@@ -40,13 +40,18 @@ import type {
   SuccessStateTrigger,
 } from "../../shared/types";
 import { dispatchAiSuggestionsPrompt } from "../ai/dispatchBackend";
-import { buildAiSuggestionsPrompt } from "../ai/prompt-builder";
+import {
+  buildAiSuggestionsInputSignature,
+  buildAiSuggestionsPrompt,
+} from "../ai/prompt-builder";
 import { parseAiSuggestionsResponse } from "../ai/response-parser";
 import { getFrontendApiBaseUrl } from "../api/config";
 import {
   applyValueActions,
   buildRuntimeFieldStates,
   CONDITIONAL_CONTAINER_TYPES,
+  evaluateRule,
+  getRuntimeKey,
 } from "../conditional-engine";
 import {
   AI_SUGGESTION_WATCHER_KEYS,
@@ -73,6 +78,125 @@ interface SubmissionMetaRuntime {
   aiSuggestionCount?: number;
   aiSuggestionAccepted?: boolean;
   aiSourcesUsed?: boolean;
+}
+
+function hasNamedValueField(
+  field: FieldConfig,
+): field is Extract<FieldConfig, { name: string }> {
+  return "name" in field && typeof field.name === "string" && field.name !== "";
+}
+
+function hasChildFields(
+  field: FieldConfig,
+): field is FieldConfig & { children: FieldConfig[] } {
+  return (
+    CONDITIONAL_CONTAINER_TYPES.has(field.type) &&
+    field.type !== "wizard" &&
+    Array.isArray((field as { children?: FieldConfig[] }).children)
+  );
+}
+
+function isWizardField(
+  field: FieldConfig,
+): field is Extract<FieldConfig, { type: "wizard" }> {
+  return field.type === "wizard";
+}
+
+function isWizardStepVisible(
+  step: Extract<FieldConfig, { type: "wizard" }>["steps"][number],
+  values: Record<string, unknown>,
+) {
+  let visible = !step.hidden;
+  const logic = step.conditionalLogic;
+
+  if (!logic?.enabled || !logic.rules?.length) {
+    return visible;
+  }
+
+  for (const rule of logic.rules) {
+    if (!evaluateRule(rule, values)) continue;
+    if (rule.then.action === "show") visible = true;
+    if (rule.then.action === "hide") visible = false;
+  }
+
+  return visible;
+}
+
+function collectFieldVisibility(
+  fields: FieldConfig[],
+  values: Record<string, unknown>,
+  fieldStates: ReturnType<typeof buildRuntimeFieldStates>,
+  path: number[] = [],
+  ancestorHidden = false,
+  acc = {
+    hiddenNames: new Set<string>(),
+    visibleNames: new Set<string>(),
+  },
+) {
+  fields.forEach((field, index) => {
+    const currentPath = [...path, index];
+    const runtimeKey = getRuntimeKey(field, currentPath);
+    const hiddenByState = fieldStates[runtimeKey]?.visible === false;
+    const currentHidden = ancestorHidden || hiddenByState;
+
+    if (isWizardField(field)) {
+      field.steps.forEach((step, stepIndex) => {
+        collectFieldVisibility(
+          step.children,
+          values,
+          fieldStates,
+          [...currentPath, stepIndex],
+          currentHidden || !isWizardStepVisible(step, values),
+          acc,
+        );
+      });
+      return;
+    }
+
+    if (hasChildFields(field)) {
+      collectFieldVisibility(
+        field.children,
+        values,
+        fieldStates,
+        currentPath,
+        currentHidden,
+        acc,
+      );
+      return;
+    }
+
+    if (currentHidden && hasNamedValueField(field)) {
+      acc.hiddenNames.add(field.name);
+      return;
+    }
+
+    if (hasNamedValueField(field)) {
+      acc.visibleNames.add(field.name);
+    }
+  });
+
+  return acc;
+}
+
+function areFieldValuesEqual(left: unknown, right: unknown): boolean {
+  if (left === right) return true;
+
+  if (Array.isArray(left) && Array.isArray(right)) {
+    return (
+      left.length === right.length &&
+      left.every((item, index) => areFieldValuesEqual(item, right[index]))
+    );
+  }
+
+  if (left && right && typeof left === "object" && typeof right === "object") {
+    try {
+      return JSON.stringify(left) === JSON.stringify(right);
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
 }
 
 function humanizeSubmissionStatus(status?: string): string | undefined {
@@ -263,6 +387,43 @@ function hydrateSuccessStateHtml(
   return container.innerHTML;
 }
 
+type FlowActionTrigger = "submit" | "show-form";
+
+function getFlowActionTrigger(target: HTMLElement): FlowActionTrigger | null {
+  const trigger = target.closest<HTMLElement>(
+    "[data-smartcloud-flow-action], [data-flow-action], .smartcloud-flow-action-submit, .smartcloud-flow-action-show-form, a[href='#smartcloud-flow-submit'], a[href='#smartcloud-flow-show-form']",
+  );
+
+  if (!trigger) return null;
+
+  const explicitAction =
+    trigger.dataset.smartcloudFlowAction || trigger.dataset.flowAction;
+
+  if (explicitAction === "submit" || explicitAction === "show-form") {
+    return explicitAction;
+  }
+
+  if (trigger.classList.contains("smartcloud-flow-action-submit")) {
+    return "submit";
+  }
+
+  if (trigger.classList.contains("smartcloud-flow-action-show-form")) {
+    return "show-form";
+  }
+
+  if (trigger instanceof HTMLAnchorElement) {
+    const href = trigger.getAttribute("href");
+    if (href === "#smartcloud-flow-submit") {
+      return "submit";
+    }
+    if (href === "#smartcloud-flow-show-form") {
+      return "show-form";
+    }
+  }
+
+  return null;
+}
+
 interface FrontendUploadUrlResponse {
   uploadId: string;
   bucket: string;
@@ -449,6 +610,38 @@ export function FormShell({
     () => ({ ...reducerState, values: valuesWithActions, fieldStates }),
     [fieldStates, reducerState, valuesWithActions],
   );
+  const hiddenFieldNames = useMemo(() => {
+    const visibility = collectFieldVisibility(
+      fields,
+      {
+        ...valuesWithActions,
+        ...conditionalSystemValues,
+      },
+      fieldStates,
+    );
+
+    return Array.from(visibility.hiddenNames).filter(
+      (name) => !visibility.visibleNames.has(name),
+    );
+  }, [conditionalSystemValues, fieldStates, fields, valuesWithActions]);
+
+  useEffect(() => {
+    if (!hiddenFieldNames.length) return;
+
+    const nextValues: Record<string, unknown> = {};
+    const changedNames = hiddenFieldNames.filter((name) => {
+      const resetValue = initialValues[name] ?? "";
+      if (areFieldValuesEqual(reducerState.values[name], resetValue)) {
+        return false;
+      }
+      nextValues[name] = resetValue;
+      return true;
+    });
+
+    if (!changedNames.length) return;
+
+    dispatch({ type: "RESET_FIELDS", values: nextValues, names: changedNames });
+  }, [hiddenFieldNames, initialValues, reducerState.values]);
 
   const frontendApiBaseUrl = getFrontendApiBaseUrl();
   const fileFields = useMemo(() => collectFileFields(fields), [fields]);
@@ -655,399 +848,442 @@ export function FormShell({
     };
   }, [rootElement, currentDirection, currentLanguage, resumeMode]);
 
-  const actions = {
-    form,
-    fields,
-    setValue: (name: string, value: unknown) => {
-      setLastCompletedAction(null);
-      dispatch({ type: "SET_VALUE", name, value });
-    },
-    setErrors: (errors: Record<string, string | undefined>) => {
-      dispatch({ type: "SET_ERRORS", errors });
-    },
-    validateField: (name: string) => {
-      if (state.touched.has(name)) {
-        const error = validateField(
-          name,
-          fields,
-          state.values,
-          state.fieldStates,
-        );
-        dispatch({ type: "SET_FIELD_ERROR", name, error });
-      }
-    },
-    reset: () => {
-      setLastSubmitResponse(null);
-      setLastSubmissionSource(null);
-      dispatch({ type: "RESET", values: initialValues });
-    },
-    saveDraft: async (): Promise<FormDraftResponse | undefined> => {
-      if (!form.allowDrafts) return undefined;
-      dispatch({ type: "SET_STATUS", status: "saving-draft" });
-      try {
-        if (!form.formId)
-          throw new Error(
-            I18n.get(
-              "Form ID is missing. Please ensure the form is properly synced with the backend.",
-            ),
+  const actions = useMemo(
+    () => ({
+      form,
+      fields,
+      setValue: (name: string, value: unknown) => {
+        setLastCompletedAction(null);
+        dispatch({ type: "SET_VALUE", name, value });
+      },
+      setErrors: (errors: Record<string, string | undefined>) => {
+        dispatch({ type: "SET_ERRORS", errors });
+      },
+      validateField: (name: string) => {
+        if (state.touched.has(name)) {
+          const error = validateField(
+            name,
+            fields,
+            state.values,
+            state.fieldStates,
           );
-        let wpSuiteSiteSettings = {} as SiteSettings;
-        if (typeof WpSuite !== "undefined")
-          wpSuiteSiteSettings = WpSuite.siteSettings;
-        const serializedValues = await prepareSerializableValues(
-          state.values,
-          wpSuiteSiteSettings?.accountId,
-          wpSuiteSiteSettings?.siteId,
-        );
-        const draftRequest = {
-          accountId: wpSuiteSiteSettings?.accountId,
-          siteId: wpSuiteSiteSettings?.siteId,
-          formId: form.formId,
-          formName: form.formName,
-          submissionId: draftSubmissionId,
-          password: draftPassword,
-          values: serializedValues,
-          metadata: {
-            pageUrl: window.location.href,
-            pageTitle: document.title,
-            userAgent: navigator.userAgent,
-            aiSuggestions: buildAiSuggestionsSubmissionMetadata(
-              state.aiSuggestions,
-            ),
-          },
-        };
-        const response = await dispatchFrontendRequest<FormDraftResponse>(
-          `/forms/${encodeURIComponent(form.formId)}/drafts`,
-          draftRequest,
-        );
-        setDraftSubmissionId(response.submissionId);
-        if (response.password) setDraftPassword(response.password);
-        setLastCompletedAction("save-draft");
-        dispatch({
-          type: "SET_STATUS",
-          status: "success",
-          message:
-            response.message ||
-            form.draftSaveSuccessMessage ||
-            I18n.get("Draft saved successfully."),
-        });
-        emitFormEvent("smartcloud-flow:draft-saved", {
-          action: "save-draft",
-          formId: form.formId,
-          submissionId: response.submissionId,
-          status: response.status,
-          response,
-        });
-        return response;
-      } catch (error) {
-        emitFormEvent("smartcloud-flow:error", {
-          action: "save-draft",
-          formId: form.formId,
-          message:
-            error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred"),
-        });
-        dispatch({
-          type: "SET_STATUS",
-          status: "error",
-          message:
-            error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred"),
-        });
-        return undefined;
-      }
-    },
-    loadDraft: async () => {
-      if (!form.allowDrafts || !form.formId) return;
-      dispatch({ type: "SET_STATUS", status: "loading-draft" });
-      try {
-        const response = await dispatchFrontendRequest<FormDraftLoadResponse>(
-          `/forms/${encodeURIComponent(form.formId)}/drafts/load`,
-          { submissionId: resumeDraftIdInput, password: resumePasswordInput },
-        );
-        setDraftSubmissionId(response.submissionId);
-        setDraftPassword(resumePasswordInput);
-        setResumeMode(false);
-        setLastCompletedAction("load-draft");
-        dispatch({
-          type: "DRAFT_LOADED",
-          values: response.fields,
-          message: I18n.get("Draft loaded successfully."),
-        });
-        emitFormEvent("smartcloud-flow:draft-loaded", {
-          action: "load-draft",
-          formId: form.formId,
-          submissionId: response.submissionId,
-          status: response.status,
-          response,
-        });
-      } catch (error) {
-        emitFormEvent("smartcloud-flow:error", {
-          action: "load-draft",
-          formId: form.formId,
-          message:
-            error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred"),
-        });
-        dispatch({
-          type: "SET_STATUS",
-          status: "error",
-          message:
-            error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred"),
-        });
-      }
-    },
-    deleteDraft: async () => {
-      if (!form.allowDrafts || !form.formId || !form.draftAllowDelete) return;
-      dispatch({ type: "SET_STATUS", status: "deleting-draft" });
-      try {
-        await dispatchFrontendRequest<{ success?: boolean; message?: string }>(
-          `/forms/${encodeURIComponent(form.formId)}/drafts/delete`,
-          { submissionId: resumeDraftIdInput, password: resumePasswordInput },
-        );
-        setResumeDraftIdInput("");
-        setResumePasswordInput("");
-        setLastCompletedAction("delete-draft");
-        dispatch({
-          type: "SET_STATUS",
-          status: "success",
-          message: I18n.get("Draft deleted."),
-        });
-        emitFormEvent("smartcloud-flow:draft-deleted", {
-          action: "delete-draft",
-          formId: form.formId,
-          submissionId: draftSubmissionId,
-          status: "deleted",
-        });
-      } catch (error) {
-        emitFormEvent("smartcloud-flow:error", {
-          action: "delete-draft",
-          formId: form.formId,
-          message:
-            error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred"),
-        });
-        dispatch({
-          type: "SET_STATUS",
-          status: "error",
-          message:
-            error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred"),
-        });
-      }
-    },
+          dispatch({ type: "SET_FIELD_ERROR", name, error });
+        }
+      },
+      reset: () => {
+        setLastSubmitResponse(null);
+        setLastSubmissionSource(null);
+        dispatch({ type: "RESET", values: initialValues });
+      },
+      saveDraft: async (): Promise<FormDraftResponse | undefined> => {
+        if (!form.allowDrafts) return undefined;
+        dispatch({ type: "SET_STATUS", status: "saving-draft" });
+        try {
+          if (!form.formId)
+            throw new Error(
+              I18n.get(
+                "Form ID is missing. Please ensure the form is properly synced with the backend.",
+              ),
+            );
+          let wpSuiteSiteSettings = {} as SiteSettings;
+          if (typeof WpSuite !== "undefined")
+            wpSuiteSiteSettings = WpSuite.siteSettings;
+          const serializedValues = await prepareSerializableValues(
+            state.values,
+            wpSuiteSiteSettings?.accountId,
+            wpSuiteSiteSettings?.siteId,
+          );
+          const draftRequest = {
+            accountId: wpSuiteSiteSettings?.accountId,
+            siteId: wpSuiteSiteSettings?.siteId,
+            formId: form.formId,
+            formName: form.formName,
+            submissionId: draftSubmissionId,
+            password: draftPassword,
+            values: serializedValues,
+            metadata: {
+              pageUrl: window.location.href,
+              pageTitle: document.title,
+              userAgent: navigator.userAgent,
+              aiSuggestions: buildAiSuggestionsSubmissionMetadata(
+                state.aiSuggestions,
+              ),
+            },
+          };
+          const response = await dispatchFrontendRequest<FormDraftResponse>(
+            `/forms/${encodeURIComponent(form.formId)}/drafts`,
+            draftRequest,
+          );
+          setDraftSubmissionId(response.submissionId);
+          if (response.password) setDraftPassword(response.password);
+          setLastCompletedAction("save-draft");
+          dispatch({
+            type: "SET_STATUS",
+            status: "success",
+            message:
+              response.message ||
+              form.draftSaveSuccessMessage ||
+              I18n.get("Draft saved successfully."),
+          });
+          emitFormEvent("smartcloud-flow:draft-saved", {
+            action: "save-draft",
+            formId: form.formId,
+            submissionId: response.submissionId,
+            status: response.status,
+            response,
+          });
+          return response;
+        } catch (error) {
+          emitFormEvent("smartcloud-flow:error", {
+            action: "save-draft",
+            formId: form.formId,
+            message:
+              error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred"),
+          });
+          dispatch({
+            type: "SET_STATUS",
+            status: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred"),
+          });
+          return undefined;
+        }
+      },
+      loadDraft: async () => {
+        if (!form.allowDrafts || !form.formId) return;
+        dispatch({ type: "SET_STATUS", status: "loading-draft" });
+        try {
+          const response = await dispatchFrontendRequest<FormDraftLoadResponse>(
+            `/forms/${encodeURIComponent(form.formId)}/drafts/load`,
+            { submissionId: resumeDraftIdInput, password: resumePasswordInput },
+          );
+          setDraftSubmissionId(response.submissionId);
+          setDraftPassword(resumePasswordInput);
+          setResumeMode(false);
+          setLastCompletedAction("load-draft");
+          dispatch({
+            type: "DRAFT_LOADED",
+            values: response.fields,
+            message: I18n.get("Draft loaded successfully."),
+          });
+          emitFormEvent("smartcloud-flow:draft-loaded", {
+            action: "load-draft",
+            formId: form.formId,
+            submissionId: response.submissionId,
+            status: response.status,
+            response,
+          });
+        } catch (error) {
+          emitFormEvent("smartcloud-flow:error", {
+            action: "load-draft",
+            formId: form.formId,
+            message:
+              error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred"),
+          });
+          dispatch({
+            type: "SET_STATUS",
+            status: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred"),
+          });
+        }
+      },
+      deleteDraft: async () => {
+        if (!form.allowDrafts || !form.formId || !form.draftAllowDelete) return;
+        dispatch({ type: "SET_STATUS", status: "deleting-draft" });
+        try {
+          await dispatchFrontendRequest<{
+            success?: boolean;
+            message?: string;
+          }>(`/forms/${encodeURIComponent(form.formId)}/drafts/delete`, {
+            submissionId: resumeDraftIdInput,
+            password: resumePasswordInput,
+          });
+          setResumeDraftIdInput("");
+          setResumePasswordInput("");
+          setLastCompletedAction("delete-draft");
+          dispatch({
+            type: "SET_STATUS",
+            status: "success",
+            message: I18n.get("Draft deleted."),
+          });
+          emitFormEvent("smartcloud-flow:draft-deleted", {
+            action: "delete-draft",
+            formId: form.formId,
+            submissionId: draftSubmissionId,
+            status: "deleted",
+          });
+        } catch (error) {
+          emitFormEvent("smartcloud-flow:error", {
+            action: "delete-draft",
+            formId: form.formId,
+            message:
+              error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred"),
+          });
+          dispatch({
+            type: "SET_STATUS",
+            status: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred"),
+          });
+        }
+      },
 
-    startNewForm: () => {
-      setResumeMode(false);
-      setLastSubmitResponse(null);
-      setLastSubmissionSource(null);
-      setLastCompletedAction(null);
-      dispatch({ type: "RESET", values: initialValues });
-    },
-    runAiSuggestions: async (
-      field: Extract<FieldConfig, { type: "ai-suggestions" }>,
-    ) => {
-      const preset =
-        (getFlowPlugin()?.settings?.aiSuggestionsPresets || []).find(
-          (item) => item.id === (field.presetId || form.aiSuggestionsPresetId),
-        ) || aiSuggestionsPreset;
-      if (!preset?.template) {
-        dispatch({
-          type: "AI_SUGGESTIONS_DONE",
-          suggestions: [],
-          rawText: "AI Suggestions preset is missing or empty.",
-        });
-        return;
-      }
-      dispatch({ type: "AI_SUGGESTIONS_LOADING" });
-      try {
-        const prompt = buildAiSuggestionsPrompt(
-          preset.template,
-          fields,
-          state.values,
-        );
-        const response = await dispatchAiSuggestionsPrompt({
-          text: prompt,
-          responseConstraint: {
-            type: "object",
-            properties: {
-              suggestions: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    title: { type: "string" },
-                    description: { type: "string" },
-                    confidence: { type: "number" },
+      startNewForm: () => {
+        setResumeMode(false);
+        setLastSubmitResponse(null);
+        setLastSubmissionSource(null);
+        setLastCompletedAction(null);
+        dispatch({ type: "RESET", values: initialValues });
+      },
+      runAiSuggestions: async (
+        field: Extract<FieldConfig, { type: "ai-suggestions" }>,
+      ) => {
+        const preset =
+          (getFlowPlugin()?.settings?.aiSuggestionsPresets || []).find(
+            (item) =>
+              item.id === (field.presetId || form.aiSuggestionsPresetId),
+          ) || aiSuggestionsPreset;
+        if (!preset?.template) {
+          dispatch({
+            type: "AI_SUGGESTIONS_DONE",
+            suggestions: [],
+            rawText: "AI Suggestions preset is missing or empty.",
+          });
+          return;
+        }
+        try {
+          const prompt = buildAiSuggestionsPrompt(
+            preset.template,
+            fields,
+            state.values,
+            { formLanguage: currentLanguage },
+          );
+          const signature = buildAiSuggestionsInputSignature(state.values);
+          dispatch({ type: "AI_SUGGESTIONS_LOADING", signature });
+          const response = await dispatchAiSuggestionsPrompt({
+            text: prompt,
+            responseConstraint: {
+              type: "object",
+              properties: {
+                suggestions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string" },
+                      title: { type: "string" },
+                      possibleAnswer: { type: "string" },
+                      whyThisMayHelp: { type: "string" },
+                      relatedDocumentation: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            title: { type: "string" },
+                            url: { type: "string" },
+                          },
+                        },
+                      },
+                      nextBestAction: { type: "string" },
+                      description: { type: "string" },
+                      confidence: { type: "number" },
+                    },
                   },
                 },
               },
             },
-          },
-          disableKB: !preset.useKnowledgeBase,
-          topK: preset.topK,
-        });
-        const parsed = parseAiSuggestionsResponse(response);
-        dispatch({
-          type: "AI_SUGGESTIONS_DONE",
-          suggestions: parsed.suggestions,
-          rawText:
-            field.fallbackToRawText === false ? undefined : parsed.rawText,
-          citations: parsed.citations,
-          metadata: parsed.metadata,
-        });
-      } catch (error) {
-        dispatch({
-          type: "AI_SUGGESTIONS_DONE",
-          suggestions: [],
-          rawText:
-            error instanceof Error
-              ? error.message
-              : "Failed to generate suggestions.",
-        });
-      }
-    },
-    acceptAiSuggestion: (suggestionId?: string) => {
-      setLastCompletedAction("ai-accepted");
-      dispatch({ type: "AI_SUGGESTIONS_ACCEPT", suggestionId });
-      emitFormEvent("smartcloud-flow:ai-suggestion-accepted", {
-        action: "ai-suggestion-accepted",
-        formId: form.formId,
-        suggestionId,
-      });
-    },
-    rejectAiSuggestions: () => {
-      dispatch({ type: "AI_SUGGESTIONS_REJECT" });
-    },
-    submit: async () => {
-      dispatch({ type: "SET_STATUS", status: "validating" });
-      const errors = validateValues(fields, state.values, state.fieldStates);
-      if (Object.keys(errors).length > 0) {
-        dispatch({ type: "SET_ERRORS", errors });
-        return;
-      }
-
-      dispatch({ type: "SET_STATUS", status: "submitting" });
-      try {
-        if (!form.formId) {
-          throw new Error(
-            I18n.get(
-              "Form ID is missing. Please ensure the form is properly synced with the backend.",
-            ),
-          );
+            disableKB: !preset.useKnowledgeBase,
+            topK: preset.topK,
+          });
+          const parsed = parseAiSuggestionsResponse(response);
+          dispatch({
+            type: "AI_SUGGESTIONS_DONE",
+            suggestions: parsed.suggestions,
+            rawText:
+              field.fallbackToRawText === false ? undefined : parsed.rawText,
+            citations: parsed.citations,
+            metadata: parsed.metadata,
+          });
+        } catch (error) {
+          dispatch({
+            type: "AI_SUGGESTIONS_DONE",
+            suggestions: [],
+            rawText:
+              error instanceof Error
+                ? error.message
+                : "Failed to generate suggestions.",
+          });
         }
-
-        let wpSuiteSiteSettings = {} as SiteSettings;
-        if (typeof WpSuite !== "undefined") {
-          wpSuiteSiteSettings = WpSuite.siteSettings;
-        }
-        const serializedValues = await prepareSerializableValues(
-          state.values,
-          wpSuiteSiteSettings?.accountId,
-          wpSuiteSiteSettings?.siteId,
-        );
-
-        const submitRequest = {
-          accountId: wpSuiteSiteSettings?.accountId,
-          siteId: wpSuiteSiteSettings?.siteId,
+      },
+      resetAiSuggestions: () => {
+        dispatch({ type: "AI_SUGGESTIONS_RESET" });
+      },
+      acceptAiSuggestion: (suggestionId?: string) => {
+        setLastCompletedAction("ai-accepted");
+        dispatch({ type: "AI_SUGGESTIONS_ACCEPT", suggestionId });
+        emitFormEvent("smartcloud-flow:ai-suggestion-accepted", {
+          action: "ai-suggestion-accepted",
           formId: form.formId,
-          formName: form.formName,
-          values: serializedValues,
-          metadata: {
-            pageUrl: window.location.href,
-            pageTitle: document.title,
-            userAgent: navigator.userAgent,
-            aiSuggestions: buildAiSuggestionsSubmissionMetadata(
-              state.aiSuggestions,
-            ),
-          },
-        };
+          suggestionId,
+        });
+      },
+      rejectAiSuggestions: () => {
+        dispatch({ type: "AI_SUGGESTIONS_REJECT" });
+      },
+      submit: async () => {
+        dispatch({ type: "SET_STATUS", status: "validating" });
+        const errors = validateValues(fields, state.values, state.fieldStates);
+        if (Object.keys(errors).length > 0) {
+          dispatch({ type: "SET_ERRORS", errors });
+          return;
+        }
 
-        const submissionSource =
-          draftSubmissionId && draftPassword ? "draft" : "direct";
-
-        let response: FormSubmitResponse;
-
-        if (form.endpointPath) {
-          response = await dispatchFrontendRequest<FormSubmitResponse>(
-            form.endpointPath,
-            submitRequest,
-          );
-        } else {
-          const backend = await resolveBackend();
-
-          if (!backend.available) {
+        dispatch({ type: "SET_STATUS", status: "submitting" });
+        try {
+          if (!form.formId) {
             throw new Error(
-              backend.reason ||
-                I18n.get("No backend configured for form submissions"),
+              I18n.get(
+                "Form ID is missing. Please ensure the form is properly synced with the backend.",
+              ),
             );
           }
 
-          response = (await dispatchBackend(
-            {
-              backendAvailable: backend.available,
-              backendTransport: backend.transport,
-              backendApiName: backend.apiName,
-              backendBaseUrl: backend.baseUrl,
-              reason: "Form submission",
-            },
-            "frontend",
-            draftSubmissionId && draftPassword
-              ? `/forms/${encodeURIComponent(
-                  form.formId,
-                )}/drafts/${encodeURIComponent(draftSubmissionId)}/submit`
-              : `/forms/${encodeURIComponent(form.formId)}/submit`,
-            "POST",
-            submitRequest,
-            {},
-          )) as FormSubmitResponse;
-        }
+          let wpSuiteSiteSettings = {} as SiteSettings;
+          if (typeof WpSuite !== "undefined") {
+            wpSuiteSiteSettings = WpSuite.siteSettings;
+          }
+          const serializedValues = await prepareSerializableValues(
+            state.values,
+            wpSuiteSiteSettings?.accountId,
+            wpSuiteSiteSettings?.siteId,
+          );
 
-        setDraftPassword(undefined);
-        setLastSubmitResponse(response);
-        setLastSubmissionSource(submissionSource);
-        setLastCompletedAction("submit");
-        dispatch({
-          type: "SUBMIT_SUCCESS",
-          message: response.message ?? form.successMessage,
-        });
-        emitFormEvent("smartcloud-flow:submit-success", {
-          action: "submit",
-          formId: form.formId,
-          submissionId: response.submissionId,
-          status: response.status,
-          acceptedAt: response.acceptedAt,
-          response,
-        });
-      } catch (error) {
-        emitFormEvent("smartcloud-flow:error", {
-          action: "submit",
-          formId: form.formId,
-          message:
-            form.errorMessage ||
-            (error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred")),
-        });
-        dispatch({
-          type: "SET_STATUS",
-          status: "error",
-          message:
-            form.errorMessage ||
-            (error instanceof Error
-              ? error.message
-              : I18n.get("An error occurred")),
-        });
-      }
-    },
-  };
+          const submitRequest = {
+            accountId: wpSuiteSiteSettings?.accountId,
+            siteId: wpSuiteSiteSettings?.siteId,
+            formId: form.formId,
+            formName: form.formName,
+            values: serializedValues,
+            metadata: {
+              pageUrl: window.location.href,
+              pageTitle: document.title,
+              userAgent: navigator.userAgent,
+              aiSuggestions: buildAiSuggestionsSubmissionMetadata(
+                state.aiSuggestions,
+              ),
+            },
+          };
+
+          const submissionSource =
+            draftSubmissionId && draftPassword ? "draft" : "direct";
+
+          let response: FormSubmitResponse;
+
+          if (form.endpointPath) {
+            response = await dispatchFrontendRequest<FormSubmitResponse>(
+              form.endpointPath,
+              submitRequest,
+            );
+          } else {
+            const backend = await resolveBackend();
+
+            if (!backend.available) {
+              throw new Error(
+                backend.reason ||
+                  I18n.get("No backend configured for form submissions"),
+              );
+            }
+
+            response = (await dispatchBackend(
+              {
+                backendAvailable: backend.available,
+                backendTransport: backend.transport,
+                backendApiName: backend.apiName,
+                backendBaseUrl: backend.baseUrl,
+                reason: "Form submission",
+              },
+              "frontend",
+              draftSubmissionId && draftPassword
+                ? `/forms/${encodeURIComponent(
+                    form.formId,
+                  )}/drafts/${encodeURIComponent(draftSubmissionId)}/submit`
+                : `/forms/${encodeURIComponent(form.formId)}/submit`,
+              "POST",
+              submitRequest,
+              {},
+            )) as FormSubmitResponse;
+          }
+
+          setDraftPassword(undefined);
+          setLastSubmitResponse(response);
+          setLastSubmissionSource(submissionSource);
+          setLastCompletedAction("submit");
+          dispatch({
+            type: "SUBMIT_SUCCESS",
+            message: response.message ?? form.successMessage,
+          });
+          emitFormEvent("smartcloud-flow:submit-success", {
+            action: "submit",
+            formId: form.formId,
+            submissionId: response.submissionId,
+            status: response.status,
+            acceptedAt: response.acceptedAt,
+            response,
+          });
+        } catch (error) {
+          emitFormEvent("smartcloud-flow:error", {
+            action: "submit",
+            formId: form.formId,
+            message:
+              form.errorMessage ||
+              (error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred")),
+          });
+          dispatch({
+            type: "SET_STATUS",
+            status: "error",
+            message:
+              form.errorMessage ||
+              (error instanceof Error
+                ? error.message
+                : I18n.get("An error occurred")),
+          });
+        }
+      },
+    }),
+    [
+      aiSuggestionsPreset,
+      dispatchFrontendRequest,
+      draftPassword,
+      draftSubmissionId,
+      emitFormEvent,
+      fields,
+      form,
+      initialValues,
+      currentLanguage,
+      prepareSerializableValues,
+      resumeDraftIdInput,
+      resumePasswordInput,
+      state.aiSuggestions,
+      state.fieldStates,
+      state.touched,
+      state.values,
+    ],
+  );
 
   const successStates = states.successStates || {};
   const acceptedAiSuggestion = useMemo(
@@ -1079,13 +1315,16 @@ export function FormShell({
         submissionSource: lastSubmissionSource ?? undefined,
         aiSuggestionId: state.aiSuggestions.selectedSuggestionId,
         aiSuggestionTitle: acceptedAiSuggestion?.title,
-        aiSuggestionDescription: acceptedAiSuggestion?.description,
+        aiSuggestionDescription:
+          acceptedAiSuggestion?.possibleAnswer ||
+          acceptedAiSuggestion?.description,
         aiSuggestionCount: state.aiSuggestions.suggestions.length,
         aiSuggestionAccepted: state.aiSuggestions.status === "accepted",
         aiSourcesUsed: Boolean(state.aiSuggestions.citations),
       }),
     [
       acceptedAiSuggestion?.description,
+      acceptedAiSuggestion?.possibleAnswer,
       acceptedAiSuggestion?.title,
       activeStandaloneState?.html,
       form.formId,
@@ -1103,6 +1342,16 @@ export function FormShell({
   const shouldShowSubmittedState =
     state.status === "success" && lastCompletedAction === "submit";
   const shouldShowStandaloneState = Boolean(activeStandaloneState?.html);
+
+  const returnToForm = useCallback(() => {
+    setResumeMode(false);
+    setLastCompletedAction(null);
+    dispatch({ type: "SET_STATUS", status: "idle" });
+    emitFormEvent("smartcloud-flow:return-to-form", {
+      action: "return-to-form",
+      formId: form.formId,
+    });
+  }, [emitFormEvent, form.formId]);
 
   useEffect(() => {
     const handleCopyClick = async (event: Event) => {
@@ -1131,11 +1380,31 @@ export function FormShell({
       }
     };
 
+    const handleActionClick = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const action = getFlowActionTrigger(target);
+      if (!action) return;
+
+      event.preventDefault();
+
+      if (action === "show-form") {
+        returnToForm();
+        return;
+      }
+
+      returnToForm();
+      void actions.submit();
+    };
+
     rootElement.addEventListener("click", handleCopyClick);
+    rootElement.addEventListener("click", handleActionClick);
     return () => {
       rootElement.removeEventListener("click", handleCopyClick);
+      rootElement.removeEventListener("click", handleActionClick);
     };
-  }, [rootElement]);
+  }, [actions, returnToForm, rootElement]);
 
   return (
     <DirectionProvider initialDirection={currentDirection}>

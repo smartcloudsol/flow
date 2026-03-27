@@ -137,7 +137,7 @@ function getDefaultRuntimeState(field: FieldConfig): RuntimeFieldState {
   const selectLike = field as Partial<SelectFieldConfig>;
 
   return {
-    visible: !Boolean(field.hidden),
+    visible: !field.hidden,
     enabled: !nonInteractiveTypes.has(field.type),
     required: "required" in field ? Boolean(field.required) : undefined,
     options: Array.isArray(selectLike.options) ? selectLike.options : undefined,

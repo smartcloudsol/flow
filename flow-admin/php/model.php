@@ -13,6 +13,8 @@ if (!defined('ABSPATH')) {
 
 class FlowAdminSettings
 {
+    private const ALLOWED_HIGHLIGHTED_SUBMISSION_ACTIONS = ['seen', 'resolved', 'completed'];
+
     public function __construct(
         public bool $enablePoweredBy = false,
         public string $defaultOutputLanguage = "",
@@ -20,7 +22,24 @@ class FlowAdminSettings
         public bool $formsBackendSyncEnabled = true,
         public bool $formsAllowPermanentDelete = false,
         public array $aiSuggestionsPresets = [],
+        public array $highlightedSubmissionActions = ['seen', 'resolved', 'completed'],
     ) {
+    }
+
+    private static function normalizeHighlightedSubmissionActions(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return self::ALLOWED_HIGHLIGHTED_SUBMISSION_ACTIONS;
+        }
+
+        $normalized = array_values(array_intersect(
+            self::ALLOWED_HIGHLIGHTED_SUBMISSION_ACTIONS,
+            array_map('strval', $raw)
+        ));
+
+        return !empty($normalized)
+            ? $normalized
+            : self::ALLOWED_HIGHLIGHTED_SUBMISSION_ACTIONS;
     }
 
     /**
@@ -40,6 +59,7 @@ class FlowAdminSettings
                 formsBackendSyncEnabled: (bool) ($raw->formsBackendSyncEnabled ?? true),
                 formsAllowPermanentDelete: (bool) ($raw->formsAllowPermanentDelete ?? false),
                 aiSuggestionsPresets: is_array($raw->aiSuggestionsPresets ?? null) ? $raw->aiSuggestionsPresets : [],
+                highlightedSubmissionActions: self::normalizeHighlightedSubmissionActions($raw->highlightedSubmissionActions ?? null),
             );
         }
 
@@ -58,6 +78,7 @@ class FlowAdminSettings
             formsBackendSyncEnabled: (bool) ($arr['formsBackendSyncEnabled'] ?? true),
             formsAllowPermanentDelete: (bool) ($arr['formsAllowPermanentDelete'] ?? false),
             aiSuggestionsPresets: is_array($arr['aiSuggestionsPresets'] ?? null) ? $arr['aiSuggestionsPresets'] : [],
+            highlightedSubmissionActions: self::normalizeHighlightedSubmissionActions($arr['highlightedSubmissionActions'] ?? null),
         );
     }
 }

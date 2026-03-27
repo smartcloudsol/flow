@@ -1,7 +1,11 @@
 import { NodeViewWrapper, NodeViewProps } from "@tiptap/react";
-import { Badge, Modal, Stack, TextInput, Button, Group } from "@mantine/core";
+import { Badge, Button, Group, Popover, Stack, TextInput } from "@mantine/core";
 import { IconBraces } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { t } from "../../operations/i18n";
+
+export const TEMPLATE_VARIABLE_POPOVER_EVENT =
+  "smartcloud-flow:template-variable-popover";
 
 export default function TemplateVariableComponent({
   node,
@@ -18,49 +22,106 @@ export default function TemplateVariableComponent({
     setEditing(false);
   };
 
-  return (
-    <>
-      <NodeViewWrapper as="span" style={{ display: "inline-block" }}>
-        <Badge
-          size="sm"
-          variant="light"
-          color="blue"
-          leftSection={<IconBraces size={12} />}
-          style={{ cursor: "pointer", userSelect: "none" }}
-          onClick={() => setEditing(true)}
-        >
-          {label || path}
-        </Badge>
-      </NodeViewWrapper>
+  const openEditor = () => {
+    setEditPath(path);
+    setEditLabel(label || "");
+    setEditing(true);
+  };
 
-      <Modal
-        opened={editing}
-        onClose={() => setEditing(false)}
-        title="Edit Template Variable"
-        size="sm"
-        zIndex={100002}
+  const closeEditor = () => {
+    setEditing(false);
+  };
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent(TEMPLATE_VARIABLE_POPOVER_EVENT, {
+        detail: { open: editing },
+      }),
+    );
+
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent(TEMPLATE_VARIABLE_POPOVER_EVENT, {
+          detail: { open: false },
+        }),
+      );
+    };
+  }, [editing]);
+
+  return (
+    <Popover
+      opened={editing}
+      onChange={setEditing}
+      width={340}
+      position="bottom-start"
+      shadow="md"
+      withinPortal={false}
+      zIndex={100002}
+    >
+      <Popover.Target>
+        <NodeViewWrapper
+          as="span"
+          contentEditable={false}
+          style={{ display: "inline", whiteSpace: "normal" }}
+        >
+          <Badge
+            component="span"
+            size="sm"
+            variant="light"
+            color="blue"
+            leftSection={<IconBraces size={12} />}
+            style={{
+              cursor: "pointer",
+              userSelect: "none",
+              verticalAlign: "baseline",
+            }}
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onClick={openEditor}
+          >
+            {label || path}
+          </Badge>
+        </NodeViewWrapper>
+      </Popover.Target>
+
+      <Popover.Dropdown
+        contentEditable={false}
+        onMouseDown={(event) => {
+          event.stopPropagation();
+        }}
       >
-        <Stack>
+        <Stack
+          gap="sm"
+          onKeyDownCapture={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              event.stopPropagation();
+              closeEditor();
+            }
+          }}
+        >
           <TextInput
-            label="Variable Path"
-            placeholder="submission.fields.name"
+            label={t("Variable Path")}
+            placeholder={t("submission.fields.name")}
             value={editPath}
             onChange={(e) => setEditPath(e.currentTarget.value)}
           />
           <TextInput
-            label="Display Label (optional)"
-            placeholder="Name"
+            label={t("Display Label (optional)")}
+            placeholder={t("Name")}
             value={editLabel}
             onChange={(e) => setEditLabel(e.currentTarget.value)}
           />
           <Group justify="flex-end">
-            <Button variant="light" onClick={() => setEditing(false)}>
-              Cancel
+            <Button variant="light" onClick={closeEditor}>
+              {t("Cancel")}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{t("Save")}</Button>
           </Group>
         </Stack>
-      </Modal>
-    </>
+      </Popover.Dropdown>
+    </Popover>
   );
 }

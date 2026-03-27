@@ -18,6 +18,7 @@ type FormActions = {
   runAiSuggestions: (
     field: Extract<FieldConfig, { type: "ai-suggestions" }>,
   ) => Promise<void>;
+  resetAiSuggestions: () => void;
   acceptAiSuggestion: (suggestionId?: string) => void;
   rejectAiSuggestions: () => void;
 };

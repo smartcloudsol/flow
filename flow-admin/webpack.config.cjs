@@ -9,6 +9,10 @@ module.exports = function () {
     ...defaultConfig,
     entry: {
       index: [path.resolve(process.cwd(), "src", "index.tsx")],
+      "editor-runtime": [path.resolve(process.cwd(), "src", "editor-runtime.ts")],
+      "operations-runtime": [
+        path.resolve(process.cwd(), "src", "operations-runtime.tsx"),
+      ],
     },
     externals: {
       ...defaultConfig.externals,

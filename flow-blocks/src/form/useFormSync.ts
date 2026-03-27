@@ -5,11 +5,86 @@
  * Triggers sync on block save and provides sync status to the editor UI.
  */
 
+import { FormSyncManager } from "./form-sync-manager";
+import type { FieldBlockData } from "./form-extractor";
+import { getFormSyncMeta, updateFormSyncMeta } from "./sync-meta-api";
 import { getWpSuite, type SiteSettings } from "@smart-cloud/wpsuite-core";
 import { useSelect } from "@wordpress/data";
 import { store as editorStore } from "@wordpress/editor";
 import { useCallback, useEffect, useRef, useState } from "@wordpress/element";
 import type { FieldConfig, FormAttributes } from "../shared/types";
+
+function isContainerField(
+  field: FieldConfig,
+): field is FieldConfig & { children: FieldConfig[] } {
+  return (
+    (field.type === "stack" ||
+      field.type === "group" ||
+      field.type === "grid" ||
+      field.type === "fieldset" ||
+      field.type === "collapse" ||
+      field.type === "visuallyhidden") &&
+    "children" in field &&
+    Array.isArray((field as { children?: FieldConfig[] }).children)
+  );
+}
+
+function isWizardField(
+  field: FieldConfig,
+): field is Extract<FieldConfig, { type: "wizard" }> {
+  return field.type === "wizard";
+}
+
+function normalizeFieldForSync(field: FieldConfig): FieldBlockData {
+  const normalized: Record<string, unknown> = {
+    type: field.type,
+  };
+
+  Object.keys(field).forEach((key) => {
+    if (
+      ["id", "clientId", "anchor", "className", "children", "steps"].includes(
+        key,
+      ) ||
+      key.startsWith("_")
+    ) {
+      return;
+    }
+
+    const value = (field as unknown as Record<string, unknown>)[key];
+    if (value !== undefined) {
+      normalized[key] = value;
+    }
+  });
+
+  if (isContainerField(field)) {
+    normalized.children = field.children.map(normalizeFieldForSync);
+  }
+
+  if (isWizardField(field)) {
+    normalized.steps = field.steps.map((step) => {
+      const normalizedStep: Record<string, unknown> = {
+        children: step.children.map(normalizeFieldForSync),
+      };
+
+      if (step.title !== undefined) {
+        normalizedStep.title = step.title;
+      }
+      if (step.description !== undefined) {
+        normalizedStep.description = step.description;
+      }
+      if (step.hidden !== undefined) {
+        normalizedStep.hidden = step.hidden;
+      }
+      if (step.conditionalLogic !== undefined) {
+        normalizedStep.conditionalLogic = step.conditionalLogic;
+      }
+
+      return normalizedStep;
+    });
+  }
+
+  return normalized as FieldBlockData;
+}
 
 interface SyncStatus {
   status: "idle" | "syncing" | "synced" | "error";
@@ -74,14 +149,6 @@ export function useFormSync(options: FormSyncOptions) {
     setSyncStatus((prev) => ({ ...prev, status: "syncing", lastError: null }));
 
     try {
-      // Dynamically import sync manager to avoid circular dependencies
-      const { FormSyncManager } = await import(
-        "../../../admin/src/api/form-sync-manager"
-      );
-      const { getFormSyncMeta, updateFormSyncMeta } = await import(
-        "../../../admin/src/api/sync-meta-api"
-      );
-
       // Get current sync metadata from post meta
       const currentMeta = await getFormSyncMeta(postId);
 
@@ -91,49 +158,7 @@ export function useFormSync(options: FormSyncOptions) {
         postType: "smartcloud_flow_form", // or get from WP
         postStatus: "publish", // or get from WP
         attributes: formAttributes as Record<string, unknown>,
-        fields: fields.map((field) => {
-          // Add properties that exist on non-container fields
-          if (
-            field.type !== "submit" &&
-            field.type !== "save-draft" &&
-            field.type !== "stack" &&
-            field.type !== "group" &&
-            field.type !== "grid" &&
-            field.type !== "fieldset" &&
-            field.type !== "collapse" &&
-            field.type !== "visuallyhidden" &&
-            field.type !== "divider" &&
-            "name" in field
-          ) {
-            const validField = field;
-            const fieldData: Record<string, unknown> = {
-              type: validField.type,
-              name: validField.name,
-              label: validField.label,
-              description: validField.description,
-              required: validField.required,
-            };
-
-            // Add optional properties if they exist
-            if ("placeholder" in field && field.placeholder) {
-              fieldData.placeholder = field.placeholder;
-            }
-            if (
-              field.type === "select" &&
-              "options" in field &&
-              field.options
-            ) {
-              fieldData.options = field.options;
-            }
-
-            return fieldData;
-          }
-          return {
-            type: field.type,
-          };
-        }) as unknown as Parameters<
-          typeof FormSyncManager.prototype.syncForm
-        >[0]["fields"],
+        fields: fields.map(normalizeFieldForSync),
         sourceKind: "post" as const,
       };
 
@@ -223,9 +248,6 @@ export function useFormSync(options: FormSyncOptions) {
         error instanceof Error ? error.message : "Sync failed";
 
       try {
-        const { updateFormSyncMeta } = await import(
-          "../../../admin/src/api/sync-meta-api"
-        );
         await updateFormSyncMeta(postId, {
           syncStatus: "error",
           lastError: errorMessage,
@@ -270,9 +292,6 @@ export function useFormSync(options: FormSyncOptions) {
 
     const loadSyncStatus = async () => {
       try {
-        const { getFormSyncMeta } = await import(
-          "../../../admin/src/api/sync-meta-api"
-        );
         const meta = await getFormSyncMeta(postId);
 
         // Clear error status on editor load - errors are only relevant during active sync

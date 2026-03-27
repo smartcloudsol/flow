@@ -1,8 +1,9 @@
-import { Button, Menu, Stack, Text } from "@mantine/core";
+import { Button, Menu, ScrollArea, Stack, Text } from "@mantine/core";
 import { IconBraces } from "@tabler/icons-react";
 import type { Editor } from "@tiptap/react";
 import { useMemo } from "react";
 import type { FormDefinition } from "../../api/types";
+import { t } from "../../operations/i18n";
 
 export interface TemplateVariableOption {
   path: string;
@@ -10,69 +11,197 @@ export interface TemplateVariableOption {
   description?: string;
 }
 
-const DEFAULT_VARIABLES: TemplateVariableOption[] = [
-  {
-    path: "submission.email",
-    label: "Submission Email",
-    description: "Email associated with submission",
-  },
-  {
-    path: "submission.status",
-    label: "Status",
-    description: "Current submission status",
-  },
-  {
-    path: "submission.createdAt",
-    label: "Created At",
-    description: "Submission creation date",
-  },
-  {
-    path: "form.name",
-    label: "Form Name",
-    description: "Name of the form",
-  },
-  {
-    path: "site.name",
-    label: "Site Name",
-    description: "Name of the site",
-  },
-];
+interface TemplateVariableGroup {
+  key: string;
+  label: string;
+  variables: TemplateVariableOption[];
+}
+
+interface GeneratedFieldVariables {
+  flatFields: TemplateVariableOption[];
+  commonFields: TemplateVariableOption[];
+  ungroupedFields: TemplateVariableOption[];
+  stepGroups: TemplateVariableGroup[];
+}
+
+function getDefaultVariables(): TemplateVariableOption[] {
+  return [
+    {
+      path: "submission.email",
+      label: "Submission Email",
+      description: t("Email associated with submission"),
+    },
+    {
+      path: "submission.status",
+      label: "Status",
+      description: t("Current submission status"),
+    },
+    {
+      path: "submission.createdAt",
+      label: "Created At",
+      description: t("Submission creation date"),
+    },
+    {
+      path: "form.name",
+      label: "Form Name",
+      description: t("Name of the form"),
+    },
+    {
+      path: "site.name",
+      label: "Site Name",
+      description: t("Name of the site"),
+    },
+  ];
+}
 
 // Generate variables from FormDefinition fieldSchema or fields array
 function generateFieldVariables(
   formDefinition?: FormDefinition,
-): TemplateVariableOption[] {
-  if (!formDefinition) return [];
+): GeneratedFieldVariables {
+  if (!formDefinition) {
+    return {
+      flatFields: [],
+      commonFields: [],
+      ungroupedFields: [],
+      stepGroups: [],
+    };
+  }
 
-  const fieldVars: TemplateVariableOption[] = [];
+  const fieldVars = new Map<
+    string,
+    {
+      variable: TemplateVariableOption;
+      stepKeys: Set<string>;
+      stepLabels: Set<string>;
+      ungrouped: boolean;
+    }
+  >();
+  const stepOrder: TemplateVariableGroup[] = [];
+  const stepIndex = new Map<string, TemplateVariableGroup>();
 
-  // Try fields array first (primary source from backend)
-  if (formDefinition.fields && Array.isArray(formDefinition.fields)) {
-    console.log("Using fields array, length:", formDefinition.fields.length);
-    (
-      formDefinition.fields as Array<{
+  const ensureStepGroup = (stepKey: string, stepLabel: string) => {
+    const existingGroup = stepIndex.get(stepKey);
+    if (existingGroup) {
+      return existingGroup;
+    }
+
+    const nextGroup: TemplateVariableGroup = {
+      key: stepKey,
+      label: stepLabel,
+      variables: [],
+    };
+    stepIndex.set(stepKey, nextGroup);
+    stepOrder.push(nextGroup);
+    return nextGroup;
+  };
+
+  const addFieldVariable = (
+    variable: TemplateVariableOption,
+    stepMeta?: { key: string; label: string },
+  ) => {
+    const existing = fieldVars.get(variable.path);
+    if (!existing) {
+      fieldVars.set(variable.path, {
+        variable,
+        stepKeys: new Set(stepMeta ? [stepMeta.key] : []),
+        stepLabels: new Set(stepMeta ? [stepMeta.label] : []),
+        ungrouped: !stepMeta,
+      });
+      if (stepMeta) {
+        ensureStepGroup(stepMeta.key, stepMeta.label);
+      }
+      return;
+    }
+
+    if (stepMeta) {
+      existing.stepKeys.add(stepMeta.key);
+      existing.stepLabels.add(stepMeta.label);
+      ensureStepGroup(stepMeta.key, stepMeta.label);
+      return;
+    }
+
+    existing.ungrouped = true;
+  };
+
+  const walkFields = (
+    fields: unknown[],
+    stepMeta?: { key: string; label: string },
+  ) => {
+    fields.forEach((field) => {
+      if (!field || typeof field !== "object") {
+        return;
+      }
+
+      const record = field as {
         name?: string;
         label?: string;
         description?: string;
         type?: string;
-      }>
-    ).forEach((field) => {
-      if (field.name) {
-        fieldVars.push({
-          path: `submission.fields.${field.name}`,
-          label: field.label || field.name,
-          description:
-            field.description || `Form field: ${field.name} (${field.type})`,
+        children?: unknown[];
+        steps?: Array<{
+          title?: string;
+          description?: string;
+          children?: unknown[];
+        }>;
+        wizard?: {
+          steps?: Array<{
+            title?: string;
+            description?: string;
+            children?: unknown[];
+          }>;
+        };
+      };
+
+      if (record.name) {
+        addFieldVariable(
+          {
+            path: `submission.fields.${record.name}`,
+            label: record.label || record.name,
+            description:
+              record.description ||
+              `${t("Form field:")} ${record.name}${
+                record.type ? ` (${record.type})` : ""
+              }`,
+          },
+          stepMeta,
+        );
+      }
+
+      if (Array.isArray(record.children) && record.children.length > 0) {
+        walkFields(record.children, stepMeta);
+      }
+
+      if (Array.isArray(record.steps)) {
+        record.steps.forEach((step, index) => {
+          if (Array.isArray(step.children) && step.children.length > 0) {
+            walkFields(step.children, {
+              key: `step:${step.title || index + 1}:${index}`,
+              label: step.title?.trim() || `${t("Step")} ${index + 1}`,
+            });
+          }
+        });
+      }
+
+      if (Array.isArray(record.wizard?.steps)) {
+        record.wizard.steps.forEach((step, index) => {
+          if (Array.isArray(step.children) && step.children.length > 0) {
+            walkFields(step.children, {
+              key: `wizard-step:${step.title || index + 1}:${index}`,
+              label: step.title?.trim() || `${t("Step")} ${index + 1}`,
+            });
+          }
         });
       }
     });
+  };
+
+  // Try fields array first (primary source from backend)
+  if (formDefinition.fields && Array.isArray(formDefinition.fields)) {
+    walkFields(formDefinition.fields as unknown[]);
   }
   // Fallback to fieldSchema if fields array not available
   else if (formDefinition.fieldSchema) {
     const schema = formDefinition.fieldSchema;
-
-    console.log("FormDefinition:", formDefinition);
-    console.log("fieldSchema:", schema);
 
     // Check if it's a JSON schema with properties
     if (typeof schema === "object" && schema !== null) {
@@ -83,13 +212,13 @@ function generateFieldVariables(
 
       // Handle JSON Schema format with properties
       if (properties && typeof properties === "object") {
-        console.log("Using JSON Schema format with properties");
         Object.keys(properties).forEach((fieldName) => {
           const field = properties[fieldName];
           const title = field.title || fieldName;
-          const description = field.description || `Form field: ${fieldName}`;
+          const description =
+            field.description || `${t("Form field:")} ${fieldName}`;
 
-          fieldVars.push({
+          addFieldVariable({
             path: `submission.fields.${fieldName}`,
             label: title,
             description,
@@ -97,13 +226,12 @@ function generateFieldVariables(
         });
       } else {
         // Handle direct object format (field names as keys)
-        console.log("Using direct object format, keys:", Object.keys(schema));
         Object.keys(schema).forEach((fieldName) => {
           const field = (schema as Record<string, unknown>)[fieldName];
 
           // Handle various field formats
           let title = fieldName;
-          let description = `Form field: ${fieldName}`;
+          let description = `${t("Form field:")} ${fieldName}`;
 
           if (typeof field === "object" && field !== null) {
             const fieldObj = field as {
@@ -112,13 +240,14 @@ function generateFieldVariables(
               type?: string;
             };
             title = fieldObj.title || fieldName;
-            description = fieldObj.description || `Form field: ${fieldName}`;
+            description =
+              fieldObj.description || `${t("Form field:")} ${fieldName}`;
           } else if (typeof field === "string") {
             // Field is just a type string like "string", "number", etc.
-            description = `Form field: ${fieldName} (${field})`;
+            description = `${t("Form field:")} ${fieldName} (${field})`;
           }
 
-          fieldVars.push({
+          addFieldVariable({
             path: `submission.fields.${fieldName}`,
             label: title,
             description,
@@ -128,8 +257,53 @@ function generateFieldVariables(
     }
   }
 
-  console.log("Generated field variables:", fieldVars);
-  return fieldVars;
+  const commonFields: TemplateVariableOption[] = [];
+  const ungroupedFields: TemplateVariableOption[] = [];
+
+  Array.from(fieldVars.values()).forEach((entry) => {
+    const stepLabels = Array.from(entry.stepLabels);
+    const isCommonField = entry.stepKeys.size > 1;
+    const variable =
+      stepLabels.length > 1
+        ? {
+            ...entry.variable,
+            description: [
+              entry.variable.description,
+              `${t("Appears in:")} ${stepLabels.join(", ")}`,
+            ]
+              .filter(Boolean)
+              .join(" • "),
+          }
+        : entry.variable;
+
+    if (isCommonField) {
+      commonFields.push(variable);
+      return;
+    }
+
+    if (entry.stepKeys.size === 1) {
+      const [stepKey] = Array.from(entry.stepKeys);
+      const group = stepIndex.get(stepKey);
+      group?.variables.push(variable);
+      return;
+    }
+
+    if (entry.ungrouped) {
+      ungroupedFields.push(variable);
+    }
+  });
+
+  const stepGroups = stepOrder.filter((group) => group.variables.length > 0);
+  const flatFields = Array.from(fieldVars.values()).map(
+    (entry) => entry.variable,
+  );
+
+  return {
+    flatFields,
+    commonFields,
+    ungroupedFields,
+    stepGroups,
+  };
 }
 
 interface TemplateVariablePickerProps {
@@ -147,105 +321,132 @@ export default function TemplateVariablePicker({
   size = "xs",
   onInsert,
 }: TemplateVariablePickerProps) {
-  const allVariables = useMemo(() => {
-    if (variables) return variables;
+  const { fieldVars, commonFields, ungroupedFields, stepGroups, allVariables } =
+    useMemo(() => {
+      if (variables) {
+        return {
+          fieldVars: variables,
+          commonFields: [] as TemplateVariableOption[],
+          ungroupedFields: [] as TemplateVariableOption[],
+          stepGroups: [] as TemplateVariableGroup[],
+          allVariables: [...variables, ...getDefaultVariables()],
+        };
+      }
 
-    const fieldVars = generateFieldVariables(formDefinition);
-    return [...fieldVars, ...DEFAULT_VARIABLES];
-  }, [formDefinition, variables]);
+      const generated = generateFieldVariables(formDefinition);
+      return {
+        fieldVars: generated.flatFields,
+        commonFields: generated.commonFields,
+        ungroupedFields: generated.ungroupedFields,
+        stepGroups: generated.stepGroups,
+        allVariables: [...generated.flatFields, ...getDefaultVariables()],
+      };
+    }, [formDefinition, variables]);
+
+  const hasStepGroups = stepGroups.length > 0 && !variables;
 
   const insertVariable = (path: string, label: string) => {
     if (onInsert) {
       // Custom insert handler
       onInsert(path, label);
     } else if (editor) {
-      // Default Tiptap insert
-      const html = `<span data-template-variable="true" data-path="${path}" data-label="${label}" class="template-variable">{{${path}}}</span> `;
-      editor.chain().focus().insertContent(html).run();
+      editor
+        .chain()
+        .focus()
+        .insertContent([
+          {
+            type: "templateVariable",
+            attrs: { path, label },
+          },
+          {
+            type: "text",
+            text: " ",
+          },
+        ])
+        .run();
     }
   };
 
+  const renderVariableItems = (items: TemplateVariableOption[]) =>
+    items.map((variable) => (
+      <Menu.Item
+        key={variable.path}
+        onClick={() => insertVariable(variable.path, t(variable.label))}
+      >
+        <Stack gap={0}>
+          <Text size="sm">{t(variable.label)}</Text>
+          {variable.description && (
+            <Text size="xs" c="dimmed">
+              {variable.description}
+            </Text>
+          )}
+        </Stack>
+      </Menu.Item>
+    ));
+
   return (
-    <Menu
-      shadow="md"
-      width={280}
-      position="bottom-start"
-      withinPortal
-      zIndex={100003}
-    >
+    <Menu shadow="md" width={280} position="bottom-start" zIndex={100003}>
       <Menu.Target>
         <Button
           size={size}
           variant="light"
           leftSection={<IconBraces size={16} />}
         >
-          Insert Variable
+          {t("Insert Variable")}
         </Button>
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Label>Submission Fields</Menu.Label>
-        {allVariables
-          .filter((v) => v.path.startsWith("submission.fields."))
-          .map((variable) => (
-            <Menu.Item
-              key={variable.path}
-              onClick={() => insertVariable(variable.path, variable.label)}
-            >
-              <Stack gap={0}>
-                <Text size="sm">{variable.label}</Text>
-                {variable.description && (
-                  <Text size="xs" c="dimmed">
-                    {variable.description}
-                  </Text>
-                )}
-              </Stack>
-            </Menu.Item>
-          ))}
+        <ScrollArea.Autosize
+          mah="min(24rem, calc(100vh - 10rem))"
+          scrollbarSize={8}
+        >
+          <Menu.Label>{t("Submission Fields")}</Menu.Label>
+          {hasStepGroups ? (
+            <>
+              {commonFields.length > 0 && (
+                <>
+                  <Menu.Label>{t("Common Across Steps")}</Menu.Label>
+                  {renderVariableItems(commonFields)}
+                </>
+              )}
 
-        <Menu.Divider />
-        <Menu.Label>Submission Data</Menu.Label>
-        {allVariables
-          .filter(
-            (v) =>
-              v.path.startsWith("submission.") &&
-              !v.path.startsWith("submission.fields."),
-          )
-          .map((variable) => (
-            <Menu.Item
-              key={variable.path}
-              onClick={() => insertVariable(variable.path, variable.label)}
-            >
-              <Stack gap={0}>
-                <Text size="sm">{variable.label}</Text>
-                {variable.description && (
-                  <Text size="xs" c="dimmed">
-                    {variable.description}
-                  </Text>
-                )}
-              </Stack>
-            </Menu.Item>
-          ))}
+              {ungroupedFields.length > 0 && (
+                <>
+                  <Menu.Label>{t("General")}</Menu.Label>
+                  {renderVariableItems(ungroupedFields)}
+                </>
+              )}
 
-        <Menu.Divider />
-        <Menu.Label>Other</Menu.Label>
-        {allVariables
-          .filter((v) => !v.path.startsWith("submission."))
-          .map((variable) => (
-            <Menu.Item
-              key={variable.path}
-              onClick={() => insertVariable(variable.path, variable.label)}
-            >
-              <Stack gap={0}>
-                <Text size="sm">{variable.label}</Text>
-                {variable.description && (
-                  <Text size="xs" c="dimmed">
-                    {variable.description}
-                  </Text>
-                )}
-              </Stack>
-            </Menu.Item>
-          ))}
+              {stepGroups.map((group) => (
+                <div key={group.key}>
+                  <Menu.Label>{group.label}</Menu.Label>
+                  {renderVariableItems(group.variables)}
+                </div>
+              ))}
+            </>
+          ) : (
+            renderVariableItems(
+              fieldVars.filter((v) => v.path.startsWith("submission.fields.")),
+            )
+          )}
+
+          <Menu.Divider />
+          <Menu.Label>{t("Submission Data")}</Menu.Label>
+          {renderVariableItems(
+            allVariables.filter(
+              (v) =>
+                v.path.startsWith("submission.") &&
+                !v.path.startsWith("submission.fields."),
+            ),
+          )}
+
+          <Menu.Divider />
+          <Menu.Label>{t("Other")}</Menu.Label>
+          {renderVariableItems(
+            allVariables.filter((v) => !v.path.startsWith("submission.")),
+          )}
+        </ScrollArea.Autosize>
       </Menu.Dropdown>
     </Menu>
   );

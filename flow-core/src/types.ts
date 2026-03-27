@@ -4,6 +4,8 @@ export type ContextKind = "admin" | "frontend";
 
 export type BackendTransport = "gatey" | "fetch";
 
+export type FlowHighlightedSubmissionAction = "seen" | "resolved" | "completed";
+
 /* -----------------------------
  * Language settings
  * ----------------------------- */
@@ -54,6 +56,9 @@ export interface FlowSettings {
 
   /** AI suggestions presets available for the user. */
   aiSuggestionsPresets?: AiSuggestionPreset[];
+
+  /** Highlighted quick status actions shown on the submission detail popup. */
+  highlightedSubmissionActions?: FlowHighlightedSubmissionAction[];
 }
 
 export interface FlowFeatures {

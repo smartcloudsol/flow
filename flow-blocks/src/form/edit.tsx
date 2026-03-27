@@ -1,5 +1,9 @@
 import { DEFAULT_THEME } from "@mantine/core";
 import {
+  FlowBackendClient,
+  getDecisionForAdminBackend,
+} from "@smart-cloud/flow-admin/editor-runtime";
+import {
   LANGUAGE_OPTIONS,
   TEXT_DOMAIN,
   getFlowPlugin,
@@ -18,6 +22,7 @@ import {
   CheckboxControl,
   ColorPicker,
   ComboboxControl,
+  Modal,
   Notice,
   PanelBody,
   Popover,
@@ -43,9 +48,150 @@ import { __ } from "@wordpress/i18n";
 import { close, plus, settings } from "@wordpress/icons";
 import { DIRECTION_OPTIONS } from "../index";
 import { parseOptions } from "../shared/field-utils";
-import type { FieldConfig, FormAttributes } from "../shared/types";
+import type {
+  FieldConfig,
+  FormActionDefinition,
+  FormAttributes,
+} from "../shared/types";
 import { renderForm, type RenderFormHandle } from "./renderForm";
 import { useFormSync } from "./useFormSync";
+
+type EditableFormAction = {
+  actionKey: string;
+  label: string;
+  allowedFromStatusesText: string;
+  targetStatus: string;
+  templateKey: string;
+  eventName: string;
+  wpHookName: string;
+  enabled: boolean;
+};
+
+const EMPTY_FORM_ACTION: EditableFormAction = {
+  actionKey: "",
+  label: "",
+  allowedFromStatusesText: "",
+  targetStatus: "",
+  templateKey: "",
+  eventName: "",
+  wpHookName: "",
+  enabled: true,
+};
+
+function normalizeActionKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_-]/g, "")
+    .replace(/_+/g, "_")
+    .replace(/-+/g, "-");
+}
+
+function parseStatusesText(value: string): string[] {
+  return value
+    .split(/\r?\n|,/)
+    .map((status) => status.trim())
+    .filter(Boolean);
+}
+
+function toEditableFormAction(
+  action?: FormActionDefinition,
+): EditableFormAction {
+  if (!action) {
+    return { ...EMPTY_FORM_ACTION };
+  }
+
+  return {
+    actionKey: action.actionKey ?? "",
+    label: action.label ?? "",
+    allowedFromStatusesText: (action.allowedFromStatuses ?? []).join("\n"),
+    targetStatus: action.targetStatus ?? "",
+    templateKey: action.templateKey ?? "",
+    eventName: action.eventName ?? "",
+    wpHookName: action.wpHookName ?? "",
+    enabled: action.enabled !== false,
+  };
+}
+
+function toStoredFormAction(
+  action: EditableFormAction,
+): FormActionDefinition | null {
+  const label = action.label.trim();
+  const actionKey = normalizeActionKey(action.actionKey || label);
+
+  if (!label || !actionKey) {
+    return null;
+  }
+
+  const allowedFromStatuses = parseStatusesText(action.allowedFromStatusesText);
+
+  return {
+    actionKey,
+    label,
+    ...(allowedFromStatuses.length ? { allowedFromStatuses } : {}),
+    ...(action.targetStatus.trim()
+      ? { targetStatus: action.targetStatus.trim() }
+      : {}),
+    ...(action.templateKey.trim()
+      ? { templateKey: action.templateKey.trim() }
+      : {}),
+    ...(action.eventName.trim() ? { eventName: action.eventName.trim() } : {}),
+    ...(action.wpHookName.trim()
+      ? { wpHookName: action.wpHookName.trim() }
+      : {}),
+    enabled: action.enabled,
+  };
+}
+
+function getActionValidationMessage(
+  action: EditableFormAction,
+  actions: FormActionDefinition[],
+  editingIndex: number | null,
+): string | null {
+  if (!action.label.trim()) {
+    return __("Action label is required.", TEXT_DOMAIN);
+  }
+
+  const nextAction = toStoredFormAction(action);
+  if (!nextAction?.actionKey) {
+    return __(
+      "Action key is required or must be derivable from the label.",
+      TEXT_DOMAIN,
+    );
+  }
+
+  const duplicateIndex = actions.findIndex(
+    (item, index) =>
+      index !== editingIndex && item.actionKey === nextAction.actionKey,
+  );
+
+  if (duplicateIndex >= 0) {
+    return __("Action key must be unique within the form.", TEXT_DOMAIN);
+  }
+
+  return null;
+}
+
+function describeAction(action: FormActionDefinition): string {
+  const parts: string[] = [];
+
+  if (action.allowedFromStatuses?.length) {
+    parts.push(
+      `${__("Allowed from", TEXT_DOMAIN)}: ${action.allowedFromStatuses.join(
+        ", ",
+      )}`,
+    );
+  }
+  if (action.targetStatus) {
+    parts.push(`${__("Target status", TEXT_DOMAIN)}: ${action.targetStatus}`);
+  }
+  if (action.templateKey) {
+    parts.push(`${__("Template", TEXT_DOMAIN)}: ${action.templateKey}`);
+  }
+
+  return parts.join(" · ");
+}
 
 function createContactTemplateBlocks(): BlockInstance[] {
   return [
@@ -183,6 +329,7 @@ const FIELD_BLOCK_MAPPING: Record<string, string> = {
   "smartcloud-flow/textarea-field": "textarea",
   "smartcloud-flow/select-field": "select",
   "smartcloud-flow/checkbox-field": "checkbox",
+  "smartcloud-flow/checkbox-group-field": "checkbox-group",
   "smartcloud-flow/date-field": "date",
   "smartcloud-flow/switch-field": "switch",
   "smartcloud-flow/number-field": "number",
@@ -220,7 +367,9 @@ function blockToFieldConfig(
 
   // Convert optionsText to options array for select and radio fields
   if (
-    (fieldType === "select" || fieldType === "radio") &&
+    (fieldType === "select" ||
+      fieldType === "radio" ||
+      fieldType === "checkbox-group") &&
     (block.attributes as Record<string, unknown>)?.optionsText
   ) {
     const { optionsText, ...restAttrs } = block.attributes as Record<
@@ -284,6 +433,11 @@ function blockToFieldConfig(
             ?.title as string,
           description: (stepBlock.attributes as Record<string, unknown>)
             ?.description as string,
+          hidden: Boolean(
+            (stepBlock.attributes as Record<string, unknown>)?.hidden,
+          ),
+          conditionalLogic: (stepBlock.attributes as Record<string, unknown>)
+            ?.conditionalLogic,
           children,
         };
       });
@@ -340,6 +494,13 @@ export default function Edit({
   const [availableWorkflows, setAvailableWorkflows] = useState<
     Array<{ value: string; label: string }>
   >([]);
+  const [actionModalOpen, setActionModalOpen] = useState(false);
+  const [editingActionIndex, setEditingActionIndex] = useState<number | null>(
+    null,
+  );
+  const [editingAction, setEditingAction] = useState<EditableFormAction>({
+    ...EMPTY_FORM_ACTION,
+  });
 
   // Get current post ID
   const postId = useSelect((select) => {
@@ -447,6 +608,91 @@ export default function Edit({
     ],
     [applyBuiltInTemplate],
   );
+  const configuredActions = useMemo(
+    () => attributes.actions ?? [],
+    [attributes.actions],
+  );
+  const actionValidationMessage = useMemo(
+    () =>
+      getActionValidationMessage(
+        editingAction,
+        configuredActions,
+        editingActionIndex,
+      ),
+    [configuredActions, editingAction, editingActionIndex],
+  );
+
+  const openCreateActionModal = useCallback(() => {
+    setEditingActionIndex(null);
+    setEditingAction({ ...EMPTY_FORM_ACTION });
+    setActionModalOpen(true);
+  }, []);
+
+  const openEditActionModal = useCallback(
+    (index: number) => {
+      setEditingActionIndex(index);
+      setEditingAction(toEditableFormAction(configuredActions[index]));
+      setActionModalOpen(true);
+    },
+    [configuredActions],
+  );
+
+  const closeActionModal = useCallback(() => {
+    setActionModalOpen(false);
+    setEditingActionIndex(null);
+    setEditingAction({ ...EMPTY_FORM_ACTION });
+  }, []);
+
+  const saveEditedAction = useCallback(() => {
+    const nextAction = toStoredFormAction(editingAction);
+    if (!nextAction || actionValidationMessage) {
+      return;
+    }
+
+    const nextActions = [...configuredActions];
+    if (editingActionIndex === null) {
+      nextActions.push(nextAction);
+    } else {
+      nextActions[editingActionIndex] = nextAction;
+    }
+
+    setAttributes({ actions: nextActions });
+    closeActionModal();
+  }, [
+    actionValidationMessage,
+    closeActionModal,
+    configuredActions,
+    editingAction,
+    editingActionIndex,
+    setAttributes,
+  ]);
+
+  const deleteAction = useCallback(
+    (index: number) => {
+      const action = configuredActions[index];
+      if (!action) {
+        return;
+      }
+
+      const confirmed = window.confirm(
+        __(
+          "Delete this manual action from the form configuration?",
+          TEXT_DOMAIN,
+        ),
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      setAttributes({
+        actions: configuredActions.filter(
+          (_, actionIndex) => actionIndex !== index,
+        ),
+      });
+    },
+    [configuredActions, setAttributes],
+  );
 
   // Load available templates and workflows from backend
   useEffect(() => {
@@ -454,13 +700,6 @@ export default function Edit({
       if (!backendSyncEnabled) return;
 
       try {
-        const { FlowBackendClient } = await import(
-          "../../../admin/src/api/backend-client"
-        );
-        const { getDecisionForAdminBackend } = await import(
-          "../../../admin/src/api/backend-utils"
-        );
-
         const decision = await getDecisionForAdminBackend();
         if (!decision.backendAvailable) return;
 
@@ -978,6 +1217,129 @@ export default function Edit({
                 </p>
               </Notice>
             )}
+
+            <div style={{ borderTop: "1px solid #ddd", margin: "16px 0" }} />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              <label style={{ fontWeight: 600, display: "block" }}>
+                {__("Manual Actions", TEXT_DOMAIN)}
+              </label>
+              <Button variant="secondary" onClick={openCreateActionModal}>
+                {__("Add New", TEXT_DOMAIN)}
+              </Button>
+            </div>
+            <p
+              style={{
+                fontSize: "12px",
+                color: "#757575",
+                marginTop: 0,
+                marginBottom: "12px",
+              }}
+            >
+              {__(
+                "Define manual actions that can be triggered from a submission record and can update status, fire events, or attach templates.",
+                TEXT_DOMAIN,
+              )}
+            </p>
+
+            {configuredActions.length > 0 ? (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
+                {configuredActions.map((action, index) => (
+                  <div
+                    key={
+                      action.actionKey || `${action.label || "action"}-${index}`
+                    }
+                    style={{
+                      border: "1px solid #ddd",
+                      borderRadius: "6px",
+                      padding: "12px",
+                      background: action.enabled === false ? "#f6f7f7" : "#fff",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        gap: 12,
+                      }}
+                    >
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                          {action.label || action.actionKey}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#757575",
+                            marginBottom: 4,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {action.actionKey}
+                        </div>
+                        {describeAction(action) ? (
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#50575e",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {describeAction(action)}
+                          </div>
+                        ) : null}
+                        {action.enabled === false ? (
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#d63638",
+                              marginTop: 6,
+                            }}
+                          >
+                            {__("Disabled", TEXT_DOMAIN)}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                        <Button
+                          variant="secondary"
+                          onClick={() => openEditActionModal(index)}
+                        >
+                          {__("Edit", TEXT_DOMAIN)}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          isDestructive
+                          onClick={() => deleteAction(index)}
+                        >
+                          {__("Delete", TEXT_DOMAIN)}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Notice status="info" isDismissible={false}>
+                <p style={{ margin: 0, fontSize: "13px" }}>
+                  {__(
+                    "No manual actions configured yet. Add one to expose custom actions on submission records.",
+                    TEXT_DOMAIN,
+                  )}
+                </p>
+              </Notice>
+            )}
           </PanelBody>
         )}
 
@@ -1221,6 +1583,159 @@ export default function Edit({
         </PanelBody>
       </InspectorControls>
 
+      {actionModalOpen && (
+        <Modal
+          title={
+            editingActionIndex === null
+              ? __("Add Manual Action", TEXT_DOMAIN)
+              : __("Edit Manual Action", TEXT_DOMAIN)
+          }
+          onRequestClose={closeActionModal}
+        >
+          <ToggleControl
+            label={__("Enabled", TEXT_DOMAIN)}
+            checked={editingAction.enabled}
+            onChange={(enabled) =>
+              setEditingAction((current) => ({ ...current, enabled }))
+            }
+            help={__(
+              "Disabled actions stay in the form definition but do not appear on submission records.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Action Label", TEXT_DOMAIN)}
+            value={editingAction.label}
+            onChange={(label) =>
+              setEditingAction((current) => ({
+                ...current,
+                label,
+              }))
+            }
+            help={__(
+              "Human-friendly label shown as the action button on a submission record.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Action Key", TEXT_DOMAIN)}
+            value={editingAction.actionKey}
+            onChange={(actionKey) =>
+              setEditingAction((current) => ({
+                ...current,
+                actionKey: normalizeActionKey(actionKey),
+              }))
+            }
+            help={__(
+              "Unique machine key. Leave it blank to auto-generate from the label when saving.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextareaControl
+            label={__("Allowed From Statuses", TEXT_DOMAIN)}
+            value={editingAction.allowedFromStatusesText}
+            onChange={(allowedFromStatusesText) =>
+              setEditingAction((current) => ({
+                ...current,
+                allowedFromStatusesText,
+              }))
+            }
+            help={__(
+              "Optional. Enter one status per line to limit when the action is shown. Leave empty to allow all statuses.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Target Status", TEXT_DOMAIN)}
+            value={editingAction.targetStatus}
+            onChange={(targetStatus) =>
+              setEditingAction((current) => ({
+                ...current,
+                targetStatus,
+              }))
+            }
+            help={__(
+              "Optional. Status to apply after the manual action is invoked.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <SelectControl
+            label={__("Template", TEXT_DOMAIN)}
+            value={editingAction.templateKey}
+            options={[
+              { label: __("None", TEXT_DOMAIN), value: "" },
+              ...availableTemplates,
+            ]}
+            onChange={(templateKey) =>
+              setEditingAction((current) => ({
+                ...current,
+                templateKey,
+              }))
+            }
+            help={__(
+              "Optional. Template associated with this action for downstream processing.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Event Name", TEXT_DOMAIN)}
+            value={editingAction.eventName}
+            onChange={(eventName) =>
+              setEditingAction((current) => ({
+                ...current,
+                eventName,
+              }))
+            }
+            help={__(
+              "Optional custom event name to publish when the action runs.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("WordPress Hook Name", TEXT_DOMAIN)}
+            value={editingAction.wpHookName}
+            onChange={(wpHookName) =>
+              setEditingAction((current) => ({
+                ...current,
+                wpHookName,
+              }))
+            }
+            help={__(
+              "Optional WordPress hook to fire locally when the action runs.",
+              TEXT_DOMAIN,
+            )}
+          />
+
+          {actionValidationMessage ? (
+            <Notice status="error" isDismissible={false}>
+              <p style={{ margin: 0, fontSize: "13px" }}>
+                {actionValidationMessage}
+              </p>
+            </Notice>
+          ) : null}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 8,
+              marginTop: 16,
+            }}
+          >
+            <Button variant="tertiary" onClick={closeActionModal}>
+              {__("Cancel", TEXT_DOMAIN)}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={saveEditedAction}
+              disabled={Boolean(actionValidationMessage)}
+            >
+              {__("Save", TEXT_DOMAIN)}
+            </Button>
+          </div>
+        </Modal>
+      )}
+
       {/* Preview container - rendered in shadow DOM */}
       <div ref={previewRef} style={{ marginBottom: "20px" }} />
 
@@ -1252,6 +1767,7 @@ export default function Edit({
                 "smartcloud-flow/textarea-field",
                 "smartcloud-flow/select-field",
                 "smartcloud-flow/checkbox-field",
+                "smartcloud-flow/checkbox-group-field",
                 "smartcloud-flow/date-field",
                 "smartcloud-flow/switch-field",
                 "smartcloud-flow/number-field",

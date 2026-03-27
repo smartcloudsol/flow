@@ -1,3 +1,7 @@
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "../runtime/components/FlowDesignTokens.css";
+
 import { generateColors } from "@mantine/colors-generator";
 import {
   createTheme,
@@ -79,6 +83,24 @@ function createFormTheme(form: FormAttributes) {
         },
       },
       Modal: {
+        defaultProps: {
+          withinPortal: false,
+          zIndex: 100002,
+        },
+      },
+      Popover: {
+        defaultProps: {
+          withinPortal: false,
+          zIndex: 100002,
+        },
+      },
+      Menu: {
+        defaultProps: {
+          withinPortal: false,
+          zIndex: 100002,
+        },
+      },
+      HoverCard: {
         defaultProps: {
           withinPortal: false,
           zIndex: 100002,
@@ -171,8 +193,6 @@ export async function renderForm(
   // Resolve store
   const store = await getStore();
 
-  const theme = createFormTheme(form);
-
   // Resolve colorMode (auto -> light/dark based on system preference)
   const resolvedColorMode =
     form.colorMode === "auto"
@@ -202,7 +222,7 @@ export async function renderForm(
 
     // Load styles into shadow DOM
     const pluginUrl = getFlowPlugin()!.baseUrl;
-    const cssUrl = `${pluginUrl}blocks/index.css`;
+    const cssUrl = `${pluginUrl}blocks/form/view.css`;
 
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -258,6 +278,8 @@ export async function renderForm(
       existingStyle.remove();
     }
   }
+
+  const theme = createFormTheme(form);
 
   // Get or create React root (reuse existing root for updates)
   let root = reactRoots.get(target);

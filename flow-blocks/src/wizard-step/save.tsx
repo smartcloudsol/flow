@@ -17,6 +17,7 @@ export default function Save({
         "data-smartcloud-flow-form-field": encodeData(payload),
         "data-wizard-step-title": attributes.title as string,
         "data-wizard-step-description": attributes.description as string,
+        "data-wizard-step-hidden": attributes.hidden ? "true" : "false",
       })}
     >
       <InnerBlocks.Content />

@@ -91,10 +91,28 @@
     "draftSaveSuccessMessage": {
       "type": "string",
       "default": "Draft saved. Keep your draft ID and password to continue later."
+    },
+    "actions": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "autoReplyTemplateKey": {
+      "type": "string",
+      "default": ""
+    },
+    "workflowIds": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
     }
   },
-  "editorScript": "file:../index.js",
-  "script": "file:../index.js",
-  "viewScript": "file:../index.js",
+  "editorScript": "file:../editor.js",
+  "viewStyle": "file:./view.css",
+  "viewScript": "file:./view.js",
   "render": "file:./render.php"
 }

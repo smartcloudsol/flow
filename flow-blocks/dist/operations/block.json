@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/operations",
+  "version": "1.0.0",
+  "title": "Flow Operations",
+  "category": "smartcloud-flow",
+  "icon": "screenoptions",
+  "description": "Protected frontend operations console for submissions, templates, and workflows.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Flow Operations"
+    },
+    "initialTab": {
+      "type": "string",
+      "default": "submissions"
+    },
+    "availableTabs": {
+      "type": "array",
+      "default": [
+        "submissions",
+        "templates",
+        "workflows"
+      ]
+    },
+    "language": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string"
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "light"
+    },
+    "primaryColor": {
+      "type": "string",
+      "default": ""
+    },
+    "primaryShade": {
+      "type": "object",
+      "default": {}
+    },
+    "colors": {
+      "type": "object",
+      "default": {}
+    },
+    "themeOverrides": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "file:../editor.js",
+  "viewStyle": "smartcloud-flow-operations-runtime-style",
+  "viewScript": [
+    "smartcloud-flow-operations-runtime-script",
+    "file:./view.js"
+  ],
+  "render": "file:./render.php"
+}

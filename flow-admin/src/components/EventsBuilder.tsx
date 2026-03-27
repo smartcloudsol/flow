@@ -8,6 +8,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { t } from "../operations/i18n";
 
 export interface EventsBuilderProps {
   events: string[];
@@ -36,20 +37,20 @@ export default function EventsBuilder({
     <Stack gap="md">
       <Group justify="space-between">
         <Text size="sm" fw={500}>
-          Events
+          {t("Events")}
         </Text>
         <Button
           size="xs"
           leftSection={<IconPlus size={14} />}
           onClick={addEvent}
         >
-          Add Event
+          {t("Add Event")}
         </Button>
       </Group>
 
       {events.length === 0 ? (
         <Text size="sm" c="dimmed">
-          No events configured
+          {t("No events configured")}
         </Text>
       ) : (
         <Stack gap="sm">
@@ -57,7 +58,7 @@ export default function EventsBuilder({
             <Card key={index} withBorder p="sm">
               <Group gap="xs" wrap="nowrap">
                 <TextInput
-                  placeholder="e.g., submission.created"
+                  placeholder={t("e.g., submission.created")}
                   value={event}
                   onChange={(e) => updateEvent(index, e.currentTarget.value)}
                   style={{ flex: 1 }}

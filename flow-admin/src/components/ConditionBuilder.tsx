@@ -11,6 +11,11 @@ import {
 import { DateInput } from "@mantine/dates";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import type { FormDefinition } from "../api/types";
+import { t } from "../operations/i18n";
+import {
+  useOperationsComboboxProps,
+  useOperationsPopoverProps,
+} from "./OperationsPortalContext";
 
 export interface WorkflowCondition {
   field: string;
@@ -24,29 +29,33 @@ export interface ConditionBuilderProps {
   forms?: FormDefinition[];
 }
 
-const FIELD_OPTIONS = [
-  { value: "status", label: "Status" },
-  { value: "email", label: "Email" },
-  { value: "formId", label: "Form ID" },
-  { value: "primaryLabel", label: "Primary Label" },
-  { value: "summary", label: "Summary" },
-  { value: "tags", label: "Tags" },
-  { value: "createdAt", label: "Created At" },
-  { value: "updatedAt", label: "Updated At" },
-];
+function getFieldOptions() {
+  return [
+    { value: "status", label: t("Status") },
+    { value: "email", label: t("Email") },
+    { value: "formId", label: t("Form ID") },
+    { value: "primaryLabel", label: t("Primary Label") },
+    { value: "summary", label: t("Summary") },
+    { value: "tags", label: t("Tags") },
+    { value: "createdAt", label: t("Created At") },
+    { value: "updatedAt", label: t("Updated At") },
+  ];
+}
 
-const OPERATOR_OPTIONS = [
-  { value: "equals", label: "Equals" },
-  { value: "notEquals", label: "Not Equals" },
-  { value: "contains", label: "Contains" },
-  { value: "notContains", label: "Not Contains" },
-  { value: "startsWith", label: "Starts With" },
-  { value: "endsWith", label: "Ends With" },
-  { value: "greaterThan", label: "Greater Than" },
-  { value: "lessThan", label: "Less Than" },
-  { value: "isEmpty", label: "Is Empty" },
-  { value: "isNotEmpty", label: "Is Not Empty" },
-];
+function getOperatorOptions() {
+  return [
+    { value: "equals", label: t("Equals") },
+    { value: "notEquals", label: t("Not Equals") },
+    { value: "contains", label: t("Contains") },
+    { value: "notContains", label: t("Not Contains") },
+    { value: "startsWith", label: t("Starts With") },
+    { value: "endsWith", label: t("Ends With") },
+    { value: "greaterThan", label: t("Greater Than") },
+    { value: "lessThan", label: t("Less Than") },
+    { value: "isEmpty", label: t("Is Empty") },
+    { value: "isNotEmpty", label: t("Is Not Empty") },
+  ];
+}
 
 const STATUS_VALUES = [
   "new",
@@ -64,6 +73,11 @@ export default function ConditionBuilder({
   onChange,
   forms = [],
 }: ConditionBuilderProps) {
+  const fieldOptions = getFieldOptions();
+  const operatorOptions = getOperatorOptions();
+  const comboboxProps = useOperationsComboboxProps(100001);
+  const popoverProps = useOperationsPopoverProps(100001);
+
   const addCondition = () => {
     onChange([
       ...conditions,
@@ -89,19 +103,19 @@ export default function ConditionBuilder({
       case "status":
         return (
           <Select
-            placeholder="Value"
+            placeholder={t("Value")}
             data={STATUS_VALUES}
             value={condition.value}
             onChange={(value) => updateCondition(index, { value: value ?? "" })}
             style={{ flex: 1 }}
             searchable
-            comboboxProps={{ zIndex: 100001 }}
+            comboboxProps={comboboxProps}
           />
         );
       case "formId":
         return (
           <Select
-            placeholder="Select form"
+            placeholder={t("Select form")}
             data={forms.map((f) => ({
               value: f.formId,
               label: `${f.name || f.formId} (${f.formId})`,
@@ -110,14 +124,14 @@ export default function ConditionBuilder({
             onChange={(value) => updateCondition(index, { value: value ?? "" })}
             style={{ flex: 1 }}
             searchable
-            comboboxProps={{ zIndex: 100001 }}
+            comboboxProps={comboboxProps}
           />
         );
       case "createdAt":
       case "updatedAt":
         return (
           <DateInput
-            placeholder="Select date"
+            placeholder={t("Select date")}
             value={condition.value ? new Date(condition.value) : null}
             onChange={(value) =>
               updateCondition(index, {
@@ -125,13 +139,13 @@ export default function ConditionBuilder({
               })
             }
             style={{ flex: 1 }}
-            popoverProps={{ zIndex: 100001 }}
+            popoverProps={popoverProps}
           />
         );
       default:
         return (
           <TextInput
-            placeholder="Value"
+            placeholder={t("Value")}
             value={condition.value}
             onChange={(e) =>
               updateCondition(index, { value: e.currentTarget.value })
@@ -146,46 +160,46 @@ export default function ConditionBuilder({
     <Stack gap="md">
       <Group justify="space-between">
         <Text size="sm" fw={500}>
-          Trigger Conditions
+          {t("Trigger Conditions")}
         </Text>
         <Button
           size="xs"
           leftSection={<IconPlus size={14} />}
           onClick={addCondition}
         >
-          Add Condition
+          {t("Add Condition")}
         </Button>
       </Group>
 
       {conditions.length === 0 ? (
         <Text size="sm" c="dimmed">
-          No conditions set - workflow will run on every trigger event
+          {t("No conditions set - workflow will run on every trigger event")}
         </Text>
       ) : (
         <Stack gap="sm">
           {conditions.map((condition, index) => (
-            <Card key={index} withBorder p="sm">
+            <Card key={index} withBorder p="sm" style={{ overflow: "visible" }}>
               <Group gap="xs" wrap="nowrap">
                 <Select
-                  placeholder="Field"
-                  data={FIELD_OPTIONS}
+                  placeholder={t("Field")}
+                  data={fieldOptions}
                   value={condition.field}
                   onChange={(value) =>
                     updateCondition(index, { field: value ?? "status" })
                   }
                   style={{ flex: 1 }}
-                  comboboxProps={{ zIndex: 100001 }}
+                  comboboxProps={comboboxProps}
                 />
 
                 <Select
-                  placeholder="Operator"
-                  data={OPERATOR_OPTIONS}
+                  placeholder={t("Operator")}
+                  data={operatorOptions}
                   value={condition.operator}
                   onChange={(value) =>
                     updateCondition(index, { operator: value ?? "equals" })
                   }
                   style={{ flex: 1 }}
-                  comboboxProps={{ zIndex: 100001 }}
+                  comboboxProps={comboboxProps}
                 />
 
                 {renderValueInput(condition, index)}
@@ -205,7 +219,7 @@ export default function ConditionBuilder({
 
       {conditions.length > 1 && (
         <Text size="xs" c="dimmed">
-          Note: All conditions must be satisfied (AND logic)
+          {t("Note: All conditions must be satisfied (AND logic)")}
         </Text>
       )}
     </Stack>

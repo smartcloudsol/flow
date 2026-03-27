@@ -2,6 +2,7 @@ import { Code, Group, ScrollArea, Stack, Table, Text } from "@mantine/core";
 import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { useState } from "react";
 import type { SubmissionEvent } from "../api/types";
+import { t } from "../operations/i18n";
 
 function formatDateTime(value?: string) {
   if (!value) {
@@ -39,12 +40,12 @@ function EventDetail({ detail }: { detail: Record<string, unknown> }) {
         {expanded ? (
           <Group gap={4}>
             <IconChevronDown size={14} />
-            <span>Hide details</span>
+            <span>{t("Hide details")}</span>
           </Group>
         ) : (
           <Group gap={4}>
             <IconChevronRight size={14} />
-            <span>Show details</span>
+            <span>{t("Show details")}</span>
           </Group>
         )}
       </Text>
@@ -61,7 +62,7 @@ export function EventTimeline({ events }: { events: SubmissionEvent[] }) {
   if (!events || events.length === 0) {
     return (
       <Text c="dimmed" size="sm">
-        No events returned for this submission.
+        {t("No events returned for this submission.")}
       </Text>
     );
   }
@@ -70,10 +71,10 @@ export function EventTimeline({ events }: { events: SubmissionEvent[] }) {
     <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th>When</Table.Th>
-          <Table.Th>Event</Table.Th>
-          <Table.Th>Actor</Table.Th>
-          <Table.Th>Detail</Table.Th>
+          <Table.Th>{t("When")}</Table.Th>
+          <Table.Th>{t("Event")}</Table.Th>
+          <Table.Th>{t("Actor")}</Table.Th>
+          <Table.Th>{t("Detail")}</Table.Th>
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>

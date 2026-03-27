@@ -5,9 +5,7 @@
   "version": "1.0.0",
   "title": "Wizard",
   "category": "smartcloud-flow",
-  "parent": [
-    "smartcloud-flow/form"
-  ],
+  "parent": ["smartcloud-flow/form"],
   "icon": "editor-ol-rtl",
   "description": "Multi-step wizard container with step-by-step validation.",
   "supports": {
@@ -60,6 +58,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../index.js",
-  "script": "file:../index.js"
+  "editorScript": "file:../editor.js"
 }

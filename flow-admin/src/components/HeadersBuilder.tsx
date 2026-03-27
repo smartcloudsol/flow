@@ -8,6 +8,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { t } from "../operations/i18n";
 
 export interface HeaderEntry {
   key: string;
@@ -50,20 +51,20 @@ export default function HeadersBuilder({
     <Stack gap="md">
       <Group justify="space-between">
         <Text size="sm" fw={500}>
-          Headers
+          {t("Headers")}
         </Text>
         <Button
           size="xs"
           leftSection={<IconPlus size={14} />}
           onClick={addHeader}
         >
-          Add Header
+          {t("Add Header")}
         </Button>
       </Group>
 
       {headerEntries.length === 0 ? (
         <Text size="sm" c="dimmed">
-          No headers configured
+          {t("No headers configured")}
         </Text>
       ) : (
         <Stack gap="sm">
@@ -71,7 +72,7 @@ export default function HeadersBuilder({
             <Card key={index} withBorder p="sm">
               <Group gap="xs" wrap="nowrap">
                 <TextInput
-                  placeholder="Header name"
+                  placeholder={t("Header name")}
                   value={entry.key}
                   onChange={(e) =>
                     updateHeader(entry.key, e.currentTarget.value, entry.value)
@@ -79,7 +80,7 @@ export default function HeadersBuilder({
                   style={{ flex: 1 }}
                 />
                 <TextInput
-                  placeholder="Header value"
+                  placeholder={t("Header value")}
                   value={entry.value}
                   onChange={(e) =>
                     updateHeader(entry.key, entry.key, e.currentTarget.value)

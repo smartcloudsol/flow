@@ -7,6 +7,7 @@ import type {
   ValidationRule,
   RuntimeFieldStateMap,
 } from "../shared/types";
+import { evaluateRule } from "./conditional-engine";
 
 /**
  * Helper function to get translated string with parameter substitution
@@ -261,6 +262,18 @@ function validateFieldValue(
     return undefined;
   }
 
+  if (field.type === "checkbox-group") {
+    if (isRequired && (!Array.isArray(value) || value.length === 0)) {
+      return t("{fieldLabel} is required.", { fieldLabel });
+    }
+
+    if (value !== undefined && value !== null && !isStringArray(value)) {
+      return t("{fieldLabel} must be a list of values.", { fieldLabel });
+    }
+
+    return undefined;
+  }
+
   if (field.type === "file") {
     if (isRequired && !hasFileSelection(value)) {
       return t("{fieldLabel} is required.", { fieldLabel });
@@ -328,7 +341,30 @@ function validateFieldValue(
   }
 }
 
-function collectValidatableFields(fields: FieldConfig[]): FieldConfig[] {
+function isWizardStepVisible(
+  step: Extract<FieldConfig, { type: "wizard" }>["steps"][number],
+  values: FormValues,
+): boolean {
+  let visible = !step.hidden;
+  const logic = step.conditionalLogic;
+
+  if (!logic?.enabled || !logic.rules?.length) {
+    return visible;
+  }
+
+  for (const rule of logic.rules) {
+    if (!evaluateRule(rule, values)) continue;
+    if (rule.then.action === "show") visible = true;
+    if (rule.then.action === "hide") visible = false;
+  }
+
+  return visible;
+}
+
+function collectValidatableFields(
+  fields: FieldConfig[],
+  values: FormValues,
+): FieldConfig[] {
   return fields.flatMap((field) => {
     if (
       field.type === "submit" ||
@@ -346,12 +382,14 @@ function collectValidatableFields(fields: FieldConfig[]): FieldConfig[] {
       field.type === "collapse" ||
       field.type === "visuallyhidden"
     ) {
-      return collectValidatableFields(field.children);
+      return collectValidatableFields(field.children, values);
     }
 
     if (field.type === "wizard") {
       return field.steps.flatMap((step) =>
-        collectValidatableFields(step.children),
+        isWizardStepVisible(step, values)
+          ? collectValidatableFields(step.children, values)
+          : [],
       );
     }
 
@@ -364,19 +402,22 @@ export function validateValues(
   values: FormValues,
   fieldStates: RuntimeFieldStateMap = {},
 ): FormErrors {
-  return collectValidatableFields(fields).reduce<FormErrors>((acc, field) => {
-    if (!("name" in field)) return acc;
-    const runtimeState = fieldStates[field.name];
-    if (runtimeState && (!runtimeState.visible || !runtimeState.enabled)) {
-      return acc;
-    }
+  return collectValidatableFields(fields, values).reduce<FormErrors>(
+    (acc, field) => {
+      if (!("name" in field)) return acc;
+      const runtimeState = fieldStates[field.name];
+      if (runtimeState && (!runtimeState.visible || !runtimeState.enabled)) {
+        return acc;
+      }
 
-    const error = validateFieldValue(field, values[field.name], runtimeState);
-    if (error) {
-      acc[field.name] = error;
-    }
-    return acc;
-  }, {});
+      const error = validateFieldValue(field, values[field.name], runtimeState);
+      if (error) {
+        acc[field.name] = error;
+      }
+      return acc;
+    },
+    {},
+  );
 }
 
 /**

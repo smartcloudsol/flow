@@ -8,6 +8,17 @@ export type FormStatus =
   | "success"
   | "error";
 
+export interface FormActionDefinition {
+  actionKey?: string;
+  label?: string;
+  allowedFromStatuses?: string[];
+  targetStatus?: string;
+  templateKey?: string;
+  eventName?: string;
+  wpHookName?: string;
+  enabled?: boolean;
+}
+
 export interface FormAttributes {
   formId?: string;
   allowDrafts?: boolean;
@@ -23,6 +34,7 @@ export interface FormAttributes {
   errorMessage?: string;
   hideFormOnSuccess?: boolean;
   endpointPath?: string;
+  actions?: FormActionDefinition[];
   autoReplyTemplateKey?: string;
   workflowIds?: string[];
   language?: string;
@@ -263,6 +275,15 @@ export interface RadioFieldAttributes extends ConditionalAttributes {
   anchor?: string;
 }
 
+export interface CheckboxGroupFieldAttributes extends ConditionalAttributes {
+  name?: string;
+  label?: string;
+  description?: string;
+  required?: boolean;
+  optionsText?: string;
+  anchor?: string;
+}
+
 export interface PasswordFieldAttributes extends ConditionalAttributes {
   name?: string;
   label?: string;
@@ -451,6 +472,11 @@ export interface RadioFieldConfig extends BaseFieldConfig {
   options?: SelectOption[];
 }
 
+export interface CheckboxGroupFieldConfig extends BaseFieldConfig {
+  type: "checkbox-group";
+  options?: SelectOption[];
+}
+
 export interface PasswordFieldConfig extends BaseFieldConfig {
   type: "password";
   placeholder?: string;
@@ -533,8 +559,17 @@ export interface AiSuggestionCard {
   id: string;
   title: string;
   description?: string;
+  possibleAnswer?: string;
+  whyThisMayHelp?: string;
+  relatedDocumentation?: AiSuggestionReference[];
+  nextBestAction?: string;
   confidence?: number;
   citationIds?: string[];
+}
+
+export interface AiSuggestionReference {
+  title: string;
+  url?: string;
 }
 
 export interface AiSuggestionsConfig extends ConditionalAttributes {
@@ -601,7 +636,7 @@ export interface GridContainerConfig extends ConditionalAttributes {
   children: FieldConfig[];
 }
 
-export interface WizardStepConfig {
+export interface WizardStepConfig extends ConditionalAttributes {
   title?: string;
   description?: string;
   children: FieldConfig[];
@@ -630,6 +665,7 @@ export type FieldConfig =
   | SwitchFieldConfig
   | NumberFieldConfig
   | RadioFieldConfig
+  | CheckboxGroupFieldConfig
   | PasswordFieldConfig
   | PinFieldConfig
   | ColorFieldConfig

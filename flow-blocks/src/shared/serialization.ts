@@ -236,14 +236,14 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
   }
 
   if (
-    mutableField.type === "radio" &&
+    (mutableField.type === "radio" || mutableField.type === "checkbox-group") &&
     !Array.isArray(mutableField.options) &&
     typeof mutableField.optionsText === "string"
   ) {
     mutableField.options = parseOptions(mutableField.optionsText);
   }
 
-  if (mutableField.type === "radio") {
+  if (mutableField.type === "radio" || mutableField.type === "checkbox-group") {
     delete mutableField.optionsText;
   }
 
@@ -400,16 +400,28 @@ function parseFieldsRecursive(container: HTMLElement): FieldConfig[] {
                 type: "wizard-step",
                 title: stepNode.dataset.wizardStepTitle,
                 description: stepNode.dataset.wizardStepDescription,
+                hidden: stepNode.dataset.wizardStepHidden === "true",
               };
 
           if (stepData.type !== "wizard-step") return null;
 
+          const normalizedStepData = normalizeFieldAttributes(
+            stepData as unknown as FieldConfig,
+          ) as unknown as Record<string, unknown>;
+
           return {
             title:
-              typeof stepData.title === "string" ? stepData.title : undefined,
+              typeof normalizedStepData.title === "string"
+                ? normalizedStepData.title
+                : undefined,
             description:
-              typeof stepData.description === "string"
-                ? stepData.description
+              typeof normalizedStepData.description === "string"
+                ? normalizedStepData.description
+                : undefined,
+            hidden: Boolean(normalizedStepData.hidden),
+            conditionalLogic:
+              typeof normalizedStepData.conditionalLogic === "object"
+                ? normalizedStepData.conditionalLogic
                 : undefined,
             children: parseFieldsRecursive(stepNode),
           };

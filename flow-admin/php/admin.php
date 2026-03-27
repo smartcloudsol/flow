@@ -34,7 +34,8 @@ final class Admin
             debugLoggingEnabled: false,
             formsBackendSyncEnabled: true,
             formsAllowPermanentDelete: false,
-            aiSuggestionsPresets: []
+            aiSuggestionsPresets: [],
+            highlightedSubmissionActions: ['seen', 'resolved', 'completed']
         );
 
         // WP can return array/object depending on previous versions / serialization.
@@ -79,11 +80,20 @@ final class Admin
                 return;
             }
 
+            flow()->enqueueAdminRuntimeAssets();
+
             $script_asset = array();
             if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'admin/index.asset.php')) {
                 $script_asset = require_once(SMARTCLOUD_FLOW_PATH . 'admin/index.asset.php');
             }
-            $script_asset['dependencies'] = array_merge($script_asset['dependencies'], array('smartcloud-wpsuite-webcrypto-vendor', 'smartcloud-wpsuite-mantine-vendor'));
+            $script_asset['dependencies'] = array_merge(
+                $script_asset['dependencies'],
+                array(
+                    'smartcloud-flow-main-script',
+                    'smartcloud-wpsuite-webcrypto-vendor',
+                    'smartcloud-wpsuite-mantine-vendor'
+                )
+            );
             wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, true);
 
             if (function_exists('wp_set_script_translations')) {
@@ -306,7 +316,8 @@ final class Admin
             debugLoggingEnabled: $debugLoggingEnabled,
             formsBackendSyncEnabled: (bool) ($settings_param['formsBackendSyncEnabled'] ?? true),
             formsAllowPermanentDelete: (bool) ($settings_param['formsAllowPermanentDelete'] ?? false),
-            aiSuggestionsPresets: is_array($settings_param['aiSuggestionsPresets'] ?? null) ? $settings_param['aiSuggestionsPresets'] : []
+            aiSuggestionsPresets: is_array($settings_param['aiSuggestionsPresets'] ?? null) ? $settings_param['aiSuggestionsPresets'] : [],
+            highlightedSubmissionActions: is_array($settings_param['highlightedSubmissionActions'] ?? null) ? $settings_param['highlightedSubmissionActions'] : ['seen', 'resolved', 'completed']
         );
 
         // Frissített beállítások mentése
@@ -318,7 +329,8 @@ final class Admin
             'defaultOutputLanguage' => $defaultOutputLanguage,
             'formsBackendSyncEnabled' => $this->settings->formsBackendSyncEnabled,
             'formsAllowPermanentDelete' => $this->settings->formsAllowPermanentDelete,
-            'aiSuggestionsPresetsCount' => count($this->settings->aiSuggestionsPresets)
+            'aiSuggestionsPresetsCount' => count($this->settings->aiSuggestionsPresets),
+            'highlightedSubmissionActions' => $this->settings->highlightedSubmissionActions
         ]);
 
         return new WP_REST_Response(array('success' => true, 'message' => __('Settings updated successfully.', 'smartcloud-flow')), 200);
@@ -366,23 +378,38 @@ final class Admin
         }
 
         // Update each meta field if provided
-        if (isset($body['formId'])) {
-            FormSyncMeta::setFormId($post_id, (string) $body['formId']);
+        if (array_key_exists('formId', $body)) {
+            FormSyncMeta::setFormId(
+                $post_id,
+                $body['formId'] === null ? null : (string) $body['formId']
+            );
         }
-        if (isset($body['syncHash'])) {
-            FormSyncMeta::setSyncHash($post_id, (string) $body['syncHash']);
+        if (array_key_exists('syncHash', $body)) {
+            FormSyncMeta::setSyncHash(
+                $post_id,
+                $body['syncHash'] === null ? null : (string) $body['syncHash']
+            );
         }
-        if (isset($body['syncStatus'])) {
+        if (array_key_exists('syncStatus', $body)) {
             FormSyncMeta::setSyncStatus($post_id, (string) $body['syncStatus']);
         }
-        if (isset($body['lastSynced'])) {
-            FormSyncMeta::setLastSynced($post_id, (string) $body['lastSynced']);
+        if (array_key_exists('lastSynced', $body)) {
+            FormSyncMeta::setLastSynced(
+                $post_id,
+                $body['lastSynced'] === null ? null : (string) $body['lastSynced']
+            );
         }
-        if (isset($body['lastError'])) {
-            FormSyncMeta::setLastError($post_id, (string) $body['lastError']);
+        if (array_key_exists('lastError', $body)) {
+            FormSyncMeta::setLastError(
+                $post_id,
+                $body['lastError'] === null ? null : (string) $body['lastError']
+            );
         }
-        if (isset($body['sourceKind'])) {
-            FormSyncMeta::setSourceKind($post_id, (string) $body['sourceKind']);
+        if (array_key_exists('sourceKind', $body)) {
+            FormSyncMeta::setSourceKind(
+                $post_id,
+                $body['sourceKind'] === null ? null : (string) $body['sourceKind']
+            );
         }
 
         $updated_meta = FormSyncMeta::getAllSyncMeta($post_id);

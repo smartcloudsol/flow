@@ -64,6 +64,11 @@ import DocSidebar from "./DocSidebar";
 import classes from "./main.module.css";
 import { NoRegistrationRequiredBanner } from "./noregistration";
 import { FlowOnboarding } from "./onboarding";
+import { OperationsSection } from "./operations/OperationsSection";
+import {
+  OPERATIONS_VIEW_DEFINITIONS,
+  type OperationsView,
+} from "./operations/views";
 
 declare global {
   const wp: {
@@ -89,6 +94,12 @@ interface Site {
   subscriptionType?: SubscriptionType;
   settings: FlowConfig;
 }
+
+type AdminFlowSettings = FlowSettings & {
+  highlightedSubmissionActions?: HighlightedSubmissionAction[];
+};
+
+type HighlightedSubmissionAction = "seen" | "resolved" | "completed";
 
 let wpSuiteInstalled: boolean = false;
 let wpRestUrl: string | undefined;
@@ -249,6 +260,12 @@ function normalizeAiPreset(preset: AiSuggestionPreset): AiSuggestionPreset {
   };
 }
 
+const DEFAULT_HIGHLIGHTED_SUBMISSION_ACTIONS = [
+  "seen",
+  "resolved",
+  "completed",
+] satisfies HighlightedSubmissionAction[];
+
 function AiPresetModalEditor({
   opened,
   preset,
@@ -328,7 +345,7 @@ function AiPresetModalEditor({
           </Box>
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              Changes are saved into the general settings form. Use{' '}
+              Changes are saved into the general settings form. Use{" "}
               <strong>Save General Settings</strong> to persist them.
             </Text>
             <Group>
@@ -402,7 +419,8 @@ function AiSuggestionsPresetEditor({
           <div>
             <Text fw={600}>AI Suggestions presets</Text>
             <Text size="sm" c="dimmed">
-              Create and manage reusable prompt presets for the AI Suggestions block.
+              Create and manage reusable prompt presets for the AI Suggestions
+              block.
             </Text>
           </div>
           <Button leftSection={<IconPlus size={16} />} onClick={openCreate}>
@@ -462,7 +480,7 @@ function AiSuggestionsPresetEditor({
         )}
 
         <Text size="sm" c="dimmed">
-          Preset changes are kept in the general settings form until you click{' '}
+          Preset changes are kept in the general settings form until you click{" "}
           <strong>Save General Settings</strong>.
         </Text>
       </Stack>
@@ -482,7 +500,7 @@ function AiSuggestionsPresetEditor({
 
 interface MainProps {
   nonce: string;
-  settings: FlowSettings;
+  settings: AdminFlowSettings;
   store: Store;
 }
 
@@ -546,18 +564,22 @@ export default function Main({ nonce, settings, store }: MainProps) {
     enabled: loadSiteEnabled,
   });
 
-  const initialSettingsFormData = useMemo<FlowSettings>(
+  const initialSettingsFormData = useMemo<AdminFlowSettings>(
     () => ({
       enablePoweredBy: settings?.enablePoweredBy || false,
       debugLoggingEnabled: settings?.debugLoggingEnabled || false,
       formsBackendSyncEnabled: settings?.formsBackendSyncEnabled ?? true,
       formsAllowPermanentDelete: settings?.formsAllowPermanentDelete || false,
       aiSuggestionsPresets: settings?.aiSuggestionsPresets || [],
+      highlightedSubmissionActions: settings?.highlightedSubmissionActions
+        ?.length
+        ? (settings.highlightedSubmissionActions as HighlightedSubmissionAction[])
+        : DEFAULT_HIGHLIGHTED_SUBMISSION_ACTIONS,
     }),
     [settings],
   );
 
-  const [settingsFormData, setSettingsFormData] = useState<FlowSettings>(
+  const [settingsFormData, setSettingsFormData] = useState<AdminFlowSettings>(
     initialSettingsFormData,
   );
 
@@ -565,7 +587,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
     setSettingsFormData(initialSettingsFormData);
   }, [initialSettingsFormData]);
 
-  const [lastSavedSettings, setLastSavedSettings] = useState<FlowSettings>(
+  const [lastSavedSettings, setLastSavedSettings] = useState<AdminFlowSettings>(
     initialSettingsFormData,
   );
 
@@ -574,7 +596,8 @@ export default function Main({ nonce, settings, store }: MainProps) {
   }, [initialSettingsFormData]);
 
   const generalSettingsDirty = useMemo(
-    () => JSON.stringify(lastSavedSettings) !== JSON.stringify(settingsFormData),
+    () =>
+      JSON.stringify(lastSavedSettings) !== JSON.stringify(settingsFormData),
     [lastSavedSettings, settingsFormData],
   );
 
@@ -764,6 +787,25 @@ export default function Main({ nonce, settings, store }: MainProps) {
       }
     }
   }, [clearCache, resolvedConfig]);
+
+  const activeOperationsView =
+    activePage === "submissions" ||
+    activePage === "templates" ||
+    activePage === "workflows"
+      ? (activePage as OperationsView)
+      : null;
+
+  const operationsEditor =
+    activeOperationsView === "submissions" ? (
+      <SubmissionsEditor
+        client={backendClient}
+        boot={{ settings: settingsFormData }}
+      />
+    ) : activeOperationsView === "templates" ? (
+      <TemplatesEditor client={backendClient} boot={boot} />
+    ) : activeOperationsView === "workflows" ? (
+      <WorkflowsEditor client={backendClient} boot={boot} />
+    ) : null;
 
   return (
     <div className={classes["wpc-container"]}>
@@ -988,6 +1030,49 @@ export default function Main({ nonce, settings, store }: MainProps) {
                 </Switch.Group>
 
                 <Switch.Group
+                  value={
+                    settingsFormData.highlightedSubmissionActions?.length
+                      ? settingsFormData.highlightedSubmissionActions
+                      : DEFAULT_HIGHLIGHTED_SUBMISSION_ACTIONS
+                  }
+                  label={
+                    <InfoLabelComponent
+                      text={__("Highlighted submission actions", TEXT_DOMAIN)}
+                      scrollToId="highlighted-submission-actions"
+                    />
+                  }
+                  description={__(
+                    "Choose which quick 'Mark as...' status buttons should appear on the submission detail popup.",
+                    TEXT_DOMAIN,
+                  )}
+                  onChange={(values: string[]) =>
+                    setSettingsFormData({
+                      ...settingsFormData,
+                      highlightedSubmissionActions:
+                        values as HighlightedSubmissionAction[],
+                    })
+                  }
+                >
+                  <Stack gap="xs" mt="xs">
+                    <Switch
+                      label={__("Show 'Mark seen'", TEXT_DOMAIN)}
+                      value="seen"
+                      disabled={isSaving}
+                    />
+                    <Switch
+                      label={__("Show 'Mark resolved'", TEXT_DOMAIN)}
+                      value="resolved"
+                      disabled={isSaving}
+                    />
+                    <Switch
+                      label={__("Show 'Mark completed'", TEXT_DOMAIN)}
+                      value="completed"
+                      disabled={isSaving}
+                    />
+                  </Stack>
+                </Switch.Group>
+
+                <Switch.Group
                   defaultValue={
                     settingsFormData.debugLoggingEnabled ? ["enable"] : []
                   }
@@ -1031,11 +1116,17 @@ export default function Main({ nonce, settings, store }: MainProps) {
 
               <Group justify="space-between" mt="lg">
                 <Group gap="xs">
-                  <Badge color={generalSettingsDirty ? "yellow" : "green"} variant="light">
-                    {generalSettingsDirty ? "Unsaved changes" : "All changes saved"}
+                  <Badge
+                    color={generalSettingsDirty ? "yellow" : "green"}
+                    variant="light"
+                  >
+                    {generalSettingsDirty
+                      ? "Unsaved changes"
+                      : "All changes saved"}
                   </Badge>
                   <Text size="sm" c="dimmed">
-                    Changes made to AI presets and general options only take effect after saving.
+                    Changes made to AI presets and general options only take
+                    effect after saving.
                   </Text>
                 </Group>
                 <Button
@@ -1097,114 +1188,24 @@ export default function Main({ nonce, settings, store }: MainProps) {
               )}
             </>
           )}
-          {activePage === "submissions" && (
-            <>
-              <Title order={2} mb="md">
-                <InfoLabelComponent
-                  text={__("Form Submissions", TEXT_DOMAIN)}
-                  scrollToId="submissions"
-                />
-              </Title>
-
-              <Text mb="md">
-                {__(
-                  "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.",
-                  TEXT_DOMAIN,
-                )}
-              </Text>
-
-              {(formConfig ?? decryptedConfig)?.subscriptionType !==
-                "PROFESSIONAL" && (
-                <Alert
-                  variant="light"
-                  color="yellow"
-                  title={__("PRO Feature", TEXT_DOMAIN)}
-                  icon={<IconExclamationCircle />}
-                  mb="md"
-                >
-                  {__(
-                    "This feature is available in the PRO version of the plugin.",
-                    TEXT_DOMAIN,
-                  )}
-                </Alert>
-              )}
-              <Suspense fallback={<Text>{__("Loading...", TEXT_DOMAIN)}</Text>}>
-                <SubmissionsEditor client={backendClient} />
-              </Suspense>
-            </>
-          )}
-          {activePage === "templates" && (
-            <>
-              <Title order={2} mb="md">
-                <InfoLabelComponent
-                  text={__("Email Templates", TEXT_DOMAIN)}
-                  scrollToId="templates"
-                />
-              </Title>
-
-              <Text mb="md">
-                {__(
-                  "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.",
-                  TEXT_DOMAIN,
-                )}
-              </Text>
-
-              {(formConfig ?? decryptedConfig)?.subscriptionType !==
-                "PROFESSIONAL" && (
-                <Alert
-                  variant="light"
-                  color="yellow"
-                  title={__("PRO Feature", TEXT_DOMAIN)}
-                  icon={<IconExclamationCircle />}
-                  mb="md"
-                >
-                  {__(
-                    "This feature is available in the PRO version of the plugin.",
-                    TEXT_DOMAIN,
-                  )}
-                </Alert>
-              )}
-              <Suspense fallback={<Text>{__("Loading...", TEXT_DOMAIN)}</Text>}>
-                <TemplatesEditor client={backendClient} boot={boot} />
-              </Suspense>
-            </>
-          )}
-          {activePage === "workflows" && (
-            <>
-              <Title order={2} mb="md">
-                <InfoLabelComponent
-                  text={__("Automated Workflows", TEXT_DOMAIN)}
-                  scrollToId="workflows"
-                />
-              </Title>
-
-              <Text mb="md">
-                {__(
-                  "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.",
-                  TEXT_DOMAIN,
-                )}
-              </Text>
-
-              {(formConfig ?? decryptedConfig)?.subscriptionType !==
-                "PROFESSIONAL" && (
-                <Alert
-                  variant="light"
-                  color="yellow"
-                  title={__("PRO Feature", TEXT_DOMAIN)}
-                  icon={<IconExclamationCircle />}
-                  mb="md"
-                >
-                  {__(
-                    "This feature is available in the PRO version of the plugin.",
-                    TEXT_DOMAIN,
-                  )}
-                </Alert>
-              )}
-              <Suspense fallback={<Text>{__("Loading...", TEXT_DOMAIN)}</Text>}>
-                <WorkflowsEditor client={backendClient} boot={boot} />
-              </Suspense>
-            </>
-          )}
+          {activeOperationsView && operationsEditor ? (
+            <OperationsSection
+              title={OPERATIONS_VIEW_DEFINITIONS[activeOperationsView].title}
+              description={
+                OPERATIONS_VIEW_DEFINITIONS[activeOperationsView].description
+              }
+              scrollToId={
+                OPERATIONS_VIEW_DEFINITIONS[activeOperationsView].scrollToId
+              }
+              showProFeature={
+                (formConfig ?? decryptedConfig)?.subscriptionType !==
+                "PROFESSIONAL"
+              }
+              infoLabelComponent={InfoLabelComponent}
+            >
+              {operationsEditor}
+            </OperationsSection>
+          ) : null}
         </Box>
       </Group>
     </div>

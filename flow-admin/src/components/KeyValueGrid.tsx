@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
+import { t } from "../operations/i18n";
 
 interface FieldSchema {
   label?: string;
@@ -28,7 +29,7 @@ export function KeyValueGrid({
   if (!value || Object.keys(value).length === 0) {
     return (
       <Text c="dimmed" size="sm">
-        No data
+        {t("No data")}
       </Text>
     );
   }
@@ -96,7 +97,7 @@ function ValueDisplay({ value }: { value: unknown }) {
   }
 
   if (typeof value === "boolean") {
-    return <Text size="sm">{value ? "Yes" : "No"}</Text>;
+    return <Text size="sm">{value ? t("Yes") : t("No")}</Text>;
   }
 
   if (typeof value === "object") {
@@ -118,12 +119,12 @@ function ValueDisplay({ value }: { value: unknown }) {
           {expanded ? (
             <>
               <IconChevronDown size={14} style={{ verticalAlign: "middle" }} />{" "}
-              Hide
+              {t("Hide")}
             </>
           ) : (
             <>
               <IconChevronRight size={14} style={{ verticalAlign: "middle" }} />{" "}
-              Show details
+              {t("Show details")}
             </>
           )}
         </Text>
@@ -196,14 +197,14 @@ function FileReferenceDisplay({
               variant="light"
               size="compact-xs"
             >
-              Download
+              {t("Download")}
             </Button>
             <Anchor
               href={reference.downloadUrl}
               target="_blank"
               rel="noreferrer"
             >
-              Open in new tab
+              {t("Open in new tab")}
             </Anchor>
           </Group>
         ) : null}

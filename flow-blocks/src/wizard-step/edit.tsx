@@ -4,22 +4,30 @@ import {
   InspectorControls,
   useBlockProps,
 } from "@wordpress/block-editor";
-import { PanelBody, TextControl } from "@wordpress/components";
+import { PanelBody, TextControl, ToggleControl } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
+import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
+import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
 
 interface WizardStepAttributes {
   title?: string;
   description?: string;
+  hidden?: boolean;
+  conditionalLogic?: unknown;
 }
 
 export default function Edit({
   attributes,
   setAttributes,
+  clientId,
 }: {
   attributes: WizardStepAttributes;
   setAttributes: (next: Partial<WizardStepAttributes>) => void;
+  clientId: string;
 }) {
+  const isHidden = Boolean(attributes.hidden);
+
   return (
     <>
       <InspectorControls>
@@ -36,7 +44,21 @@ export default function Edit({
             onChange={(description) => setAttributes({ description })}
             help={__("Optional description", TEXT_DOMAIN)}
           />
+          <ToggleControl
+            label={__("Hidden", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hidden)}
+            onChange={(hidden) => setAttributes({ hidden })}
+            help={__("Hide this step by default.", TEXT_DOMAIN)}
+          />
         </PanelBody>
+        <ConditionalLogicPanel
+          attributes={attributes as Record<string, unknown>}
+          setAttributes={(next) =>
+            setAttributes(next as Partial<WizardStepAttributes>)
+          }
+          clientId={clientId}
+          allowedActions={["show", "hide"]}
+        />
       </InspectorControls>
       <div
         {...useBlockProps({
@@ -44,37 +66,84 @@ export default function Edit({
             border: "1px dashed #667eea",
             padding: "12px",
             margin: "8px 0",
-            backgroundColor: "#fff",
+            backgroundColor: isHidden ? "#f6f7ff" : "#fff",
             borderRadius: "4px",
           },
         })}
       >
-        <div
-          style={{
-            fontSize: "12px",
-            fontWeight: "bold",
-            color: "#667eea",
-            marginBottom: "8px",
-          }}
-        >
-          📄 {attributes.title || __("Step", TEXT_DOMAIN)}
-        </div>
-        {attributes.description && (
-          <div
-            style={{
-              fontSize: "11px",
-              color: "#666",
-              marginBottom: "8px",
-            }}
-          >
-            {attributes.description}
+        {isHidden ? (
+          <div style={{ display: "grid", gap: "10px" }}>
+            <HiddenBlockPreview
+              title={__("Wizard step", TEXT_DOMAIN)}
+              summary={attributes.title || __("(untitled)", TEXT_DOMAIN)}
+              borderColor="#667eea"
+              backgroundColor="#eef1ff"
+              titleColor="#667eea"
+            />
+            <div
+              style={{
+                borderLeft: "2px solid #c7d2fe",
+                paddingLeft: "12px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  color: "#667eea",
+                  marginBottom: "8px",
+                }}
+              >
+                {attributes.title || __("Step", TEXT_DOMAIN)}
+              </div>
+              {attributes.description && (
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#666",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {attributes.description}
+                </div>
+              )}
+              <div style={{ paddingLeft: "12px" }}>
+                <InnerBlocks
+                  allowedBlocks={FORM_CHILD_BLOCKS as unknown as string[]}
+                />
+              </div>
+            </div>
           </div>
+        ) : (
+          <>
+            <div
+              style={{
+                fontSize: "12px",
+                fontWeight: "bold",
+                color: "#667eea",
+                marginBottom: "8px",
+              }}
+            >
+              {attributes.title || __("Step", TEXT_DOMAIN)}
+            </div>
+            {attributes.description && (
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#666",
+                  marginBottom: "8px",
+                }}
+              >
+                {attributes.description}
+              </div>
+            )}
+            <div style={{ paddingLeft: "12px" }}>
+              <InnerBlocks
+                allowedBlocks={FORM_CHILD_BLOCKS as unknown as string[]}
+              />
+            </div>
+          </>
         )}
-        <div style={{ paddingLeft: "12px" }}>
-          <InnerBlocks
-            allowedBlocks={FORM_CHILD_BLOCKS as unknown as string[]}
-          />
-        </div>
       </div>
     </>
   );

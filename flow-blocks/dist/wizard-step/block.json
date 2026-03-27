@@ -22,8 +22,19 @@
     "description": {
       "type": "string",
       "default": ""
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
     }
   },
-  "editorScript": "file:../index.js",
-  "script": "file:../index.js"
+  "editorScript": "file:../editor.js"
 }

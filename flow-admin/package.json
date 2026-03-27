@@ -3,6 +3,18 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "exports": {
+    "./editor-runtime": "./src/editor-runtime.ts",
+    "./operations-runtime": "./src/operations-runtime.tsx",
+    "./api/backend-client": "./src/api/backend-client.ts",
+    "./api/backend-utils": "./src/api/backend-utils.ts",
+    "./api/types": "./src/api/types.ts",
+    "./operations/i18n": "./src/operations/i18n.ts",
+    "./operations/views": "./src/operations/views.ts",
+    "./paid-features/SubmissionsEditor": "./src/paid-features/SubmissionsEditor.tsx",
+    "./paid-features/TemplatesEditor": "./src/paid-features/TemplatesEditor.tsx",
+    "./paid-features/WorkflowsEditor": "./src/paid-features/WorkflowsEditor.tsx"
+  },
   "license": "ISC",
   "scripts": {
     "dev": "vite --host",

@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import Editor, { OnMount, Monaco } from "@monaco-editor/react";
 import { Box, Loader, Stack, Text } from "@mantine/core";
 import type { editor } from "monaco-editor";
+import { t } from "../operations/i18n";
 
 export interface MonacoEditorProps {
   value: string;
@@ -83,7 +84,7 @@ export default function MonacoEditor({
           <Stack align="center" justify="center" style={{ height }}>
             <Loader size="md" />
             <Text size="sm" c="dimmed">
-              Loading editor...
+              {t("Loading editor...")}
             </Text>
           </Stack>
         }

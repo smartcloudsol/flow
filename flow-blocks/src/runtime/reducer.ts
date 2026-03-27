@@ -23,6 +23,7 @@ export interface FormRuntimeState {
     rawText?: string;
     citations?: unknown;
     metadata?: Record<string, unknown>;
+    lastRunSignature?: string;
   };
 }
 
@@ -32,7 +33,7 @@ export type FormAction =
   | { type: "SET_ERRORS"; errors: FormErrors }
   | { type: "SET_FIELD_ERROR"; name: string; error: string | undefined }
   | { type: "SET_STATUS"; status: FormStatus; message?: string }
-  | { type: "AI_SUGGESTIONS_LOADING" }
+  | { type: "AI_SUGGESTIONS_LOADING"; signature?: string }
   | {
       type: "AI_SUGGESTIONS_DONE";
       suggestions: AiSuggestionCard[];
@@ -43,6 +44,7 @@ export type FormAction =
   | { type: "AI_SUGGESTIONS_ACCEPT"; suggestionId?: string }
   | { type: "AI_SUGGESTIONS_REJECT" }
   | { type: "AI_SUGGESTIONS_RESET" }
+  | { type: "RESET_FIELDS"; values: FormValues; names: string[] }
   | { type: "DRAFT_LOADED"; values: FormValues; message?: string }
   | { type: "SUBMIT_SUCCESS"; message?: string }
   | { type: "RESET"; values: FormValues };
@@ -82,6 +84,11 @@ function collectInitialValues(
 
     if (field.type === "checkbox") {
       acc[field.name] = false;
+      return;
+    }
+
+    if (field.type === "checkbox-group") {
+      acc[field.name] = [];
       return;
     }
 
@@ -162,6 +169,8 @@ export function formReducer(
           rawText: undefined,
           citations: undefined,
           metadata: undefined,
+          lastRunSignature:
+            action.signature ?? state.aiSuggestions.lastRunSignature,
         },
       };
     case "AI_SUGGESTIONS_DONE":
@@ -174,6 +183,7 @@ export function formReducer(
           rawText: action.rawText,
           citations: action.citations,
           metadata: action.metadata,
+          lastRunSignature: state.aiSuggestions.lastRunSignature,
         },
       };
     case "AI_SUGGESTIONS_ACCEPT":
@@ -199,6 +209,25 @@ export function formReducer(
         ...state,
         aiSuggestions: { status: "idle", suggestions: [] },
       };
+    case "RESET_FIELDS": {
+      const touched = new Set(state.touched);
+      const errors = { ...state.errors };
+
+      action.names.forEach((name) => {
+        touched.delete(name);
+        errors[name] = undefined;
+      });
+
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          ...action.values,
+        },
+        errors,
+        touched,
+      };
+    }
     case "DRAFT_LOADED":
       return {
         ...state,
@@ -207,6 +236,7 @@ export function formReducer(
         errors: {},
         touched: new Set(),
         message: action.message,
+        aiSuggestions: { status: "idle", suggestions: [] },
       };
     case "SUBMIT_SUCCESS":
       return {

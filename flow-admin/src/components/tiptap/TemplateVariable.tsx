@@ -127,15 +127,74 @@ export function parseTemplateVariables(text: string): Array<{
 
 // Helper to convert {{...}} patterns in HTML to template variable spans
 export function convertTemplateVariablesToSpans(html: string): string {
-  // Match {{...}} that are NOT already inside a data-template-variable span
-  const regex = /\{\{([^}]+)\}\}/g;
+  if (!html || typeof document === "undefined") {
+    return html;
+  }
 
-  return html.replace(regex, (match, path) => {
-    const trimmedPath = path.trim();
-    // Extract a label from the path (e.g., "submission.fields.name" → "name")
-    const parts = trimmedPath.split(".");
-    const label = parts[parts.length - 1];
+  const template = document.createElement("template");
+  template.innerHTML = html;
 
-    return `<span data-template-variable="true" data-path="${trimmedPath}" data-label="${label}" class="template-variable">${match}</span>`;
-  });
+  const wrapVariablesInTextNode = (textNode: globalThis.Text) => {
+    const text = textNode.textContent || "";
+    const regex = /\{\{([^}]+)\}\}/g;
+    let match: RegExpExecArray | null;
+    let lastIndex = 0;
+    const fragment = document.createDocumentFragment();
+    let changed = false;
+
+    while ((match = regex.exec(text)) !== null) {
+      changed = true;
+
+      if (match.index > lastIndex) {
+        fragment.appendChild(
+          document.createTextNode(text.slice(lastIndex, match.index)),
+        );
+      }
+
+      const rawMatch = match[0];
+      const trimmedPath = match[1].trim();
+      const parts = trimmedPath.split(".");
+      const label = parts[parts.length - 1];
+      const span = document.createElement("span");
+      span.setAttribute("data-template-variable", "true");
+      span.setAttribute("data-path", trimmedPath);
+      span.setAttribute("data-label", label);
+      span.className = "template-variable";
+      span.textContent = rawMatch;
+      fragment.appendChild(span);
+
+      lastIndex = regex.lastIndex;
+    }
+
+    if (!changed) {
+      return;
+    }
+
+    if (lastIndex < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    textNode.replaceWith(fragment);
+  };
+
+  const walk = (node: globalThis.Node) => {
+    if (node.nodeType === globalThis.Node.TEXT_NODE) {
+      wrapVariablesInTextNode(node as globalThis.Text);
+      return;
+    }
+
+    if (!(node instanceof HTMLElement)) {
+      return;
+    }
+
+    if (node.matches("span[data-template-variable]")) {
+      return;
+    }
+
+    Array.from(node.childNodes).forEach((child) => walk(child));
+  };
+
+  Array.from(template.content.childNodes).forEach((child) => walk(child));
+
+  return template.innerHTML;
 }

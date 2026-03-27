@@ -71,6 +71,29 @@ const pages = {
           TEXT_DOMAIN,
         )}
       </Text>
+      <Title order={3} mt="md" id="highlighted-submission-actions">
+        <span className="highlightable">
+          {__("Highlighted submission actions", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Choose which quick status update buttons appear in the submission details popup. These shortcuts let administrators change the current submission status with a single click.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Available options currently control whether the popup shows the Mark seen, Mark resolved, and Mark completed actions.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Disable any action you do not want operators to use as a quick shortcut. This only affects the highlighted status buttons, not the submission history or other workflow actions.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
       <Title order={3} mt="md" id="enable-debug-logging">
         <span className="highlightable">
           {__("Enable Debug Logging", TEXT_DOMAIN)}

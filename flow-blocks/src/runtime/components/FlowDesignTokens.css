@@ -117,7 +117,13 @@
   font-size: var(--flow-field-description-size);
 }
 
-.smartcloud-flow-shadow-root .flow-block :where(input, textarea, select) {
+.smartcloud-flow-shadow-root
+  .flow-block
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+    textarea,
+    select
+  ) {
   min-height: var(--flow-control-min-height);
   border-radius: var(--flow-control-radius);
   border-width: var(--flow-control-border-width);
@@ -130,11 +136,21 @@
 
 .smartcloud-flow-shadow-root
   .flow-block
-  :where(input, textarea, select)::placeholder {
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+    textarea,
+    select
+  )::placeholder {
   color: var(--flow-control-placeholder-color);
 }
 
-.smartcloud-flow-shadow-root .flow-block :where(input, textarea, select):focus {
+.smartcloud-flow-shadow-root
+  .flow-block
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+    textarea,
+    select
+  ):focus {
   border-color: var(--flow-control-focus-border-color);
   box-shadow: var(--flow-control-focus-shadow);
 }
@@ -240,6 +256,99 @@
 
 .smartcloud-flow-shadow-root .flow-ai-suggestions {
   gap: 0.875rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-border {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  width: 100%;
+  padding: 0;
+  border-radius: calc(var(--mantine-radius-md) + 4px);
+  box-sizing: border-box;
+  background: transparent;
+  box-shadow: none;
+  transition:
+    padding 180ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.smartcloud-flow-shadow-root
+  .flow-ai-suggestions-border[data-flow-active="true"] {
+  padding: var(--flow-ai-suggestions-border-thickness, 2px);
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    var(
+      --flow-ai-suggestions-border-stops,
+      #0ea5e9,
+      #2563eb,
+      #7c3aed,
+      #14b8a6,
+      #f59e0b,
+      #0ea5e9
+    )
+  );
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.12),
+    0 10px 24px -18px rgba(37, 99, 235, 0.45);
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-border__ring {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: inherit;
+  background: inherit;
+  filter: saturate(1.15) brightness(1.05);
+  animation: flow-ai-suggestions-border-spin
+    var(--flow-ai-suggestions-border-speed, 2200ms) linear infinite;
+  transition: opacity 180ms ease;
+}
+
+.smartcloud-flow-shadow-root
+  .flow-ai-suggestions-border[data-flow-active="true"]
+  .flow-ai-suggestions-border__ring {
+  opacity: 0.92;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions-border__content {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 0;
+  background: var(--mantine-color-body, #fff);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06);
+  transition: padding 180ms ease;
+}
+
+.smartcloud-flow-shadow-root
+  .flow-ai-suggestions-border[data-flow-active="true"]
+  .flow-ai-suggestions-border__content {
+  padding: 0.75rem 0.875rem;
+}
+
+.smartcloud-flow-shadow-root .flow-ai-suggestions__loading {
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+@keyframes flow-ai-suggestions-border-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smartcloud-flow-shadow-root .flow-ai-suggestions-border__ring {
+    animation: none;
+  }
 }
 
 .smartcloud-flow-shadow-root .flow-ai-suggestions__title {

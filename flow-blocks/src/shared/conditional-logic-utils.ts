@@ -28,6 +28,7 @@ export function getWatcherFieldKind(field?: FieldConfig): WatcherFieldKind {
       return "number";
     case "select":
     case "radio":
+    case "checkbox-group":
     case "tags":
       return "choice";
     case "date":
@@ -44,17 +45,20 @@ export function getWatcherFieldKind(field?: FieldConfig): WatcherFieldKind {
   }
 }
 
-const operatorMap: Record<WatcherFieldKind | "common", ConditionalOperator[]> = {
-  common: ["equals", "notEquals", "isEmpty", "isNotEmpty"],
-  text: ["contains", "notContains", "startsWith", "endsWith"],
-  number: ["greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual"],
-  boolean: ["isChecked", "isNotChecked"],
-  choice: ["contains", "notContains", "isAnyOf", "isNoneOf"],
-  date: ["greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual"],
-  unknown: ["contains", "notContains"],
-};
+const operatorMap: Record<WatcherFieldKind | "common", ConditionalOperator[]> =
+  {
+    common: ["equals", "notEquals", "isEmpty", "isNotEmpty"],
+    text: ["contains", "notContains", "startsWith", "endsWith"],
+    number: ["greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual"],
+    boolean: ["isChecked", "isNotChecked"],
+    choice: ["contains", "notContains", "isAnyOf", "isNoneOf"],
+    date: ["greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual"],
+    unknown: ["contains", "notContains"],
+  };
 
-export function getAllowedOperators(field?: FieldConfig): ConditionalOperator[] {
+export function getAllowedOperators(
+  field?: FieldConfig,
+): ConditionalOperator[] {
   const kind = getWatcherFieldKind(field);
   return [...operatorMap.common, ...operatorMap[kind]];
 }
@@ -88,7 +92,9 @@ export function getOperatorLabel(operator: ConditionalOperator): string {
   return labels[operator];
 }
 
-export function getActionLabel(action: ConditionalRule["then"]["action"]): string {
+export function getActionLabel(
+  action: ConditionalRule["then"]["action"],
+): string {
   const labels: Record<ConditionalRule["then"]["action"], string> = {
     show: __("show this field", TEXT_DOMAIN),
     hide: __("hide this field", TEXT_DOMAIN),
@@ -103,7 +109,9 @@ export function getActionLabel(action: ConditionalRule["then"]["action"]): strin
   return labels[action];
 }
 
-export function getRuleConditions(rule: ConditionalRule): ConditionalCondition[] {
+export function getRuleConditions(
+  rule: ConditionalRule,
+): ConditionalCondition[] {
   if (Array.isArray(rule.conditions) && rule.conditions.length > 0) {
     return rule.conditions;
   }
@@ -124,13 +132,23 @@ export function summarizeCondition(
   condition: ConditionalCondition,
   watcherLabel?: string,
 ): string {
-  const fieldLabel = watcherLabel || condition.field || __("another field", TEXT_DOMAIN);
+  const fieldLabel =
+    watcherLabel || condition.field || __("another field", TEXT_DOMAIN);
   const operator = getOperatorLabel(condition.operator);
   const rawValue = condition.value;
   let valuePart = "";
-  if (!["isEmpty", "isNotEmpty", "isChecked", "isNotChecked"].includes(condition.operator)) {
+  if (
+    !["isEmpty", "isNotEmpty", "isChecked", "isNotChecked"].includes(
+      condition.operator,
+    )
+  ) {
     if (Array.isArray(rawValue)) valuePart = ` ${JSON.stringify(rawValue)}`;
-    else if (rawValue !== undefined && rawValue !== null && String(rawValue) !== "") valuePart = ` "${String(rawValue)}"`;
+    else if (
+      rawValue !== undefined &&
+      rawValue !== null &&
+      String(rawValue) !== ""
+    )
+      valuePart = ` "${String(rawValue)}"`;
   }
   return `${fieldLabel} ${operator}${valuePart}`;
 }
@@ -140,7 +158,10 @@ export function summarizeRule(
   watcherLabels: Record<string, string> = {},
 ): string {
   const conditions = getRuleConditions(rule);
-  const joiner = rule.matchType === "any" ? ` ${__("OR", TEXT_DOMAIN)} ` : ` ${__("AND", TEXT_DOMAIN)} `;
+  const joiner =
+    rule.matchType === "any"
+      ? ` ${__("OR", TEXT_DOMAIN)} `
+      : ` ${__("AND", TEXT_DOMAIN)} `;
   const conditionSummary = conditions.length
     ? conditions
         .map((condition) =>
@@ -161,11 +182,20 @@ export function detectConditionalIssues(
   for (const rule of rules) {
     const conditions = getRuleConditions(rule);
     if (conditions.some((condition) => condition.field === targetFieldName)) {
-      issues.add(__("This rule watches the same field it modifies.", TEXT_DOMAIN));
+      issues.add(
+        __("This rule watches the same field it modifies.", TEXT_DOMAIN),
+      );
     }
-    const uniqueFields = new Set(conditions.map((condition) => condition.field).filter(Boolean));
+    const uniqueFields = new Set(
+      conditions.map((condition) => condition.field).filter(Boolean),
+    );
     if (uniqueFields.size !== conditions.length) {
-      issues.add(__("The same watcher field is used more than once in a single rule.", TEXT_DOMAIN));
+      issues.add(
+        __(
+          "The same watcher field is used more than once in a single rule.",
+          TEXT_DOMAIN,
+        ),
+      );
     }
   }
   return Array.from(issues);

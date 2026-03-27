@@ -22,7 +22,9 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import type { EmailTemplate, WebhookEndpoint } from "../api/types";
+import { t } from "../operations/i18n";
 import MonacoEditor from "./MonacoEditor";
+import { useOperationsComboboxProps } from "./OperationsPortalContext";
 
 const AI_AGENT_TOOL_OPTIONS = [
   {
@@ -119,14 +121,22 @@ const AI_AGENT_RESPONSE_CONSTRAINT_TEMPLATES = {
 function getDefaultAiAgentText(mode: string): string {
   switch (mode) {
     case "summarize":
-      return "Summarize the submission context concisely and highlight the most important points.";
+      return t(
+        "Summarize the submission context concisely and highlight the most important points.",
+      );
     case "classify":
-      return "Classify the submission and explain briefly why that classification fits.";
+      return t(
+        "Classify the submission and explain briefly why that classification fits.",
+      );
     case "extract":
-      return "Extract the requested structured data from the submission and return only supported values.";
+      return t(
+        "Extract the requested structured data from the submission and return only supported values.",
+      );
     case "answer":
     default:
-      return "Answer the request using the submission context and any available knowledge base evidence.";
+      return t(
+        "Answer the request using the submission context and any available knowledge base evidence.",
+      );
   }
 }
 
@@ -291,6 +301,11 @@ export default function StepBuilder({
   webhooks = [],
 }: StepBuilderProps) {
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
+  const comboboxProps = useOperationsComboboxProps(100001);
+  const actionTypeOptions = ACTION_TYPES.map((action) => ({
+    ...action,
+    label: t(action.label),
+  }));
 
   const addStep = () => {
     onChange([
@@ -347,8 +362,8 @@ export default function StepBuilder({
   };
 
   const getStepLabel = (actionType: string) => {
-    return (
-      ACTION_TYPES.find((a) => a.value === actionType)?.label ?? actionType
+    return t(
+      ACTION_TYPES.find((a) => a.value === actionType)?.label ?? actionType,
     );
   };
 
@@ -358,9 +373,9 @@ export default function StepBuilder({
         return (
           <Stack gap="sm">
             <Select
-              label="Email Template"
-              description="Select the template to use for this email"
-              placeholder="Choose a template"
+              label={t("Email Template")}
+              description={t("Select the template to use for this email")}
+              placeholder={t("Choose a template")}
               data={templates.map((t) => ({
                 value: t.templateKey,
                 label: t.name || t.templateKey,
@@ -370,12 +385,12 @@ export default function StepBuilder({
                 updateStepConfig(index, { templateKey: value ?? "" })
               }
               searchable
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <TextInput
-              label="Recipient Email"
-              description="Use {{submission.email}} for submitter's email"
-              placeholder="{{submission.email}}"
+              label={t("Recipient Email")}
+              description={t("Use {{submission.email}} for submitter's email")}
+              placeholder={t("{{submission.email}}")}
               value={String(step.config.recipientEmail ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, {
@@ -384,17 +399,17 @@ export default function StepBuilder({
               }
             />
             <TextInput
-              label="CC (optional)"
-              description="Comma-separated email addresses"
-              placeholder="admin@example.com, manager@example.com"
+              label={t("CC (optional)")}
+              description={t("Comma-separated email addresses")}
+              placeholder={t("admin@example.com, manager@example.com")}
               value={String(step.config.cc ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { cc: e.currentTarget.value })
               }
             />
             <TextInput
-              label="BCC (optional)"
-              placeholder="archive@example.com"
+              label={t("BCC (optional)")}
+              placeholder={t("archive@example.com")}
               value={String(step.config.bcc ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { bcc: e.currentTarget.value })
@@ -407,9 +422,11 @@ export default function StepBuilder({
         return (
           <Stack gap="sm">
             <Select
-              label="Use Webhook Endpoint"
-              description="Select a predefined webhook or leave empty for inline URL"
-              placeholder="Choose webhook endpoint (optional)"
+              label={t("Use Webhook Endpoint")}
+              description={t(
+                "Select a predefined webhook or leave empty for inline URL",
+              )}
+              placeholder={t("Choose webhook endpoint (optional)")}
               data={webhooks.map((w) => ({
                 value: w.webhookKey,
                 label: w.name || w.webhookKey,
@@ -420,12 +437,12 @@ export default function StepBuilder({
               }
               searchable
               clearable
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <TextInput
-              label="Webhook URL (if not using endpoint)"
-              description="The endpoint to send the webhook to"
-              placeholder="https://example.com/api/webhook"
+              label={t("Webhook URL (if not using endpoint)")}
+              description={t("The endpoint to send the webhook to")}
+              placeholder={t("https://example.com/api/webhook")}
               value={String(step.config.url ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { url: e.currentTarget.value })
@@ -433,17 +450,17 @@ export default function StepBuilder({
               disabled={!!step.config.webhookKey}
             />
             <Select
-              label="HTTP Method"
+              label={t("HTTP Method")}
               data={["POST", "PUT", "PATCH", "GET"]}
               value={String(step.config.method ?? "POST")}
               onChange={(value) =>
                 updateStepConfig(index, { method: value ?? "POST" })
               }
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <Textarea
-              label="Request Body (JSON)"
-              description="Use {{submission}} to include submission data"
+              label={t("Request Body (JSON)")}
+              description={t("Use {{submission}} to include submission data")}
               placeholder='{"submission": {{submission}}, "event": "workflow_triggered"}'
               minRows={4}
               value={String(step.config.body ?? "")}
@@ -452,7 +469,7 @@ export default function StepBuilder({
               }
             />
             <Textarea
-              label="Headers (JSON, optional)"
+              label={t("Headers (JSON, optional)")}
               placeholder='{"Authorization": "Bearer token", "Content-Type": "application/json"}'
               minRows={3}
               value={String(step.config.headers ?? "")}
@@ -467,19 +484,19 @@ export default function StepBuilder({
         return (
           <Stack gap="sm">
             <Select
-              label="New Status"
-              description="The status to set on the submission"
+              label={t("New Status")}
+              description={t("The status to set on the submission")}
               data={STATUS_VALUES}
               value={String(step.config.status ?? "")}
               onChange={(value) =>
                 updateStepConfig(index, { status: value ?? "" })
               }
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <TextInput
-              label="Notes (optional)"
-              description="Internal notes to add to the submission"
-              placeholder="Status updated by workflow"
+              label={t("Notes (optional)")}
+              description={t("Internal notes to add to the submission")}
+              placeholder={t("Status updated by workflow")}
               value={String(step.config.notes ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { notes: e.currentTarget.value })
@@ -492,8 +509,8 @@ export default function StepBuilder({
         return (
           <Stack gap="sm">
             <TextInput
-              label="Duration (seconds)"
-              description="How long to wait before the next step"
+              label={t("Duration (seconds)")}
+              description={t("How long to wait before the next step")}
               type="number"
               placeholder="300"
               value={String(step.config.durationSeconds ?? "")}
@@ -504,8 +521,9 @@ export default function StepBuilder({
               }
             />
             <Text size="xs" c="dimmed">
-              Note: Delays are useful for rate limiting or waiting for external
-              processes
+              {t(
+                "Note: Delays are useful for rate limiting or waiting for external processes",
+              )}
             </Text>
           </Stack>
         );
@@ -514,18 +532,20 @@ export default function StepBuilder({
         return (
           <Stack gap="sm">
             <TextInput
-              label="Event Source"
-              description="The source identifier for the event (default: smartcloud.flow)"
-              placeholder="smartcloud.flow"
+              label={t("Event Source")}
+              description={t(
+                "The source identifier for the event (default: smartcloud.flow)",
+              )}
+              placeholder={t("smartcloud.flow")}
               value={String(step.config.source ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { source: e.currentTarget.value })
               }
             />
             <TextInput
-              label="Detail Type"
-              description="The type of event to publish (required)"
-              placeholder="lead.requested"
+              label={t("Detail Type")}
+              description={t("The type of event to publish (required)")}
+              placeholder={t("lead.requested")}
               value={String(step.config.detailType ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { detailType: e.currentTarget.value })
@@ -533,21 +553,21 @@ export default function StepBuilder({
               required
             />
             <TextInput
-              label="Event Bus Name (optional)"
-              description="Leave empty to use default event bus"
-              placeholder="default"
+              label={t("Event Bus Name (optional)")}
+              description={t("Leave empty to use default event bus")}
+              placeholder={t("default")}
               value={String(step.config.eventBusName ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { eventBusName: e.currentTarget.value })
               }
             />
             <Select
-              label="Payload Mode"
-              description="How to construct the event payload"
+              label={t("Payload Mode")}
+              description={t("How to construct the event payload")}
               data={[
-                { value: "full-submission", label: "Full Submission Data" },
-                { value: "custom", label: "Custom Template Only" },
-                { value: "merged", label: "Merged (Submission + Custom)" },
+                { value: "full-submission", label: t("Full Submission Data") },
+                { value: "custom", label: t("Custom Template Only") },
+                { value: "merged", label: t("Merged (Submission + Custom)") },
               ]}
               value={String(step.config.payloadMode ?? "full-submission")}
               onChange={(value) =>
@@ -555,13 +575,13 @@ export default function StepBuilder({
                   payloadMode: value ?? "full-submission",
                 })
               }
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             {(step.config.payloadMode === "custom" ||
               step.config.payloadMode === "merged") && (
               <Textarea
-                label="Custom Payload (JSON)"
-                description="Use {{submission.field}} for dynamic values"
+                label={t("Custom Payload (JSON)")}
+                description={t("Use {{submission.field}} for dynamic values")}
                 placeholder='{\n  "leadEmail": "{{submission.email}}",\n  "leadName": "{{submission.name}}"\n}'
                 minRows={6}
                 value={String(step.config.customPayload ?? "")}
@@ -573,8 +593,8 @@ export default function StepBuilder({
               />
             )}
             <Checkbox
-              label="Include workflow metadata"
-              description="Add workflow ID and step info to event"
+              label={t("Include workflow metadata")}
+              description={t("Add workflow ID and step info to event")}
               checked={Boolean(step.config.includeWorkflowMetadata)}
               onChange={(e) =>
                 updateStepConfig(index, {
@@ -583,8 +603,10 @@ export default function StepBuilder({
               }
             />
             <Checkbox
-              label="Include submission metadata"
-              description="Add submission ID, form ID, status, and timestamps"
+              label={t("Include submission metadata")}
+              description={t(
+                "Add submission ID, form ID, status, and timestamps",
+              )}
               checked={Boolean(step.config.includeSubmissionMetadata)}
               onChange={(e) =>
                 updateStepConfig(index, {
@@ -593,10 +615,12 @@ export default function StepBuilder({
               }
             />
             <Select
-              label="Update Status on Success (optional)"
-              description="Change submission status after successful event publish"
+              label={t("Update Status on Success (optional)")}
+              description={t(
+                "Change submission status after successful event publish",
+              )}
               data={[
-                { value: "", label: "Don't update status" },
+                { value: "", label: t("Don't update status") },
                 ...STATUS_VALUES,
               ]}
               value={String(step.config.statusOnSuccess ?? "")}
@@ -604,29 +628,29 @@ export default function StepBuilder({
                 updateStepConfig(index, { statusOnSuccess: value ?? "" })
               }
               clearable
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <Text size="xs" c="dimmed">
-              💡 This action publishes an event to EventBridge. Configure AWS
-              EventBridge rules in your account to route events to Lambda, Step
-              Functions, or other targets.
+              {t(
+                "This action publishes an event to EventBridge. Configure AWS EventBridge rules in your account to route events to Lambda, Step Functions, or other targets.",
+              )}
             </Text>
           </Stack>
         );
 
-      case "ai.agent":
+      case "ai.agent": {
         const selectedTools = getAiAgentToolNames(step.config);
         const selectedToolChoice = getAiAgentToolChoice(step.config);
         return (
           <Stack gap="sm">
             <Select
-              label="Mode"
-              description="High-level intent passed to the AI agent"
+              label={t("Mode")}
+              description={t("High-level intent passed to the AI agent")}
               data={[
-                { value: "answer", label: "Answer" },
-                { value: "summarize", label: "Summarize" },
-                { value: "classify", label: "Classify" },
-                { value: "extract", label: "Extract structured data" },
+                { value: "answer", label: t("Answer") },
+                { value: "summarize", label: t("Summarize") },
+                { value: "classify", label: t("Classify") },
+                { value: "extract", label: t("Extract structured data") },
               ]}
               value={String(step.config.mode ?? "answer")}
               onChange={(value) => {
@@ -638,11 +662,13 @@ export default function StepBuilder({
                     : { text: getDefaultAiAgentText(nextMode) }),
                 });
               }}
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <Textarea
-              label="Prompt Text"
-              description="Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported."
+              label={t("Prompt Text")}
+              description={t(
+                "Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported.",
+              )}
               placeholder={getDefaultAiAgentText(
                 String(step.config.mode ?? "answer"),
               )}
@@ -654,9 +680,13 @@ export default function StepBuilder({
               required
             />
             <Textarea
-              label="System Prompt"
-              description="Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt."
-              placeholder="You are a support agent. Be concise and cite sources when available."
+              label={t("System Prompt")}
+              description={t(
+                "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.",
+              )}
+              placeholder={t(
+                "You are a support agent. Be concise and cite sources when available.",
+              )}
               minRows={3}
               value={String(step.config.systemPrompt ?? "")}
               onChange={(e) =>
@@ -666,9 +696,11 @@ export default function StepBuilder({
               }
             />
             <TextInput
-              label="Knowledge Base ID (optional)"
-              description="Leave empty to use the backend default KB configuration"
-              placeholder="KB12345678"
+              label={t("Knowledge Base ID (optional)")}
+              description={t(
+                "Leave empty to use the backend default KB configuration",
+              )}
+              placeholder={t("KB12345678")}
               value={String(step.config.knowledgeBaseId ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, {
@@ -677,8 +709,8 @@ export default function StepBuilder({
               }
             />
             <TextInput
-              label="Top K (optional)"
-              description="Maximum retrieved KB chunks"
+              label={t("Top K (optional)")}
+              description={t("Maximum retrieved KB chunks")}
               type="number"
               placeholder="5"
               value={String(step.config.topK ?? "")}
@@ -691,8 +723,8 @@ export default function StepBuilder({
               }
             />
             <Checkbox
-              label="Enable reasoning"
-              description="Enables Bedrock reasoning config for this step."
+              label={t("Enable reasoning")}
+              description={t("Enables Bedrock reasoning config for this step.")}
               checked={Boolean(step.config.enableReasoning)}
               onChange={(e) =>
                 updateStepConfig(index, {
@@ -701,11 +733,11 @@ export default function StepBuilder({
               }
             />
             <Select
-              label="Reasoning Effort"
+              label={t("Reasoning Effort")}
               data={[
-                { value: "low", label: "Low" },
-                { value: "medium", label: "Medium" },
-                { value: "high", label: "High" },
+                { value: "low", label: t("Low") },
+                { value: "medium", label: t("Medium") },
+                { value: "high", label: t("High") },
               ]}
               value={String(step.config.reasoningEffort ?? "low")}
               onChange={(value) =>
@@ -714,19 +746,23 @@ export default function StepBuilder({
                 })
               }
               disabled={!step.config.enableReasoning}
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <Select
-              label="Tool Invocation Policy"
-              description="Controls how Bedrock may use the enabled tools below."
+              label={t("Tool Invocation Policy")}
+              description={t(
+                "Controls how Bedrock may use the enabled tools below.",
+              )}
               data={[
                 {
                   value: "auto",
-                  label: "Auto - model decides if a tool is needed",
+                  label: t("Auto - model decides if a tool is needed"),
                 },
                 {
                   value: "any",
-                  label: "Require tool use - model must use one enabled tool",
+                  label: t(
+                    "Require tool use - model must use one enabled tool",
+                  ),
                 },
               ]}
               value={selectedToolChoice}
@@ -741,17 +777,17 @@ export default function StepBuilder({
                 });
               }}
               disabled={selectedTools.length === 0}
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <Stack gap="xs">
               <Text size="sm" fw={500}>
-                Enabled Tools
+                {t("Enabled Tools")}
               </Text>
               {AI_AGENT_TOOL_OPTIONS.map((tool) => (
                 <Checkbox
                   key={tool.value}
-                  label={tool.label}
-                  description={tool.description}
+                  label={t(tool.label)}
+                  description={t(tool.description)}
                   checked={selectedTools.includes(tool.value)}
                   onChange={(e) => {
                     const nextTools = e.currentTarget.checked
@@ -771,7 +807,7 @@ export default function StepBuilder({
             </Stack>
             <Group gap="xs">
               <Text size="sm" fw={500}>
-                Response Schema Presets
+                {t("Response Schema Presets")}
               </Text>
               <Button
                 size="xs"
@@ -784,7 +820,7 @@ export default function StepBuilder({
                   })
                 }
               >
-                Use preset for current mode
+                {t("Use preset for current mode")}
               </Button>
               <Button
                 size="xs"
@@ -793,17 +829,17 @@ export default function StepBuilder({
                   updateStepConfig(index, { responseConstraint: undefined })
                 }
               >
-                Clear
+                {t("Clear")}
               </Button>
             </Group>
             <Stack gap="xs">
               <Text size="sm" fw={500}>
-                Response Constraint (JSON schema, optional)
+                {t("Response Constraint (JSON schema, optional)")}
               </Text>
               <Text size="xs" c="dimmed">
-                Use a JSON object schema. Invalid JSON stays in the editor until
-                you fix it, and the workflow keeps the draft text instead of
-                discarding it.
+                {t(
+                  "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.",
+                )}
               </Text>
               <MonacoEditor
                 language="json"
@@ -833,16 +869,19 @@ export default function StepBuilder({
               {typeof step.config.responseConstraint === "string" &&
               step.config.responseConstraint.trim() ? (
                 <Text size="xs" c="orange">
-                  The schema is currently invalid JSON. Fix the editor content
-                  before saving.
+                  {t(
+                    "The schema is currently invalid JSON. Fix the editor content before saving.",
+                  )}
                 </Text>
               ) : null}
             </Stack>
             <Select
-              label="Update Status on Dispatch (optional)"
-              description="Change submission status immediately after the AI request event is published"
+              label={t("Update Status on Dispatch (optional)")}
+              description={t(
+                "Change submission status immediately after the AI request event is published",
+              )}
               data={[
-                { value: "", label: "Don't update status" },
+                { value: "", label: t("Don't update status") },
                 ...STATUS_VALUES,
               ]}
               value={String(step.config.statusOnSuccess ?? "")}
@@ -850,22 +889,22 @@ export default function StepBuilder({
                 updateStepConfig(index, { statusOnSuccess: value ?? "" })
               }
               clearable
-              comboboxProps={{ zIndex: 100001 }}
+              comboboxProps={comboboxProps}
             />
             <Text size="xs" c="dimmed">
-              This step emits an `ai.agent.requested` event. The AI backend then
-              emits `ai.agent.completed` or `ai.agent.failed`, which can trigger
-              downstream workflows.
+              {t(
+                "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.",
+              )}
             </Text>
           </Stack>
         );
-
+      }
       case "zapier":
         return (
           <Stack gap="sm">
             <TextInput
-              label="Zapier Webhook URL"
-              description="Get this URL from your Zapier webhook trigger"
+              label={t("Zapier Webhook URL")}
+              description={t("Get this URL from your Zapier webhook trigger")}
               placeholder="https://hooks.zapier.com/hooks/catch/..."
               value={String(step.config.url ?? "")}
               onChange={(e) =>
@@ -874,17 +913,17 @@ export default function StepBuilder({
               required
             />
             <TextInput
-              label="Event Name"
-              description="A friendly name for this event in Zapier"
-              placeholder="New Form Submission"
+              label={t("Event Name")}
+              description={t("A friendly name for this event in Zapier")}
+              placeholder={t("New Form Submission")}
               value={String(step.config.eventName ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { eventName: e.currentTarget.value })
               }
             />
             <Checkbox
-              label="Include full submission data"
-              description="Send all submission fields to Zapier"
+              label={t("Include full submission data")}
+              description={t("Send all submission fields to Zapier")}
               checked={Boolean(step.config.includeFullSubmission ?? true)}
               onChange={(e) =>
                 updateStepConfig(index, {
@@ -893,8 +932,8 @@ export default function StepBuilder({
               }
             />
             <Textarea
-              label="Additional Fields (JSON, optional)"
-              description="Add custom fields to the Zapier payload"
+              label={t("Additional Fields (JSON, optional)")}
+              description={t("Add custom fields to the Zapier payload")}
               placeholder='{\n  "customField": "{{submission.field}}"\n}'
               minRows={4}
               value={String(step.config.additionalFields ?? "")}
@@ -905,8 +944,9 @@ export default function StepBuilder({
               }
             />
             <Text size="xs" c="dimmed">
-              ⚡ Zapier webhook calls are made with POST method and
-              application/json content type.
+              {t(
+                "Zapier webhook calls are made with POST method and application/json content type.",
+              )}
             </Text>
           </Stack>
         );
@@ -914,7 +954,7 @@ export default function StepBuilder({
       default:
         return (
           <Textarea
-            label="Configuration (JSON)"
+            label={t("Configuration (JSON)")}
             minRows={6}
             value={JSON.stringify(step.config, null, 2)}
             onChange={(e) => {
@@ -934,33 +974,34 @@ export default function StepBuilder({
     <Stack gap="md">
       <Group justify="space-between">
         <Text size="sm" fw={500}>
-          Workflow Steps
+          {t("Workflow Steps")}
         </Text>
         <Button
           size="xs"
           leftSection={<IconPlus size={14} />}
           onClick={addStep}
         >
-          Add Step
+          {t("Add Step")}
         </Button>
       </Group>
 
       {steps.length === 0 ? (
         <Text size="sm" c="dimmed">
-          No steps configured - add a step to define what happens when the
-          workflow triggers
+          {t(
+            "No steps configured - add a step to define what happens when the workflow triggers",
+          )}
         </Text>
       ) : (
         <Stack gap="sm">
           {steps.map((step, index) => (
-            <Card key={index} withBorder p="md">
+            <Card key={index} withBorder p="md" style={{ overflow: "visible" }}>
               <Stack gap="sm">
                 <Group justify="space-between" wrap="nowrap">
                   <Group gap="xs">
                     <IconGripVertical size={16} color="gray" />
                     {getStepIcon(step.actionType)}
                     <Text size="sm" fw={500}>
-                      Step {index + 1}: {getStepLabel(step.actionType)}
+                      {t("Step")} {index + 1}: {getStepLabel(step.actionType)}
                     </Text>
                   </Group>
                   <Group gap="xs">
@@ -993,8 +1034,8 @@ export default function StepBuilder({
                 </Group>
 
                 <Select
-                  label="Action Type"
-                  data={ACTION_TYPES}
+                  label={t("Action Type")}
+                  data={actionTypeOptions}
                   value={step.actionType}
                   onChange={(value) =>
                     updateStep(index, {
@@ -1002,13 +1043,13 @@ export default function StepBuilder({
                       config: getDefaultStepConfig(value ?? "email.send"),
                     })
                   }
-                  comboboxProps={{ zIndex: 100001 }}
+                  comboboxProps={comboboxProps}
                 />
 
                 {renderStepConfig(step, index)}
 
                 <Checkbox
-                  label="Enable retry on failure"
+                  label={t("Enable retry on failure")}
                   checked={Boolean(step.retryPolicy)}
                   onChange={(e) =>
                     updateStep(index, {
@@ -1022,7 +1063,7 @@ export default function StepBuilder({
                 {step.retryPolicy && (
                   <Group>
                     <TextInput
-                      label="Max Attempts"
+                      label={t("Max Attempts")}
                       type="number"
                       style={{ flex: 1 }}
                       value={step.retryPolicy.maxAttempts ?? 3}
@@ -1036,7 +1077,7 @@ export default function StepBuilder({
                       }
                     />
                     <TextInput
-                      label="Backoff Multiplier"
+                      label={t("Backoff Multiplier")}
                       type="number"
                       style={{ flex: 1 }}
                       value={step.retryPolicy.backoffMultiplier ?? 2}

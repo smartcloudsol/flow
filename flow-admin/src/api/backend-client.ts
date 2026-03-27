@@ -34,6 +34,10 @@ export class FlowBackendClient {
     return this.request(`/forms?${query}`);
   }
 
+  getForm(formId: string): Promise<FormDefinition> {
+    return this.request(`/forms/${formId}`);
+  }
+
   listSiteSubmissions(
     query: SubmissionListQuery,
   ): Promise<ListResponse<Submission>> {

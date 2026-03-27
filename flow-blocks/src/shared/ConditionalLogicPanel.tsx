@@ -32,6 +32,13 @@ import type {
   FieldConfig,
 } from "./types";
 
+interface EditorBlockNode {
+  clientId: string;
+  name: string;
+  attributes: Record<string, unknown>;
+  innerBlocks?: EditorBlockNode[];
+}
+
 interface Props<T extends ConditionalAttributes = ConditionalAttributes> {
   attributes: T;
   setAttributes: (next: Partial<T>) => void;
@@ -88,6 +95,45 @@ function createRule(): ConditionalRule {
   };
 }
 
+function createSyntheticFieldConfig(
+  type: FieldConfig["type"],
+  name: string,
+  label: string,
+): FieldConfig {
+  return {
+    id: name,
+    type,
+    name,
+    label,
+  } as FieldConfig;
+}
+
+function flattenBlocks(blocks: EditorBlockNode[]): EditorBlockNode[] {
+  return blocks.flatMap((block) => [
+    block,
+    ...flattenBlocks(block.innerBlocks || []),
+  ]);
+}
+
+function findFormScopeRootId(
+  clientId: string,
+  getBlockRootClientId: (clientId: string) => string | null,
+): string | undefined {
+  let scopeRootId: string | undefined;
+  let currentClientId: string | null = clientId;
+
+  while (currentClientId) {
+    const parentId = getBlockRootClientId(currentClientId);
+    if (!parentId) {
+      break;
+    }
+    scopeRootId = parentId;
+    currentClientId = parentId;
+  }
+
+  return scopeRootId;
+}
+
 export function ConditionalLogicPanel<
   T extends ConditionalAttributes = ConditionalAttributes,
 >({ attributes, setAttributes, clientId, allowedActions }: Props<T>) {
@@ -109,18 +155,17 @@ export function ConditionalLogicPanel<
   const blocks = useSelect(
     (select) => {
       const { getBlocks, getBlockRootClientId } = select(blockEditorStore);
-      const rootId = getBlockRootClientId(clientId);
-      return getBlocks(rootId || undefined);
+      const scopeRootId = findFormScopeRootId(clientId, getBlockRootClientId);
+
+      return getBlocks(scopeRootId || undefined) as EditorBlockNode[];
     },
     [clientId],
-  ) as Array<{
-    clientId: string;
-    name: string;
-    attributes: Record<string, unknown>;
-  }>;
+  );
 
   const availableFields = useMemo(() => {
-    const namedFields = blocks
+    const flattenedBlocks = flattenBlocks(blocks || []);
+
+    const namedFields = flattenedBlocks
       .filter(
         (block) =>
           block.clientId !== clientId &&
@@ -138,7 +183,7 @@ export function ConditionalLogicPanel<
         } as FieldConfig,
       }));
 
-    const hasAiSuggestions = blocks.some(
+    const hasAiSuggestions = flattenedBlocks.some(
       (block) => block.name === "smartcloud-flow/ai-suggestions",
     );
 
@@ -151,65 +196,65 @@ export function ConditionalLogicPanel<
       {
         label: __("AI suggestions status", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.status,
-        field: {
-          type: "text",
-          name: AI_SUGGESTION_WATCHER_KEYS.status,
-          label: __("AI suggestions status", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "text",
+          AI_SUGGESTION_WATCHER_KEYS.status,
+          __("AI suggestions status", TEXT_DOMAIN),
+        ),
       },
       {
         label: __("AI suggestions accepted", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.accepted,
-        field: {
-          type: "switch",
-          name: AI_SUGGESTION_WATCHER_KEYS.accepted,
-          label: __("AI suggestions accepted", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "switch",
+          AI_SUGGESTION_WATCHER_KEYS.accepted,
+          __("AI suggestions accepted", TEXT_DOMAIN),
+        ),
       },
       {
         label: __("AI suggestions rejected", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.rejected,
-        field: {
-          type: "switch",
-          name: AI_SUGGESTION_WATCHER_KEYS.rejected,
-          label: __("AI suggestions rejected", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "switch",
+          AI_SUGGESTION_WATCHER_KEYS.rejected,
+          __("AI suggestions rejected", TEXT_DOMAIN),
+        ),
       },
       {
         label: __("AI suggestions already ran", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.ran,
-        field: {
-          type: "switch",
-          name: AI_SUGGESTION_WATCHER_KEYS.ran,
-          label: __("AI suggestions already ran", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "switch",
+          AI_SUGGESTION_WATCHER_KEYS.ran,
+          __("AI suggestions already ran", TEXT_DOMAIN),
+        ),
       },
       {
         label: __("AI suggestion count", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.suggestionCount,
-        field: {
-          type: "number",
-          name: AI_SUGGESTION_WATCHER_KEYS.suggestionCount,
-          label: __("AI suggestion count", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "number",
+          AI_SUGGESTION_WATCHER_KEYS.suggestionCount,
+          __("AI suggestion count", TEXT_DOMAIN),
+        ),
       },
       {
         label: __("Selected AI suggestion ID", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.selectedSuggestionId,
-        field: {
-          type: "text",
-          name: AI_SUGGESTION_WATCHER_KEYS.selectedSuggestionId,
-          label: __("Selected AI suggestion ID", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "text",
+          AI_SUGGESTION_WATCHER_KEYS.selectedSuggestionId,
+          __("Selected AI suggestion ID", TEXT_DOMAIN),
+        ),
       },
       {
         label: __("AI sources used", TEXT_DOMAIN),
         value: AI_SUGGESTION_WATCHER_KEYS.sourcesUsed,
-        field: {
-          type: "switch",
-          name: AI_SUGGESTION_WATCHER_KEYS.sourcesUsed,
-          label: __("AI sources used", TEXT_DOMAIN),
-        } as FieldConfig,
+        field: createSyntheticFieldConfig(
+          "switch",
+          AI_SUGGESTION_WATCHER_KEYS.sourcesUsed,
+          __("AI sources used", TEXT_DOMAIN),
+        ),
       },
     ];
   }, [blocks, clientId]);

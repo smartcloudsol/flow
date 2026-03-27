@@ -3,6 +3,7 @@ export const FORM_CHILD_BLOCKS = [
   "smartcloud-flow/textarea-field",
   "smartcloud-flow/select-field",
   "smartcloud-flow/checkbox-field",
+  "smartcloud-flow/checkbox-group-field",
   "smartcloud-flow/date-field",
   "smartcloud-flow/switch-field",
   "smartcloud-flow/number-field",

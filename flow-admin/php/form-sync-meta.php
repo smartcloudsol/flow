@@ -39,11 +39,15 @@ class FormSyncMeta
      * Set backend formId for a post
      * 
      * @param int $post_id
-     * @param string $formId
+     * @param string|null $formId
      * @return bool
      */
-    public static function setFormId(int $post_id, string $formId): bool
+    public static function setFormId(int $post_id, ?string $formId): bool
     {
+        if ($formId === null) {
+            return delete_post_meta($post_id, self::META_FORM_ID);
+        }
+
         Logger::debug('Setting form backend sync ID', [
             'post_id' => $post_id,
             'formId' => $formId
@@ -68,11 +72,15 @@ class FormSyncMeta
      * Set sync hash
      * 
      * @param int $post_id
-     * @param string $hash
+     * @param string|null $hash
      * @return bool
      */
-    public static function setSyncHash(int $post_id, string $hash): bool
+    public static function setSyncHash(int $post_id, ?string $hash): bool
     {
+        if ($hash === null) {
+            return delete_post_meta($post_id, self::META_SYNC_HASH);
+        }
+
         return update_post_meta($post_id, self::META_SYNC_HASH, $hash);
     }
 
@@ -121,11 +129,15 @@ class FormSyncMeta
      * Set last synced timestamp
      * 
      * @param int $post_id
-     * @param string $timestamp ISO 8601 timestamp
+     * @param string|null $timestamp ISO 8601 timestamp
      * @return bool
      */
-    public static function setLastSynced(int $post_id, string $timestamp): bool
+    public static function setLastSynced(int $post_id, ?string $timestamp): bool
     {
+        if ($timestamp === null) {
+            return delete_post_meta($post_id, self::META_LAST_SYNCED);
+        }
+
         return update_post_meta($post_id, self::META_LAST_SYNCED, $timestamp);
     }
 
@@ -179,11 +191,15 @@ class FormSyncMeta
      * Set source kind
      * 
      * @param int $post_id
-     * @param string $kind
+     * @param string|null $kind
      * @return bool
      */
-    public static function setSourceKind(int $post_id, string $kind): bool
+    public static function setSourceKind(int $post_id, ?string $kind): bool
     {
+        if ($kind === null) {
+            return delete_post_meta($post_id, self::META_SOURCE_KIND);
+        }
+
         return update_post_meta($post_id, self::META_SOURCE_KIND, $kind);
     }
 
