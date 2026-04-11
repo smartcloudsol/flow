@@ -9,6 +9,8 @@ import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import { GROUP_WRAP_OPTIONS } from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { ConditionalAttributes } from "../shared/types";
 
 interface GroupFieldAttributes extends ConditionalAttributes {
@@ -16,6 +18,8 @@ interface GroupFieldAttributes extends ConditionalAttributes {
   align?: string;
   justify?: string;
   grow?: boolean;
+  preventGrowOverflow?: boolean;
+  wrap?: "wrap" | "nowrap";
 }
 
 const GAP_OPTIONS = [
@@ -89,11 +93,14 @@ export default function Edit({
             onChange={(justify) => setAttributes({ justify })}
             help={__("Horizontal alignment of grouped items.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Grow children", TEXT_DOMAIN)}
-            checked={attributes.grow}
-            onChange={(grow) => setAttributes({ grow })}
-            help={__("Make children take equal width.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Wrap", TEXT_DOMAIN)}
+            value={attributes.wrap ?? "wrap"}
+            options={GROUP_WRAP_OPTIONS}
+            onChange={(wrap) =>
+              setAttributes({ wrap: wrap as GroupFieldAttributes["wrap"] })
+            }
+            help={__("Allows items to wrap onto multiple lines.", TEXT_DOMAIN)}
           />
 
           <ToggleControl
@@ -101,6 +108,30 @@ export default function Edit({
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+
+          <ToggleSettingsSection
+            visibleCount={1}
+            items={[
+              {
+                key: "grow",
+                label: __("Grow children", TEXT_DOMAIN),
+                checked: Boolean(attributes.grow),
+                onChange: (grow) => setAttributes({ grow }),
+                help: __("Make children take equal width.", TEXT_DOMAIN),
+              },
+              {
+                key: "preventGrowOverflow",
+                label: __("Prevent grow overflow", TEXT_DOMAIN),
+                checked: attributes.preventGrowOverflow ?? true,
+                onChange: (preventGrowOverflow) =>
+                  setAttributes({ preventGrowOverflow }),
+                help: __(
+                  "Keep wide children from overflowing when grow is enabled.",
+                  TEXT_DOMAIN,
+                ),
+              },
+            ]}
           />
         </PanelBody>
         <ConditionalLogicPanel

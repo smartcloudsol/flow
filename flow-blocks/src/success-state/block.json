@@ -18,5 +18,5 @@
     "html": false,
     "reusable": false
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

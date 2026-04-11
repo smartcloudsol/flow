@@ -1,68 +1,37 @@
 export const koDict: Record<string, string> = {
   "A descriptive name for the workflow": "워크플로를 설명하는 이름",
-  "A descriptive name for this webhook endpoint":
-    "이 웹훅 엔드포인트에 대한 설명적인 이름",
-  "A friendly name for this event in Zapier":
-    "Zapier에서 이 이벤트를 부르는 친근한 이름",
   Accepted: "수락됨",
-  "Action Invoked - When a manual action is triggered":
-    "동작 발생 - 수동 동작이 트리거될 때",
   "Action invoked successfully": "작업이 성공적으로 실행되었습니다.",
+  "Action Key": "작업 키",
   "Action Type": "액션 유형",
   Actions: "작업",
   Actor: "수행자",
   "Add Condition": "조건 추가",
-  "Add custom fields to the Zapier payload":
-    "Zapier 페이로드에 사용자 정의 필드를 추가하세요",
   "Add Event": "이벤트 추가",
   "Add Header": "헤더 추가",
   "Add Step": "단계 추가",
-  "Add submission ID, form ID, status, and timestamps":
-    "제출 ID, 양식 ID, 상태 및 타임스탬프를 추가하세요.",
-  "Add workflow ID and step info to event":
-    "이벤트에 워크플로 ID와 단계 정보를 추가합니다.",
   "Additional Fields (JSON, optional)": "추가 필드(JSON 형식, 선택 사항)",
-  "admin@example.com, manager@example.com":
-    "admin@example.com, manager@example.com",
+  Advanced: "고급",
+  "Advanced automation entities": "고급 자동화 엔터티",
   "AI Agent": "AI 에이전트",
-  "AI Agent Completed - After AI processing finishes":
-    "AI 에이전트 완료 - AI 처리가 완료된 후",
-  "AI Agent Failed - When AI processing errors":
-    "AI 에이전트 오류 발생 - AI 처리 오류 발생 시",
   "AI Suggestions": "AI 추천",
   "All forms": "모든 양식",
-  "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or transformations.":
-    "모델이 계산이나 변환을 위해 샌드박스 환경에서 실행되는 간단한 JavaScript 표현식을 평가할 수 있도록 허용합니다.",
-  "Allow the model to fetch and ground answers from explicit HTTPS URLs.":
-    "모델이 명시적인 HTTPS URL에서 응답을 가져오고 검증할 수 있도록 허용합니다.",
   "Always run when the trigger matches": "트리거가 일치할 때 항상 실행됩니다.",
   Answer: "답변",
-  "Answer the request using the submission context and any available knowledge base evidence.":
-    "제출 맥락과 사용 가능한 지식 기반 증거를 활용하여 요청에 답변하십시오.",
   Any: "임의",
   "Appears in:": "표시 위치:",
   "archive@example.com": "archive@example.com",
-  "Auto - model decides if a tool is needed":
-    "자동 모델은 도구가 필요한지 여부를 결정합니다.",
   "Automated Workflows": "자동화된 워크플로",
-  "Backoff multiplier": "백오프 승수",
   "Backoff Multiplier": "백오프 승수",
+  "Backoff multiplier": "백오프 승수",
   "BCC (optional)": "BCC (선택 사항)",
   "Call Webhook": "웹훅 호출",
   Cancel: "취소",
   "CC (optional)": "CC (선택 사항)",
-  "Change submission status after successful event publish":
-    "이벤트 게시 성공 후 제출 상태 변경",
-  "Change submission status immediately after the AI request event is published":
-    "AI 요청 이벤트가 게시된 직후 제출 상태를 즉시 변경하세요.",
-  "Choose a form to see field-specific template variables":
-    "양식1을 선택하여 필드별 템플릿 변수를 확인하세요.",
   "Choose a template": "템플릿을 선택하세요",
   "Choose webhook endpoint (optional)":
     "웹훅 엔드포인트를 선택하세요(선택 사항).",
   Classify: "나누다",
-  "Classify the submission and explain briefly why that classification fits.":
-    "제출물을 분류하고 해당 분류가 적합한 이유를 간략하게 설명하십시오.",
   Clear: "지우기",
   Code: "암호",
   "Code Interpreter": "코드 인터프리터",
@@ -73,16 +42,9 @@ export const koDict: Record<string, string> = {
   Condition: "상태",
   "Configuration (JSON)": "구성(JSON)",
   Contains: "포함됨",
-  "Controls how Bedrock may use the enabled tools below.":
-    "Bedrock에서 아래에 활성화된 도구를 사용하는 방식을 제어합니다.",
-  "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.":
-    "자동 응답 및 워크플로 알림을 위한 이메일 템플릿을 생성하고 관리하세요. 템플릿은 동적 콘텐츠 작성을 위해 Handlebars 구문을 지원합니다.",
-  "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.":
-    "양식 제출 시 실행되는 자동화된 워크플로를 생성하세요. 워크플로는 이메일 전송, HTTP 요청 수행, 조건부 로직 실행 등을 수행할 수 있습니다.",
   Created: "생성됨",
   "Created At": "제작일:",
-  "CRUD and preview follow the OpenAPI contract directly: list responses return items, create/update return the full template object, and preview returns subject, htmlBody, and textBody.":
-    "CRUD 및 미리보기는 OpenAPI 계약을 직접 따릅니다. 목록 응답은 항목을 반환하고, 생성/업데이트는 전체 템플릿 객체를 반환하며, 미리보기는 제목, HTML 본문 및 텍스트 본문을 반환합니다.",
+  "CRM lead intake webhook": "CRM 리드 접수 웹훅",
   "Current submission status": "현재 제출 상태",
   "Current webhook payload": "현재 웹훅 페이로드",
   "Current workflow payload": "현재 워크플로 페이로드",
@@ -92,6 +54,7 @@ export const koDict: Record<string, string> = {
   default: "기본",
   "Delay/Wait": "지연/대기",
   Delete: "삭제",
+  "Delete step": "단계 삭제",
   "Delete submission": "제출물 삭제",
   "Delete template": "템플릿 삭제",
   "Delete webhook endpoint": "웹훅 엔드포인트 삭제",
@@ -115,18 +78,14 @@ export const koDict: Record<string, string> = {
   "Edit Template Variable": "편집 템플릿 변수",
   Email: "이메일",
   "Email associated with submission": "제출과 관련된 이메일",
-  "Email subject line (Handlebars variables supported)":
-    "이메일 제목 (핸들바 변수 지원)",
   "Email Template": "이메일 템플릿",
-  "Email templates": "이메일 템플릿",
   "Email Templates": "이메일 템플릿",
+  "Email templates": "이메일 템플릿",
   "en, hu, de": "en, hu, de",
   "Enable reasoning": "추론 기능을 활성화합니다",
   "Enable retry on failure": "실패 시 재시도 기능을 활성화합니다.",
   Enabled: "활성화됨",
   "Enabled Tools": "활성화된 도구",
-  "Enables Bedrock reasoning config for this step.":
-    "이 단계에 대한 Bedrock 추론 구성을 활성화합니다.",
   "Ends With": "끝맺음",
   Engine: "엔진",
   Equals: "동등하다",
@@ -135,18 +94,14 @@ export const koDict: Record<string, string> = {
   "Event Name": "이벤트 이름",
   "Event Source": "이벤트 소스",
   "Event timeline": "이벤트 타임라인",
+  "Event Type": "이벤트 유형",
   "EventBridge Event": "이벤트브리지 이벤트",
   Events: "이벤트",
-  "Exponential backoff factor (2 = double delay each retry)":
-    "지수적 백오프 계수(2 = 재시도할 때마다 지연 시간 두 배)",
   "Extract structured data": "구조화된 데이터 추출",
-  "Extract the requested structured data from the submission and return only supported values.":
-    "제출된 데이터에서 요청된 구조화된 데이터를 추출하고 지원되는 값만 반환합니다.",
+  "Failed to create linked entity": "연결된 엔터티를 생성하지 못했습니다",
   "Failed to load template": "템플릿을 불러오는 데 실패했습니다.",
   Field: "필드",
   "Flow Operations": "흐름 작업",
-  "For status-based workflows, choose whether the workflow should run every time the matching status is reached, or only the first time per submission.":
-    "상태 기반 워크플로의 경우, 일치하는 상태에 도달할 때마다 워크플로를 실행할지, 아니면 제출 건당 처음 한 번만 실행할지 선택합니다.",
   Form: "양식",
   "Form field:": "양식 필드:",
   "Form ID": "양식 ID",
@@ -156,11 +111,7 @@ export const koDict: Record<string, string> = {
   "From email": "보낸 사람 이메일",
   "From name": "보낸 사람 이름",
   "Full Submission Data": "전체 제출 데이터",
-  "Get this URL from your Zapier webhook trigger":
-    "Zapier 웹훅 트리거에서 이 URL을 가져오세요.",
   "Greater Than": "보다 큰",
-  "has an invalid Response Constraint JSON schema.":
-    "응답 제약 조건 JSON 스키마가 유효하지 않습니다.",
   "Header name": "헤더 이름",
   "Header value": "헤더 값",
   Headers: "헤더",
@@ -168,12 +119,6 @@ export const koDict: Record<string, string> = {
   Hide: "숨다",
   "Hide details": "세부 정보 숨기기",
   High: "높은",
-  "High-level intent passed to the AI agent":
-    "상위 수준의 의도가 AI 에이전트에 전달되었습니다.",
-  "How long to wait before the next step":
-    "다음 단계로 넘어가기까지 얼마나 기다려야 하나요?",
-  "How many times to retry failed deliveries":
-    "배송 실패 시 재시도 횟수는 몇 회입니까?",
   "How to construct the event payload": "이벤트 페이로드를 구성하는 방법",
   "HTML body": "HTML 본문",
   "HTTP Method": "HTTP 메서드",
@@ -183,9 +128,6 @@ export const koDict: Record<string, string> = {
   "Include workflow metadata": "워크플로 메타데이터를 포함합니다",
   "Insert Variable": "변수 삽입",
   "Internal notes": "내부 메모",
-  "Internal notes to add to the submission": "제출물에 추가할 내부 메모",
-  "Internal tags for categorization and filtering":
-    "분류 및 필터링용 내부 태그",
   "Internal updates": "내부 업데이트",
   "Is Empty": "비어 있음",
   "Is Not Empty": "비어있지 않음",
@@ -197,10 +139,6 @@ export const koDict: Record<string, string> = {
   "Language code": "언어 코드",
   "lead.requested": "리드 요청됨",
   "Leave empty to disable signing": "서명 기능을 비활성화하려면 비워 두십시오.",
-  "Leave empty to use default event bus":
-    "기본 이벤트 버스를 사용하려면 비워 두십시오.",
-  "Leave empty to use the backend default KB configuration":
-    "백엔드의 기본 KB 구성을 사용하려면 비워 두십시오.",
   "Less Than": "미만",
   loaded: "짐을 실은",
   "Loading editor...": "에디터 로딩 중...",
@@ -208,14 +146,12 @@ export const koDict: Record<string, string> = {
   "Loading…": "로딩 중…",
   Locale: "장소",
   Low: "낮은",
-  "Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported.":
-    "메인 사용자 프롬프트입니다. 이는 런타임에 필수적입니다. {{submission.email}}과 같은 템플릿이 지원됩니다.",
   "Manual workflow actions": "수동 워크플로 작업",
   "Mark completed": "마크가 완료했습니다",
   "Mark resolved": "Mark가 해결했습니다",
   "Mark seen": "마크가 봤어요",
-  "Max attempts": "최대 시도 횟수",
   "Max Attempts": "최대 시도 횟수",
+  "Max attempts": "최대 시도 횟수",
   "Maximum retrieved KB chunks": "최대 검색된 KB 청크",
   Medium: "중간",
   "Merged (Submission + Custom)": "병합됨(제출 + 사용자 지정)",
@@ -231,88 +167,54 @@ export const koDict: Record<string, string> = {
   "New webhook": "새로운 웹훅",
   "New workflow": "새로운 워크플로",
   No: "아니요",
-  "No conditions set - workflow will run on every trigger event":
-    "조건이 설정되지 않았습니다. 워크플로는 모든 트리거 이벤트 발생 시 실행됩니다.",
   "No data": "데이터 없음",
-  "No enabled manual actions were found for the current submission status.":
-    "현재 제출 상태에 대해 활성화된 수동 작업이 없습니다.",
   "No events configured": "구성된 이벤트가 없습니다.",
-  "No events returned for this submission.":
-    "이번 제출에 대한 이벤트가 반환되지 않았습니다.",
   "No headers configured": "헤더가 구성되지 않았습니다.",
   "No metadata": "메타데이터 없음",
-  "No steps configured - add a step to define what happens when the workflow triggers":
-    "구성된 단계가 없습니다. 워크플로가 시작될 때 수행할 작업을 정의하는 단계를 추가하세요.",
   "noreply@example.com": "noreply@example.com",
   "Not Contains": "포함되지 않음",
   "Not Equals": "같지 않음",
   "Not used": "사용하지 않음",
-  "Note: All conditions must be satisfied (AND logic)":
-    "참고: 모든 조건이 충족되어야 합니다(AND 논리).",
-  "Note: Delays are useful for rate limiting or waiting for external processes":
-    "참고: 지연은 속도 제한이나 외부 프로세스 대기 등에 유용합니다.",
   "Notes (optional)": "참고 (선택 사항)",
   "Open in new tab": "새 탭에서 열기",
   Operator: "연산자",
-  "Optional description of this email template's purpose":
-    "이 이메일 템플릿의 용도에 대한 선택 설명",
-  "Optional description of what this webhook is used for":
-    "이 웹훅의 용도에 대한 선택적 설명입니다.",
-  "Optional description of what this workflow does":
-    "이 워크플로의 기능에 대한 선택적 설명입니다.",
-  "Optional secret for HMAC signature verification":
-    "HMAC 서명 검증을 위한 선택적 비밀 키",
-  "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.":
-    "선택 사항입니다. 이 필드를 비워두면 AI 백엔드에서 내장된 답변 템플릿/시스템 프롬프트를 사용합니다.",
+  "Order confirmation email": "주문 확인 이메일",
   Other: "다른",
   "Payload Mode": "페이로드 모드",
   "Press Enter to add a tag": "태그를 추가하려면 Enter 키를 누르세요.",
   Preview: "시사",
   Primary: "주요한",
-  "Primary label": "기본 라벨",
   "Primary Label": "기본 라벨",
-  "Private notes visible only to administrators":
-    "관리자에게만 표시되는 비공개 메모",
+  "Primary label": "기본 라벨",
   "PRO Feature": "PRO 기능",
+  "Process Maps": "프로세스 맵",
+  "Process-map step triggers": "프로세스 맵 단계 트리거",
   "Prompt Text": "프롬프트 텍스트",
   Ran: "란",
   "Reasoning Effort": "추론 노력",
   "Recipient Email": "수신자 이메일",
-  "Reference form (for field suggestions)": "참고 양식 (현장 제안용)",
   "Rendered preview": "렌더링된 미리보기",
+  "Rendering model": "렌더링 모델",
   "Repeat policy": "반복 정책",
   "Reply address": "회신 주소",
   "Reply-to": "답장하기",
   "Request Body (JSON)": "요청 본문(JSON)",
-  "Require tool use - model must use one enabled tool":
-    "도구 사용 필수 - 모델은 활성화된 도구 중 하나를 사용해야 합니다.",
-  "Response Constraint (JSON schema, optional)":
-    "응답 제약 조건(JSON 스키마, 선택 사항)",
   "Response Schema Presets": "응답 스키마 사전 설정",
-  "Return a server-side fallback when the model asks for interactive browser or desktop control.":
-    "모델이 대화형 브라우저 또는 데스크톱 제어를 요청할 경우 서버 측 대체 응답을 반환합니다.",
   "Reviewed / Continued": "검토됨 / 계속",
   "Run action": "작업 실행",
   "Run manual workflow action": "수동 워크플로 작업 실행",
-  "Run only the first time per submission":
-    "제출 건당 첫 번째 실행만 가능합니다.",
   Save: "구하다",
   "Save internal fields": "내부 필드를 저장합니다",
   "Save template": "템플릿 저장",
   "Save webhook": "웹훅을 저장하세요",
   "Save workflow": "워크플로 저장",
+  "Screen structure": "화면 구조",
   Search: "찾다",
   "Select a form to see its fields": "양식을 선택하여 해당 필드를 확인하세요.",
-  "Select a predefined webhook or leave empty for inline URL":
-    "미리 정의된 웹훅을 선택하거나, 인라인 URL을 사용하려면 비워 두십시오.",
   "Select date": "날짜를 선택하세요",
   "Select form": "양식을 선택하세요",
-  "Select the template to use for this email":
-    "이 이메일에 사용할 템플릿을 선택하세요.",
   Selected: "선택된",
   "Selected suggestion ID": "선택된 제안 ID",
-  "Send all submission fields to Zapier":
-    "모든 제출 필드를 Zapier로 전송합니다.",
   "Send Email": "이메일 보내기",
   "Sender display name": "발신자 표시 이름",
   "Sender email address": "발신자 이메일 주소",
@@ -321,31 +223,28 @@ export const koDict: Record<string, string> = {
   "Signing secret": "서명 비밀",
   "Site Name": "사이트 이름",
   "smartcloud.flow": "스마트클라우드.플로우",
+  "Source Channel": "소스 채널",
+  "Source System": "소스 시스템",
   "Sources used": "참고 자료",
   "Starts With": "~로 시작합니다",
   Status: "상태",
   "Status updated by workflow": "워크플로에 의해 상태가 업데이트되었습니다.",
   Step: "단계",
+  "Step for workflow": "워크플로용 단계",
   Steps: "단계",
   Subject: "제목",
   Submission: "제출",
-  "Submission Created - When a new form is submitted":
-    "제출 완료 - 새 양식이 제출될 때",
   "Submission creation date": "제출물 생성일",
   "Submission Data": "제출 데이터",
   "Submission deleted": "제출물이 삭제되었습니다",
   "Submission Email": "제출 이메일",
   "Submission Fields": "제출 필드",
   "Submission updated": "제출 내용이 업데이트되었습니다.",
-  "Submission Updated - When submission status or fields change":
-    "제출 상태 또는 입력 항목이 변경될 때 제출 업데이트됨",
   "submission.fields.name": "제출 필드 이름",
   Submissions: "제출물",
   "Submitted fields": "제출된 필드",
   Suggestions: "제안",
   Summarize: "요약하다",
-  "Summarize the submission context concisely and highlight the most important points.":
-    "제출물의 맥락을 간결하게 요약하고 가장 중요한 요점을 강조하십시오.",
   Summary: "요약",
   "support@example.com": "support@example.com",
   "System Prompt": "시스템 프롬프트",
@@ -357,81 +256,38 @@ export const koDict: Record<string, string> = {
   "Template key": "템플릿 키",
   "Template saved": "템플릿이 저장되었습니다",
   "Text body": "본문",
-  "Thank you {{fullName}} for your submission":
-    "제출해 주셔서 감사합니다, {{fullName}}님.",
   "The endpoint to send the webhook to": "웹훅을 보낼 엔드포인트",
-  "The endpoint where webhook events will be sent":
-    "웹훅 이벤트가 전송될 엔드포인트",
-  "The schema is currently invalid JSON. Fix the editor content before saving.":
-    "현재 스키마는 유효하지 않은 JSON 형식입니다. 저장하기 전에 편집기 내용을 수정하세요.",
-  "The source identifier for the event (default: smartcloud.flow)":
-    "이벤트의 소스 식별자(기본값: smartcloud.flow)",
   "The status to set on the submission": "제출물에 설정할 상태",
-  "The type of event to publish (required)": "게시할 이벤트 유형 (필수)",
-  "The workflow screen now also includes webhook endpoint management because the backend exposes both /admin/workflows and /admin/webhook-endpoints as first-class admin resources.":
-    "이제 워크플로 화면에는 웹훅 엔드포인트 관리 기능도 포함됩니다. 백엔드에서 /admin/workflows와 /admin/webhook-endpoints를 모두 관리자 리소스로 직접 제공하기 때문입니다.",
-  "This action publishes an event to EventBridge. Configure AWS EventBridge rules in your account to route events to Lambda, Step Functions, or other targets.":
-    "이 작업은 EventBridge에 이벤트를 게시합니다. AWS EventBridge 계정의 규칙을 구성하여 이벤트를 Lambda, Step Functions 또는 기타 대상으로 라우팅할 수 있습니다.",
-  "This feature is available in the PRO version of the plugin.":
-    "이 기능은 플러그인의 PRO 버전에서 사용할 수 있습니다.",
-  "This site is not connected to a backend workspace yet.":
-    "이 사이트는 아직 백엔드 워크스페이스에 연결되어 있지 않습니다.",
-  "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.":
-    "이 단계에서는 `ai.agent.requested` 이벤트가 발생합니다. 그러면 AI 백엔드는 `ai.agent.completed` 또는 `ai.agent.failed` 이벤트를 발생시키며, 이는 하위 워크플로를 트리거할 수 있습니다.",
-  "This submission does not contain AI suggestion analytics metadata.":
-    "이 제출물에는 AI 추천 분석 메타데이터가 포함되어 있지 않습니다.",
-  "This template is used for sending welcome emails to new subscribers...":
-    "이 템플릿은 신규 구독자에게 환영 이메일을 보내는 데 사용됩니다.",
+  "This step belongs to the current process map. It is persisted inside the process map metadata and projected into workflow actions when the map is saved.":
+    "이 단계는 현재 프로세스 맵에 속합니다. 이 단계는 프로세스 맵 메타데이터에 저장되며, 맵이 저장될 때 워크플로 작업에 반영됩니다.",
+  "This step references a not-yet-saved linked entity. It will only be created when you save the template or webhook editor.":
+    "이 단계는 아직 저장되지 않은 연결 엔터티를 참조합니다. 템플릿 또는 webhook 편집기를 저장할 때만 생성됩니다.",
   "This template key already exists": "이 템플릿 키는 이미 존재합니다.",
-  "This webhook sends form submissions to our CRM system...":
-    "이 웹훅은 양식 제출 내용을 당사 CRM 시스템으로 전송합니다...",
+  "This will detach the linked template or webhook from this step on the current process map canvas.":
+    "이 작업은 현재 프로세스 맵 캔버스에서 이 단계에 연결된 템플릿 또는 webhook을 분리합니다.",
+  "This will remove the selected step from the current process map canvas.":
+    "이 작업은 현재 프로세스 맵 캔버스에서 선택한 단계를 제거합니다.",
+  "This will remove the workflow node and its attached steps from the current process map canvas.":
+    "이 작업은 현재 프로세스 맵 캔버스에서 워크플로 노드와 연결된 단계들을 제거합니다.",
   "This will delete submission": "이렇게 하면 제출 내용이 삭제됩니다.",
-  "This will permanently delete the selected email template.":
-    "선택한 이메일 템플릿이 영구적으로 삭제됩니다.",
-  "This will permanently delete the selected webhook endpoint.":
-    "선택한 웹훅 엔드포인트가 영구적으로 삭제됩니다.",
-  "This will permanently delete the selected workflow.":
-    "선택한 워크플로가 영구적으로 삭제됩니다.",
-  "This will run the selected manual workflow action for this submission.":
-    "이 제출에 대해 선택한 수동 워크플로 작업을 실행합니다.",
-  "This workflow sends a welcome email to new subscribers...":
-    "이 워크플로는 신규 구독자에게 환영 이메일을 보냅니다...",
   To: "받는 사람",
-  'To send an email when a submission is marked as \\"resolved\\":':
-    '제출된 문제가 \\"해결됨\\"으로 표시될 때 이메일을 보내려면 다음 단계를 따르세요.',
   "Tool Invocation Policy": "도구 호출 정책",
   "Top K (optional)": "상위 K (선택 사항)",
   Trigger: "방아쇠",
   "Trigger Conditions": "트리거 조건",
   "Trigger event": "트리거 이벤트",
-  "Unique identifier (lowercase, hyphens, underscores)":
-    "고유 식별자(소문자, 하이픈, 밑줄)",
+  "Trigger model": "트리거 모델",
   unknown: "알려지지 않은",
   "Untitled suggestion": "제목 없는 제안",
   "Update Status": "상태 업데이트",
-  "Update Status on Dispatch (optional)": "배송 상태 업데이트 (선택 사항)",
   "Update Status on Success (optional)": "성공 시 상태 업데이트 (선택 사항)",
   Updated: "업데이트됨",
   "Updated At": "업데이트됨",
   URL: "URL",
-  "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.":
-    "JSON 객체 스키마를 사용하세요. 유효하지 않은 JSON은 수정할 때까지 편집기에 남아 있으며, 워크플로는 초안 텍스트를 버리는 대신 보관합니다.",
   "Use preset for current mode": "현재 모드에 대한 사전 설정을 사용하십시오.",
-  "Use the tabs to manage submissions, email templates, and workflows from the frontend.":
-    "프런트엔드에서 탭을 사용하여 제출물, 이메일 템플릿 및 워크플로를 관리할 수 있습니다.",
   "Use Webhook Endpoint": "웹훅 엔드포인트를 사용하세요",
-  "Use {{submission.email}} for submitter's email":
-    "제출자의 이메일 주소로는 {{submission.email}}을 사용하세요.",
-  "Use {{submission.fields.fieldName}} for template variables":
-    "템플릿 변수에는 {{submission.fields.fieldName}}을 사용하세요.",
-  "Use {{submission.field}} for dynamic values":
-    "동적 값을 사용하려면 {{submission.field}}를 사용하세요.",
-  "Use {{submission}} to include submission data":
-    "제출 데이터를 포함하려면 {{submission}}을 사용하세요.",
   Value: "값",
   "Variable Path": "변수 경로",
-  "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.":
-    "WordPress 사이트에서 제출된 양식 내용을 확인하고 관리할 수 있습니다. 모든 제출 내용은 AWS DynamoDB에 저장됩니다.",
   Visual: "시각",
   "Web Grounding": "웹 접지",
   "Webhook deleted": "웹훅이 삭제되었습니다",
@@ -439,8 +295,6 @@ export const koDict: Record<string, string> = {
   "Webhook endpoints": "웹훅 엔드포인트",
   "Webhook key": "웹훅 키",
   "Webhook name": "웹훅 이름",
-  "Webhook Requested - External webhook trigger":
-    "웹훅 요청됨 - 외부 웹훅 트리거",
   "Webhook saved": "웹훅 저장됨",
   "Webhook URL (if not using endpoint)":
     "웹훅 URL (엔드포인트를 사용하지 않는 경우)",
@@ -453,12 +307,12 @@ export const koDict: Record<string, string> = {
   "Workflow name": "워크플로 이름",
   "Workflow saved": "워크플로가 저장되었습니다",
   "Workflow Steps": "워크플로 단계",
+  "Workflow steps": "워크플로 단계",
   Workflows: "워크플로",
   "Write your email template here...": "여기에 이메일 템플릿을 작성하세요...",
   Yes: "예",
   "Zapier (Webhook Preset)": "Zapier (웹훅 사전 설정)",
-  "Zapier webhook calls are made with POST method and application/json content type.":
-    "Zapier 웹훅 호출은 POST 메서드와 application/json 콘텐츠 유형을 사용하여 이루어집니다.",
   "Zapier Webhook URL": "Zapier 웹훅 URL",
-  "{{submission.email}}": "{{submission.email}}",
 };
+
+export default koDict;

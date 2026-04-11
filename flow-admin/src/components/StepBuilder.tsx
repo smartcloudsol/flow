@@ -6,13 +6,13 @@ import {
   Group,
   Select,
   Stack,
+  TagsInput,
   Text,
   TextInput,
   Textarea,
 } from "@mantine/core";
 import {
   IconBrain,
-  IconBolt,
   IconCloud,
   IconGripVertical,
   IconMail,
@@ -23,7 +23,7 @@ import {
 import { useState } from "react";
 import type { EmailTemplate, WebhookEndpoint } from "../api/types";
 import { t } from "../operations/i18n";
-import MonacoEditor from "./MonacoEditor";
+import JsonDraftEditor from "./JsonDraftEditor";
 import { useOperationsComboboxProps } from "./OperationsPortalContext";
 
 const AI_AGENT_TOOL_OPTIONS = [
@@ -34,16 +34,16 @@ const AI_AGENT_TOOL_OPTIONS = [
       "Allow the model to fetch and ground answers from explicit HTTPS URLs.",
   },
   {
-    value: "code_interpreter",
-    label: "Code Interpreter",
+    value: "calculator",
+    label: "Calculator",
     description:
-      "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or transformations.",
+      "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or deterministic transformations.",
   },
   {
-    value: "computer_use",
-    label: "Computer Use",
+    value: "script_runner",
+    label: "Script Runner",
     description:
-      "Return a server-side fallback when the model asks for interactive browser or desktop control.",
+      "Allow the model to run short JavaScript snippets for best-effort debugging and tiny examples without imports, filesystem, or network access.",
   },
 ] as const;
 
@@ -61,7 +61,7 @@ const AI_AGENT_TOOL_SCHEMAS: Record<string, Record<string, unknown>> = {
     required: ["urls"],
     additionalProperties: false,
   },
-  code_interpreter: {
+  calculator: {
     type: "object",
     properties: {
       expression: { type: "string", minLength: 1 },
@@ -69,14 +69,42 @@ const AI_AGENT_TOOL_SCHEMAS: Record<string, Record<string, unknown>> = {
     required: ["expression"],
     additionalProperties: false,
   },
-  computer_use: {
+  script_runner: {
     type: "object",
     properties: {
-      task: { type: "string" },
+      language: {
+        type: "string",
+        enum: ["javascript"],
+      },
+      code: { type: "string", minLength: 1 },
+      goal: { type: "string" },
+      input: {
+        type: ["object", "array", "string", "number", "boolean", "null"],
+      },
     },
-    additionalProperties: true,
+    required: ["code"],
+    additionalProperties: false,
   },
 };
+
+function normalizeAiAgentToolNames(toolNames: string[]): string[] {
+  return Array.from(
+    new Set(
+      toolNames.flatMap((toolName) => {
+        switch (toolName.trim()) {
+          case "code_interpreter":
+            return ["calculator", "script_runner"];
+          case "web_grounding":
+          case "calculator":
+          case "script_runner":
+            return [toolName.trim()];
+          default:
+            return [];
+        }
+      }),
+    ),
+  );
+}
 
 const AI_AGENT_RESPONSE_CONSTRAINT_TEMPLATES = {
   generic: {
@@ -118,25 +146,305 @@ const AI_AGENT_RESPONSE_CONSTRAINT_TEMPLATES = {
   },
 } as const;
 
+const ROUTING_REQUIRED_PROPERTIES = [
+  "route",
+  "confidence",
+  "reason",
+  "outcomes",
+] as const;
+
+const AI_ROUTING_PRESETS = [
+  {
+    value: "none",
+    label: "No internal routing",
+    description: "Free-form AI output without platform routing contract.",
+  },
+  {
+    value: "route-by-category",
+    label: "Route by category",
+    description:
+      "The model returns a stable routing envelope with route, confidence, reason, outcomes, and signals.",
+  },
+  {
+    value: "route-by-outcomes",
+    label: "Route by outcomes",
+    description:
+      "The model focuses on explicit actionable outcomes while still returning the platform routing envelope.",
+  },
+  {
+    value: "draft-reply-only",
+    label: "Draft reply only",
+    description:
+      "The model produces a structured draft reply and no internal routing-specific contract is required.",
+  },
+] as const;
+
+type AiRoutingPreset = (typeof AI_ROUTING_PRESETS)[number]["value"];
+
+interface RoutingAuthoringConfig {
+  routes: string[];
+  outcomeTypes: string[];
+  signalKeys: string[];
+}
+
+function normalizeStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((entry): entry is string => typeof entry === "string")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function getRoutingAuthoringConfig(
+  config: Record<string, unknown>,
+): RoutingAuthoringConfig {
+  return {
+    routes: normalizeStringList(config.routingRoutes),
+    outcomeTypes: normalizeStringList(config.routingOutcomeTypes),
+    signalKeys: normalizeStringList(config.routingSignalKeys),
+  };
+}
+
+function buildRoutingResponseConstraint(
+  preset: AiRoutingPreset,
+  authoring: RoutingAuthoringConfig = {
+    routes: [],
+    outcomeTypes: [],
+    signalKeys: [],
+  },
+) {
+  if (preset === "draft-reply-only") {
+    return {
+      additionalProperties: false,
+      type: "object",
+      required: ["draftReply"],
+      properties: {
+        draftReply: {
+          type: "object",
+          required: ["subject", "body"],
+          properties: {
+            subject: { type: "string", minLength: 1, maxLength: 200 },
+            body: { type: "string", minLength: 1, maxLength: 4000 },
+            tone: { type: ["string", "null"] },
+          },
+        },
+      },
+    };
+  }
+
+  const routeProperty: Record<string, unknown> = {
+    type: "string",
+    minLength: 1,
+    maxLength: 100,
+    description: "Primary routing category chosen by the model.",
+  };
+  if (authoring.routes.length > 0) {
+    routeProperty.enum = authoring.routes;
+  }
+
+  const outcomeTypeEnum =
+    authoring.outcomeTypes.length > 0
+      ? authoring.outcomeTypes
+      : [
+          "invoke_webhook",
+          "invoke_workflow",
+          "send_email",
+          "set_status",
+          "emit_event",
+          "custom",
+        ];
+
+  const signalsProperty: Record<string, unknown> =
+    authoring.signalKeys.length > 0
+      ? {
+          type: "object",
+          additionalProperties: false,
+          properties: Object.fromEntries(
+            authoring.signalKeys.map((key) => [
+              key,
+              { type: ["string", "number", "boolean", "null"] },
+            ]),
+          ),
+        }
+      : {
+          type: "object",
+          additionalProperties: {
+            type: ["string", "number", "boolean", "null"],
+          },
+        };
+
+  return {
+    additionalProperties: false,
+    type: "object",
+    required: ["routing"],
+    properties: {
+      routing: {
+        type: "object",
+        additionalProperties: false,
+        required: [...ROUTING_REQUIRED_PROPERTIES],
+        properties: {
+          route: routeProperty,
+          confidence: {
+            type: "number",
+            minimum: 0,
+            maximum: 1,
+          },
+          reason: {
+            type: "string",
+            minLength: 1,
+            maxLength: 500,
+          },
+          outcomes: {
+            type: "array",
+            minItems: 0,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["type", "key"],
+              properties: {
+                type: {
+                  type: "string",
+                  enum: outcomeTypeEnum,
+                },
+                key: { type: "string", minLength: 1, maxLength: 120 },
+                confidence: { type: "number", minimum: 0, maximum: 1 },
+                reason: { type: ["string", "null"] },
+              },
+            },
+          },
+          signals: signalsProperty,
+        },
+      },
+    },
+  };
+}
+
+function buildRoutingSystemPromptBlock(preset: AiRoutingPreset): string {
+  if (preset === "none") return "";
+  if (preset === "draft-reply-only") {
+    return [
+      "[Platform routing contract]",
+      "Return a strictly valid JSON object that matches the response schema.",
+      "Do not add undocumented properties.",
+      "Focus on drafting the reply payload only; do not invent internal routing metadata.",
+    ].join("\n");
+  }
+
+  return [
+    "[Platform routing contract]",
+    "Return a strictly valid JSON object that matches the response schema.",
+    "Populate routing.route, routing.confidence, routing.reason, and routing.outcomes deterministically from the input event.",
+    "Use routing.outcomes for actionable next steps. Each outcome must contain a stable type and key.",
+    "Use routing.signals only for auxiliary classification data, not for arbitrary prose.",
+    "Do not omit required routing properties and do not add undocumented properties.",
+  ].join("\n");
+}
+
+function composeAiSystemPrompt(
+  platformBlock: string,
+  userGuidance: string,
+): string {
+  const parts = [platformBlock.trim(), userGuidance.trim()].filter(Boolean);
+  return parts.join("\n\n");
+}
+
+function validateRoutingConstraint(
+  schema: unknown,
+  preset: AiRoutingPreset,
+): string | null {
+  if (preset === "none") return null;
+  if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
+    return "Response Constraint must be a JSON object schema.";
+  }
+
+  const root = schema as Record<string, unknown>;
+  const properties = root.properties;
+  if (
+    !properties ||
+    typeof properties !== "object" ||
+    Array.isArray(properties)
+  ) {
+    return "Response Constraint must contain a properties object.";
+  }
+
+  if (preset === "draft-reply-only") {
+    if (!("draftReply" in (properties as Record<string, unknown>))) {
+      return "Draft reply preset requires a draftReply property.";
+    }
+    return null;
+  }
+
+  const routing = (properties as Record<string, unknown>).routing;
+  if (!routing || typeof routing !== "object" || Array.isArray(routing)) {
+    return "Routing preset requires a routing object property.";
+  }
+
+  const routingProps = (routing as Record<string, unknown>).properties;
+  if (
+    !routingProps ||
+    typeof routingProps !== "object" ||
+    Array.isArray(routingProps)
+  ) {
+    return "Routing preset requires routing.properties.";
+  }
+
+  for (const key of ROUTING_REQUIRED_PROPERTIES) {
+    if (!(key in (routingProps as Record<string, unknown>))) {
+      return `Routing preset requires routing.${key}.`;
+    }
+  }
+
+  return null;
+}
+
+function parseJsonTemplateDraft(input: string): unknown {
+  const normalized = input.replace(/\{\{[\s\S]*?\}\}/g, "0");
+  return JSON.parse(normalized);
+}
+
+function validateJsonTemplateDraft(
+  input: string,
+  options?: { requireObject?: boolean },
+): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const parsed = parseJsonTemplateDraft(trimmed);
+
+    if (
+      options?.requireObject &&
+      (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    ) {
+      return "This field must contain a JSON object.";
+    }
+
+    return null;
+  } catch {
+    return "The JSON is currently invalid. Fix the editor content before saving.";
+  }
+}
+
 function getDefaultAiAgentText(mode: string): string {
   switch (mode) {
     case "summarize":
-      return t(
-        "Summarize the submission context concisely and highlight the most important points.",
-      );
+      return "Summarize the submission context concisely and highlight the most important points.";
     case "classify":
-      return t(
-        "Classify the submission and explain briefly why that classification fits.",
-      );
+      return "Classify the submission and explain briefly why that classification fits.";
     case "extract":
-      return t(
-        "Extract the requested structured data from the submission and return only supported values.",
-      );
+      return "Extract the requested structured data from the submission and return only supported values.";
     case "answer":
     default:
-      return t(
-        "Answer the request using the submission context and any available knowledge base evidence.",
-      );
+      return "Answer the request using the submission context and any available knowledge base evidence.";
   }
 }
 
@@ -145,6 +453,11 @@ function getDefaultAiAgentConfig(mode = "answer"): Record<string, unknown> {
     mode,
     text: getDefaultAiAgentText(mode),
     systemPrompt: "",
+    userSystemPrompt: "",
+    routingPreset: "none",
+    routingRoutes: [],
+    routingOutcomeTypes: [],
+    routingSignalKeys: [],
     enableReasoning: false,
     reasoningEffort: "low",
   };
@@ -156,6 +469,11 @@ function getDefaultStepConfig(actionType: string): Record<string, unknown> {
       return {
         templateKey: "",
         recipientEmail: "{{submission.email}}",
+      };
+    case "webhook.call":
+      return {
+        webhookKey: "",
+        body: "",
       };
     case "ai.agent":
       return getDefaultAiAgentConfig();
@@ -177,25 +495,29 @@ function getAiAgentToolNames(config: Record<string, unknown>): string[] {
     typeof toolSelection === "object" &&
     Array.isArray((toolSelection as { tools?: unknown[] }).tools)
   ) {
-    return ((toolSelection as { tools?: unknown[] }).tools ?? [])
-      .map((tool) => {
-        if (
-          tool &&
-          typeof tool === "object" &&
-          typeof (tool as { name?: unknown }).name === "string"
-        ) {
-          return String((tool as { name?: string }).name);
-        }
-        return "";
-      })
-      .filter(Boolean);
+    return normalizeAiAgentToolNames(
+      ((toolSelection as { tools?: unknown[] }).tools ?? [])
+        .map((tool) => {
+          if (
+            tool &&
+            typeof tool === "object" &&
+            typeof (tool as { name?: unknown }).name === "string"
+          ) {
+            return String((tool as { name?: string }).name);
+          }
+          return "";
+        })
+        .filter(Boolean),
+    );
   }
 
   if (Array.isArray(config.enabledTools)) {
-    return config.enabledTools
-      .filter((tool): tool is string => typeof tool === "string")
-      .map((tool) => tool.trim())
-      .filter(Boolean);
+    return normalizeAiAgentToolNames(
+      config.enabledTools
+        .filter((tool): tool is string => typeof tool === "string")
+        .map((tool) => tool.trim())
+        .filter(Boolean),
+    );
   }
 
   return [];
@@ -260,10 +582,6 @@ function getResponseConstraintTemplate(mode: string): Record<string, unknown> {
 export interface WorkflowStep {
   actionType: string;
   config: Record<string, unknown>;
-  retryPolicy?: {
-    maxAttempts?: number;
-    backoffMultiplier?: number;
-  };
 }
 
 export interface StepBuilderProps {
@@ -278,7 +596,6 @@ const ACTION_TYPES = [
   { value: "webhook.call", label: "Call Webhook", icon: IconWebhook },
   { value: "eventbridge.event", label: "EventBridge Event", icon: IconCloud },
   { value: "ai.agent", label: "AI Agent", icon: IconBrain },
-  { value: "zapier", label: "Zapier (Webhook Preset)", icon: IconBolt },
   { value: "status.update", label: "Update Status", icon: null },
   { value: "delay", label: "Delay/Wait", icon: null },
 ];
@@ -418,67 +735,51 @@ export default function StepBuilder({
           </Stack>
         );
 
-      case "webhook.call":
+      case "webhook.call": {
+        const webhookBodyDraftError = validateJsonTemplateDraft(
+          String(step.config.body ?? ""),
+        );
+
         return (
           <Stack gap="sm">
             <Select
-              label={t("Use Webhook Endpoint")}
+              label={t("Webhook Endpoint")}
               description={t(
-                "Select a predefined webhook or leave empty for inline URL",
+                "Choose a saved webhook endpoint. Zapier endpoints are configured in the Webhooks screen.",
               )}
-              placeholder={t("Choose webhook endpoint (optional)")}
+              placeholder={t("Choose webhook endpoint")}
               data={webhooks.map((w) => ({
                 value: w.webhookKey,
-                label: w.name || w.webhookKey,
+                label:
+                  (w.name || w.webhookKey) +
+                  (w.provider === "zapier" ? ` (${t("Zapier")})` : ""),
               }))}
               value={String(step.config.webhookKey ?? "")}
               onChange={(value) =>
                 updateStepConfig(index, { webhookKey: value ?? "" })
               }
               searchable
-              clearable
               comboboxProps={comboboxProps}
             />
-            <TextInput
-              label={t("Webhook URL (if not using endpoint)")}
-              description={t("The endpoint to send the webhook to")}
-              placeholder={t("https://example.com/api/webhook")}
-              value={String(step.config.url ?? "")}
-              onChange={(e) =>
-                updateStepConfig(index, { url: e.currentTarget.value })
-              }
-              disabled={!!step.config.webhookKey}
-            />
-            <Select
-              label={t("HTTP Method")}
-              data={["POST", "PUT", "PATCH", "GET"]}
-              value={String(step.config.method ?? "POST")}
-              onChange={(value) =>
-                updateStepConfig(index, { method: value ?? "POST" })
-              }
-              comboboxProps={comboboxProps}
-            />
-            <Textarea
-              label={t("Request Body (JSON)")}
-              description={t("Use {{submission}} to include submission data")}
-              placeholder='{"submission": {{submission}}, "event": "workflow_triggered"}'
-              minRows={4}
+            <JsonDraftEditor
+              label="Request Body Template (optional)"
+              description="Leave empty to send the default payload. Use dotted placeholders like {{submission.email}}."
+              height={180}
+              minHeight={160}
               value={String(step.config.body ?? "")}
-              onChange={(e) =>
-                updateStepConfig(index, { body: e.currentTarget.value })
+              onChange={(value) =>
+                updateStepConfig(index, { body: value ?? "" })
               }
+              warnings={[webhookBodyDraftError]}
             />
-            <Textarea
-              label={t("Headers (JSON, optional)")}
-              placeholder='{"Authorization": "Bearer token", "Content-Type": "application/json"}'
-              minRows={3}
-              value={String(step.config.headers ?? "")}
-              onChange={(e) =>
-                updateStepConfig(index, { headers: e.currentTarget.value })
-              }
-            />
+            <Text size="xs" c="dimmed">
+              {t(
+                "Endpoint URL, method, headers, signing, and provider preset are managed on the webhook endpoint itself.",
+              )}
+            </Text>
           </Stack>
         );
+      }
 
       case "status.update":
         return (
@@ -528,7 +829,12 @@ export default function StepBuilder({
           </Stack>
         );
 
-      case "eventbridge.event":
+      case "eventbridge.event": {
+        const customPayloadDraftError = validateJsonTemplateDraft(
+          String(step.config.customPayload ?? ""),
+          { requireObject: true },
+        );
+
         return (
           <Stack gap="sm">
             <TextInput
@@ -579,17 +885,18 @@ export default function StepBuilder({
             />
             {(step.config.payloadMode === "custom" ||
               step.config.payloadMode === "merged") && (
-              <Textarea
-                label={t("Custom Payload (JSON)")}
-                description={t("Use {{submission.field}} for dynamic values")}
-                placeholder='{\n  "leadEmail": "{{submission.email}}",\n  "leadName": "{{submission.name}}"\n}'
-                minRows={6}
+              <JsonDraftEditor
+                label="Custom Payload (JSON)"
+                description="Use dotted template paths like {{result.routing.route}}, {{submission.fields.workEmail}}, {{submission.source.pageUrl}}, {{submission.submissionId}}, or {{site.baseUrl}}. accountId, siteId, and occurredAt are added automatically."
+                height={220}
+                minHeight={180}
                 value={String(step.config.customPayload ?? "")}
-                onChange={(e) =>
+                onChange={(value) =>
                   updateStepConfig(index, {
-                    customPayload: e.currentTarget.value,
+                    customPayload: value ?? "",
                   })
                 }
+                warnings={[customPayloadDraftError]}
               />
             )}
             <Checkbox
@@ -637,10 +944,32 @@ export default function StepBuilder({
             </Text>
           </Stack>
         );
+      }
 
       case "ai.agent": {
         const selectedTools = getAiAgentToolNames(step.config);
         const selectedToolChoice = getAiAgentToolChoice(step.config);
+        const routingPreset = String(
+          step.config.routingPreset ?? "none",
+        ) as AiRoutingPreset;
+        const routingAuthoring = getRoutingAuthoringConfig(step.config);
+        const platformSystemPrompt =
+          buildRoutingSystemPromptBlock(routingPreset);
+        const userSystemPrompt = String(
+          step.config.userSystemPrompt ??
+            (platformSystemPrompt &&
+            String(step.config.systemPrompt ?? "").startsWith(
+              platformSystemPrompt,
+            )
+              ? String(step.config.systemPrompt ?? "")
+                  .slice(platformSystemPrompt.length)
+                  .trim()
+              : step.config.systemPrompt ?? ""),
+        );
+        const routingValidation = validateRoutingConstraint(
+          step.config.responseConstraint,
+          routingPreset,
+        );
         return (
           <Stack gap="sm">
             <Select
@@ -664,6 +993,123 @@ export default function StepBuilder({
               }}
               comboboxProps={comboboxProps}
             />
+            <Select
+              label={t("Internal routing")}
+              description={t(
+                "Use a platform-owned routing contract when you want downstream conditional branching from the AI result.",
+              )}
+              data={AI_ROUTING_PRESETS.map((preset) => ({
+                value: preset.value,
+                label: t(preset.label),
+              }))}
+              value={routingPreset}
+              onChange={(value) => {
+                const nextPreset = (value ?? "none") as AiRoutingPreset;
+                const nextPlatformBlock =
+                  buildRoutingSystemPromptBlock(nextPreset);
+                updateStepConfig(index, {
+                  routingPreset: nextPreset,
+                  responseConstraint:
+                    nextPreset === "none"
+                      ? step.config.responseConstraint
+                      : buildRoutingResponseConstraint(
+                          nextPreset,
+                          routingAuthoring,
+                        ),
+                  userSystemPrompt,
+                  systemPrompt: composeAiSystemPrompt(
+                    nextPlatformBlock,
+                    userSystemPrompt,
+                  ),
+                });
+              }}
+              comboboxProps={comboboxProps}
+            />
+            <Text size="xs" c="dimmed">
+              {t(
+                AI_ROUTING_PRESETS.find(
+                  (preset) => preset.value === routingPreset,
+                )?.description ?? "",
+              )}
+            </Text>
+            {routingPreset !== "none" &&
+            routingPreset !== "draft-reply-only" ? (
+              <Stack gap="xs">
+                <TagsInput
+                  label={t("Route Keys")}
+                  description={t(
+                    "Explicit route values that the AI is allowed to emit. These directly seed process-map branch suggestions.",
+                  )}
+                  placeholder={t("Add route keys like support, sales, billing")}
+                  value={routingAuthoring.routes}
+                  onChange={(value) => {
+                    const nextAuthoring = {
+                      ...routingAuthoring,
+                      routes: normalizeStringList(value),
+                    };
+                    updateStepConfig(index, {
+                      routingRoutes: nextAuthoring.routes,
+                      responseConstraint: buildRoutingResponseConstraint(
+                        routingPreset,
+                        nextAuthoring,
+                      ),
+                    });
+                  }}
+                  comboboxProps={comboboxProps}
+                  clearable
+                />
+                <TagsInput
+                  label={t("Outcome Types")}
+                  description={t(
+                    "Stable outcome type keys used for downstream workflow actions. Prefer generic verbs over tenant-specific booleans.",
+                  )}
+                  placeholder={t(
+                    "Add outcome types like invoke_webhook, invoke_workflow, send_email",
+                  )}
+                  value={routingAuthoring.outcomeTypes}
+                  onChange={(value) => {
+                    const nextAuthoring = {
+                      ...routingAuthoring,
+                      outcomeTypes: normalizeStringList(value),
+                    };
+                    updateStepConfig(index, {
+                      routingOutcomeTypes: nextAuthoring.outcomeTypes,
+                      responseConstraint: buildRoutingResponseConstraint(
+                        routingPreset,
+                        nextAuthoring,
+                      ),
+                    });
+                  }}
+                  comboboxProps={comboboxProps}
+                  clearable
+                />
+                <TagsInput
+                  label={t("Signal Keys")}
+                  description={t(
+                    "Optional structured signal names for auxiliary metadata like priority, language, or urgency.",
+                  )}
+                  placeholder={t(
+                    "Add signal keys like priority, language, urgency",
+                  )}
+                  value={routingAuthoring.signalKeys}
+                  onChange={(value) => {
+                    const nextAuthoring = {
+                      ...routingAuthoring,
+                      signalKeys: normalizeStringList(value),
+                    };
+                    updateStepConfig(index, {
+                      routingSignalKeys: nextAuthoring.signalKeys,
+                      responseConstraint: buildRoutingResponseConstraint(
+                        routingPreset,
+                        nextAuthoring,
+                      ),
+                    });
+                  }}
+                  comboboxProps={comboboxProps}
+                  clearable
+                />
+              </Stack>
+            ) : null}
             <Textarea
               label={t("Prompt Text")}
               description={t(
@@ -673,25 +1119,55 @@ export default function StepBuilder({
                 String(step.config.mode ?? "answer"),
               )}
               minRows={4}
+              styles={{
+                input: {
+                  resize: "vertical",
+                  overflow: "auto",
+                  minHeight: "110px",
+                },
+              }}
               value={String(step.config.text ?? "")}
               onChange={(e) =>
                 updateStepConfig(index, { text: e.currentTarget.value })
               }
               required
             />
+            {platformSystemPrompt ? (
+              <Textarea
+                label={t("Platform System Block")}
+                description={t(
+                  "Automatically injected guardrails for the selected routing preset. This part is not user-editable.",
+                )}
+                autosize
+                minRows={5}
+                value={platformSystemPrompt}
+                readOnly
+              />
+            ) : null}
             <Textarea
-              label={t("System Prompt")}
+              label={t("Additional System Guidance")}
               description={t(
-                "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.",
+                "Optional user-owned instructions appended after the platform block. Leave empty to rely on the preset guardrails and backend defaults.",
               )}
               placeholder={t(
                 "You are a support agent. Be concise and cite sources when available.",
               )}
               minRows={3}
-              value={String(step.config.systemPrompt ?? "")}
+              styles={{
+                input: {
+                  resize: "vertical",
+                  overflow: "auto",
+                  minHeight: "90px",
+                },
+              }}
+              value={userSystemPrompt}
               onChange={(e) =>
                 updateStepConfig(index, {
-                  systemPrompt: e.currentTarget.value,
+                  userSystemPrompt: e.currentTarget.value,
+                  systemPrompt: composeAiSystemPrompt(
+                    platformSystemPrompt,
+                    e.currentTarget.value,
+                  ),
                 })
               }
             />
@@ -814,13 +1290,21 @@ export default function StepBuilder({
                 variant="light"
                 onClick={() =>
                   updateStepConfig(index, {
-                    responseConstraint: getResponseConstraintTemplate(
-                      String(step.config.mode ?? "answer"),
-                    ),
+                    responseConstraint:
+                      routingPreset === "none"
+                        ? getResponseConstraintTemplate(
+                            String(step.config.mode ?? "answer"),
+                          )
+                        : buildRoutingResponseConstraint(
+                            routingPreset,
+                            routingAuthoring,
+                          ),
                   })
                 }
               >
-                {t("Use preset for current mode")}
+                {routingPreset === "none"
+                  ? t("Use preset for current mode")
+                  : t("Apply routing preset")}
               </Button>
               <Button
                 size="xs"
@@ -832,49 +1316,39 @@ export default function StepBuilder({
                 {t("Clear")}
               </Button>
             </Group>
-            <Stack gap="xs">
-              <Text size="sm" fw={500}>
-                {t("Response Constraint (JSON schema, optional)")}
-              </Text>
-              <Text size="xs" c="dimmed">
-                {t(
-                  "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.",
-                )}
-              </Text>
-              <MonacoEditor
-                language="json"
-                height={220}
-                value={
-                  typeof step.config.responseConstraint === "string"
-                    ? step.config.responseConstraint
-                    : JSON.stringify(
-                        step.config.responseConstraint ?? {},
-                        null,
-                        2,
-                      )
+            <JsonDraftEditor
+              label="Response Constraint (JSON schema, optional)"
+              description="Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it."
+              height={220}
+              value={
+                typeof step.config.responseConstraint === "string"
+                  ? step.config.responseConstraint
+                  : JSON.stringify(
+                      step.config.responseConstraint ?? {},
+                      null,
+                      2,
+                    )
+              }
+              onChange={(value) => {
+                const nextValue = value ?? "";
+                try {
+                  updateStepConfig(index, {
+                    responseConstraint: nextValue.trim()
+                      ? JSON.parse(nextValue)
+                      : undefined,
+                  });
+                } catch {
+                  updateStepConfig(index, { responseConstraint: nextValue });
                 }
-                onChange={(value) => {
-                  const nextValue = value ?? "";
-                  try {
-                    updateStepConfig(index, {
-                      responseConstraint: nextValue.trim()
-                        ? JSON.parse(nextValue)
-                        : undefined,
-                    });
-                  } catch {
-                    updateStepConfig(index, { responseConstraint: nextValue });
-                  }
-                }}
-              />
-              {typeof step.config.responseConstraint === "string" &&
-              step.config.responseConstraint.trim() ? (
-                <Text size="xs" c="orange">
-                  {t(
-                    "The schema is currently invalid JSON. Fix the editor content before saving.",
-                  )}
-                </Text>
-              ) : null}
-            </Stack>
+              }}
+              warnings={[
+                typeof step.config.responseConstraint === "string" &&
+                step.config.responseConstraint.trim()
+                  ? "The schema is currently invalid JSON. Fix the editor content before saving."
+                  : null,
+                routingValidation,
+              ]}
+            />
             <Select
               label={t("Update Status on Dispatch (optional)")}
               description={t(
@@ -892,69 +1366,22 @@ export default function StepBuilder({
               comboboxProps={comboboxProps}
             />
             <Text size="xs" c="dimmed">
-              {t(
-                "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.",
-              )}
+              {routingPreset === "none"
+                ? t(
+                    "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, and process-map connections can scope downstream workflows to this exact AI step.",
+                  )
+                : t(
+                    "This step emits an `ai.agent.requested` event with a routing contract. Downstream workflows should branch on routing.route, routing.outcomes, or routing.signals instead of prompt-specific booleans.",
+                  )}
             </Text>
           </Stack>
         );
       }
-      case "zapier":
-        return (
-          <Stack gap="sm">
-            <TextInput
-              label={t("Zapier Webhook URL")}
-              description={t("Get this URL from your Zapier webhook trigger")}
-              placeholder="https://hooks.zapier.com/hooks/catch/..."
-              value={String(step.config.url ?? "")}
-              onChange={(e) =>
-                updateStepConfig(index, { url: e.currentTarget.value })
-              }
-              required
-            />
-            <TextInput
-              label={t("Event Name")}
-              description={t("A friendly name for this event in Zapier")}
-              placeholder={t("New Form Submission")}
-              value={String(step.config.eventName ?? "")}
-              onChange={(e) =>
-                updateStepConfig(index, { eventName: e.currentTarget.value })
-              }
-            />
-            <Checkbox
-              label={t("Include full submission data")}
-              description={t("Send all submission fields to Zapier")}
-              checked={Boolean(step.config.includeFullSubmission ?? true)}
-              onChange={(e) =>
-                updateStepConfig(index, {
-                  includeFullSubmission: e.currentTarget.checked,
-                })
-              }
-            />
-            <Textarea
-              label={t("Additional Fields (JSON, optional)")}
-              description={t("Add custom fields to the Zapier payload")}
-              placeholder='{\n  "customField": "{{submission.field}}"\n}'
-              minRows={4}
-              value={String(step.config.additionalFields ?? "")}
-              onChange={(e) =>
-                updateStepConfig(index, {
-                  additionalFields: e.currentTarget.value,
-                })
-              }
-            />
-            <Text size="xs" c="dimmed">
-              {t(
-                "Zapier webhook calls are made with POST method and application/json content type.",
-              )}
-            </Text>
-          </Stack>
-        );
-
       default:
         return (
           <Textarea
             label={t("Configuration (JSON)")}
+            autosize
             minRows={6}
             value={JSON.stringify(step.config, null, 2)}
             onChange={(e) => {
@@ -1047,51 +1474,6 @@ export default function StepBuilder({
                 />
 
                 {renderStepConfig(step, index)}
-
-                <Checkbox
-                  label={t("Enable retry on failure")}
-                  checked={Boolean(step.retryPolicy)}
-                  onChange={(e) =>
-                    updateStep(index, {
-                      retryPolicy: e.currentTarget.checked
-                        ? { maxAttempts: 3, backoffMultiplier: 2 }
-                        : undefined,
-                    })
-                  }
-                />
-
-                {step.retryPolicy && (
-                  <Group>
-                    <TextInput
-                      label={t("Max Attempts")}
-                      type="number"
-                      style={{ flex: 1 }}
-                      value={step.retryPolicy.maxAttempts ?? 3}
-                      onChange={(e) =>
-                        updateStep(index, {
-                          retryPolicy: {
-                            ...step.retryPolicy,
-                            maxAttempts: Number(e.currentTarget.value),
-                          },
-                        })
-                      }
-                    />
-                    <TextInput
-                      label={t("Backoff Multiplier")}
-                      type="number"
-                      style={{ flex: 1 }}
-                      value={step.retryPolicy.backoffMultiplier ?? 2}
-                      onChange={(e) =>
-                        updateStep(index, {
-                          retryPolicy: {
-                            ...step.retryPolicy,
-                            backoffMultiplier: Number(e.currentTarget.value),
-                          },
-                        })
-                      }
-                    />
-                  </Group>
-                )}
               </Stack>
             </Card>
           ))}

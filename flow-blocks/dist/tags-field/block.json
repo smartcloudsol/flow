@@ -34,20 +34,121 @@
       "type": "string",
       "default": ""
     },
+    "acceptValueOnBlur": {
+      "type": "boolean",
+      "default": true
+    },
+    "allowDuplicates": {
+      "type": "boolean",
+      "default": false
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "inputSize": {
+      "type": "string"
+    },
+    "limit": {
+      "type": "number"
+    },
+    "loading": {
+      "type": "boolean",
+      "default": false
+    },
+    "loadingPosition": {
+      "type": "string",
+      "default": "right"
+    },
+    "maxDropdownHeight": {
+      "type": "number"
+    },
     "placeholder": {
       "type": "string",
       "default": ""
+    },
+    "pointer": {
+      "type": "boolean",
+      "default": false
     },
     "required": {
       "type": "boolean",
       "default": false
     },
+    "size": {
+      "type": "string"
+    },
     "maxTags": {
       "type": "number"
+    },
+    "optionsText": {
+      "type": "string",
+      "default": ""
+    },
+    "optionsSource": {
+      "type": "string",
+      "default": "static",
+      "enum": [
+        "static",
+        "api",
+        "autocomplete"
+      ]
+    },
+    "apiEndpoint": {
+      "type": "string",
+      "default": ""
+    },
+    "apiMethod": {
+      "type": "string",
+      "default": "GET"
+    },
+    "apiHeaders": {
+      "type": "string",
+      "default": "{}"
+    },
+    "apiParams": {
+      "type": "string",
+      "default": "{}"
+    },
+    "apiResponsePath": {
+      "type": "string",
+      "default": ""
+    },
+    "apiLabelPath": {
+      "type": "string",
+      "default": ""
+    },
+    "apiValuePath": {
+      "type": "string",
+      "default": ""
+    },
+    "cacheEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "cacheTTL": {
+      "type": "number",
+      "default": 3600
+    },
+    "autocompleteMinChars": {
+      "type": "number",
+      "default": 2
+    },
+    "autocompleteDebounce": {
+      "type": "number",
+      "default": 300
     },
     "splitChars": {
       "type": "string",
       "default": ","
+    },
+    "searchParam": {
+      "type": "string",
+      "default": "q"
+    },
+    "withScrollArea": {
+      "type": "boolean",
+      "default": true
     },
     "conditionalLogic": {
       "type": "object",
@@ -62,5 +163,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

@@ -54,11 +54,10 @@
       "default": ""
     }
   },
-  "editorScript": "file:../editor.js",
-  "viewStyle": "smartcloud-flow-operations-runtime-style",
+  "editorScript": "smartcloud-flow-blocks-editor-script",
   "viewScript": [
     "smartcloud-flow-operations-runtime-script",
-    "file:./view.js"
+    "smartcloud-flow-blocks-view-script"
   ],
   "render": "file:./render.php"
 }

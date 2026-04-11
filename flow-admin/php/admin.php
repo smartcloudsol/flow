@@ -34,7 +34,6 @@ final class Admin
             debugLoggingEnabled: false,
             formsBackendSyncEnabled: true,
             formsAllowPermanentDelete: false,
-            aiSuggestionsPresets: [],
             highlightedSubmissionActions: ['seen', 'resolved', 'completed']
         );
 
@@ -94,7 +93,7 @@ final class Admin
                     'smartcloud-wpsuite-mantine-vendor'
                 )
             );
-            wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, true);
+            wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('strategy' => 'defer'));
 
             if (function_exists('wp_set_script_translations')) {
                 wp_set_script_translations('smartcloud-flow-admin-script', 'smartcloud-flow', SMARTCLOUD_FLOW_PATH . 'languages');
@@ -131,7 +130,7 @@ final class Admin
 
     public function renderShortcodeColumn($column, $post_id)
     {
-        if ('wpc_shortcode' !== $column) {
+        if ('wpc_shortcode' !== $column || get_query_var('s') !== 'smartcloud-flow') {
             return;
         }
 
@@ -217,7 +216,7 @@ final class Admin
     }
     public function highlightMenu($parent_file)
     {
-        if (get_query_var('post_type') == 'wp_block' && get_query_var('s') == 'smartcloud-flow') {
+        if (get_query_var('post_type') === 'wp_block' && get_query_var('s') === 'smartcloud-flow') {
             return SMARTCLOUD_WPSUITE_SLUG;
         }
         return $parent_file;
@@ -225,7 +224,7 @@ final class Admin
 
     public function highlightSubmenu($submenu_file)
     {
-        if (get_query_var('post_type') == 'wp_block' && get_query_var('s') == 'smartcloud-flow') {
+        if (get_query_var('post_type') === 'wp_block' && get_query_var('s') === 'smartcloud-flow') {
             return admin_url("edit.php?post_type=wp_block&s=smartcloud-flow");
         }
         return $submenu_file;
@@ -316,7 +315,6 @@ final class Admin
             debugLoggingEnabled: $debugLoggingEnabled,
             formsBackendSyncEnabled: (bool) ($settings_param['formsBackendSyncEnabled'] ?? true),
             formsAllowPermanentDelete: (bool) ($settings_param['formsAllowPermanentDelete'] ?? false),
-            aiSuggestionsPresets: is_array($settings_param['aiSuggestionsPresets'] ?? null) ? $settings_param['aiSuggestionsPresets'] : [],
             highlightedSubmissionActions: is_array($settings_param['highlightedSubmissionActions'] ?? null) ? $settings_param['highlightedSubmissionActions'] : ['seen', 'resolved', 'completed']
         );
 
@@ -329,7 +327,6 @@ final class Admin
             'defaultOutputLanguage' => $defaultOutputLanguage,
             'formsBackendSyncEnabled' => $this->settings->formsBackendSyncEnabled,
             'formsAllowPermanentDelete' => $this->settings->formsAllowPermanentDelete,
-            'aiSuggestionsPresetsCount' => count($this->settings->aiSuggestionsPresets),
             'highlightedSubmissionActions' => $this->settings->highlightedSubmissionActions
         ]);
 

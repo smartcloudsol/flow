@@ -14,7 +14,6 @@ import {
 } from "@mantine/core";
 import {
   dispatchBackend,
-  getFlowPlugin,
   getStoreSelect,
   resolveBackend,
   type Store,
@@ -26,7 +25,14 @@ import {
 } from "@smart-cloud/wpsuite-core";
 import { useSelect } from "@wordpress/data";
 import { I18n } from "aws-amplify/utils";
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { CheckIcon, CopyIcon } from "../../icons";
 import type {
   AiSuggestionsSubmissionMetadata,
@@ -44,6 +50,7 @@ import {
   buildAiSuggestionsInputSignature,
   buildAiSuggestionsPrompt,
 } from "../ai/prompt-builder";
+import { getAiSuggestionsInputScope } from "../ai/input-scope";
 import { parseAiSuggestionsResponse } from "../ai/response-parser";
 import { getFrontendApiBaseUrl } from "../api/config";
 import {
@@ -58,7 +65,12 @@ import {
   stripConditionalSystemValues,
 } from "../../shared/conditional-system-watchers";
 import { FormActionsProvider } from "../context/FormActionsContext";
+import type { FormReturnIntent } from "../context/FormActionsContext";
 import { FormAttributesProvider } from "../context/FormAttributesContext";
+import {
+  FormPreviewProvider,
+  type FormPreviewSelection,
+} from "../context/FormPreviewContext";
 import { FormStateProvider } from "../context/FormStateContext";
 import { formReducer, getInitialValues } from "../reducer";
 import { validateField, validateValues } from "../validation";
@@ -176,6 +188,54 @@ function collectFieldVisibility(
   });
 
   return acc;
+}
+
+function collectVisibleDuplicateFieldNames(
+  fields: FieldConfig[],
+  values: Record<string, unknown>,
+  fieldStates: ReturnType<typeof buildRuntimeFieldStates>,
+  path: number[] = [],
+  ancestorHidden = false,
+  counts = new Map<string, number>(),
+) {
+  fields.forEach((field, index) => {
+    const currentPath = [...path, index];
+    const runtimeKey = getRuntimeKey(field, currentPath);
+    const hiddenByState = fieldStates[runtimeKey]?.visible === false;
+    const currentHidden = ancestorHidden || hiddenByState;
+
+    if (isWizardField(field)) {
+      field.steps.forEach((step, stepIndex) => {
+        collectVisibleDuplicateFieldNames(
+          step.children,
+          values,
+          fieldStates,
+          [...currentPath, stepIndex],
+          currentHidden || !isWizardStepVisible(step, values),
+          counts,
+        );
+      });
+      return;
+    }
+
+    if (hasChildFields(field)) {
+      collectVisibleDuplicateFieldNames(
+        field.children,
+        values,
+        fieldStates,
+        currentPath,
+        currentHidden,
+        counts,
+      );
+      return;
+    }
+
+    if (!currentHidden && hasNamedValueField(field)) {
+      counts.set(field.name, (counts.get(field.name) ?? 0) + 1);
+    }
+  });
+
+  return counts;
 }
 
 function areFieldValuesEqual(left: unknown, right: unknown): boolean {
@@ -470,6 +530,7 @@ export function FormShell({
   form,
   fields,
   states,
+  preview,
   store,
   rootElement,
   hostElement,
@@ -477,6 +538,7 @@ export function FormShell({
   form: FormAttributes;
   fields: FieldConfig[];
   states: FormStateContents;
+  preview?: FormPreviewSelection;
   store: Store;
   rootElement: HTMLDivElement;
   hostElement: HTMLDivElement;
@@ -485,6 +547,7 @@ export function FormShell({
     () => getStoreSelect(store).getLanguage(),
     [store],
   );
+  const isEditorPreview = Boolean(preview);
   const directionInStore = useSelect(
     () => getStoreSelect(store).getDirection(),
     [store],
@@ -535,6 +598,9 @@ export function FormShell({
   const [lastSubmissionSource, setLastSubmissionSource] = useState<
     "direct" | "draft" | null
   >(null);
+  const [formReturnIntent, setFormReturnIntent] =
+    useState<FormReturnIntent>(null);
+  const [scrollResetKey, setScrollResetKey] = useState(0);
   const [lastCompletedAction, setLastCompletedAction] = useState<
     | "submit"
     | "save-draft"
@@ -543,6 +609,7 @@ export function FormShell({
     | "ai-accepted"
     | null
   >(null);
+  const effectiveResumeMode = isEditorPreview ? false : resumeMode;
 
   const initialValues = useMemo(() => {
     const baseValues = getInitialValues(fields);
@@ -555,6 +622,7 @@ export function FormShell({
   const [reducerState, dispatch] = useReducer(formReducer, {
     status: "idle",
     values: initialValues,
+    evaluationValues: initialValues,
     errors: {},
     fields,
     submitCount: 0,
@@ -607,8 +675,16 @@ export function FormShell({
     [conditionalSystemValues, fields, valuesWithActions],
   );
   const state = useMemo(
-    () => ({ ...reducerState, values: valuesWithActions, fieldStates }),
-    [fieldStates, reducerState, valuesWithActions],
+    () => ({
+      ...reducerState,
+      values: valuesWithActions,
+      evaluationValues: {
+        ...valuesWithActions,
+        ...conditionalSystemValues,
+      },
+      fieldStates,
+    }),
+    [conditionalSystemValues, fieldStates, reducerState, valuesWithActions],
   );
   const hiddenFieldNames = useMemo(() => {
     const visibility = collectFieldVisibility(
@@ -624,6 +700,22 @@ export function FormShell({
       (name) => !visibility.visibleNames.has(name),
     );
   }, [conditionalSystemValues, fieldStates, fields, valuesWithActions]);
+  const visibleDuplicateFieldNames = useMemo(
+    () =>
+      Array.from(
+        collectVisibleDuplicateFieldNames(
+          fields,
+          {
+            ...valuesWithActions,
+            ...conditionalSystemValues,
+          },
+          fieldStates,
+        ).entries(),
+      )
+        .filter(([, count]) => count > 1)
+        .map(([name]) => name),
+    [conditionalSystemValues, fieldStates, fields, valuesWithActions],
+  );
 
   useEffect(() => {
     if (!hiddenFieldNames.length) return;
@@ -642,6 +734,15 @@ export function FormShell({
 
     dispatch({ type: "RESET_FIELDS", values: nextValues, names: changedNames });
   }, [hiddenFieldNames, initialValues, reducerState.values]);
+
+  useEffect(() => {
+    if (!visibleDuplicateFieldNames.length) return;
+
+    console.warn(
+      "Unsupported Flow form configuration: multiple visible fields share the same name. Values are shared by name, but runtime configuration is instance-specific.",
+      visibleDuplicateFieldNames,
+    );
+  }, [visibleDuplicateFieldNames]);
 
   const frontendApiBaseUrl = getFrontendApiBaseUrl();
   const fileFields = useMemo(() => collectFileFields(fields), [fields]);
@@ -668,6 +769,27 @@ export function FormShell({
     },
     [hostElement],
   );
+
+  const requestViewScrollReset = useCallback(() => {
+    setScrollResetKey((current) => current + 1);
+  }, []);
+
+  const clearFormReturnIntent = useCallback(() => {
+    setFormReturnIntent(null);
+  }, []);
+
+  const scrollRootIntoView = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    rootElement.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+  }, [rootElement]);
 
   const getRecaptchaHeaders = useCallback(async () => {
     const siteSettings = getWpSuite()?.siteSettings as SiteSettings | undefined;
@@ -822,20 +944,17 @@ export function FormShell({
     [dispatchFrontendRequest, fileFields, form.formId],
   );
 
-  const aiSuggestionsPreset = useMemo(() => {
-    const presets = getFlowPlugin()?.settings?.aiSuggestionsPresets || [];
-    return presets.find((item) => item.id === form.aiSuggestionsPresetId);
-  }, [form.aiSuggestionsPresetId]);
+  const aiSuggestionsRunIdRef = useRef(0);
 
   useEffect(() => {
     rootElement.setAttribute("dir", currentDirection);
     rootElement.setAttribute(
       "data-flow-view",
-      resumeMode ? "draft-resume" : "form",
+      effectiveResumeMode ? "draft-resume" : "form",
     );
     rootElement.setAttribute(
       "data-flow-draft-resume-active",
-      resumeMode ? "true" : "false",
+      effectiveResumeMode ? "true" : "false",
     );
     if (currentLanguage) {
       rootElement.setAttribute("lang", currentLanguage);
@@ -846,12 +965,16 @@ export function FormShell({
       rootElement.removeAttribute("data-flow-view");
       rootElement.removeAttribute("data-flow-draft-resume-active");
     };
-  }, [rootElement, currentDirection, currentLanguage, resumeMode]);
+  }, [rootElement, currentDirection, currentLanguage, effectiveResumeMode]);
 
   const actions = useMemo(
     () => ({
       form,
       fields,
+      emitFormEvent,
+      formReturnIntent,
+      clearFormReturnIntent,
+      requestViewScrollReset,
       setValue: (name: string, value: unknown) => {
         setLastCompletedAction(null);
         dispatch({ type: "SET_VALUE", name, value });
@@ -859,18 +982,20 @@ export function FormShell({
       setErrors: (errors: Record<string, string | undefined>) => {
         dispatch({ type: "SET_ERRORS", errors });
       },
-      validateField: (name: string) => {
+      validateField: (name: string, runtimeKey?: string) => {
         if (state.touched.has(name)) {
           const error = validateField(
             name,
             fields,
             state.values,
             state.fieldStates,
+            runtimeKey,
           );
           dispatch({ type: "SET_FIELD_ERROR", name, error });
         }
       },
       reset: () => {
+        setFormReturnIntent(null);
         setLastSubmitResponse(null);
         setLastSubmissionSource(null);
         dispatch({ type: "RESET", values: initialValues });
@@ -901,6 +1026,15 @@ export function FormShell({
             submissionId: draftSubmissionId,
             password: draftPassword,
             values: serializedValues,
+            context: {
+              pageUrl: window.location.href,
+              pageTitle: document.title,
+              baseUrl: window.location.origin,
+              locale:
+                document.documentElement.lang ||
+                navigator.language ||
+                undefined,
+            },
             metadata: {
               pageUrl: window.location.href,
               pageTitle: document.title,
@@ -1042,6 +1176,7 @@ export function FormShell({
       },
 
       startNewForm: () => {
+        setFormReturnIntent(null);
         setResumeMode(false);
         setLastSubmitResponse(null);
         setLastSubmissionSource(null);
@@ -1050,28 +1185,26 @@ export function FormShell({
       },
       runAiSuggestions: async (
         field: Extract<FieldConfig, { type: "ai-suggestions" }>,
+        runtimeKey: string,
       ) => {
-        const preset =
-          (getFlowPlugin()?.settings?.aiSuggestionsPresets || []).find(
-            (item) =>
-              item.id === (field.presetId || form.aiSuggestionsPresetId),
-          ) || aiSuggestionsPreset;
-        if (!preset?.template) {
-          dispatch({
-            type: "AI_SUGGESTIONS_DONE",
-            suggestions: [],
-            rawText: "AI Suggestions preset is missing or empty.",
-          });
-          return;
-        }
+        const runId = aiSuggestionsRunIdRef.current + 1;
         try {
-          const prompt = buildAiSuggestionsPrompt(
-            preset.template,
+          const aiInputScope = getAiSuggestionsInputScope(
             fields,
+            runtimeKey,
             state.values,
+            state.fieldStates,
+          );
+          const prompt = buildAiSuggestionsPrompt(
+            field.promptOverride,
+            aiInputScope.fields,
+            aiInputScope.values,
             { formLanguage: currentLanguage },
           );
-          const signature = buildAiSuggestionsInputSignature(state.values);
+          const signature = buildAiSuggestionsInputSignature(
+            aiInputScope.values,
+          );
+          aiSuggestionsRunIdRef.current = runId;
           dispatch({ type: "AI_SUGGESTIONS_LOADING", signature });
           const response = await dispatchAiSuggestionsPrompt({
             text: prompt,
@@ -1105,9 +1238,10 @@ export function FormShell({
                 },
               },
             },
-            disableKB: !preset.useKnowledgeBase,
-            topK: preset.topK,
           });
+          if (runId !== aiSuggestionsRunIdRef.current) {
+            return;
+          }
           const parsed = parseAiSuggestionsResponse(response);
           dispatch({
             type: "AI_SUGGESTIONS_DONE",
@@ -1118,6 +1252,9 @@ export function FormShell({
             metadata: parsed.metadata,
           });
         } catch (error) {
+          if (runId !== aiSuggestionsRunIdRef.current) {
+            return;
+          }
           dispatch({
             type: "AI_SUGGESTIONS_DONE",
             suggestions: [],
@@ -1129,11 +1266,13 @@ export function FormShell({
         }
       },
       resetAiSuggestions: () => {
+        aiSuggestionsRunIdRef.current += 1;
         dispatch({ type: "AI_SUGGESTIONS_RESET" });
       },
       acceptAiSuggestion: (suggestionId?: string) => {
         setLastCompletedAction("ai-accepted");
         dispatch({ type: "AI_SUGGESTIONS_ACCEPT", suggestionId });
+        requestViewScrollReset();
         emitFormEvent("smartcloud-flow:ai-suggestion-accepted", {
           action: "ai-suggestion-accepted",
           formId: form.formId,
@@ -1141,11 +1280,31 @@ export function FormShell({
         });
       },
       rejectAiSuggestions: () => {
+        aiSuggestionsRunIdRef.current += 1;
         dispatch({ type: "AI_SUGGESTIONS_REJECT" });
+        requestViewScrollReset();
+        emitFormEvent("smartcloud-flow:ai-suggestions-rejected", {
+          action: "ai-suggestions-rejected",
+          formId: form.formId,
+          suggestionCount: state.aiSuggestions.suggestions.length,
+          selectedSuggestionId: state.aiSuggestions.selectedSuggestionId,
+        });
       },
       submit: async () => {
+        if (state.aiSuggestions.status === "accepted") {
+          emitFormEvent("smartcloud-flow:submit-after-ai-accepted", {
+            action: "submit-after-ai-accepted",
+            formId: form.formId,
+            suggestionId: state.aiSuggestions.selectedSuggestionId,
+            suggestionCount: state.aiSuggestions.suggestions.length,
+          });
+        }
         dispatch({ type: "SET_STATUS", status: "validating" });
-        const errors = validateValues(fields, state.values, state.fieldStates);
+        const errors = validateValues(
+          fields,
+          state.evaluationValues,
+          state.fieldStates,
+        );
         if (Object.keys(errors).length > 0) {
           dispatch({ type: "SET_ERRORS", errors });
           return;
@@ -1177,6 +1336,15 @@ export function FormShell({
             formId: form.formId,
             formName: form.formName,
             values: serializedValues,
+            context: {
+              pageUrl: window.location.href,
+              pageTitle: document.title,
+              baseUrl: window.location.origin,
+              locale:
+                document.documentElement.lang ||
+                navigator.language ||
+                undefined,
+            },
             metadata: {
               pageUrl: window.location.href,
               pageTitle: document.title,
@@ -1266,19 +1434,22 @@ export function FormShell({
       },
     }),
     [
-      aiSuggestionsPreset,
+      clearFormReturnIntent,
       dispatchFrontendRequest,
       draftPassword,
       draftSubmissionId,
       emitFormEvent,
       fields,
       form,
+      formReturnIntent,
       initialValues,
       currentLanguage,
       prepareSerializableValues,
+      requestViewScrollReset,
       resumeDraftIdInput,
       resumePasswordInput,
       state.aiSuggestions,
+      state.evaluationValues,
       state.fieldStates,
       state.touched,
       state.values,
@@ -1297,12 +1468,18 @@ export function FormShell({
     successStates[trigger] ||
     (trigger === "submit-success" ? states.success : undefined);
 
+  const previewedSuccessState =
+    preview?.mode === "success-state" && preview.successTrigger
+      ? getSuccessStateContent(preview.successTrigger)
+      : undefined;
+
   const activeStandaloneState =
-    lastCompletedAction === "ai-accepted"
+    previewedSuccessState ||
+    (lastCompletedAction === "ai-accepted"
       ? getSuccessStateContent("ai-accepted")
       : state.status === "success" && lastCompletedAction === "submit"
       ? getSuccessStateContent("submit-success")
-      : undefined;
+      : undefined);
   const activeStandaloneHtml = useMemo(
     () =>
       hydrateSuccessStateHtml(activeStandaloneState?.html || "", {
@@ -1342,16 +1519,44 @@ export function FormShell({
   const shouldShowSubmittedState =
     state.status === "success" && lastCompletedAction === "submit";
   const shouldShowStandaloneState = Boolean(activeStandaloneState?.html);
+  const lastShownSuccessStateRef = useRef<string | null>(null);
 
-  const returnToForm = useCallback(() => {
-    setResumeMode(false);
-    setLastCompletedAction(null);
-    dispatch({ type: "SET_STATUS", status: "idle" });
-    emitFormEvent("smartcloud-flow:return-to-form", {
-      action: "return-to-form",
-      formId: form.formId,
+  useEffect(() => {
+    if (scrollResetKey === 0 || typeof window === "undefined") {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      scrollRootIntoView();
     });
-  }, [emitFormEvent, form.formId]);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [
+    effectiveResumeMode,
+    lastCompletedAction,
+    scrollResetKey,
+    scrollRootIntoView,
+    shouldShowStandaloneState,
+    state.status,
+  ]);
+
+  const returnToForm = useCallback(
+    (intent: FormReturnIntent = null) => {
+      setFormReturnIntent(intent);
+      requestViewScrollReset();
+      setResumeMode(false);
+      setLastCompletedAction(null);
+      dispatch({ type: "SET_STATUS", status: "idle" });
+      emitFormEvent("smartcloud-flow:return-to-form", {
+        action: "return-to-form",
+        formId: form.formId,
+        returnIntent: intent || undefined,
+      });
+    },
+    [emitFormEvent, form.formId, requestViewScrollReset],
+  );
 
   useEffect(() => {
     const handleCopyClick = async (event: Event) => {
@@ -1390,11 +1595,13 @@ export function FormShell({
       event.preventDefault();
 
       if (action === "show-form") {
-        returnToForm();
+        returnToForm(
+          lastCompletedAction === "ai-accepted" ? "last-step" : null,
+        );
         return;
       }
 
-      returnToForm();
+      returnToForm(lastCompletedAction === "ai-accepted" ? "last-step" : null);
       void actions.submit();
     };
 
@@ -1404,211 +1611,263 @@ export function FormShell({
       rootElement.removeEventListener("click", handleCopyClick);
       rootElement.removeEventListener("click", handleActionClick);
     };
-  }, [actions, returnToForm, rootElement]);
+  }, [actions, lastCompletedAction, returnToForm, rootElement]);
+
+  useEffect(() => {
+    if (isEditorPreview) {
+      return;
+    }
+
+    if (!shouldShowStandaloneState || !activeStandaloneState?.html) {
+      lastShownSuccessStateRef.current = null;
+      return;
+    }
+
+    const trigger =
+      lastCompletedAction === "ai-accepted" ? "ai-accepted" : "submit-success";
+    const eventKey = [
+      trigger,
+      lastSubmitResponse?.submissionId || "",
+      state.aiSuggestions.selectedSuggestionId || "",
+    ].join(":");
+
+    if (lastShownSuccessStateRef.current === eventKey) {
+      return;
+    }
+
+    lastShownSuccessStateRef.current = eventKey;
+    emitFormEvent("smartcloud-flow:success-state-shown", {
+      action: "success-state-shown",
+      formId: form.formId,
+      trigger,
+      submissionId: lastSubmitResponse?.submissionId,
+      suggestionId: state.aiSuggestions.selectedSuggestionId,
+    });
+  }, [
+    activeStandaloneState?.html,
+    emitFormEvent,
+    form.formId,
+    isEditorPreview,
+    lastCompletedAction,
+    lastSubmitResponse?.submissionId,
+    shouldShowStandaloneState,
+    state.aiSuggestions.selectedSuggestionId,
+  ]);
 
   return (
     <DirectionProvider initialDirection={currentDirection}>
-      <FormAttributesProvider value={form}>
-        <FormStateProvider value={state}>
-          <FormActionsProvider value={actions}>
-            {resumeMode ? (
-              <Paper
-                withBorder
-                radius="lg"
-                p="lg"
-                data-flow-view="draft-resume"
-                data-flow-draft-resume-active="true"
-              >
-                <Stack>
-                  <Text fw={600}>
-                    {form.draftResumeTitle || I18n.get("Continue a saved form")}
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    {form.draftResumeDescription ||
-                      I18n.get(
-                        "Enter your draft ID and password to continue, or start a new form.",
-                      )}
-                  </Text>
-                  {state.message ? (
-                    <Alert color={state.status === "success" ? "green" : "red"}>
-                      {state.message}
-                    </Alert>
-                  ) : null}
-                  <TextInput
-                    label={I18n.get("Draft ID")}
-                    value={resumeDraftIdInput}
-                    onChange={(event) =>
-                      setResumeDraftIdInput(event.currentTarget.value)
-                    }
-                  />
-                  <PasswordInput
-                    label={I18n.get("Password")}
-                    value={resumePasswordInput}
-                    onChange={(event) =>
-                      setResumePasswordInput(event.currentTarget.value)
-                    }
-                  />
-                  <Group>
-                    <Button
-                      onClick={() => void actions.loadDraft()}
-                      disabled={!resumeDraftIdInput || !resumePasswordInput}
-                      loading={state.status === "loading-draft"}
-                    >
-                      {I18n.get("Load")}
-                    </Button>
-                    {form.draftAllowDelete ? (
-                      <Button
-                        variant="outline"
-                        color="red"
-                        onClick={() => void actions.deleteDraft()}
-                        disabled={!resumeDraftIdInput || !resumePasswordInput}
-                        loading={state.status === "deleting-draft"}
+      <FormPreviewProvider value={preview}>
+        <FormAttributesProvider value={form}>
+          <FormStateProvider value={state}>
+            <FormActionsProvider value={actions}>
+              {effectiveResumeMode ? (
+                <Paper
+                  withBorder
+                  radius="lg"
+                  p="lg"
+                  data-flow-view="draft-resume"
+                  data-flow-draft-resume-active="true"
+                >
+                  <Stack>
+                    <Text fw={600}>
+                      {form.draftResumeTitle ||
+                        I18n.get("Continue a saved form")}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                      {form.draftResumeDescription ||
+                        I18n.get(
+                          "Enter your draft ID and password to continue, or start a new form.",
+                        )}
+                    </Text>
+                    {state.message ? (
+                      <Alert
+                        color={state.status === "success" ? "green" : "red"}
                       >
-                        {I18n.get("Delete")}
-                      </Button>
+                        {state.message}
+                      </Alert>
                     ) : null}
-                    <Button variant="subtle" onClick={actions.startNewForm}>
-                      {I18n.get("New form")}
-                    </Button>
-                  </Group>
-                </Stack>
-              </Paper>
-            ) : shouldShowStandaloneState ? (
-              <div
-                data-flow-view="success-state"
-                data-flow-draft-resume-active="false"
-              >
-                <div
-                  data-flow-state="success"
-                  dangerouslySetInnerHTML={{
-                    __html: activeStandaloneHtml,
-                  }}
-                />
-              </div>
-            ) : (
-              <Paper
-                withBorder
-                radius="lg"
-                p="lg"
-                data-flow-view="form"
-                data-flow-draft-resume-active="false"
-              >
-                <Stack>
-                  <Text fw={600}>{form.formName}</Text>
-                  {state.message && state.status !== "idle" ? (
-                    <Alert color={state.status === "success" ? "green" : "red"}>
-                      {state.message}
-                    </Alert>
-                  ) : null}
-                  {draftSubmissionId &&
-                  draftPassword &&
-                  state.status === "success" ? (
-                    <Alert color="blue" title={I18n.get("Draft information")}>
-                      <Stack gap="xs">
-                        <Text size="sm">
-                          {I18n.get("Save these details to continue later:")}
-                        </Text>
-                        <Group gap="xs" wrap="nowrap">
-                          <Text size="sm" fw={500} style={{ flex: 1 }}>
-                            {I18n.get("Submission ID")}: {draftSubmissionId}
-                          </Text>
-                          <CopyButton value={draftSubmissionId}>
-                            {({ copied, copy }) => (
-                              <Tooltip
-                                label={
-                                  copied ? I18n.get("Copied") : I18n.get("Copy")
-                                }
-                              >
-                                <ActionIcon
-                                  color={copied ? "teal" : "gray"}
-                                  variant="subtle"
-                                  onClick={copy}
-                                >
-                                  {copied ? (
-                                    <CheckIcon width={16} height={16} />
-                                  ) : (
-                                    <CopyIcon width={16} height={16} />
-                                  )}
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                          </CopyButton>
-                        </Group>
-                        <Group gap="xs" wrap="nowrap">
-                          <Text size="sm" fw={500} style={{ flex: 1 }}>
-                            {I18n.get("Password")}: {draftPassword}
-                          </Text>
-                          <CopyButton value={draftPassword}>
-                            {({ copied, copy }) => (
-                              <Tooltip
-                                label={
-                                  copied ? I18n.get("Copied") : I18n.get("Copy")
-                                }
-                              >
-                                <ActionIcon
-                                  color={copied ? "teal" : "gray"}
-                                  variant="subtle"
-                                  onClick={copy}
-                                >
-                                  {copied ? (
-                                    <CheckIcon width={16} height={16} />
-                                  ) : (
-                                    <CopyIcon width={16} height={16} />
-                                  )}
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                          </CopyButton>
-                        </Group>
-                        <CopyButton
-                          value={`Submission ID: ${draftSubmissionId}\nPassword: ${draftPassword}`}
+                    <TextInput
+                      label={I18n.get("Draft ID")}
+                      value={resumeDraftIdInput}
+                      onChange={(event) =>
+                        setResumeDraftIdInput(event.currentTarget.value)
+                      }
+                    />
+                    <PasswordInput
+                      label={I18n.get("Password")}
+                      value={resumePasswordInput}
+                      onChange={(event) =>
+                        setResumePasswordInput(event.currentTarget.value)
+                      }
+                    />
+                    <Group>
+                      <Button
+                        onClick={() => void actions.loadDraft()}
+                        disabled={!resumeDraftIdInput || !resumePasswordInput}
+                        loading={state.status === "loading-draft"}
+                      >
+                        {I18n.get("Load")}
+                      </Button>
+                      {form.draftAllowDelete ? (
+                        <Button
+                          variant="outline"
+                          color="red"
+                          onClick={() => void actions.deleteDraft()}
+                          disabled={!resumeDraftIdInput || !resumePasswordInput}
+                          loading={state.status === "deleting-draft"}
                         >
-                          {({ copied, copy }) => (
-                            <Button
-                              size="xs"
-                              variant="default"
-                              onClick={copy}
-                              leftSection={
-                                copied ? (
-                                  <CheckIcon width={14} height={14} />
-                                ) : (
-                                  <CopyIcon width={14} height={14} />
-                                )
-                              }
-                            >
-                              {copied
-                                ? I18n.get("Copied!")
-                                : I18n.get("Copy both")}
-                            </Button>
-                          )}
-                        </CopyButton>
-                      </Stack>
-                    </Alert>
-                  ) : null}
-                  {!shouldShowSubmittedState &&
-                    !(state.status === "success" && form.hideFormOnSuccess) &&
-                    fields.map((field, idx) => (
-                      <FieldRenderer
-                        key={
-                          field.type === "submit"
-                            ? `submit-${field.label}`
-                            : CONDITIONAL_CONTAINER_TYPES.has(field.type) ||
-                              field.type === "divider"
-                            ? "c" + idx
-                            : "name" in field
-                            ? field.name
-                            : `field-${idx}`
-                        }
-                        field={field}
-                        path={[idx]}
-                      />
-                    ))}
-                </Stack>
-              </Paper>
-            )}
-          </FormActionsProvider>
-        </FormStateProvider>
-      </FormAttributesProvider>
+                          {I18n.get("Delete")}
+                        </Button>
+                      ) : null}
+                      <Button variant="subtle" onClick={actions.startNewForm}>
+                        {I18n.get("New form")}
+                      </Button>
+                    </Group>
+                  </Stack>
+                </Paper>
+              ) : shouldShowStandaloneState ? (
+                <div
+                  data-flow-view="success-state"
+                  data-flow-draft-resume-active="false"
+                >
+                  <div
+                    data-flow-state="success"
+                    dangerouslySetInnerHTML={{
+                      __html: activeStandaloneHtml,
+                    }}
+                  />
+                </div>
+              ) : (
+                <Paper
+                  withBorder
+                  radius="lg"
+                  p="lg"
+                  data-flow-view="form"
+                  data-flow-draft-resume-active="false"
+                >
+                  <Stack>
+                    <Text fw={600}>{form.formName}</Text>
+                    {state.message && state.status !== "idle" ? (
+                      <Alert
+                        color={state.status === "success" ? "green" : "red"}
+                      >
+                        {state.message}
+                      </Alert>
+                    ) : null}
+                    {draftSubmissionId &&
+                    draftPassword &&
+                    state.status === "success" ? (
+                      <Alert color="blue" title={I18n.get("Draft information")}>
+                        <Stack gap="xs">
+                          <Text size="sm">
+                            {I18n.get("Save these details to continue later:")}
+                          </Text>
+                          <Group gap="xs" wrap="nowrap">
+                            <Text size="sm" fw={500} style={{ flex: 1 }}>
+                              {I18n.get("Submission ID")}: {draftSubmissionId}
+                            </Text>
+                            <CopyButton value={draftSubmissionId}>
+                              {({ copied, copy }) => (
+                                <Tooltip
+                                  label={
+                                    copied
+                                      ? I18n.get("Copied")
+                                      : I18n.get("Copy")
+                                  }
+                                >
+                                  <ActionIcon
+                                    color={copied ? "teal" : "gray"}
+                                    variant="subtle"
+                                    onClick={copy}
+                                  >
+                                    {copied ? (
+                                      <CheckIcon width={16} height={16} />
+                                    ) : (
+                                      <CopyIcon width={16} height={16} />
+                                    )}
+                                  </ActionIcon>
+                                </Tooltip>
+                              )}
+                            </CopyButton>
+                          </Group>
+                          <Group gap="xs" wrap="nowrap">
+                            <Text size="sm" fw={500} style={{ flex: 1 }}>
+                              {I18n.get("Password")}: {draftPassword}
+                            </Text>
+                            <CopyButton value={draftPassword}>
+                              {({ copied, copy }) => (
+                                <Tooltip
+                                  label={
+                                    copied
+                                      ? I18n.get("Copied")
+                                      : I18n.get("Copy")
+                                  }
+                                >
+                                  <ActionIcon
+                                    color={copied ? "teal" : "gray"}
+                                    variant="subtle"
+                                    onClick={copy}
+                                  >
+                                    {copied ? (
+                                      <CheckIcon width={16} height={16} />
+                                    ) : (
+                                      <CopyIcon width={16} height={16} />
+                                    )}
+                                  </ActionIcon>
+                                </Tooltip>
+                              )}
+                            </CopyButton>
+                          </Group>
+                          <CopyButton
+                            value={`Submission ID: ${draftSubmissionId}\nPassword: ${draftPassword}`}
+                          >
+                            {({ copied, copy }) => (
+                              <Button
+                                size="xs"
+                                variant="default"
+                                onClick={copy}
+                                leftSection={
+                                  copied ? (
+                                    <CheckIcon width={14} height={14} />
+                                  ) : (
+                                    <CopyIcon width={14} height={14} />
+                                  )
+                                }
+                              >
+                                {copied
+                                  ? I18n.get("Copied!")
+                                  : I18n.get("Copy both")}
+                              </Button>
+                            )}
+                          </CopyButton>
+                        </Stack>
+                      </Alert>
+                    ) : null}
+                    {!shouldShowSubmittedState &&
+                      !(state.status === "success" && form.hideFormOnSuccess) &&
+                      fields.map((field, idx) => (
+                        <FieldRenderer
+                          key={
+                            field.type === "submit"
+                              ? `submit-${field.label}`
+                              : CONDITIONAL_CONTAINER_TYPES.has(field.type) ||
+                                field.type === "divider"
+                              ? "c" + idx
+                              : "name" in field
+                              ? field.name
+                              : `field-${idx}`
+                          }
+                          field={field}
+                          path={[idx]}
+                        />
+                      ))}
+                  </Stack>
+                </Paper>
+              )}
+            </FormActionsProvider>
+          </FormStateProvider>
+        </FormAttributesProvider>
+      </FormPreviewProvider>
     </DirectionProvider>
   );
 }

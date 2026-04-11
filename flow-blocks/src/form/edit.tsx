@@ -9,7 +9,7 @@ import {
   getFlowPlugin,
 } from "@smart-cloud/flow-core";
 import { getWpSuite, type SiteSettings } from "@smart-cloud/wpsuite-core";
-import { createBlock, type BlockInstance } from "@wordpress/blocks";
+import { createBlock, serialize, type BlockInstance } from "@wordpress/blocks";
 import {
   BlockControls,
   InnerBlocks,
@@ -45,14 +45,17 @@ import {
   useState,
 } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
-import { close, plus, settings } from "@wordpress/icons";
+import { check, close, plus, seen, settings } from "@wordpress/icons";
 import { DIRECTION_OPTIONS } from "../index";
 import { parseOptions } from "../shared/field-utils";
 import type {
   FieldConfig,
   FormActionDefinition,
   FormAttributes,
+  FormStateContents,
+  SuccessStateTrigger,
 } from "../shared/types";
+import type { FormPreviewSelection } from "../runtime/context/FormPreviewContext";
 import { renderForm, type RenderFormHandle } from "./renderForm";
 import { useFormSync } from "./useFormSync";
 
@@ -93,6 +96,19 @@ function parseStatusesText(value: string): string[] {
     .split(/\r?\n|,/)
     .map((status) => status.trim())
     .filter(Boolean);
+}
+
+function isMissingTemplateError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("404") ||
+    message.includes("template not found") ||
+    message.includes("not found")
+  );
 }
 
 function toEditableFormAction(
@@ -359,9 +375,7 @@ const FIELD_BLOCK_MAPPING: Record<string, string> = {
 /**
  * Recursively convert Gutenberg blocks to FieldConfig
  */
-function blockToFieldConfig(
-  block: Record<string, unknown>,
-): FieldConfig | null {
+function blockToFieldConfig(block: BlockInstance): FieldConfig | null {
   const fieldType = FIELD_BLOCK_MAPPING[block.name as string];
   if (!fieldType) return null;
 
@@ -369,7 +383,8 @@ function blockToFieldConfig(
   if (
     (fieldType === "select" ||
       fieldType === "radio" ||
-      fieldType === "checkbox-group") &&
+      fieldType === "checkbox-group" ||
+      fieldType === "tags") &&
     (block.attributes as Record<string, unknown>)?.optionsText
   ) {
     const { optionsText, ...restAttrs } = block.attributes as Record<
@@ -379,7 +394,10 @@ function blockToFieldConfig(
     return {
       type: fieldType,
       ...restAttrs,
-      options: parseOptions(optionsText as string),
+      options:
+        !restAttrs.optionsSource || restAttrs.optionsSource === "static"
+          ? parseOptions(optionsText as string)
+          : undefined,
     } as FieldConfig;
   }
 
@@ -397,6 +415,31 @@ function blockToFieldConfig(
     } as FieldConfig;
   }
 
+  if (fieldType === "slider" || fieldType === "rangeslider") {
+    const {
+      marksData,
+      marks: legacyMarks,
+      ...restAttrs
+    } = (block.attributes as Record<string, unknown>) ?? {};
+
+    return {
+      ...restAttrs,
+      type: fieldType,
+      ...(Array.isArray(marksData)
+        ? { marks: marksData }
+        : legacyMarks === true &&
+          typeof restAttrs.min === "number" &&
+          typeof restAttrs.max === "number"
+        ? {
+            marks: [
+              { value: restAttrs.min as number },
+              { value: restAttrs.max as number },
+            ],
+          }
+        : {}),
+    } as FieldConfig;
+  }
+
   // Handle container blocks (stack, group, grid, fieldset, collapse, visuallyhidden) with nested children
   if (
     fieldType === "stack" ||
@@ -406,7 +449,7 @@ function blockToFieldConfig(
     fieldType === "collapse" ||
     fieldType === "visuallyhidden"
   ) {
-    const children = ((block.innerBlocks as Record<string, unknown>[]) || [])
+    const children = (block.innerBlocks || [])
       .map(blockToFieldConfig)
       .filter(Boolean) as FieldConfig[];
 
@@ -419,12 +462,10 @@ function blockToFieldConfig(
 
   // Handle wizard block with wizard-step children
   if (fieldType === "wizard") {
-    const steps = ((block.innerBlocks as Record<string, unknown>[]) || [])
+    const steps = (block.innerBlocks || [])
       .filter((innerBlock) => innerBlock.name === "smartcloud-flow/wizard-step")
       .map((stepBlock) => {
-        const children = (
-          (stepBlock.innerBlocks as Record<string, unknown>[]) || []
-        )
+        const children = (stepBlock.innerBlocks || [])
           .map(blockToFieldConfig)
           .filter(Boolean) as FieldConfig[];
 
@@ -458,6 +499,107 @@ function blockToFieldConfig(
     type: fieldType,
     ...(block.attributes as Record<string, unknown>),
   } as FieldConfig;
+}
+
+type WizardPreviewOption = {
+  key: string;
+  label: string;
+  wizardPath: string;
+  stepIndex: number;
+};
+
+type SuccessStatePreviewOption = {
+  key: string;
+  label: string;
+  trigger: SuccessStateTrigger;
+  html: string;
+};
+
+function collectWizardPreviewOptions(fields: FieldConfig[]) {
+  const options: WizardPreviewOption[] = [];
+  let wizardCount = 0;
+
+  const visit = (items: FieldConfig[], path: number[] = []) => {
+    items.forEach((field, index) => {
+      const nextPath = [...path, index];
+
+      if (field.type === "wizard") {
+        wizardCount += 1;
+        const wizardLabel =
+          field.title?.trim() ||
+          `${__("Wizard", TEXT_DOMAIN)} ${String(wizardCount)}`;
+
+        field.steps.forEach((step, stepIndex) => {
+          const stepTitle = step.title?.trim();
+          options.push({
+            key: `wizard:${nextPath.join(".")}:${String(stepIndex)}`,
+            label: stepTitle
+              ? `${wizardLabel} · ${__("Step", TEXT_DOMAIN)} ${String(
+                  stepIndex + 1,
+                )}: ${stepTitle}`
+              : `${wizardLabel} · ${__("Step", TEXT_DOMAIN)} ${String(
+                  stepIndex + 1,
+                )}`,
+            wizardPath: nextPath.join("."),
+            stepIndex,
+          });
+        });
+      }
+
+      const childFields = (field as { children?: FieldConfig[] }).children;
+      if (Array.isArray(childFields) && childFields.length > 0) {
+        visit(childFields, nextPath);
+      }
+    });
+  };
+
+  visit(fields);
+
+  return options;
+}
+
+function collectSuccessStatePreviewOptions(blocks: BlockInstance[]) {
+  const optionsByTrigger = new Map<
+    SuccessStateTrigger,
+    SuccessStatePreviewOption
+  >();
+
+  blocks.forEach((block) => {
+    if (block.name !== "smartcloud-flow/success-state") {
+      return;
+    }
+
+    const trigger =
+      block.attributes?.trigger === "ai-accepted"
+        ? "ai-accepted"
+        : "submit-success";
+
+    optionsByTrigger.set(trigger, {
+      key: `success:${trigger}`,
+      label:
+        trigger === "ai-accepted"
+          ? __("Success State · AI suggestion was accepted", TEXT_DOMAIN)
+          : __("Success State · Form was submitted", TEXT_DOMAIN),
+      trigger,
+      html: serialize(block.innerBlocks ?? []),
+    });
+  });
+
+  return Array.from(optionsByTrigger.values());
+}
+
+function previewSelectionKey(selection: FormPreviewSelection) {
+  if (selection.mode === "wizard-step") {
+    return `wizard:${selection.wizardPath || ""}:${String(
+      selection.stepIndex ?? 0,
+    )}`;
+  }
+
+  if (selection.mode === "success-state") {
+    return `success:${selection.successTrigger || "submit-success"}`;
+  }
+
+  return "form";
 }
 
 export default function Edit({
@@ -521,7 +663,7 @@ export default function Edit({
   const innerBlocks = useSelect(
     (select) => {
       const { getBlocks } = select(blockEditorStore) as unknown as {
-        getBlocks: (id: string) => Record<string, unknown>[];
+        getBlocks: (id: string) => BlockInstance[];
       };
       return getBlocks(clientId);
     },
@@ -536,6 +678,87 @@ export default function Edit({
         .filter(Boolean) as FieldConfig[],
     [innerBlocks],
   );
+  const wizardPreviewOptions = useMemo(
+    () => collectWizardPreviewOptions(fields),
+    [fields],
+  );
+  const successStatePreviewOptions = useMemo(
+    () => collectSuccessStatePreviewOptions(innerBlocks || []),
+    [innerBlocks],
+  );
+  const previewStates = useMemo<FormStateContents>(() => {
+    const states: FormStateContents = {
+      successStates: {},
+    };
+
+    successStatePreviewOptions.forEach((option) => {
+      states.successStates![option.trigger] = { html: option.html };
+
+      if (option.trigger === "submit-success") {
+        states.success = { html: option.html };
+      }
+    });
+
+    return states;
+  }, [successStatePreviewOptions]);
+  const [previewSelection, setPreviewSelection] =
+    useState<FormPreviewSelection>({
+      mode: "form",
+    });
+  const previewSelectionKeyValue = useMemo(
+    () => previewSelectionKey(previewSelection),
+    [previewSelection],
+  );
+  const previewControls = useMemo(
+    () => [
+      {
+        icon: previewSelection.mode === "form" ? check : undefined,
+        title: __("Form", TEXT_DOMAIN),
+        onClick: () => setPreviewSelection({ mode: "form" }),
+      },
+      ...wizardPreviewOptions.map((option) => ({
+        icon: option.key === previewSelectionKeyValue ? check : undefined,
+        title: option.label,
+        onClick: () =>
+          setPreviewSelection({
+            mode: "wizard-step",
+            wizardPath: option.wizardPath,
+            stepIndex: option.stepIndex,
+          }),
+      })),
+      ...successStatePreviewOptions.map((option) => ({
+        icon: option.key === previewSelectionKeyValue ? check : undefined,
+        title: option.label,
+        onClick: () =>
+          setPreviewSelection({
+            mode: "success-state",
+            successTrigger: option.trigger,
+          }),
+      })),
+    ],
+    [
+      previewSelection.mode,
+      previewSelectionKeyValue,
+      successStatePreviewOptions,
+      wizardPreviewOptions,
+    ],
+  );
+
+  useEffect(() => {
+    const validKeys = new Set<string>([
+      "form",
+      ...wizardPreviewOptions.map((option) => option.key),
+      ...successStatePreviewOptions.map((option) => option.key),
+    ]);
+
+    if (!validKeys.has(previewSelectionKeyValue)) {
+      setPreviewSelection({ mode: "form" });
+    }
+  }, [
+    previewSelectionKeyValue,
+    successStatePreviewOptions,
+    wizardPreviewOptions,
+  ]);
 
   const applyBuiltInTemplate = useCallback(
     (blocks: BlockInstance[], nextAttributes: Partial<FormAttributes>) => {
@@ -717,12 +940,37 @@ export default function Edit({
         // Load templates
         try {
           const templatesResponse = await client.listTemplates();
-          setAvailableTemplates(
-            (templatesResponse.items || []).map((t) => ({
-              value: t.templateKey,
-              label: t.name || t.templateKey,
-            })),
-          );
+          const templateOptions = (templatesResponse.items || []).map((t) => ({
+            value: t.templateKey,
+            label: t.name || t.templateKey,
+          }));
+          const currentAutoReplyTemplateKey =
+            attributes.autoReplyTemplateKey?.trim() ?? "";
+
+          if (
+            currentAutoReplyTemplateKey &&
+            !templateOptions.some(
+              (template) => template.value === currentAutoReplyTemplateKey,
+            )
+          ) {
+            try {
+              const currentTemplate = await client.getTemplate(
+                currentAutoReplyTemplateKey,
+              );
+              templateOptions.unshift({
+                value: currentTemplate.templateKey,
+                label: currentTemplate.name || currentTemplate.templateKey,
+              });
+            } catch (error) {
+              if (isMissingTemplateError(error)) {
+                setAttributes({ autoReplyTemplateKey: "" });
+              } else {
+                console.warn("Failed to verify auto-reply template:", error);
+              }
+            }
+          }
+
+          setAvailableTemplates(templateOptions);
         } catch (error) {
           console.warn("Failed to load templates:", error);
         }
@@ -745,7 +993,7 @@ export default function Edit({
     };
 
     loadBackendOptions();
-  }, [backendSyncEnabled]);
+  }, [attributes.autoReplyTemplateKey, backendSyncEnabled, setAttributes]);
 
   // Use backend sync hook
   const { syncStatus, performSync } = useFormSync({
@@ -781,6 +1029,8 @@ export default function Edit({
           target: previewRef.current!,
           form: attributes,
           fields,
+          states: previewStates,
+          preview: previewSelection,
         });
 
         if (!cancelled) {
@@ -806,11 +1056,18 @@ export default function Edit({
     };
     // fieldsKey already includes fields serialization, so fields dependency is not needed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attributes, fieldsKey]);
+  }, [attributes, fieldsKey, previewSelection, previewStates]);
 
   return (
     <div {...blockProps}>
       <BlockControls>
+        <ToolbarGroup>
+          <ToolbarDropdownMenu
+            icon={seen}
+            label={__("Preview state", TEXT_DOMAIN)}
+            controls={previewControls}
+          />
+        </ToolbarGroup>
         <ToolbarGroup>
           <ToolbarButton
             icon={showCustomization ? close : settings}

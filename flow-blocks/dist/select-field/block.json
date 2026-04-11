@@ -34,13 +34,74 @@
       "type": "string",
       "default": ""
     },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
     "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "allowDeselect": {
+      "type": "boolean",
+      "default": true
+    },
+    "autoSelectOnBlur": {
+      "type": "boolean",
+      "default": false
+    },
+    "chevronColor": {
+      "type": "string",
+      "default": ""
+    },
+    "clearable": {
+      "type": "boolean",
+      "default": false
+    },
+    "defaultDropdownOpened": {
+      "type": "boolean",
+      "default": false
+    },
+    "inputSize": {
+      "type": "string"
+    },
+    "limit": {
+      "type": "number"
+    },
+    "multiple": {
       "type": "boolean",
       "default": false
     },
     "placeholder": {
       "type": "string",
       "default": "Select an option"
+    },
+    "pointer": {
+      "type": "boolean",
+      "default": false
+    },
+    "searchable": {
+      "type": "boolean",
+      "default": false
+    },
+    "selectFirstOptionOnChange": {
+      "type": "boolean",
+      "default": false
+    },
+    "withAlignedLabels": {
+      "type": "boolean",
+      "default": false
+    },
+    "withCheckIcon": {
+      "type": "boolean",
+      "default": true
+    },
+    "withScrollArea": {
+      "type": "boolean",
+      "default": true
     },
     "optionsText": {
       "type": "string",
@@ -72,6 +133,14 @@
       "default": "{}"
     },
     "apiResponsePath": {
+      "type": "string",
+      "default": ""
+    },
+    "apiLabelPath": {
+      "type": "string",
+      "default": ""
+    },
+    "apiValuePath": {
       "type": "string",
       "default": ""
     },
@@ -108,5 +177,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

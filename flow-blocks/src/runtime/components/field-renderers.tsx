@@ -17,6 +17,7 @@ import {
   Radio,
   RangeSlider,
   Rating,
+  MultiSelect,
   Select,
   SimpleGrid,
   Slider,
@@ -30,18 +31,25 @@ import {
   Textarea,
   UnstyledButton,
   VisuallyHidden,
+  RadioIconProps,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { I18n } from "aws-amplify/utils";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import type { FieldConfig, RuntimeFieldState } from "../../shared/types";
+import type {
+  FieldConfig,
+  FlowIconName,
+  FlowRatingSymbolName,
+  RuntimeFieldState,
+} from "../../shared/types";
+import { getAiSuggestionsInputScope } from "../ai/input-scope";
 import { buildAiSuggestionsInputSignature } from "../ai/prompt-builder";
 import { evaluateRule, getRuntimeKey } from "../conditional-engine";
 import { useFormField } from "../hooks/useFormField";
 import { useFormRuntime } from "../hooks/useFormRuntime";
 import { useOptionsData } from "../hooks/useOptionsData";
-import { validateValues } from "../validation";
+import { validateField } from "../validation";
 import { WizardContainer } from "./WizardContainer";
 
 function joinClassNames(
@@ -51,15 +59,167 @@ function joinClassNames(
 }
 
 function getBlockClassName(type: FieldConfig["type"], extraClassName?: string) {
-  return joinClassNames("flow-block", `flow-block--${type}`, extraClassName);
+  return joinClassNames("flow-block", `flow-block__${type}`, extraClassName);
 }
 
 function getControlClassName(type: string, extraClassName?: string) {
   return joinClassNames(
     "flow-control",
-    `flow-control--${type}`,
+    `flow-control__${type}`,
     extraClassName,
   );
+}
+
+function getFieldRenderKey(field: FieldConfig, path: number[]) {
+  return getRuntimeKey(field, path);
+}
+
+function resolveInputSize(field: { size?: string; inputSize?: string }) {
+  return field.inputSize || field.size;
+}
+
+function resolveMantineSize(size?: string) {
+  return size === "xs" ||
+    size === "sm" ||
+    size === "md" ||
+    size === "lg" ||
+    size === "xl"
+    ? size
+    : undefined;
+}
+
+function resolveFileCapture(capture?: string) {
+  if (capture === "user" || capture === "environment") {
+    return capture;
+  }
+
+  if (capture === "true") {
+    return true;
+  }
+
+  if (capture === "false") {
+    return false;
+  }
+
+  return undefined;
+}
+
+function FlowCheckIcon(props: RadioIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      {...props}
+    >
+      <path d="M5 12.5 9.5 17 19 7.5" />
+    </svg>
+  );
+}
+
+function FlowCrossIcon(props: RadioIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      {...props}
+    >
+      <path d="M7 7 17 17" />
+      <path d="M17 7 7 17" />
+    </svg>
+  );
+}
+
+function FlowMinusIcon(props: RadioIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      {...props}
+    >
+      <path d="M6 12h12" />
+    </svg>
+  );
+}
+
+function FlowDotIcon(props: RadioIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <circle cx="12" cy="12" r="5" />
+    </svg>
+  );
+}
+
+function getIndicatorIcon(icon?: FlowIconName) {
+  switch (icon) {
+    case "check":
+      return FlowCheckIcon;
+    case "x":
+      return FlowCrossIcon;
+    case "minus":
+      return FlowMinusIcon;
+    case "dot":
+      return FlowDotIcon;
+    default:
+      return undefined;
+  }
+}
+
+function getThumbIcon(icon?: FlowIconName) {
+  switch (icon) {
+    case "check":
+      return <span aria-hidden="true">✓</span>;
+    case "x":
+      return <span aria-hidden="true">✕</span>;
+    case "star":
+      return <span aria-hidden="true">★</span>;
+    case "heart":
+      return <span aria-hidden="true">♥</span>;
+    case "thumb-up":
+      return <span aria-hidden="true">👍</span>;
+    case "sun":
+      return <span aria-hidden="true">☀</span>;
+    case "moon":
+      return <span aria-hidden="true">☾</span>;
+    default:
+      return undefined;
+  }
+}
+
+function getRatingSymbol(symbol?: FlowRatingSymbolName, filled = true) {
+  switch (symbol) {
+    case "heart":
+      return <span aria-hidden="true">{filled ? "♥" : "♡"}</span>;
+    case "check":
+      return <span aria-hidden="true">✓</span>;
+    case "dot":
+      return <span aria-hidden="true">•</span>;
+    case "star":
+      return <span aria-hidden="true">{filled ? "★" : "☆"}</span>;
+    default:
+      return undefined;
+  }
+}
+
+function getLoaderSections(position: "left" | "right" = "right") {
+  const loader = <Loader size="xs" />;
+
+  return position === "left"
+    ? { leftSection: loader }
+    : { rightSection: loader };
+}
+
+function getRequiredLabel(label: string | undefined, required?: boolean) {
+  if (!label || !required) {
+    return label;
+  }
+
+  return label.endsWith("*") ? label : `${label} *`;
 }
 
 function FieldBlock({
@@ -85,11 +245,22 @@ function FieldMessage({
     <div
       className={joinClassNames(
         "flow-block-message",
-        `flow-block-message--${variant}`,
+        `flow-block-message__${variant}`,
       )}
     >
       {children}
     </div>
+  );
+}
+
+function OptionsLoadingIndicator() {
+  return (
+    <Group gap="xs" align="center">
+      <Loader size="xs" />
+      <Text size="sm" c="dimmed">
+        {I18n.get("Loading options...") || "Loading options..."}
+      </Text>
+    </Group>
   );
 }
 
@@ -333,7 +504,10 @@ function collectFieldsBeforeTarget(
   fields: FieldConfig[],
   targetRuntimeKey: string,
   values: Record<string, unknown>,
-  acc: Array<Extract<FieldConfig, { name: string }>>,
+  acc: Array<{
+    field: Extract<FieldConfig, { name: string }>;
+    runtimeKey: string;
+  }>,
   path: number[] = [],
 ): boolean {
   for (const [index, field] of fields.entries()) {
@@ -378,7 +552,7 @@ function collectFieldsBeforeTarget(
     }
 
     if (isNamedInteractiveField(field)) {
-      acc.push(field);
+      acc.push({ field, runtimeKey });
     }
   }
 
@@ -415,45 +589,56 @@ function getAiSuggestionPrerequisites(
   values: Record<string, unknown>,
   fieldStates: Record<string, RuntimeFieldState>,
 ) {
-  const precedingFields: Array<Extract<FieldConfig, { name: string }>> = [];
+  const precedingFields: Array<{
+    field: Extract<FieldConfig, { name: string }>;
+    runtimeKey: string;
+  }> = [];
   collectFieldsBeforeTarget(fields, targetRuntimeKey, values, precedingFields);
 
-  const visibleFields = precedingFields.filter((field) => {
-    const runtime = fieldStates[field.name];
+  const visibleFields = precedingFields.filter(({ runtimeKey }) => {
+    const runtime = fieldStates[runtimeKey];
     return runtime?.visible !== false && runtime?.enabled !== false;
   });
 
-  const requiredFields = visibleFields.filter((field) => {
-    const runtime = fieldStates[field.name];
+  const requiredFields = visibleFields.filter(({ field, runtimeKey }) => {
+    const runtime = fieldStates[runtimeKey];
     return Boolean(
       runtime?.required ?? ("required" in field && field.required),
     );
   });
 
-  const requiredErrors = validateValues(requiredFields, values, fieldStates);
+  const requiredFieldLabels = requiredFields
+    .filter(({ field, runtimeKey }) =>
+      Boolean(
+        validateField(field.name, fields, values, fieldStates, runtimeKey),
+      ),
+    )
+    .map(({ field }) => getFieldLabel(field));
   const descriptiveField =
     [...visibleFields]
       .reverse()
       .find(
-        (field) =>
+        ({ field, runtimeKey }) =>
           field.type === "textarea" &&
           Boolean(
-            fieldStates[field.name]?.required ??
+            fieldStates[runtimeKey]?.required ??
               ("required" in field && field.required),
           ),
       ) ||
-    [...visibleFields].reverse().find((field) => field.type === "textarea");
+    [...visibleFields].reverse().find(({ field }) => field.type === "textarea");
   const descriptiveFieldLabel = descriptiveField
-    ? getFieldLabel(descriptiveField)
+    ? getFieldLabel(descriptiveField.field)
     : undefined;
   const isDescriptiveReady = descriptiveField
-    ? !isMissingValue(descriptiveField, values[descriptiveField.name])
+    ? !isMissingValue(
+        descriptiveField.field,
+        values[descriptiveField.field.name],
+      )
     : true;
 
-  const missingRequiredLabels = requiredFields
-    .filter((field) => Boolean(requiredErrors[field.name]))
-    .map((field) => getFieldLabel(field))
-    .filter((label) => label !== descriptiveFieldLabel || isDescriptiveReady);
+  const missingRequiredLabels = requiredFieldLabels.filter(
+    (label) => label !== descriptiveFieldLabel || isDescriptiveReady,
+  );
 
   return {
     canRun: missingRequiredLabels.length === 0 && isDescriptiveReady,
@@ -597,12 +782,15 @@ function TextField({
         label={field.label}
         description={field.description}
         placeholder={field.placeholder}
+        pointer={field.pointer}
         required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        size={resolveInputSize(field)}
         value={String(value ?? "")}
         error={error}
         disabled={isPending || enabled === false}
         onChange={(event) => setValue(event.currentTarget.value)}
-        onBlur={() => validateField(field.name)}
+        onBlur={() => validateField(field.name, runtimeKey)}
       />
     </FieldBlock>
   );
@@ -627,13 +815,18 @@ function TextareaField({
         description={field.description}
         placeholder={field.placeholder}
         required={required ?? field.required}
+        withAsterisk={required ?? field.required}
         minRows={field.minRows ?? 3}
-        autosize
+        maxRows={field.maxRows}
+        autosize={field.autosize ?? true}
+        pointer={field.pointer}
+        resize={field.resize}
+        size={resolveInputSize(field)}
         value={String(value ?? "")}
         error={error}
         disabled={isPending || enabled === false}
         onChange={(event) => setValue(event.currentTarget.value)}
-        onBlur={() => validateField(field.name)}
+        onBlur={() => validateField(field.name, runtimeKey)}
       />
     </FieldBlock>
   );
@@ -653,29 +846,78 @@ function SelectField({
     options,
     isLoading,
     error: apiError,
+    search,
   } = useOptionsData(field, runtime);
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
   if (isHidden(runtime)) return null;
+
+  if (field.multiple) {
+    const selectedValues = Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === "string")
+      : [];
+
+    return (
+      <FieldBlock type="select">
+        <MultiSelect
+          className={getControlClassName("select")}
+          clearable={field.clearable}
+          label={field.label}
+          description={field.description}
+          placeholder={field.placeholder}
+          searchable={field.searchable || isAutocompleteSource}
+          limit={field.limit}
+          size={resolveInputSize(field)}
+          withCheckIcon={field.withCheckIcon}
+          withScrollArea={field.withScrollArea}
+          data={options}
+          value={selectedValues}
+          error={error || apiError}
+          required={required ?? field.required}
+          withAsterisk={required ?? field.required}
+          rightSection={isLoading ? <Loader size="xs" /> : undefined}
+          disabled={isPending || isLoading || enabled === false}
+          onChange={(nextValue) => setValue(nextValue)}
+          onSearchChange={search}
+          onBlur={() => validateField(field.name, runtimeKey)}
+          nothingFoundMessage={
+            isAutocompleteSource ? "Type to search..." : "No options"
+          }
+        />
+      </FieldBlock>
+    );
+  }
+
   return (
     <FieldBlock type="select">
       <Select
         className={getControlClassName("select")}
+        allowDeselect={field.allowDeselect}
+        autoSelectOnBlur={field.autoSelectOnBlur}
+        chevronColor={field.chevronColor || undefined}
+        clearable={field.clearable}
+        defaultDropdownOpened={field.defaultDropdownOpened}
+        limit={field.limit}
         label={field.label}
         description={field.description}
         placeholder={field.placeholder}
+        pointer={field.pointer}
         required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        searchable={field.searchable || isAutocompleteSource}
+        size={resolveInputSize(field)}
+        withCheckIcon={field.withCheckIcon}
+        withScrollArea={field.withScrollArea}
         data={options}
         value={String(value ?? "")}
         error={error || apiError}
+        rightSection={isLoading ? <Loader size="xs" /> : undefined}
         disabled={isPending || isLoading || enabled === false}
         onChange={(nextValue) => setValue(nextValue ?? "")}
-        onBlur={() => validateField(field.name)}
-        searchable={
-          (runtime?.optionsSource || field.optionsSource) === "autocomplete"
-        }
+        onSearchChange={search}
+        onBlur={() => validateField(field.name, runtimeKey)}
         nothingFoundMessage={
-          (runtime?.optionsSource || field.optionsSource) === "autocomplete"
-            ? "Type to search..."
-            : "No options"
+          isAutocompleteSource ? "Type to search..." : "No options"
         }
       />
     </FieldBlock>
@@ -696,13 +938,18 @@ function CheckboxField({
     <FieldBlock type="checkbox">
       <Checkbox
         className={getControlClassName("checkbox")}
-        label={field.label}
+        autoContrast={field.autoContrast}
+        label={getRequiredLabel(field.label, required ?? field.required)}
         description={field.description}
         checked={Boolean(value)}
+        color={field.color || undefined}
         error={error}
         disabled={isPending || enabled === false}
+        icon={getIndicatorIcon(field.icon)}
+        iconColor={field.iconColor || undefined}
         onChange={(event) => setValue(event.currentTarget.checked)}
         required={required ?? field.required}
+        size={field.size}
       />
     </FieldBlock>
   );
@@ -717,30 +964,63 @@ function CheckboxGroupField({
 }) {
   const { value, error, isPending, setValue, enabled, required, runtime } =
     useFormField(field.name, runtimeKey);
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    search,
+  } = useOptionsData(field, runtime);
+  const [searchValue, setSearchValue] = useState("");
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
   if (isHidden(runtime)) return null;
 
   const selectedValues = Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
 
+  const availableOptions = options.length
+    ? options
+    : Array.isArray(field.options)
+    ? field.options
+    : [];
+
+  const handleSearchChange = (nextValue: string) => {
+    setSearchValue(nextValue);
+    search(nextValue);
+  };
+
   return (
     <FieldBlock type="checkbox-group">
+      {isAutocompleteSource ? (
+        <TextInput
+          className={getControlClassName("checkbox-group-search")}
+          placeholder={I18n.get("Type to search...") || "Type to search..."}
+          value={searchValue}
+          disabled={isPending || isLoading || enabled === false}
+          onChange={(event) => handleSearchChange(event.currentTarget.value)}
+          mb="sm"
+        />
+      ) : null}
       <Checkbox.Group
         label={field.label}
         description={field.description}
+        withAsterisk={required ?? field.required}
         value={selectedValues}
-        error={error}
+        error={error || apiError}
         onChange={setValue}
       >
         <Stack gap="xs">
-          {(field.options || []).map((option) => (
+          {isLoading ? <OptionsLoadingIndicator /> : null}
+          {availableOptions.map((option) => (
             <Checkbox
               key={option.value}
               className={getControlClassName("checkbox-item")}
               value={option.value}
               label={option.label}
-              disabled={isPending || enabled === false}
+              disabled={isPending || isLoading || enabled === false}
               required={required ?? field.required}
+              size={field.size}
             />
           ))}
         </Stack>
@@ -767,12 +1047,14 @@ function DateField({
         label={field.label}
         description={field.description}
         placeholder={field.placeholder}
+        size={resolveMantineSize(field.size)}
         value={typeof value === "string" && value ? new Date(value) : null}
         error={error}
         required={required ?? field.required}
+        withAsterisk={required ?? field.required}
         disabled={isPending || enabled === false}
         onChange={(nextValue) => setValue(nextValue ?? "")}
-        onBlur={() => validateField(field.name)}
+        onBlur={() => validateField(field.name, runtimeKey)}
       />
     </FieldBlock>
   );
@@ -796,7 +1078,7 @@ function SaveDraftField({
         className={joinClassNames(
           getControlClassName("save-draft"),
           "flow-action-button",
-          "flow-action-button--save-draft",
+          "flow-action-button__save-draft",
         )}
         variant="outline"
         loading={isPending}
@@ -828,9 +1110,14 @@ function AiSuggestionsField({
     rejectAiSuggestions,
   } = useFormRuntime();
 
+  const aiInputScope = useMemo(
+    () => getAiSuggestionsInputScope(fields, runtimeKey, values, fieldStates),
+    [fieldStates, fields, runtimeKey, values],
+  );
+
   const inputSignature = useMemo(
-    () => buildAiSuggestionsInputSignature(values),
-    [values],
+    () => buildAiSuggestionsInputSignature(aiInputScope.values),
+    [aiInputScope],
   );
 
   useEffect(() => {
@@ -869,12 +1156,13 @@ function AiSuggestionsField({
     ) {
       return;
     }
-    void runAiSuggestions(field);
+    void runAiSuggestions(field, runtimeKey);
   }, [
     aiSuggestions.status,
     field,
     prerequisites.canRun,
     runAiSuggestions,
+    runtimeKey,
     runtime?.visible,
   ]);
 
@@ -891,6 +1179,7 @@ function AiSuggestionsField({
     "Accept this answer?";
   const continueLabel =
     field.continueLabel || I18n.get("Continue") || "Continue";
+  const skipLabel = I18n.get("Skip suggestions") || "Skip suggestions";
   const continueDescription =
     field.continueDescription ||
     I18n.get(
@@ -965,8 +1254,12 @@ function AiSuggestionsField({
               <Stack gap="xs">
                 <Button
                   variant="default"
-                  className="flow-ai-suggestions__trigger"
-                  onClick={() => void runAiSuggestions(field)}
+                  className={joinClassNames(
+                    getControlClassName("button"),
+                    "flow-action-button",
+                    "flow-ai-suggestions__trigger",
+                  )}
+                  onClick={() => void runAiSuggestions(field, runtimeKey)}
                   loading={isGenerating || isPending}
                   disabled={!prerequisites.canRun}
                 >
@@ -984,12 +1277,29 @@ function AiSuggestionsField({
               </Stack>
             ) : null}
             {isGenerating ? (
-              <Group gap="xs" className="flow-ai-suggestions__loading">
-                <Loader size="sm" />
-                <Text size="sm" fw={500}>
-                  {loadingLabel}
-                </Text>
-              </Group>
+              <Stack gap="xs">
+                <Group gap="xs" className="flow-ai-suggestions__loading">
+                  <Loader size="sm" />
+                  <Text size="sm" fw={500}>
+                    {loadingLabel}
+                  </Text>
+                </Group>
+                <Group>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className={joinClassNames(
+                      getControlClassName("button"),
+                      "flow-action-button",
+                      "flow-ai-suggestions__skip-button",
+                    )}
+                    onClick={() => rejectAiSuggestions()}
+                    disabled={aiSuggestions.status === "rejected"}
+                  >
+                    {skipLabel}
+                  </Button>
+                </Group>
+              </Stack>
             ) : null}
             {aiSuggestions.rawText ? (
               <Alert color="blue">{aiSuggestions.rawText}</Alert>
@@ -1116,7 +1426,12 @@ function AiSuggestionsField({
                       ) : null}
                       <Group>
                         <Button
-                          size="xs"
+                          size="sm"
+                          className={joinClassNames(
+                            getControlClassName("button"),
+                            "flow-action-button",
+                            "flow-ai-suggestions__accept-button",
+                          )}
                           onClick={() => acceptAiSuggestion(suggestion.id)}
                           disabled={aiSuggestions.status === "accepted"}
                         >
@@ -1164,9 +1479,13 @@ function AiSuggestionsField({
                 </Text>
                 <Group>
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="default"
-                    className="flow-ai-suggestions__continue-button"
+                    className={joinClassNames(
+                      getControlClassName("button"),
+                      "flow-action-button",
+                      "flow-ai-suggestions__continue-button",
+                    )}
                     onClick={() => rejectAiSuggestions()}
                     disabled={aiSuggestions.status === "rejected"}
                   >
@@ -1240,7 +1559,7 @@ function SubmitField({
         className={joinClassNames(
           getControlClassName("submit"),
           "flow-action-button",
-          "flow-action-button--submit",
+          "flow-action-button__submit",
         )}
         variant="filled"
         loading={isPending}
@@ -1272,9 +1591,16 @@ function StackContainer({
       align={field.align as React.CSSProperties["alignItems"]}
       justify={field.justify as React.CSSProperties["justifyContent"]}
     >
-      {field.children.map((child, index) => (
-        <FieldRenderer key={index} field={child} path={[...path, index]} />
-      ))}
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
     </Stack>
   );
 }
@@ -1297,10 +1623,19 @@ function GroupContainer({
       align={field.align as React.CSSProperties["alignItems"]}
       justify={field.justify as React.CSSProperties["justifyContent"]}
       grow={field.grow}
+      preventGrowOverflow={field.preventGrowOverflow}
+      wrap={field.wrap}
     >
-      {field.children.map((child, index) => (
-        <FieldRenderer key={index} field={child} path={[...path, index]} />
-      ))}
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
     </Group>
   );
 }
@@ -1320,12 +1655,26 @@ function GridContainer({
     <SimpleGrid
       className={getBlockClassName("grid")}
       cols={field.columns}
-      spacing={field.spacing}
+      spacing={field.gutter ?? field.spacing}
       verticalSpacing={field.verticalSpacing}
+      style={{
+        gridTemplateRows: field.rows
+          ? `repeat(${field.rows}, minmax(0, 1fr))`
+          : undefined,
+        justifyContent: field.justify,
+        overflow: field.overflow,
+      }}
     >
-      {field.children.map((child, index) => (
-        <FieldRenderer key={index} field={child} path={[...path, index]} />
-      ))}
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
     </SimpleGrid>
   );
 }
@@ -1344,7 +1693,9 @@ function SwitchField({
     <FieldBlock type="switch">
       <Switch
         className={getControlClassName("switch")}
-        label={field.label}
+        color={field.color || undefined}
+        label={getRequiredLabel(field.label, required ?? field.required)}
+        labelPosition={field.labelPosition}
         description={field.description}
         checked={Boolean(value)}
         error={error}
@@ -1353,6 +1704,9 @@ function SwitchField({
         onLabel={field.onLabel}
         offLabel={field.offLabel}
         required={required ?? field.required}
+        size={field.size}
+        thumbIcon={getThumbIcon(field.thumbIcon)}
+        withThumbIndicator={field.withThumbIndicator}
       />
     </FieldBlock>
   );
@@ -1373,18 +1727,32 @@ function NumberField({
     <FieldBlock type="number">
       <NumberInput
         className={getControlClassName("number")}
+        allowDecimal={field.allowDecimal}
+        allowLeadingZeros={field.allowLeadingZeros}
+        allowedDecimalSeparators={field.allowedDecimalSeparators}
+        clampBehavior={field.clampBehavior}
+        decimalScale={field.decimalScale}
+        decimalSeparator={field.decimalSeparator}
         label={field.label}
         description={field.description}
+        fixedDecimalScale={field.fixedDecimalScale}
+        hideControls={field.hideControls}
         placeholder={field.placeholder}
         min={field.min}
         max={field.max}
+        prefix={field.prefix}
         step={field.step}
+        suffix={field.suffix}
+        thousandSeparator={field.thousandSeparator}
+        thousandsGroupStyle={field.thousandsGroupStyle}
         value={typeof value === "number" ? value : undefined}
         error={error}
         required={required ?? field.required}
+        withAsterisk={required ?? field.required}
         disabled={isPending || enabled === false}
+        size={resolveInputSize(field)}
         onChange={setValue}
-        onBlur={() => validateField(field.name)}
+        onBlur={() => validateField(field.name, runtimeKey)}
       />
     </FieldBlock>
   );
@@ -1399,26 +1767,64 @@ function RadioField({
 }) {
   const { value, error, isPending, setValue, enabled, required, runtime } =
     useFormField(field.name, runtimeKey);
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    search,
+  } = useOptionsData(field, runtime);
+  const [searchValue, setSearchValue] = useState("");
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
   if (isHidden(runtime)) return null;
+
+  const availableOptions = options.length
+    ? options
+    : Array.isArray(field.options)
+    ? field.options
+    : [];
+
+  const handleSearchChange = (nextValue: string) => {
+    setSearchValue(nextValue);
+    search(nextValue);
+  };
+
   return (
     <FieldBlock type="radio">
+      {isAutocompleteSource ? (
+        <TextInput
+          className={getControlClassName("radio-search")}
+          placeholder={I18n.get("Type to search...") || "Type to search..."}
+          value={searchValue}
+          disabled={isPending || isLoading || enabled === false}
+          onChange={(event) => handleSearchChange(event.currentTarget.value)}
+          mb="sm"
+        />
+      ) : null}
       <Radio.Group
         className={getControlClassName("radio")}
         label={field.label}
         description={field.description}
+        withAsterisk={required ?? field.required}
         value={String(value ?? "")}
-        error={error}
+        error={error || apiError}
         required={required ?? field.required}
         onChange={setValue}
       >
         <Stack gap="xs">
-          {(field.options || []).map((option) => (
+          {isLoading ? <OptionsLoadingIndicator /> : null}
+          {availableOptions.map((option) => (
             <Radio
               key={option.value}
+              autoContrast={field.autoContrast}
               className={getControlClassName("radio-item")}
+              color={field.color || undefined}
+              icon={getIndicatorIcon(field.icon)}
+              iconColor={field.iconColor || undefined}
+              size={field.size}
               value={option.value}
               label={option.label}
-              disabled={isPending || enabled === false}
+              disabled={isPending || isLoading || enabled === false}
             />
           ))}
         </Stack>
@@ -1437,7 +1843,15 @@ function PasswordField({
   const { value, error, isPending, setValue, enabled, required, runtime } =
     useFormField(field.name, runtimeKey);
   const { validateField } = useFormRuntime();
+  const [uncontrolledVisible, setUncontrolledVisible] = useState(
+    field.defaultVisible ?? false,
+  );
   if (isHidden(runtime)) return null;
+
+  const loaderSections = field.loading
+    ? getLoaderSections(field.loadingPosition)
+    : {};
+
   return (
     <FieldBlock type="password">
       <PasswordInput
@@ -1445,13 +1859,19 @@ function PasswordField({
         label={field.label}
         description={field.description}
         placeholder={field.placeholder}
+        size={resolveInputSize(field)}
         value={String(value ?? "")}
         error={error}
         required={required ?? field.required}
+        withAsterisk={required ?? field.required}
         disabled={isPending || enabled === false}
-        visible={field.visible}
+        visible={field.visible ?? uncontrolledVisible}
+        onVisibilityChange={
+          field.visible === undefined ? setUncontrolledVisible : undefined
+        }
         onChange={(event) => setValue(event.currentTarget.value)}
-        onBlur={() => validateField(field.name)}
+        onBlur={() => validateField(field.name, runtimeKey)}
+        {...loaderSections}
       />
     </FieldBlock>
   );
@@ -1471,8 +1891,12 @@ function PinField({
     <FieldBlock type="pin">
       <PinInput
         className={getControlClassName("pin")}
+        gap={field.gap}
+        inputMode={field.inputMode}
         length={field.length}
         mask={field.mask}
+        placeholder={field.placeholder}
+        size={resolveMantineSize(field.size)}
         type={field.inputType === "number" ? "number" : "alphanumeric"}
         value={String(value ?? "")}
         disabled={isPending || enabled === false}
@@ -1502,14 +1926,22 @@ function ColorField({
     <FieldBlock type="color">
       <ColorInput
         className={getControlClassName("color")}
+        closeOnColorSwatchClick={field.closeOnColorSwatchClick}
+        disallowInput={field.disallowInput}
         label={field.label}
         description={field.description}
+        withAsterisk={field.required}
+        pointer={field.pointer}
+        size={field.size}
+        swatches={field.swatches}
+        swatchesPerRow={field.swatchesPerRow}
         value={String(value ?? "")}
         error={error}
         disabled={isPending || enabled === false}
         format={field.format}
         withPicker={field.withPicker}
         withEyeDropper={field.withEyeDropper}
+        withPreview={field.withPreview}
         onChange={setValue}
       />
     </FieldBlock>
@@ -1533,12 +1965,16 @@ function FileField({
         className={getControlClassName("file")}
         label={field.label}
         description={field.description}
+        withAsterisk={required ?? field.required}
         value={getFileInputValue(value)}
         error={error}
         required={required ?? field.required}
         disabled={isPending || enabled === false}
         accept={field.accept}
+        capture={resolveFileCapture(field.capture)}
+        clearable={field.clearable}
         multiple={field.multiple}
+        size={resolveInputSize(field)}
         onChange={setValue}
       />
       {uploadedFiles.length > 0 ? (
@@ -1569,10 +2005,19 @@ function SliderField({
     <FieldBlock type="slider">
       <Slider
         className={getControlClassName("slider")}
-        label={field.showLabelOnHover ? "" : undefined}
-        min={field.min}
-        max={field.max}
+        color={field.color || undefined}
+        domain={field.domain}
+        inverted={field.inverted}
+        labelAlwaysOn={field.labelAlwaysOn}
+        marks={field.marks}
+        min={field.domain?.[0] ?? field.min}
+        max={field.domain?.[1] ?? field.max}
+        precision={field.precision}
+        restrictToMarks={field.restrictToMarks}
+        showLabelOnHover={field.showLabelOnHover}
         step={field.step}
+        size={field.size}
+        thumbSize={field.thumbSize}
         value={typeof value === "number" ? value : field.min || 0}
         disabled={isPending || enabled === false}
         onChange={setValue as (value: number) => void}
@@ -1598,9 +2043,22 @@ function RangeSliderField({
     <FieldBlock type="rangeslider">
       <RangeSlider
         className={getControlClassName("rangeslider")}
-        min={field.min}
-        max={field.max}
+        color={field.color || undefined}
+        domain={field.domain}
+        inverted={field.inverted}
+        labelAlwaysOn={field.labelAlwaysOn}
+        marks={field.marks}
+        min={field.domain?.[0] ?? field.min}
+        max={field.domain?.[1] ?? field.max}
+        maxRange={field.maxRange}
+        minRange={field.minRange}
+        precision={field.precision}
+        pushOnOverlap={field.pushOnOverlap}
+        restrictToMarks={field.restrictToMarks}
+        showLabelOnHover={field.showLabelOnHover}
         step={field.step}
+        size={field.size}
+        thumbSize={field.thumbSize}
         value={
           Array.isArray(value)
             ? (value as [number, number])
@@ -1623,20 +2081,45 @@ function TagsField({
 }) {
   const { value, error, isPending, setValue, enabled, required, runtime } =
     useFormField(field.name, runtimeKey);
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    search,
+  } = useOptionsData(field, runtime);
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
   if (isHidden(runtime)) return null;
   return (
     <FieldBlock type="tags">
+      {(field.loading && field.loadingPosition === "left") || isLoading ? (
+        <Loader size="xs" />
+      ) : null}
       <TagsInput
         className={getControlClassName("tags")}
+        acceptValueOnBlur={field.acceptValueOnBlur}
+        allowDuplicates={field.allowDuplicates}
         label={field.label}
         description={field.description}
+        withAsterisk={required ?? field.required}
+        limit={field.limit}
+        maxDropdownHeight={field.maxDropdownHeight}
         placeholder={field.placeholder}
+        pointer={field.pointer}
+        size={resolveInputSize(field)}
+        splitChars={field.splitChars ? field.splitChars.split("") : undefined}
+        data={options}
         value={Array.isArray(value) ? (value as string[]) : []}
-        error={error}
+        error={error || apiError}
         required={required ?? field.required}
-        disabled={isPending || enabled === false}
+        disabled={isPending || isLoading || enabled === false}
+        withScrollArea={field.withScrollArea}
+        onSearchChange={isAutocompleteSource ? search : undefined}
         onChange={setValue as (value: string[]) => void}
       />
+      {(field.loading && field.loadingPosition !== "left") || isLoading ? (
+        <Loader size="xs" />
+      ) : null}
     </FieldBlock>
   );
 }
@@ -1657,8 +2140,13 @@ function RatingField({
     <FieldBlock type="rating">
       <Rating
         className={getControlClassName("rating")}
+        color={field.color || undefined}
         count={field.count}
+        emptySymbol={getRatingSymbol(field.emptySymbol, false)}
         fractions={field.fractions}
+        fullSymbol={getRatingSymbol(field.fullSymbol, true)}
+        highlightSelectedOnly={field.highlightSelectedOnly}
+        size={field.size}
         value={typeof value === "number" ? value : 0}
         readOnly={isPending || enabled === false}
         onChange={setValue as (value: number) => void}
@@ -1682,9 +2170,16 @@ function FieldsetContainer({
   return (
     <Fieldset className={getBlockClassName("fieldset")} legend={field.legend}>
       <Stack>
-        {field.children.map((child, index) => (
-          <FieldRenderer key={index} field={child} path={[...path, index]} />
-        ))}
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
       </Stack>
     </Fieldset>
   );
@@ -1701,29 +2196,42 @@ function CollapseContainer({
 }) {
   const runtime = useRuntimeByKey(runtimeKey);
   const [opened, setOpened] = useState(field.defaultOpened ?? false);
+  const isExpanded =
+    typeof field.expanded === "boolean" ? field.expanded : opened;
   if (isHidden(runtime)) return null;
   return (
     <Stack gap="xs" className={getBlockClassName("collapse")}>
       <UnstyledButton
         className="flow-collapse-toggle"
         type="button"
-        onClick={() => setOpened((current) => !current)}
-        aria-expanded={opened}
+        onClick={() => {
+          if (typeof field.expanded !== "boolean") {
+            setOpened((current) => !current);
+          }
+        }}
+        aria-expanded={isExpanded}
       >
         <Group justify="space-between" wrap="nowrap">
           <Text fw={500} className="flow-collapse-title">
             {field.title || I18n.get("Show more") || "Show more"}
           </Text>
           <Text size="sm" className="flow-collapse-icon">
-            {opened ? "-" : "+"}
+            {isExpanded ? "-" : "+"}
           </Text>
         </Group>
       </UnstyledButton>
-      <Collapse in={opened}>
+      <Collapse animateOpacity={field.animateOpacity} in={isExpanded}>
         <Stack>
-          {field.children.map((child, index) => (
-            <FieldRenderer key={index} field={child} path={[...path, index]} />
-          ))}
+          {field.children.map((child, index) => {
+            const childPath = [...path, index];
+            return (
+              <FieldRenderer
+                key={getFieldRenderKey(child, childPath)}
+                field={child}
+                path={childPath}
+              />
+            );
+          })}
         </Stack>
       </Collapse>
     </Stack>
@@ -1744,6 +2252,7 @@ function DividerElement({
       className={getBlockClassName("divider")}
       label={field.label}
       labelPosition={field.labelPosition}
+      orientation={field.orientation}
       size={field.size}
     />
   );
@@ -1762,9 +2271,16 @@ function VisuallyHiddenContainer({
   if (isHidden(runtime)) return null;
   return (
     <VisuallyHidden>
-      {field.children.map((child, index) => (
-        <FieldRenderer key={index} field={child} path={[...path, index]} />
-      ))}
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
     </VisuallyHidden>
   );
 }

@@ -12,9 +12,12 @@ export default function Save({
   const payload = {
     type: "checkbox-group",
     ...restAttributes,
-    options: parseOptions(
-      typeof optionsText === "string" ? optionsText : undefined,
-    ),
+    options:
+      !restAttributes.optionsSource || restAttributes.optionsSource === "static"
+        ? parseOptions(
+            typeof optionsText === "string" ? optionsText : undefined,
+          )
+        : undefined,
   };
 
   return (

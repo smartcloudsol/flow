@@ -42,16 +42,15 @@ export default function Edit({
             onChange={(successMessage) => setAttributes({ successMessage })}
           />
           <ToggleControl
-            label={__("Show title", TEXT_DOMAIN)}
-            checked={Boolean(attributes.showTitle ?? true)}
-            onChange={(showTitle) => setAttributes({ showTitle })}
-          />
-
-          <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
+            label={__("Show title", TEXT_DOMAIN)}
+            checked={Boolean(attributes.showTitle ?? true)}
+            onChange={(showTitle) => setAttributes({ showTitle })}
           />
         </PanelBody>
         <ConditionalLogicPanel

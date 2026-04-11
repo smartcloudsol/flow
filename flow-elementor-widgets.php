@@ -5,6 +5,8 @@
  * Provides Elementor widget for SmartCloud Flow Form block
  */
 
+namespace SmartCloud\WPSuite\Flow;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -49,15 +51,33 @@ add_action('elementor/elements/categories_registered', static function ($manager
 abstract class Flow_Base_Widget extends \Elementor\Widget_Base
 {
     protected static array $COLOR_MODES;
+    protected static array $SIZE_OPTIONS;
+    protected static array $BOOLEAN_OVERRIDE_OPTIONS;
 
     public function __construct($data = [], $args = null)
     {
         parent::__construct($data, $args);
 
         self::$COLOR_MODES = [
+            '' => __('Default', 'smartcloud-flow'),
             'auto' => __('System', 'smartcloud-flow'),
             'light' => __('Light', 'smartcloud-flow'),
             'dark' => __('Dark', 'smartcloud-flow'),
+        ];
+
+        self::$SIZE_OPTIONS = [
+            '' => __('Default', 'smartcloud-flow'),
+            'xs' => 'XS',
+            'sm' => 'SM',
+            'md' => 'MD',
+            'lg' => 'LG',
+            'xl' => 'XL',
+        ];
+
+        self::$BOOLEAN_OVERRIDE_OPTIONS = [
+            '' => __('Default', 'smartcloud-flow'),
+            'true' => __('True', 'smartcloud-flow'),
+            'false' => __('False', 'smartcloud-flow'),
         ];
     }
 
@@ -69,6 +89,8 @@ abstract class Flow_Base_Widget extends \Elementor\Widget_Base
 
 class Flow_Form_Widget extends Flow_Base_Widget
 {
+    private const FLOW_BLOCK_PREFIX = 'smartcloud-flow/';
+
     public function get_name()
     {
         return 'smartcloud_flow_form';
@@ -86,6 +108,8 @@ class Flow_Form_Widget extends Flow_Base_Widget
 
     protected function register_controls()
     {
+        $field_target_options = $this->get_pattern_override_target_options();
+
         $this->start_controls_section('pattern-block', ['label' => __('Pattern', 'smartcloud-flow')]);
         $options = [];
         $patterns = get_posts([
@@ -116,25 +140,34 @@ class Flow_Form_Widget extends Flow_Base_Widget
         $this->add_control('endpointPath', ['label' => __('Endpoint Path', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
         $this->add_control('hideFormOnSuccess', [
             'label' => __('Hide Form on Success', 'smartcloud-flow'),
-            'type' => \Elementor\Controls_Manager::SWITCHER,
-            'label_on' => __('Yes', 'smartcloud-flow'),
-            'label_off' => __('No', 'smartcloud-flow'),
-            'return_value' => 'yes',
-            'default' => 'yes',
-            'description' => __('Hide form fields after successful submission and only show the success message.', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'true' => [
+                    'title' => __('Yes', 'smartcloud-flow'),
+                    'icon' => 'eicon-check-circle-o',
+                ],
+                'false' => [
+                    'title' => __('No', 'smartcloud-flow'),
+                    'icon' => 'eicon-ban',
+                ],
+            ],
+            'default' => '',
+            'toggle' => true,
+            'description' => __('Leave both options unselected to inherit the pattern value. Select Yes or No only when you want to override it.', 'smartcloud-flow'),
         ]);
 
         $this->add_control('colorMode', [
             'label' => __('Color Mode', 'smartcloud-flow'),
             'type' => \Elementor\Controls_Manager::SELECT,
             'options' => self::$COLOR_MODES,
-            'default' => 'auto',
+            'default' => '',
         ]);
 
         $this->add_control('primaryColor', [
             'label' => __('Primary Color', 'smartcloud-flow'),
             'type' => \Elementor\Controls_Manager::SELECT,
             'options' => [
+                '' => __('Default', 'smartcloud-flow'),
                 'cyan' => __('Cyan', 'smartcloud-flow'),
                 'blue' => __('Blue', 'smartcloud-flow'),
                 'indigo' => __('Indigo', 'smartcloud-flow'),
@@ -152,7 +185,7 @@ class Flow_Form_Widget extends Flow_Base_Widget
                 'custom' => __('Custom', 'smartcloud-flow'),
             ],
             'description' => __('Mantine theme color name', 'smartcloud-flow'),
-            'default' => 'blue',
+            'default' => '',
 
         ]);
 
@@ -209,6 +242,74 @@ class Flow_Form_Widget extends Flow_Base_Widget
             'description' => __('Custom CSS for theming', 'smartcloud-flow'),
         ]);
 
+        $this->add_control('configYaml', [
+            'label' => __('Advanced Config (YAML)', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXTAREA,
+            'description' => __('Extra Flow config merged through the shortcode YAML body. Use this for fieldOverrides or other advanced Mantine props.', 'smartcloud-flow'),
+            'rows' => 10,
+        ]);
+
+        $this->end_controls_section();
+
+        $repeater = new \Elementor\Repeater();
+        $repeater->add_control('fieldKeyPreset', [
+            'label' => __('Field from schema', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT2,
+            'options' => $field_target_options,
+            'label_block' => true,
+            'description' => __('Generated from the selected Flow pattern, including nested containers and wizard steps. Name-based targets and explicit path targets are both listed.', 'smartcloud-flow'),
+        ]);
+        $repeater->add_control('fieldKey', [
+            'label' => __('Field name or path', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXT,
+            'description' => __('Manual fallback. Use a field name or parsed path like 0.2.1 if the schema list is empty or you need a custom target.', 'smartcloud-flow'),
+            'label_block' => true,
+        ]);
+        $repeater->add_control('size', [
+            'label' => __('Block size', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$SIZE_OPTIONS,
+            'default' => '',
+        ]);
+        $repeater->add_control('inputSize', [
+            'label' => __('Input size', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$SIZE_OPTIONS,
+            'default' => '',
+        ]);
+        $repeater->add_control('placeholder', [
+            'label' => __('Placeholder', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXT,
+            'description' => __('Common for text-like inputs.', 'smartcloud-flow'),
+        ]);
+        $repeater->add_control('description', [
+            'label' => __('Description', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXTAREA,
+            'description' => __('Help text shown below the field in the rendered form.', 'smartcloud-flow'),
+        ]);
+        $repeater->add_control('disabled', [
+            'label' => __('Disabled', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$BOOLEAN_OVERRIDE_OPTIONS,
+            'default' => '',
+            'description' => __('Applies broadly across interactive fields.', 'smartcloud-flow'),
+        ]);
+        $repeater->add_control('required', [
+            'label' => __('Required', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$BOOLEAN_OVERRIDE_OPTIONS,
+            'default' => '',
+            'description' => __('Shows the usual required marker where the target component supports it.', 'smartcloud-flow'),
+        ]);
+
+        $this->start_controls_section('field-overrides-block', ['label' => __('Field Overrides', 'smartcloud-flow')]);
+        $this->add_control('fieldOverrides', [
+            'label' => __('Common field overrides', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::REPEATER,
+            'fields' => $repeater->get_controls(),
+            'title_field' => '{{{ fieldKeyPreset || fieldKey || "override" }}}',
+            'description' => __('These controls generate fieldOverrides in the shortcode YAML. Duplicate targets are merged, so the later repeater row overrides earlier values for the same field.', 'smartcloud-flow'),
+        ]);
         $this->end_controls_section();
     }
 
@@ -289,6 +390,72 @@ class Flow_Form_Widget extends Flow_Base_Widget
             }
         }
 
+        if (!empty($all['fieldOverrides']) && is_array($all['fieldOverrides'])) {
+            $field_override_map = [];
+
+            foreach ($all['fieldOverrides'] as $override) {
+                if (!is_array($override)) {
+                    continue;
+                }
+
+                $field_key = isset($override['fieldKeyPreset']) && trim((string) $override['fieldKeyPreset']) !== ''
+                    ? trim((string) $override['fieldKeyPreset'])
+                    : (isset($override['fieldKey']) ? trim((string) $override['fieldKey']) : '');
+                if ($field_key === '') {
+                    continue;
+                }
+
+                $override_values = [];
+                foreach (['size', 'inputSize', 'placeholder', 'description'] as $scalar_key) {
+                    if (!empty($override[$scalar_key])) {
+                        $override_values[$scalar_key] = $override[$scalar_key];
+                    }
+                }
+
+                foreach (['disabled', 'required'] as $boolean_key) {
+                    if (($override[$boolean_key] ?? '') === 'true') {
+                        $override_values[$boolean_key] = true;
+                    } elseif (($override[$boolean_key] ?? '') === 'false') {
+                        $override_values[$boolean_key] = false;
+                    }
+                }
+
+                if (empty($override_values)) {
+                    continue;
+                }
+
+                $field_override_map[$field_key] = array_merge(
+                    $field_override_map[$field_key] ?? [],
+                    $override_values
+                );
+            }
+
+            if (!empty($field_override_map)) {
+                $field_override_lines = [];
+                foreach ($field_override_map as $field_key => $override_values) {
+                    $field_override_lines[] = '  ' . $this->yaml_encode_key((string) $field_key) . ':';
+                    foreach ($override_values as $key => $value) {
+                        $field_override_lines[] = '    ' . $key . ': ' . $this->yaml_encode_value($value);
+                    }
+                }
+
+                $yaml_parts[] = 'fieldOverrides:';
+                $yaml_parts = array_merge($yaml_parts, $field_override_lines);
+            }
+        }
+
+        if (!empty($all['configYaml'])) {
+            $config_yaml = trim($all['configYaml']);
+            if ($config_yaml !== '') {
+                if (!empty($yaml_parts)) {
+                    $yaml_parts[] = '';
+                }
+                foreach (explode("\n", $config_yaml) as $line) {
+                    $yaml_parts[] = rtrim($line, "\r");
+                }
+            }
+        }
+
         $body = !empty($yaml_parts) ? implode("\n", $yaml_parts) : '';
 
         smartcloud_flow_do_shortcode('smartcloud-flow-form', $atts, $body);
@@ -308,8 +475,122 @@ class Flow_Form_Widget extends Flow_Base_Widget
         }
         return $value;
     }
+
+    private function yaml_encode_key(string $value): string
+    {
+        if (preg_match('/^[A-Za-z0-9_.-]+$/', $value)) {
+            return $value;
+        }
+
+        return '"' . str_replace('"', '\\"', $value) . '"';
+    }
+
+    private function get_pattern_override_target_options(): array
+    {
+        $pattern_id = $this->get_selected_pattern_id();
+        if (!$pattern_id) {
+            return [
+                '' => __('Select a pattern to load schema targets', 'smartcloud-flow'),
+            ];
+        }
+
+        $pattern_post = get_post($pattern_id);
+        if (!$pattern_post || $pattern_post->post_type !== 'wp_block') {
+            return [
+                '' => __('Pattern not found', 'smartcloud-flow'),
+            ];
+        }
+
+        $blocks = parse_blocks((string) $pattern_post->post_content);
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') !== 'smartcloud-flow/form') {
+                continue;
+            }
+
+            $options = [];
+            $this->collect_override_target_options($block['innerBlocks'] ?? [], [], $options);
+
+            return !empty($options)
+                ? $options
+                : ['' => __('No Flow fields found in pattern', 'smartcloud-flow')];
+        }
+
+        return [
+            '' => __('Pattern does not contain a Flow form', 'smartcloud-flow'),
+        ];
+    }
+
+    private function get_selected_pattern_id(): int
+    {
+        $settings = [];
+        if (isset($this->data['settings']) && is_array($this->data['settings'])) {
+            $settings = $this->data['settings'];
+        }
+        $pattern_id = isset($settings['pattern']) ? intval($settings['pattern']) : 0;
+        return $pattern_id > 0 ? $pattern_id : 0;
+    }
+
+    private function collect_override_target_options(array $blocks, array $path, array &$options): void
+    {
+        foreach ($blocks as $index => $block) {
+            if (!is_array($block)) {
+                continue;
+            }
+
+            $block_name = isset($block['blockName']) ? (string) $block['blockName'] : '';
+            if ($block_name === '' || strpos($block_name, self::FLOW_BLOCK_PREFIX) !== 0) {
+                continue;
+            }
+
+            $current_path = array_merge($path, [intval($index) + 1]);
+            $attrs = (isset($block['attrs']) && is_array($block['attrs'])) ? $block['attrs'] : [];
+
+            if ($block_name !== 'smartcloud-flow/form') {
+                $type = substr($block_name, strlen(self::FLOW_BLOCK_PREFIX));
+                $path_key = implode('.', $current_path);
+                $target_key = isset($attrs['name']) && is_string($attrs['name']) && trim($attrs['name']) !== ''
+                    ? trim($attrs['name'])
+                    : $path_key;
+
+                $summary = $this->describe_flow_block_target($type, $attrs, $path_key);
+                $options[$target_key] = sprintf(
+                    /* translators: Formats and assigns a localized option label to the $options array for a given target key. The label is generated using the provided $summary, which represents a brief description or summary of the target or path. The formatted string includes the summary followed by "[name]", and is localized using the 'smartcloud-flow' text domain for translation support.*/
+                    __('%s [name]', 'smartcloud-flow'),
+                    $summary
+                );
+
+                if ($target_key !== $path_key) {
+                    $options[$path_key] = sprintf(
+                        /* translators: Formats and assigns a localized option label to the $options array for a given target key. The label is generated using the provided $summary, which represents a brief description or summary of the target or path. The formatted string includes the summary followed by "[path]", and is localized using the 'smartcloud-flow' text domain for translation support. */
+                        __('%s [path]', 'smartcloud-flow'),
+                        $summary
+                    );
+                }
+            }
+
+            $inner_blocks = (isset($block['innerBlocks']) && is_array($block['innerBlocks']))
+                ? $block['innerBlocks']
+                : [];
+            if (!empty($inner_blocks)) {
+                $this->collect_override_target_options($inner_blocks, $current_path, $options);
+            }
+        }
+    }
+
+    private function describe_flow_block_target(string $type, array $attrs, string $path_key): string
+    {
+        $base_label = ucwords(str_replace(['-', '_'], ' ', $type));
+
+        foreach (['label', 'title', 'legend', 'name'] as $attr_key) {
+            if (isset($attrs[$attr_key]) && is_string($attrs[$attr_key]) && trim($attrs[$attr_key]) !== '') {
+                return sprintf('%s: %s (%s)', $base_label, trim($attrs[$attr_key]), $path_key);
+            }
+        }
+
+        return sprintf('%s (%s)', $base_label, $path_key);
+    }
 }
 
 add_action('elementor/widgets/register', static function ($m) {
-    $m->register(new \Flow_Form_Widget());
+    $m->register(new \SmartCloud\WPSuite\Flow\Flow_Form_Widget());
 });

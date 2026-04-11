@@ -34,13 +34,93 @@
       "type": "string",
       "default": ""
     },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
     "required": {
       "type": "boolean",
       "default": false
     },
+    "autoContrast": {
+      "type": "boolean",
+      "default": false
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "icon": {
+      "type": "string",
+      "default": ""
+    },
+    "iconColor": {
+      "type": "string",
+      "default": ""
+    },
     "optionsText": {
       "type": "string",
       "default": "Option 1|option1\nOption 2|option2"
+    },
+    "optionsSource": {
+      "type": "string",
+      "default": "static",
+      "enum": [
+        "static",
+        "api",
+        "autocomplete"
+      ]
+    },
+    "apiEndpoint": {
+      "type": "string",
+      "default": ""
+    },
+    "apiMethod": {
+      "type": "string",
+      "default": "GET"
+    },
+    "apiHeaders": {
+      "type": "string",
+      "default": "{}"
+    },
+    "apiParams": {
+      "type": "string",
+      "default": "{}"
+    },
+    "apiResponsePath": {
+      "type": "string",
+      "default": ""
+    },
+    "apiLabelPath": {
+      "type": "string",
+      "default": ""
+    },
+    "apiValuePath": {
+      "type": "string",
+      "default": ""
+    },
+    "cacheEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "cacheTTL": {
+      "type": "number",
+      "default": 3600
+    },
+    "autocompleteMinChars": {
+      "type": "number",
+      "default": 2
+    },
+    "autocompleteDebounce": {
+      "type": "number",
+      "default": 300
+    },
+    "searchParam": {
+      "type": "string",
+      "default": "q"
     },
     "conditionalLogic": {
       "type": "object",
@@ -55,5 +135,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

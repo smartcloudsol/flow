@@ -38,6 +38,14 @@
       "type": "string",
       "default": "flex-start"
     },
+    "preventGrowOverflow": {
+      "type": "boolean",
+      "default": true
+    },
+    "wrap": {
+      "type": "string",
+      "default": "wrap"
+    },
     "conditionalLogic": {
       "type": "object",
       "default": {
@@ -51,5 +59,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

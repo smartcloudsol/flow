@@ -34,6 +34,14 @@
       "type": "string",
       "default": ""
     },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
     "required": {
       "type": "boolean",
       "default": false
@@ -45,6 +53,21 @@
     "fractions": {
       "type": "number",
       "default": 1
+    },
+    "emptySymbol": {
+      "type": "string",
+      "default": ""
+    },
+    "fullSymbol": {
+      "type": "string",
+      "default": ""
+    },
+    "highlightSelectedOnly": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
     },
     "conditionalLogic": {
       "type": "object",
@@ -59,5 +82,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

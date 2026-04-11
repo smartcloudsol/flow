@@ -6,6 +6,7 @@ import {
 } from "@wordpress/block-editor";
 import {
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -15,6 +16,11 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import {
+  LOADING_POSITION_OPTIONS,
+  SIZE_OPTIONS,
+} from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { PasswordFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -84,24 +90,97 @@ export default function Edit({
             onChange={(placeholder) => setAttributes({ placeholder })}
             help={__("Placeholder text shown inside the input.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={attributes.required}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Block size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__(
+              "Controls the outer field width and spacing.",
+              TEXT_DOMAIN,
+            )}
           />
-          <ToggleControl
-            label={__("Visible by default", TEXT_DOMAIN)}
-            checked={attributes.visible}
-            onChange={(visible) => setAttributes({ visible })}
-            help={__("Show password by default.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Input size", TEXT_DOMAIN)}
+            value={attributes.inputSize ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(inputSize) =>
+              setAttributes({ inputSize: inputSize || undefined })
+            }
+            help={__(
+              "Controls the input height and internal spacing.",
+              TEXT_DOMAIN,
+            )}
           />
-
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __("Prevent users from editing this field.", TEXT_DOMAIN),
+              },
+              {
+                key: "defaultVisible",
+                label: __("Default visible", TEXT_DOMAIN),
+                checked: Boolean(attributes.defaultVisible),
+                onChange: (defaultVisible) => setAttributes({ defaultVisible }),
+                help: __(
+                  "Keep the password characters visible when the field first loads.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "visible",
+                label: __("Visible by default", TEXT_DOMAIN),
+                checked: Boolean(attributes.visible),
+                onChange: (visible) => setAttributes({ visible }),
+                help: __("Show password by default.", TEXT_DOMAIN),
+              },
+              {
+                key: "loading",
+                label: __("Loading state", TEXT_DOMAIN),
+                checked: Boolean(attributes.loading),
+                onChange: (loading) => setAttributes({ loading }),
+                help: __("Render the field in a loading state.", TEXT_DOMAIN),
+              },
+            ]}
+          />
+          <SelectControl
+            label={__("Loading position", TEXT_DOMAIN)}
+            value={attributes.loadingPosition ?? "right"}
+            options={LOADING_POSITION_OPTIONS}
+            onChange={(loadingPosition) =>
+              setAttributes({
+                loadingPosition:
+                  loadingPosition as PasswordFieldAttributes["loadingPosition"],
+              })
+            }
+            help={__(
+              "Places the loading indicator before or after the input text.",
+              TEXT_DOMAIN,
+            )}
           />
         </PanelBody>
         <ConditionalLogicPanel

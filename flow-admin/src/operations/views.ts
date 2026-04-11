@@ -1,9 +1,6 @@
 import type { AdminView } from "../api/types";
 
-export type OperationsView = Extract<
-  AdminView,
-  "submissions" | "templates" | "workflows"
->;
+export type OperationsView = Extract<AdminView, "submissions" | "workflows">;
 
 export interface OperationsViewDefinition {
   title: string;
@@ -13,7 +10,6 @@ export interface OperationsViewDefinition {
 
 export const OPERATIONS_VIEW_ORDER: OperationsView[] = [
   "submissions",
-  "templates",
   "workflows",
 ];
 
@@ -27,16 +23,10 @@ export const OPERATIONS_VIEW_DEFINITIONS: Record<
       "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.",
     scrollToId: "submissions",
   },
-  templates: {
-    title: "Email Templates",
-    description:
-      "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.",
-    scrollToId: "templates",
-  },
   workflows: {
-    title: "Automated Workflows",
+    title: "Workflows",
     description:
-      "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.",
+      "Use Process Maps as the main orchestration surface, then fall back to Advanced CRUD for workflows, webhook endpoints, and templates when needed.",
     scrollToId: "workflows",
   },
 };

@@ -21,6 +21,43 @@ if (!window.__smartcloudFlowMountedForms) {
 
 const mountedForms = window.__smartcloudFlowMountedForms;
 
+function isFormRoot(element: HTMLElement): boolean {
+  return (
+    element.classList.contains("smartcloud-flow-form") &&
+    typeof element.dataset.config === "string"
+  );
+}
+
+function getConfigContainer(element: HTMLElement): HTMLElement | null {
+  const configContainers = element.querySelectorAll<HTMLElement>(
+    ".smartcloud-flow-form__config",
+  );
+
+  return configContainers[configContainers.length - 1] || null;
+}
+
+function getConfigSignature(element: HTMLElement): string {
+  const configContainer = getConfigContainer(element);
+  if (!configContainer) {
+    return "";
+  }
+
+  return configContainer.innerHTML;
+}
+
+function isConfigReady(element: HTMLElement): boolean {
+  const configContainer = getConfigContainer(element);
+  if (!configContainer) {
+    return false;
+  }
+
+  return Boolean(
+    configContainer.querySelector(
+      "[data-smartcloud-flow-form-field], [data-smartcloud-flow-form-state]",
+    ),
+  );
+}
+
 // Generate unique ID for form element if it doesn't have one
 function ensureFormId(element: HTMLElement): string {
   if (!element.id) {
@@ -37,10 +74,22 @@ async function mountForm(id: string) {
     console.warn(`[Flow] Form element not found: ${id}`);
     return;
   }
+  if (!isFormRoot(element)) {
+    console.warn(`[Flow] Ignoring non-root form mount target: ${id}`);
+    return;
+  }
+  if (!isConfigReady(element)) {
+    window.setTimeout(() => {
+      void mountForm(id);
+    }, 100);
+    return;
+  }
+
+  const configSignature = getConfigSignature(element);
+  const previousSignature = element.dataset.smartcloudFlowConfigSignature || "";
 
   // Check if there's an existing mount for this form (could be a Promise or a handle)
   const existing = mountedForms.get(id);
-
   if (existing) {
     // If it's a Promise, it's currently being mounted
     if (existing instanceof Promise) {
@@ -49,7 +98,10 @@ async function mountForm(id: string) {
     }
 
     // If it's a handle, verify the target element matches
-    if (existing.container === element) {
+    if (
+      existing.container === element &&
+      previousSignature === configSignature
+    ) {
       return; // Already mounted to the correct target, skip
     } else {
       // Target changed, unmount old one first
@@ -59,8 +111,15 @@ async function mountForm(id: string) {
   }
 
   // Check if already mounted (legacy double-check with jQuery data)
-  if (jQuery(element).data("rendered")) {
+  if (
+    jQuery(element).data("rendered") &&
+    previousSignature === configSignature
+  ) {
     return;
+  }
+
+  if (jQuery(element).data("rendered")) {
+    jQuery(element).removeData("rendered");
   }
 
   const mountNode = element.querySelector<HTMLElement>(
@@ -77,26 +136,33 @@ async function mountForm(id: string) {
 
   // Create a Promise for the mount operation and store it immediately
   const mountPromise = (async () => {
-    await waitForFlowReady();
+    try {
+      await waitForFlowReady();
 
-    // Parse form data
-    const parsed = parseFormElement(element);
+      // Parse form data
+      const parsed = parseFormElement(element);
 
-    // Render form with shadow DOM isolation
-    const handle = await renderForm({
-      target: element,
-      form: parsed.form,
-      fields: parsed.fields,
-      states: parsed.states,
-    });
+      // Render form with shadow DOM isolation
+      const handle = await renderForm({
+        target: element,
+        form: parsed.form,
+        fields: parsed.fields,
+        states: parsed.states,
+      });
 
-    // Replace the promise with the actual handle
-    mountedForms.set(id, handle);
+      // Replace the promise with the actual handle
+      mountedForms.set(id, handle);
 
-    mountNode.dataset.mounted = "true";
-    jQuery(element).data("rendered", "true");
+      element.dataset.smartcloudFlowConfigSignature = configSignature;
+      mountNode.dataset.mounted = "true";
+      jQuery(element).data("rendered", "true");
 
-    return handle;
+      return handle;
+    } catch (error) {
+      mountedForms.delete(id);
+      console.error("[Flow Debug] mountForm failed", { id, error });
+      throw error;
+    }
   })();
 
   // Store the promise immediately to prevent duplicate mounts
@@ -123,13 +189,13 @@ if (document.readyState === "loading") {
     "DOMContentLoaded",
     () => {
       document
-        .querySelectorAll<HTMLElement>(".smartcloud-flow-form")
+        .querySelectorAll<HTMLElement>(".smartcloud-flow-form[data-config]")
         .forEach(ensureFormId);
     },
     { once: true },
   );
 } else {
   document
-    .querySelectorAll<HTMLElement>(".smartcloud-flow-form")
+    .querySelectorAll<HTMLElement>(".smartcloud-flow-form[data-config]")
     .forEach(ensureFormId);
 }

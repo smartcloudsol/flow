@@ -34,6 +34,25 @@
       "type": "string",
       "default": ""
     },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "domain": {
+      "type": "array"
+    },
+    "inverted": {
+      "type": "boolean",
+      "default": false
+    },
+    "labelAlwaysOn": {
+      "type": "boolean",
+      "default": false
+    },
     "required": {
       "type": "boolean",
       "default": false
@@ -54,9 +73,26 @@
       "type": "boolean",
       "default": false
     },
+    "marksData": {
+      "type": "array",
+      "default": []
+    },
+    "precision": {
+      "type": "number"
+    },
+    "restrictToMarks": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
     "showLabelOnHover": {
       "type": "boolean",
       "default": true
+    },
+    "thumbSize": {
+      "type": "number"
     },
     "conditionalLogic": {
       "type": "object",
@@ -71,5 +107,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

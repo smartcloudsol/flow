@@ -9,10 +9,12 @@ import {
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import { DIVIDER_ORIENTATION_OPTIONS } from "../shared/mantine-editor-options";
 
 interface DividerAttributes {
   label?: string;
   labelPosition?: string;
+  orientation?: string;
   size?: string;
   hidden?: boolean;
   conditionalLogic?: unknown;
@@ -66,6 +68,12 @@ export default function Edit({
             options={SIZE_OPTIONS}
             onChange={(size) => setAttributes({ size })}
             help={__("Divider thickness.", TEXT_DOMAIN)}
+          />
+          <SelectControl
+            label={__("Orientation", TEXT_DOMAIN)}
+            value={attributes.orientation ?? "horizontal"}
+            options={DIVIDER_ORIENTATION_OPTIONS}
+            onChange={(orientation) => setAttributes({ orientation })}
           />
 
           <ToggleControl

@@ -13,6 +13,8 @@ import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
 import type { ConditionalAttributes } from "../shared/types";
 
 interface CollapseAttributes extends ConditionalAttributes {
+  animateOpacity?: boolean;
+  expanded?: boolean;
   title?: string;
   defaultOpened?: boolean;
 }
@@ -53,17 +55,30 @@ export default function Edit({
             help={__("Collapse trigger text.", TEXT_DOMAIN)}
           />
           <ToggleControl
+            label={__("Hidden", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hidden)}
+            onChange={(hidden) => setAttributes({ hidden })}
+            help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
             label={__("Default opened", TEXT_DOMAIN)}
             checked={attributes.defaultOpened}
             onChange={(defaultOpened) => setAttributes({ defaultOpened })}
             help={__("Open by default.", TEXT_DOMAIN)}
           />
-
           <ToggleControl
-            label={__("Hidden", TEXT_DOMAIN)}
-            checked={Boolean(attributes.hidden)}
-            onChange={(hidden) => setAttributes({ hidden })}
-            help={__("Hide this block by default.", TEXT_DOMAIN)}
+            label={__("Animate opacity", TEXT_DOMAIN)}
+            checked={attributes.animateOpacity ?? true}
+            onChange={(animateOpacity) => setAttributes({ animateOpacity })}
+          />
+          <ToggleControl
+            label={__("Expanded", TEXT_DOMAIN)}
+            checked={Boolean(attributes.expanded)}
+            onChange={(expanded) => setAttributes({ expanded })}
+            help={__(
+              "Force the collapse to stay open on the frontend.",
+              TEXT_DOMAIN,
+            )}
           />
         </PanelBody>
         <ConditionalLogicPanel

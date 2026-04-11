@@ -6,6 +6,7 @@ import {
 } from "@wordpress/block-editor";
 import {
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -15,6 +16,8 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import { SIZE_OPTIONS } from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { DateFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -87,18 +90,40 @@ export default function Edit({
               TEXT_DOMAIN,
             )}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={Boolean(attributes.required)}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__("Controls the input size and spacing.", TEXT_DOMAIN)}
           />
-
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __("Prevent users from editing this field.", TEXT_DOMAIN),
+              },
+            ]}
           />
         </PanelBody>
         <ConditionalLogicPanel

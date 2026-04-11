@@ -34,6 +34,18 @@
       "type": "string",
       "default": ""
     },
+    "closeOnColorSwatchClick": {
+      "type": "boolean",
+      "default": false
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "disallowInput": {
+      "type": "boolean",
+      "default": false
+    },
     "required": {
       "type": "boolean",
       "default": false
@@ -42,6 +54,20 @@
       "type": "string",
       "default": "hex"
     },
+    "pointer": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
+    "swatches": {
+      "type": "array",
+      "default": []
+    },
+    "swatchesPerRow": {
+      "type": "number"
+    },
     "withPicker": {
       "type": "boolean",
       "default": true
@@ -49,6 +75,10 @@
     "withEyeDropper": {
       "type": "boolean",
       "default": false
+    },
+    "withPreview": {
+      "type": "boolean",
+      "default": true
     },
     "conditionalLogic": {
       "type": "object",
@@ -63,5 +93,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

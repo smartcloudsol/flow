@@ -7,6 +7,7 @@ import {
 import {
   __experimentalNumberControl as NumberControl,
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -16,6 +17,16 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import {
+  CLAMP_BEHAVIOR_OPTIONS,
+  SIZE_OPTIONS,
+  THOUSANDS_GROUP_STYLE_OPTIONS,
+} from "../shared/mantine-editor-options";
+import {
+  parseDelimitedList,
+  serializeDelimitedList,
+} from "../shared/mantine-prop-utils";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { NumberFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -85,18 +96,58 @@ export default function Edit({
             onChange={(placeholder) => setAttributes({ placeholder })}
             help={__("Placeholder text shown inside the input.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={attributes.required}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Block size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__(
+              "Controls the outer field width and spacing.",
+              TEXT_DOMAIN,
+            )}
           />
-
+          <SelectControl
+            label={__("Input size", TEXT_DOMAIN)}
+            value={attributes.inputSize ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(inputSize) =>
+              setAttributes({ inputSize: inputSize || undefined })
+            }
+            help={__(
+              "Controls the input height and internal spacing.",
+              TEXT_DOMAIN,
+            )}
+          />
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __("Prevent users from editing this field.", TEXT_DOMAIN),
+              },
+            ]}
           />
         </PanelBody>
         <PanelBody
@@ -146,6 +197,112 @@ export default function Edit({
             checked={attributes.allowDecimal ?? true}
             onChange={(allowDecimal) => setAttributes({ allowDecimal })}
             help={__("Allow decimal values.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
+            label={__("Allow leading zeros", TEXT_DOMAIN)}
+            checked={Boolean(attributes.allowLeadingZeros)}
+            onChange={(allowLeadingZeros) =>
+              setAttributes({ allowLeadingZeros })
+            }
+            help={__(
+              "Keep leading zeros instead of trimming them automatically.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Allowed decimal separators", TEXT_DOMAIN)}
+            value={serializeDelimitedList(attributes.allowedDecimalSeparators)}
+            onChange={(value) =>
+              setAttributes({
+                allowedDecimalSeparators: parseDelimitedList(value),
+              })
+            }
+            help={__("Comma or newline separated characters.", TEXT_DOMAIN)}
+          />
+          <SelectControl
+            label={__("Clamp behavior", TEXT_DOMAIN)}
+            value={attributes.clampBehavior ?? "blur"}
+            options={CLAMP_BEHAVIOR_OPTIONS}
+            onChange={(clampBehavior) =>
+              setAttributes({
+                clampBehavior:
+                  clampBehavior as NumberFieldAttributes["clampBehavior"],
+              })
+            }
+            help={__(
+              "Controls when values outside min or max get corrected.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Decimal separator", TEXT_DOMAIN)}
+            value={attributes.decimalSeparator ?? "."}
+            onChange={(decimalSeparator) => setAttributes({ decimalSeparator })}
+            help={__(
+              "Character used for decimal values, for example dot or comma.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <ToggleControl
+            label={__("Fixed decimal scale", TEXT_DOMAIN)}
+            checked={Boolean(attributes.fixedDecimalScale)}
+            onChange={(fixedDecimalScale) =>
+              setAttributes({ fixedDecimalScale })
+            }
+            help={__(
+              "Always show the configured number of decimal places.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <ToggleControl
+            label={__("Hide controls", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hideControls)}
+            onChange={(hideControls) => setAttributes({ hideControls })}
+            help={__(
+              "Hide the built-in increment and decrement buttons.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Prefix", TEXT_DOMAIN)}
+            value={attributes.prefix ?? ""}
+            onChange={(prefix) => setAttributes({ prefix })}
+            help={__("Text shown before the numeric value.", TEXT_DOMAIN)}
+          />
+          <NumberControl
+            label={__("Start value", TEXT_DOMAIN)}
+            value={attributes.startValue}
+            onChange={(value) =>
+              setAttributes({ startValue: value ? Number(value) : undefined })
+            }
+          />
+          <TextControl
+            label={__("Suffix", TEXT_DOMAIN)}
+            value={attributes.suffix ?? ""}
+            onChange={(suffix) => setAttributes({ suffix })}
+            help={__("Text shown after the numeric value.", TEXT_DOMAIN)}
+          />
+          <TextControl
+            label={__("Thousand separator", TEXT_DOMAIN)}
+            value={attributes.thousandSeparator ?? ""}
+            onChange={(thousandSeparator) =>
+              setAttributes({ thousandSeparator })
+            }
+            help={__(
+              "Character used to visually group large numbers.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <SelectControl
+            label={__("Thousands group style", TEXT_DOMAIN)}
+            value={attributes.thousandsGroupStyle ?? "none"}
+            options={THOUSANDS_GROUP_STYLE_OPTIONS}
+            onChange={(thousandsGroupStyle) =>
+              setAttributes({
+                thousandsGroupStyle:
+                  thousandsGroupStyle as NumberFieldAttributes["thousandsGroupStyle"],
+              })
+            }
           />
         </PanelBody>
         <ConditionalLogicPanel

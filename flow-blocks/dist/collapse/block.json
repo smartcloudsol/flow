@@ -26,9 +26,16 @@
       "type": "string",
       "default": "Show more"
     },
+    "animateOpacity": {
+      "type": "boolean",
+      "default": true
+    },
     "defaultOpened": {
       "type": "boolean",
       "default": false
+    },
+    "expanded": {
+      "type": "boolean"
     },
     "conditionalLogic": {
       "type": "object",
@@ -43,5 +50,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

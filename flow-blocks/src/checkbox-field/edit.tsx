@@ -6,6 +6,7 @@ import {
 } from "@wordpress/block-editor";
 import {
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -15,6 +16,11 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import {
+  FLOW_ICON_OPTIONS,
+  SIZE_OPTIONS,
+} from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { CheckboxFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -84,12 +90,71 @@ export default function Edit({
             onChange={(checkedLabel) => setAttributes({ checkedLabel })}
             help={__("Text displayed when checkbox is checked.", TEXT_DOMAIN)}
           />
-
+          <SelectControl
+            label={__("Size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__("Controls the option size and spacing.", TEXT_DOMAIN)}
+          />
+          <TextControl
+            label={__("Color", TEXT_DOMAIN)}
+            value={attributes.color ?? ""}
+            onChange={(color) => setAttributes({ color })}
+            help={__(
+              "Overrides the accent color of the checkbox.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <SelectControl
+            label={__("Icon", TEXT_DOMAIN)}
+            value={attributes.icon ?? ""}
+            options={FLOW_ICON_OPTIONS}
+            onChange={(icon) => setAttributes({ icon: icon || undefined })}
+            help={__(
+              "Selects the icon used for the checked state.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Icon color", TEXT_DOMAIN)}
+            value={attributes.iconColor ?? ""}
+            onChange={(iconColor) => setAttributes({ iconColor })}
+            help={__("Overrides the selected icon color.", TEXT_DOMAIN)}
+          />
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __(
+                  "Prevent users from changing this field.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "autoContrast",
+                label: __("Auto contrast", TEXT_DOMAIN),
+                checked: Boolean(attributes.autoContrast),
+                onChange: (autoContrast) => setAttributes({ autoContrast }),
+                help: __(
+                  "Automatically adjust icon contrast against the chosen color.",
+                  TEXT_DOMAIN,
+                ),
+              },
+            ]}
           />
         </PanelBody>
         <ConditionalLogicPanel

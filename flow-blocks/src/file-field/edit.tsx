@@ -6,6 +6,7 @@ import {
 } from "@wordpress/block-editor";
 import {
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -16,6 +17,8 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import { SIZE_OPTIONS } from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { FileFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -85,17 +88,92 @@ export default function Edit({
             onChange={(accept) => setAttributes({ accept })}
             help={__("Accepted file types (e.g., image/*,.pdf)", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={attributes.required}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <TextControl
+            label={__("Capture", TEXT_DOMAIN)}
+            value={attributes.capture ?? ""}
+            onChange={(capture) =>
+              setAttributes({
+                capture: (capture ||
+                  undefined) as FileFieldAttributes["capture"],
+              })
+            }
+            help={__(
+              "Optional device capture hint, e.g. user or environment.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <SelectControl
+            label={__("Block size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__(
+              "Controls the outer field width and spacing.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <SelectControl
+            label={__("Input size", TEXT_DOMAIN)}
+            value={attributes.inputSize ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(inputSize) =>
+              setAttributes({ inputSize: inputSize || undefined })
+            }
+            help={__(
+              "Controls the input height and internal spacing.",
+              TEXT_DOMAIN,
+            )}
           />
           <ToggleControl
-            label={__("Multiple files", TEXT_DOMAIN)}
-            checked={attributes.multiple}
-            onChange={(multiple) => setAttributes({ multiple })}
-            help={__("Allow multiple file uploads.", TEXT_DOMAIN)}
+            label={__("Hidden", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hidden)}
+            onChange={(hidden) => setAttributes({ hidden })}
+            help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={3}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "multiple",
+                label: __("Multiple files", TEXT_DOMAIN),
+                checked: Boolean(attributes.multiple),
+                onChange: (multiple) => setAttributes({ multiple }),
+                help: __("Allow multiple file uploads.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __(
+                  "Prevent users from uploading files in this field.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "clearable",
+                label: __("Clearable", TEXT_DOMAIN),
+                checked: Boolean(attributes.clearable),
+                onChange: (clearable) => setAttributes({ clearable }),
+                help: __(
+                  "Allow removing an already selected file before submission.",
+                  TEXT_DOMAIN,
+                ),
+              },
+            ]}
           />
           <NumberControl
             label={__("Max file size (MB)", TEXT_DOMAIN)}
@@ -115,13 +193,6 @@ export default function Edit({
               "Maximum number of files (when multiple is enabled).",
               TEXT_DOMAIN,
             )}
-          />
-
-          <ToggleControl
-            label={__("Hidden", TEXT_DOMAIN)}
-            checked={Boolean(attributes.hidden)}
-            onChange={(hidden) => setAttributes({ hidden })}
-            help={__("Hide this block by default.", TEXT_DOMAIN)}
           />
         </PanelBody>
         <ConditionalLogicPanel

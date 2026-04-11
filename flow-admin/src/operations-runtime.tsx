@@ -21,7 +21,7 @@ import {
 } from "./operations/i18n";
 import OperationsRuntimeApp from "./components/OperationsRuntimeApp";
 
-type OperationsTab = "submissions" | "templates" | "workflows";
+type OperationsTab = "submissions" | "workflows";
 
 export interface RenderOperationsHandle {
   container: HTMLDivElement;
@@ -349,6 +349,26 @@ async function mountOperationsTarget(
     ".smartcloud-flow-operations-shadow-root",
   );
 
+  const ensureShadowStylesheet = async (
+    href: string,
+    id: string,
+  ): Promise<void> => {
+    if (shadow.querySelector(`#${id}`)) {
+      return;
+    }
+
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = href;
+
+    await new Promise<void>((resolve) => {
+      link.onload = () => resolve();
+      link.onerror = () => resolve();
+      shadow.appendChild(link);
+    });
+  };
+
   if (!rootEl) {
     shadow.innerHTML = "";
 
@@ -365,15 +385,14 @@ async function mountOperationsTarget(
       : "";
 
     if (pluginUrl) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = `${pluginUrl}admin/operations-runtime.css${pluginVersion}`;
-
-      await new Promise<void>((resolve) => {
-        link.onload = () => resolve();
-        link.onerror = () => resolve();
-        shadow.appendChild(link);
-      });
+      await ensureShadowStylesheet(
+        `${pluginUrl}admin/operations-runtime.css${pluginVersion}`,
+        "smartcloud-flow-operations-runtime-css",
+      );
+      await ensureShadowStylesheet(
+        `${pluginUrl}admin/style-operations-runtime.css${pluginVersion}`,
+        "smartcloud-flow-operations-runtime-style-css",
+      );
     }
 
     shadowCleanups.set(target, mirrorHeadStylesIntoShadow(shadow));

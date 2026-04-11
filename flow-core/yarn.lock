@@ -993,10 +993,10 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.59.0.tgz#4584a8a87b29188a4c1fe987a9fcf701e256d86c"
   integrity sha512-2HRCml6OztYXyJXAvdDXPKcawukWY2GpR5/nxKp4iBgiO3wcoEGkAaqctIbZcNB6KlUQBIqt8VYkNSj2397EfA==
 
-"@smart-cloud/gatey-core@^2.2.2":
-  version "2.2.2"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.2.2.tgz#518b6ed4112e11fece3213cfe3a58c9e203b0e67"
-  integrity sha512-bC5A6OBNEUUFDp3v+onw88WKSRdpVV4v7JY2/MVnKds2ore1wJNhDcoRmkSyPo2yfuHJ214sJOLxTjRozOairg==
+"@smart-cloud/gatey-core@^2.2.7":
+  version "2.2.7"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.2.7.tgz#07d7e0964c075ac28863166ceebf95c273971b5b"
+  integrity sha512-CbEVt8Qwjw/UUHThx30cVM4A6u6dnY74o0ZgBpZbKKJascC+2fiy1g0n6Hi2BmuRBakWdEdT0BWsx10QW0vQZg==
   dependencies:
     "@smart-cloud/wpsuite-core" "^2.2.10"
 

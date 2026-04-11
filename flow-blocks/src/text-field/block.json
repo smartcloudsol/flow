@@ -34,7 +34,21 @@
       "type": "string",
       "default": ""
     },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
     "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "inputSize": {
+      "type": "string"
+    },
+    "pointer": {
       "type": "boolean",
       "default": false
     },
@@ -73,5 +87,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

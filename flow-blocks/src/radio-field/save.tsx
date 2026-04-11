@@ -13,7 +13,10 @@ export default function Save({
   const payload = {
     type: "radio",
     ...restAttributes,
-    options: parseOptions(optionsText as string | undefined),
+    options:
+      !restAttributes.optionsSource || restAttributes.optionsSource === "static"
+        ? parseOptions(optionsText as string | undefined)
+        : undefined,
   };
 
   return (

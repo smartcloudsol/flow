@@ -33,7 +33,6 @@ function normalizeToArray(value: unknown): unknown[] {
 }
 
 export function getRuntimeKey(field: FieldConfig, path: number[]): string {
-  if ("name" in field && field.name) return field.name;
   return `${field.type}:${path.join(".")}`;
 }
 
@@ -135,10 +134,11 @@ export function evaluateRule(
 
 function getDefaultRuntimeState(field: FieldConfig): RuntimeFieldState {
   const selectLike = field as Partial<SelectFieldConfig>;
+  const appearance = field as Partial<{ disabled?: boolean }>;
 
   return {
     visible: !field.hidden,
-    enabled: !nonInteractiveTypes.has(field.type),
+    enabled: !nonInteractiveTypes.has(field.type) && !appearance.disabled,
     required: "required" in field ? Boolean(field.required) : undefined,
     options: Array.isArray(selectLike.options) ? selectLike.options : undefined,
     optionsSource: selectLike.optionsSource,
@@ -147,6 +147,8 @@ function getDefaultRuntimeState(field: FieldConfig): RuntimeFieldState {
     apiHeaders: selectLike.apiHeaders,
     apiParams: selectLike.apiParams,
     apiResponsePath: selectLike.apiResponsePath,
+    apiLabelPath: selectLike.apiLabelPath,
+    apiValuePath: selectLike.apiValuePath,
     cacheEnabled: selectLike.cacheEnabled,
     cacheTTL: selectLike.cacheTTL,
     autocompleteMinChars: selectLike.autocompleteMinChars,
@@ -242,6 +244,8 @@ export function buildRuntimeFieldStates(
           current.apiHeaders = rule.then.params?.apiHeaders;
           current.apiParams = rule.then.params?.apiParams;
           current.apiResponsePath = rule.then.params?.apiResponsePath;
+          current.apiLabelPath = rule.then.params?.apiLabelPath;
+          current.apiValuePath = rule.then.params?.apiValuePath;
           current.cacheEnabled = rule.then.params?.cacheEnabled;
           current.cacheTTL = rule.then.params?.cacheTTL;
           current.autocompleteMinChars = rule.then.params?.autocompleteMinChars;

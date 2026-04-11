@@ -6,6 +6,7 @@ import {
 } from "@wordpress/block-editor";
 import {
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -15,6 +16,12 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import {
+  FLOW_ICON_OPTIONS,
+  LABEL_POSITION_OPTIONS,
+  SIZE_OPTIONS,
+} from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { SwitchFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -90,18 +97,87 @@ export default function Edit({
             onChange={(offLabel) => setAttributes({ offLabel })}
             help={__("Text displayed when switch is off.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={attributes.required}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__("Controls the switch size and spacing.", TEXT_DOMAIN)}
           />
-
+          <TextControl
+            label={__("Color", TEXT_DOMAIN)}
+            value={attributes.color ?? ""}
+            onChange={(color) => setAttributes({ color })}
+            help={__("Overrides the active switch color.", TEXT_DOMAIN)}
+          />
+          <SelectControl
+            label={__("Label position", TEXT_DOMAIN)}
+            value={attributes.labelPosition ?? "right"}
+            options={LABEL_POSITION_OPTIONS}
+            onChange={(labelPosition) =>
+              setAttributes({
+                labelPosition:
+                  labelPosition as SwitchFieldAttributes["labelPosition"],
+              })
+            }
+            help={__(
+              "Places the label to the left or right of the switch.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <SelectControl
+            label={__("Thumb icon", TEXT_DOMAIN)}
+            value={attributes.thumbIcon ?? ""}
+            options={FLOW_ICON_OPTIONS}
+            onChange={(thumbIcon) =>
+              setAttributes({ thumbIcon: thumbIcon || undefined })
+            }
+            help={__(
+              "Selects the icon displayed inside the switch thumb.",
+              TEXT_DOMAIN,
+            )}
+          />
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __(
+                  "Prevent users from changing this field.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "withThumbIndicator",
+                label: __("Thumb indicator", TEXT_DOMAIN),
+                checked: Boolean(attributes.withThumbIndicator),
+                onChange: (withThumbIndicator) =>
+                  setAttributes({ withThumbIndicator }),
+                help: __(
+                  "Show a visual indicator inside the switch thumb.",
+                  TEXT_DOMAIN,
+                ),
+              },
+            ]}
           />
         </PanelBody>
         <ConditionalLogicPanel

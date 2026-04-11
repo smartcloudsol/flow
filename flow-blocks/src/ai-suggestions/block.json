@@ -16,6 +16,10 @@
   "icon": "lightbulb",
   "description": "Generate AI-powered suggestions from current form values.",
   "attributes": {
+    "promptOverride": {
+      "type": "string",
+      "default": ""
+    },
     "presetId": {
       "type": "string",
       "default": ""
@@ -70,5 +74,6 @@
   },
   "supports": {
     "html": false
-  }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

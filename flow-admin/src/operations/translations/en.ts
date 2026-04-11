@@ -1,67 +1,36 @@
 export const enDict: Record<string, string> = {
   "A descriptive name for the workflow": "A descriptive name for the workflow",
-  "A descriptive name for this webhook endpoint":
-    "A descriptive name for this webhook endpoint",
-  "A friendly name for this event in Zapier":
-    "A friendly name for this event in Zapier",
   Accepted: "Accepted",
-  "Action Invoked - When a manual action is triggered":
-    "Action Invoked - When a manual action is triggered",
   "Action invoked successfully": "Action invoked successfully",
+  "Action Key": "Action Key",
   "Action Type": "Action Type",
   Actions: "Actions",
   Actor: "Actor",
   "Add Condition": "Add Condition",
-  "Add custom fields to the Zapier payload":
-    "Add custom fields to the Zapier payload",
   "Add Event": "Add Event",
   "Add Header": "Add Header",
   "Add Step": "Add Step",
-  "Add submission ID, form ID, status, and timestamps":
-    "Add submission ID, form ID, status, and timestamps",
-  "Add workflow ID and step info to event":
-    "Add workflow ID and step info to event",
   "Additional Fields (JSON, optional)": "Additional Fields (JSON, optional)",
-  "admin@example.com, manager@example.com":
-    "admin@example.com, manager@example.com",
+  Advanced: "Advanced",
+  "Advanced automation entities": "Advanced automation entities",
   "AI Agent": "AI Agent",
-  "AI Agent Completed - After AI processing finishes":
-    "AI Agent Completed - After AI processing finishes",
-  "AI Agent Failed - When AI processing errors":
-    "AI Agent Failed - When AI processing errors",
   "AI Suggestions": "AI Suggestions",
   "All forms": "All forms",
-  "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or transformations.":
-    "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or transformations.",
-  "Allow the model to fetch and ground answers from explicit HTTPS URLs.":
-    "Allow the model to fetch and ground answers from explicit HTTPS URLs.",
   "Always run when the trigger matches": "Always run when the trigger matches",
   Answer: "Answer",
-  "Answer the request using the submission context and any available knowledge base evidence.":
-    "Answer the request using the submission context and any available knowledge base evidence.",
   Any: "Any",
   "Appears in:": "Appears in:",
   "archive@example.com": "archive@example.com",
-  "Auto - model decides if a tool is needed":
-    "Auto - model decides if a tool is needed",
   "Automated Workflows": "Automated Workflows",
-  "Backoff multiplier": "Backoff multiplier",
   "Backoff Multiplier": "Backoff Multiplier",
+  "Backoff multiplier": "Backoff multiplier",
   "BCC (optional)": "BCC (optional)",
   "Call Webhook": "Call Webhook",
   Cancel: "Cancel",
   "CC (optional)": "CC (optional)",
-  "Change submission status after successful event publish":
-    "Change submission status after successful event publish",
-  "Change submission status immediately after the AI request event is published":
-    "Change submission status immediately after the AI request event is published",
-  "Choose a form to see field-specific template variables":
-    "Choose a form to see field-specific template variables",
   "Choose a template": "Choose a template",
   "Choose webhook endpoint (optional)": "Choose webhook endpoint (optional)",
   Classify: "Classify",
-  "Classify the submission and explain briefly why that classification fits.":
-    "Classify the submission and explain briefly why that classification fits.",
   Clear: "Clear",
   Code: "Code",
   "Code Interpreter": "Code Interpreter",
@@ -72,16 +41,9 @@ export const enDict: Record<string, string> = {
   Condition: "Condition",
   "Configuration (JSON)": "Configuration (JSON)",
   Contains: "Contains",
-  "Controls how Bedrock may use the enabled tools below.":
-    "Controls how Bedrock may use the enabled tools below.",
-  "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.":
-    "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.",
-  "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.":
-    "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.",
   Created: "Created",
   "Created At": "Created At",
-  "CRUD and preview follow the OpenAPI contract directly: list responses return items, create/update return the full template object, and preview returns subject, htmlBody, and textBody.":
-    "CRUD and preview follow the OpenAPI contract directly: list responses return items, create/update return the full template object, and preview returns subject, htmlBody, and textBody.",
+  "CRM lead intake webhook": "CRM lead intake webhook",
   "Current submission status": "Current submission status",
   "Current webhook payload": "Current webhook payload",
   "Current workflow payload": "Current workflow payload",
@@ -91,6 +53,7 @@ export const enDict: Record<string, string> = {
   default: "default",
   "Delay/Wait": "Delay/Wait",
   Delete: "Delete",
+  "Delete step": "Delete step",
   "Delete submission": "Delete submission",
   "Delete template": "Delete template",
   "Delete webhook endpoint": "Delete webhook endpoint",
@@ -114,18 +77,14 @@ export const enDict: Record<string, string> = {
   "Edit Template Variable": "Edit Template Variable",
   Email: "Email",
   "Email associated with submission": "Email associated with submission",
-  "Email subject line (Handlebars variables supported)":
-    "Email subject line (Handlebars variables supported)",
   "Email Template": "Email Template",
-  "Email templates": "Email templates",
   "Email Templates": "Email Templates",
+  "Email templates": "Email templates",
   "en, hu, de": "en, hu, de",
   "Enable reasoning": "Enable reasoning",
   "Enable retry on failure": "Enable retry on failure",
   Enabled: "Enabled",
   "Enabled Tools": "Enabled Tools",
-  "Enables Bedrock reasoning config for this step.":
-    "Enables Bedrock reasoning config for this step.",
   "Ends With": "Ends With",
   Engine: "Engine",
   Equals: "Equals",
@@ -134,18 +93,14 @@ export const enDict: Record<string, string> = {
   "Event Name": "Event Name",
   "Event Source": "Event Source",
   "Event timeline": "Event timeline",
+  "Event Type": "Event Type",
   "EventBridge Event": "EventBridge Event",
   Events: "Events",
-  "Exponential backoff factor (2 = double delay each retry)":
-    "Exponential backoff factor (2 = double delay each retry)",
   "Extract structured data": "Extract structured data",
-  "Extract the requested structured data from the submission and return only supported values.":
-    "Extract the requested structured data from the submission and return only supported values.",
+  "Failed to create linked entity": "Failed to create linked entity",
   "Failed to load template": "Failed to load template",
   Field: "Field",
   "Flow Operations": "Flow Operations",
-  "For status-based workflows, choose whether the workflow should run every time the matching status is reached, or only the first time per submission.":
-    "For status-based workflows, choose whether the workflow should run every time the matching status is reached, or only the first time per submission.",
   Form: "Form",
   "Form field:": "Form field:",
   "Form ID": "Form ID",
@@ -155,11 +110,7 @@ export const enDict: Record<string, string> = {
   "From email": "From email",
   "From name": "From name",
   "Full Submission Data": "Full Submission Data",
-  "Get this URL from your Zapier webhook trigger":
-    "Get this URL from your Zapier webhook trigger",
   "Greater Than": "Greater Than",
-  "has an invalid Response Constraint JSON schema.":
-    "has an invalid Response Constraint JSON schema.",
   "Header name": "Header name",
   "Header value": "Header value",
   Headers: "Headers",
@@ -167,12 +118,6 @@ export const enDict: Record<string, string> = {
   Hide: "Hide",
   "Hide details": "Hide details",
   High: "High",
-  "High-level intent passed to the AI agent":
-    "High-level intent passed to the AI agent",
-  "How long to wait before the next step":
-    "How long to wait before the next step",
-  "How many times to retry failed deliveries":
-    "How many times to retry failed deliveries",
   "How to construct the event payload": "How to construct the event payload",
   "HTML body": "HTML body",
   "HTTP Method": "HTTP Method",
@@ -182,10 +127,6 @@ export const enDict: Record<string, string> = {
   "Include workflow metadata": "Include workflow metadata",
   "Insert Variable": "Insert Variable",
   "Internal notes": "Internal notes",
-  "Internal notes to add to the submission":
-    "Internal notes to add to the submission",
-  "Internal tags for categorization and filtering":
-    "Internal tags for categorization and filtering",
   "Internal updates": "Internal updates",
   "Is Empty": "Is Empty",
   "Is Not Empty": "Is Not Empty",
@@ -197,30 +138,26 @@ export const enDict: Record<string, string> = {
   "Language code": "Language code",
   "lead.requested": "lead.requested",
   "Leave empty to disable signing": "Leave empty to disable signing",
-  "Leave empty to use default event bus":
-    "Leave empty to use default event bus",
-  "Leave empty to use the backend default KB configuration":
-    "Leave empty to use the backend default KB configuration",
   "Less Than": "Less Than",
+  "Load more": "Load more",
   loaded: "loaded",
   "Loading editor...": "Loading editor...",
   "Loading template...": "Loading template...",
   "Loading…": "Loading…",
   Locale: "Locale",
   Low: "Low",
-  "Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported.":
-    "Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported.",
   "Manual workflow actions": "Manual workflow actions",
   "Mark completed": "Mark completed",
   "Mark resolved": "Mark resolved",
   "Mark seen": "Mark seen",
-  "Max attempts": "Max attempts",
   "Max Attempts": "Max Attempts",
+  "Max attempts": "Max attempts",
   "Maximum retrieved KB chunks": "Maximum retrieved KB chunks",
   Medium: "Medium",
   "Merged (Submission + Custom)": "Merged (Submission + Custom)",
   Metadata: "Metadata",
   Mode: "Mode",
+  "More available": "More available",
   Name: "Name",
   "Name of the form": "Name of the form",
   "Name of the site": "Name of the site",
@@ -231,89 +168,56 @@ export const enDict: Record<string, string> = {
   "New webhook": "New webhook",
   "New workflow": "New workflow",
   No: "No",
-  "No conditions set - workflow will run on every trigger event":
-    "No conditions set - workflow will run on every trigger event",
   "No data": "No data",
-  "No enabled manual actions were found for the current submission status.":
-    "No enabled manual actions were found for the current submission status.",
   "No events configured": "No events configured",
-  "No events returned for this submission.":
-    "No events returned for this submission.",
   "No headers configured": "No headers configured",
   "No metadata": "No metadata",
-  "No steps configured - add a step to define what happens when the workflow triggers":
-    "No steps configured - add a step to define what happens when the workflow triggers",
   "noreply@example.com": "noreply@example.com",
   "Not Contains": "Not Contains",
   "Not Equals": "Not Equals",
   "Not used": "Not used",
-  "Note: All conditions must be satisfied (AND logic)":
-    "Note: All conditions must be satisfied (AND logic)",
-  "Note: Delays are useful for rate limiting or waiting for external processes":
-    "Note: Delays are useful for rate limiting or waiting for external processes",
   "Notes (optional)": "Notes (optional)",
+  Next: "Next",
   "Open in new tab": "Open in new tab",
   Operator: "Operator",
-  "Optional description of this email template's purpose":
-    "Optional description of this email template's purpose",
-  "Optional description of what this webhook is used for":
-    "Optional description of what this webhook is used for",
-  "Optional description of what this workflow does":
-    "Optional description of what this workflow does",
-  "Optional secret for HMAC signature verification":
-    "Optional secret for HMAC signature verification",
-  "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.":
-    "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.",
+  "Order confirmation email": "Order confirmation email",
   Other: "Other",
   "Payload Mode": "Payload Mode",
   "Press Enter to add a tag": "Press Enter to add a tag",
+  Previous: "Previous",
   Preview: "Preview",
   Primary: "Primary",
-  "Primary label": "Primary label",
   "Primary Label": "Primary Label",
-  "Private notes visible only to administrators":
-    "Private notes visible only to administrators",
+  "Primary label": "Primary label",
   "PRO Feature": "PRO Feature",
+  "Process Maps": "Process Maps",
+  "Process-map step triggers": "Process-map step triggers",
   "Prompt Text": "Prompt Text",
   Ran: "Ran",
   "Reasoning Effort": "Reasoning Effort",
   "Recipient Email": "Recipient Email",
-  "Reference form (for field suggestions)":
-    "Reference form (for field suggestions)",
   "Rendered preview": "Rendered preview",
+  "Rendering model": "Rendering model",
   "Repeat policy": "Repeat policy",
   "Reply address": "Reply address",
   "Reply-to": "Reply-to",
   "Request Body (JSON)": "Request Body (JSON)",
-  "Require tool use - model must use one enabled tool":
-    "Require tool use - model must use one enabled tool",
-  "Response Constraint (JSON schema, optional)":
-    "Response Constraint (JSON schema, optional)",
   "Response Schema Presets": "Response Schema Presets",
-  "Return a server-side fallback when the model asks for interactive browser or desktop control.":
-    "Return a server-side fallback when the model asks for interactive browser or desktop control.",
   "Reviewed / Continued": "Reviewed / Continued",
   "Run action": "Run action",
   "Run manual workflow action": "Run manual workflow action",
-  "Run only the first time per submission":
-    "Run only the first time per submission",
   Save: "Save",
   "Save internal fields": "Save internal fields",
   "Save template": "Save template",
   "Save webhook": "Save webhook",
   "Save workflow": "Save workflow",
+  "Screen structure": "Screen structure",
   Search: "Search",
   "Select a form to see its fields": "Select a form to see its fields",
-  "Select a predefined webhook or leave empty for inline URL":
-    "Select a predefined webhook or leave empty for inline URL",
   "Select date": "Select date",
   "Select form": "Select form",
-  "Select the template to use for this email":
-    "Select the template to use for this email",
   Selected: "Selected",
   "Selected suggestion ID": "Selected suggestion ID",
-  "Send all submission fields to Zapier":
-    "Send all submission fields to Zapier",
   "Send Email": "Send Email",
   "Sender display name": "Sender display name",
   "Sender email address": "Sender email address",
@@ -322,31 +226,28 @@ export const enDict: Record<string, string> = {
   "Signing secret": "Signing secret",
   "Site Name": "Site Name",
   "smartcloud.flow": "smartcloud.flow",
+  "Source Channel": "Source Channel",
+  "Source System": "Source System",
   "Sources used": "Sources used",
   "Starts With": "Starts With",
   Status: "Status",
   "Status updated by workflow": "Status updated by workflow",
   Step: "Step",
+  "Step for workflow": "Step for workflow",
   Steps: "Steps",
   Subject: "Subject",
   Submission: "Submission",
-  "Submission Created - When a new form is submitted":
-    "Submission Created - When a new form is submitted",
   "Submission creation date": "Submission creation date",
   "Submission Data": "Submission Data",
   "Submission deleted": "Submission deleted",
   "Submission Email": "Submission Email",
   "Submission Fields": "Submission Fields",
   "Submission updated": "Submission updated",
-  "Submission Updated - When submission status or fields change":
-    "Submission Updated - When submission status or fields change",
   "submission.fields.name": "submission.fields.name",
   Submissions: "Submissions",
   "Submitted fields": "Submitted fields",
   Suggestions: "Suggestions",
   Summarize: "Summarize",
-  "Summarize the submission context concisely and highlight the most important points.":
-    "Summarize the submission context concisely and highlight the most important points.",
   Summary: "Summary",
   "support@example.com": "support@example.com",
   "System Prompt": "System Prompt",
@@ -357,84 +258,43 @@ export const enDict: Record<string, string> = {
   "Template engine": "Template engine",
   "Template key": "Template key",
   "Template saved": "Template saved",
+  "Thank you {{submission.fields.name | there}} for your submission":
+    "Thank you {{submission.fields.name | there}} for your submission",
   "Text body": "Text body",
-  "Thank you {{fullName}} for your submission":
-    "Thank you {{fullName}} for your submission",
   "The endpoint to send the webhook to": "The endpoint to send the webhook to",
-  "The endpoint where webhook events will be sent":
-    "The endpoint where webhook events will be sent",
-  "The schema is currently invalid JSON. Fix the editor content before saving.":
-    "The schema is currently invalid JSON. Fix the editor content before saving.",
-  "The source identifier for the event (default: smartcloud.flow)":
-    "The source identifier for the event (default: smartcloud.flow)",
   "The status to set on the submission": "The status to set on the submission",
-  "The type of event to publish (required)":
-    "The type of event to publish (required)",
-  "The workflow screen now also includes webhook endpoint management because the backend exposes both /admin/workflows and /admin/webhook-endpoints as first-class admin resources.":
-    "The workflow screen now also includes webhook endpoint management because the backend exposes both /admin/workflows and /admin/webhook-endpoints as first-class admin resources.",
-  "This action publishes an event to EventBridge. Configure AWS EventBridge rules in your account to route events to Lambda, Step Functions, or other targets.":
-    "This action publishes an event to EventBridge. Configure AWS EventBridge rules in your account to route events to Lambda, Step Functions, or other targets.",
-  "This feature is available in the PRO version of the plugin.":
-    "This feature is available in the PRO version of the plugin.",
-  "This site is not connected to a backend workspace yet.":
-    "This site is not connected to a backend workspace yet.",
-  "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.":
-    "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.",
-  "This submission does not contain AI suggestion analytics metadata.":
-    "This submission does not contain AI suggestion analytics metadata.",
-  "This template is used for sending welcome emails to new subscribers...":
-    "This template is used for sending welcome emails to new subscribers...",
+  "This step belongs to the current process map. It is persisted inside the process map metadata and projected into workflow actions when the map is saved.":
+    "This step belongs to the current process map. It is persisted inside the process map metadata and projected into workflow actions when the map is saved.",
+  "This step references a not-yet-saved linked entity. It will only be created when you save the template or webhook editor.":
+    "This step references a not-yet-saved linked entity. It will only be created when you save the template or webhook editor.",
   "This template key already exists": "This template key already exists",
-  "This webhook sends form submissions to our CRM system...":
-    "This webhook sends form submissions to our CRM system...",
+  "This will detach the linked template or webhook from this step on the current process map canvas.":
+    "This will detach the linked template or webhook from this step on the current process map canvas.",
   "This will delete submission": "This will delete submission",
-  "This will permanently delete the selected email template.":
-    "This will permanently delete the selected email template.",
-  "This will permanently delete the selected webhook endpoint.":
-    "This will permanently delete the selected webhook endpoint.",
-  "This will permanently delete the selected workflow.":
-    "This will permanently delete the selected workflow.",
-  "This will run the selected manual workflow action for this submission.":
-    "This will run the selected manual workflow action for this submission.",
-  "This workflow sends a welcome email to new subscribers...":
-    "This workflow sends a welcome email to new subscribers...",
+  "This will remove the selected step from the current process map canvas.":
+    "This will remove the selected step from the current process map canvas.",
+  "This will remove the workflow node and its attached steps from the current process map canvas.":
+    "This will remove the workflow node and its attached steps from the current process map canvas.",
   To: "To",
-  'To send an email when a submission is marked as \\"resolved\\":':
-    'To send an email when a submission is marked as \\"resolved\\":',
   "Tool Invocation Policy": "Tool Invocation Policy",
   "Top K (optional)": "Top K (optional)",
   Trigger: "Trigger",
   "Trigger Conditions": "Trigger Conditions",
+  "Use {{path}} or {{path | fallback text}} for dynamic values.":
+    "Use {{path}} or {{path | fallback text}} for dynamic values.",
   "Trigger event": "Trigger event",
-  "Unique identifier (lowercase, hyphens, underscores)":
-    "Unique identifier (lowercase, hyphens, underscores)",
+  "Trigger model": "Trigger model",
   unknown: "unknown",
   "Untitled suggestion": "Untitled suggestion",
   "Update Status": "Update Status",
-  "Update Status on Dispatch (optional)":
-    "Update Status on Dispatch (optional)",
   "Update Status on Success (optional)": "Update Status on Success (optional)",
   Updated: "Updated",
   "Updated At": "Updated At",
   URL: "URL",
-  "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.":
-    "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.",
   "Use preset for current mode": "Use preset for current mode",
-  "Use the tabs to manage submissions, email templates, and workflows from the frontend.":
-    "Use the tabs to manage submissions, email templates, and workflows from the frontend.",
   "Use Webhook Endpoint": "Use Webhook Endpoint",
-  "Use {{submission.email}} for submitter's email":
-    "Use {{submission.email}} for submitter's email",
-  "Use {{submission.fields.fieldName}} for template variables":
-    "Use {{submission.fields.fieldName}} for template variables",
-  "Use {{submission.field}} for dynamic values":
-    "Use {{submission.field}} for dynamic values",
-  "Use {{submission}} to include submission data":
-    "Use {{submission}} to include submission data",
   Value: "Value",
   "Variable Path": "Variable Path",
-  "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.":
-    "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.",
   Visual: "Visual",
   "Web Grounding": "Web Grounding",
   "Webhook deleted": "Webhook deleted",
@@ -442,8 +302,6 @@ export const enDict: Record<string, string> = {
   "Webhook endpoints": "Webhook endpoints",
   "Webhook key": "Webhook key",
   "Webhook name": "Webhook name",
-  "Webhook Requested - External webhook trigger":
-    "Webhook Requested - External webhook trigger",
   "Webhook saved": "Webhook saved",
   "Webhook URL (if not using endpoint)": "Webhook URL (if not using endpoint)",
   When: "When",
@@ -455,12 +313,12 @@ export const enDict: Record<string, string> = {
   "Workflow name": "Workflow name",
   "Workflow saved": "Workflow saved",
   "Workflow Steps": "Workflow Steps",
+  "Workflow steps": "Workflow steps",
   Workflows: "Workflows",
   "Write your email template here...": "Write your email template here...",
   Yes: "Yes",
   "Zapier (Webhook Preset)": "Zapier (Webhook Preset)",
-  "Zapier webhook calls are made with POST method and application/json content type.":
-    "Zapier webhook calls are made with POST method and application/json content type.",
   "Zapier Webhook URL": "Zapier Webhook URL",
-  "{{submission.email}}": "{{submission.email}}",
 };
+
+export default enDict;

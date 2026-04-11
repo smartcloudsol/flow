@@ -5,8 +5,8 @@ import {
   useBlockProps,
 } from "@wordpress/block-editor";
 import {
-  Button,
   PanelBody,
+  SelectControl,
   TextareaControl,
   TextControl,
   ToggleControl,
@@ -17,6 +17,9 @@ import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { parseOptions } from "../shared/field-utils";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import { SIZE_OPTIONS } from "../shared/mantine-editor-options";
+import { OptionsSourceEditor } from "../shared/options-source-editor";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { CheckboxGroupFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -55,39 +58,6 @@ export default function Edit({
     }
   }, [attributes, attributes.name, block, clientId, updateBlock]);
 
-  const addOption = () => {
-    let idx = 1;
-    const name = "option";
-    while (options && options.some((opt) => opt.label === name + idx)) idx++;
-    const newLabel = name + idx;
-    const newOptionsText =
-      (attributes.optionsText || "") +
-      (attributes.optionsText ? "\n" : "") +
-      `${newLabel}|${newLabel}`;
-    setAttributes({ optionsText: newOptionsText });
-  };
-
-  const updateOption = (index: number, label: string, value: string) => {
-    const nextOptions = [...options];
-    nextOptions[index] = { label, value };
-    setAttributes({
-      optionsText: nextOptions
-        .map((option) => `${option.label}|${option.value}`)
-        .join("\n"),
-    });
-  };
-
-  const removeOption = (index: number) => {
-    const nextOptions = options.filter(
-      (_, optionIndex) => optionIndex !== index,
-    );
-    setAttributes({
-      optionsText: nextOptions
-        .map((option) => `${option.label}|${option.value}`)
-        .join("\n"),
-    });
-  };
-
   const isHidden = Boolean(attributes.hidden);
 
   return (
@@ -115,11 +85,15 @@ export default function Edit({
             onChange={(description) => setAttributes({ description })}
             help={__("Short help text shown below the field.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={attributes.required}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Require at least one selected option.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__("Controls the option size and spacing.", TEXT_DOMAIN)}
           />
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
@@ -127,42 +101,68 @@ export default function Edit({
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
           />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Require at least one selected option.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __(
+                  "Prevent users from changing this field.",
+                  TEXT_DOMAIN,
+                ),
+              },
+            ]}
+          />
         </PanelBody>
         <PanelBody title={__("Options", TEXT_DOMAIN)} initialOpen={true}>
-          <div style={{ marginBottom: "12px" }}>
-            {options.map((option, index) => (
-              <div
-                key={index}
-                style={{
-                  marginBottom: "8px",
-                  padding: "8px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                }}
-              >
-                <TextControl
-                  label={__("Label", TEXT_DOMAIN)}
-                  value={option.label}
-                  onChange={(label) => updateOption(index, label, option.value)}
-                />
-                <TextControl
-                  label={__("Value", TEXT_DOMAIN)}
-                  value={option.value}
-                  onChange={(value) => updateOption(index, option.label, value)}
-                />
-                <Button
-                  isDestructive
-                  variant="secondary"
-                  onClick={() => removeOption(index)}
-                >
-                  {__("Remove", TEXT_DOMAIN)}
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button variant="primary" onClick={addOption}>
-            {__("Add option", TEXT_DOMAIN)}
-          </Button>
+          <OptionsSourceEditor
+            value={{
+              optionsSource: attributes.optionsSource || "static",
+              options,
+              apiEndpoint: attributes.apiEndpoint,
+              apiMethod: attributes.apiMethod,
+              apiHeaders: attributes.apiHeaders,
+              apiParams: attributes.apiParams,
+              apiResponsePath: attributes.apiResponsePath,
+              apiLabelPath: attributes.apiLabelPath,
+              apiValuePath: attributes.apiValuePath,
+              cacheEnabled: attributes.cacheEnabled,
+              cacheTTL: attributes.cacheTTL,
+              autocompleteMinChars: attributes.autocompleteMinChars,
+              autocompleteDebounce: attributes.autocompleteDebounce,
+              searchParam: attributes.searchParam,
+            }}
+            onChange={(next) =>
+              setAttributes({
+                optionsSource: next.optionsSource,
+                optionsText: (next.options || [])
+                  .map((opt) => `${opt.label}|${opt.value}`)
+                  .join("\n"),
+                apiEndpoint: next.apiEndpoint,
+                apiMethod: next.apiMethod,
+                apiHeaders: next.apiHeaders,
+                apiParams: next.apiParams,
+                apiResponsePath: next.apiResponsePath,
+                apiLabelPath: next.apiLabelPath,
+                apiValuePath: next.apiValuePath,
+                cacheEnabled: next.cacheEnabled,
+                cacheTTL: next.cacheTTL,
+                autocompleteMinChars: next.autocompleteMinChars,
+                autocompleteDebounce: next.autocompleteDebounce,
+                searchParam: next.searchParam,
+              })
+            }
+          />
         </PanelBody>
         <ConditionalLogicPanel
           attributes={attributes}

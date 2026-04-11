@@ -34,6 +34,21 @@
       "type": "string",
       "default": ""
     },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
+    "gap": {
+      "type": "string",
+      "default": "md"
+    },
+    "inputMode": {
+      "type": "string",
+      "default": "numeric"
+    },
     "required": {
       "type": "boolean",
       "default": false
@@ -45,6 +60,10 @@
     "mask": {
       "type": "boolean",
       "default": true
+    },
+    "placeholder": {
+      "type": "string",
+      "default": ""
     },
     "inputType": {
       "type": "string",
@@ -66,5 +85,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

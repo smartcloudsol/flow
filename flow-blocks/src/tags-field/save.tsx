@@ -1,4 +1,5 @@
 import { useBlockProps } from "@wordpress/block-editor";
+import { parseOptions } from "../shared/field-utils";
 import { encodeData, filterWordPressAttributes } from "../shared/serialization";
 
 export default function Save({
@@ -6,9 +7,17 @@ export default function Save({
 }: {
   attributes: Record<string, unknown>;
 }) {
+  const { optionsText, ...restAttributes } =
+    filterWordPressAttributes(attributes);
   const payload = {
     type: "tags",
-    ...filterWordPressAttributes(attributes),
+    ...restAttributes,
+    options:
+      !restAttributes.optionsSource || restAttributes.optionsSource === "static"
+        ? parseOptions(
+            typeof optionsText === "string" ? optionsText : undefined,
+          )
+        : undefined,
   };
 
   return (

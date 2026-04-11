@@ -14,6 +14,7 @@ import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
 import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
 import { translations } from "../i18n";
+import type { FormPreviewSelection } from "../runtime/context/FormPreviewContext";
 import { FormShell } from "../runtime/components/FormShell";
 import type {
   FieldConfig,
@@ -176,6 +177,7 @@ export interface RenderFormArgs {
   form: FormAttributes;
   fields: FieldConfig[];
   states?: FormStateContents;
+  preview?: FormPreviewSelection;
 }
 
 // Store React roots in a WeakMap to reuse them across re-renders
@@ -222,7 +224,7 @@ export async function renderForm(
 
     // Load styles into shadow DOM
     const pluginUrl = getFlowPlugin()!.baseUrl;
-    const cssUrl = `${pluginUrl}blocks/form/view.css`;
+    const cssUrl = `${pluginUrl}blocks/view.css`;
 
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -299,6 +301,7 @@ export async function renderForm(
         form={form}
         fields={fields}
         states={states}
+        preview={args.preview}
         store={store}
         rootElement={rootEl!}
         hostElement={target as HTMLDivElement}

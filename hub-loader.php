@@ -157,9 +157,14 @@ final class FlowHubLoader
             'owner_is_me' => $owner_is_me
         ]);
 
-        $owner_is_active = $owner && is_plugin_active($owner);
-        $owner_exists = file_exists(WP_PLUGIN_DIR . '/' . $owner);
-        $owner_is_valid = in_array(WP_PLUGIN_DIR . '/' . $owner, wp_get_active_and_valid_plugins(), true);
+        $plugin_dir = plugin_dir_path(__DIR__);
+        $owner_plugin = ltrim(str_replace('\\/', '/', wp_unslash((string) $owner)), '/\\');
+        $owner_plugin_path = wp_normalize_path(untrailingslashit($plugin_dir) . '/' . $owner_plugin);
+        $active_valid_plugins = array_map('wp_normalize_path', wp_get_active_and_valid_plugins());
+
+        $owner_is_active = !empty($owner_plugin) && is_plugin_active($owner_plugin);
+        $owner_exists = !empty($owner_plugin) && file_exists($owner_plugin_path);
+        $owner_is_valid = in_array($owner_plugin_path, $active_valid_plugins, true);
         $owner_inactive = !$owner_is_active || !$owner_is_valid || !$owner_exists;
 
         if ($owner && $owner_inactive) {
@@ -222,7 +227,7 @@ final class FlowHubLoader
             } else {
                 Logger::debug('Hub ownership race lost - another plugin already claimed', [
                     'plugin' => $this->plugin,
-                    'winner' => $GLOBALS['smartcloud_wpsuite_fallback_parent_added'] ?? 'unknown'
+                    'winner' => get_option($owner_option) ?? 'unknown'
                 ]);
             }
             if (!$owner_is_me && $owner_version_is_smaller) {

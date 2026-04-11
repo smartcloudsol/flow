@@ -1,66 +1,36 @@
 export const arDict: Record<string, string> = {
   "A descriptive name for the workflow": "اسم وصفي لسير العمل",
-  "A descriptive name for this webhook endpoint":
-    "اسم وصفي لنقطة نهاية webhook هذه",
-  "A friendly name for this event in Zapier": "اسم ودود لهذا الحدث في زابير",
   Accepted: "مقبول",
-  "Action Invoked - When a manual action is triggered":
-    "تم استدعاء الإجراء - عند تشغيل إجراء يدوي",
   "Action invoked successfully": "تم تنفيذ الإجراء بنجاح",
+  "Action Key": "مفتاح الإجراء",
   "Action Type": "نوع الإجراء",
   Actions: "الإجراءات",
   Actor: "الجهة المنفذة",
   "Add Condition": "إضافة شرط",
-  "Add custom fields to the Zapier payload":
-    "أضف حقولًا مخصصة إلى حمولة Zapier",
   "Add Event": "إضافة حدث",
   "Add Header": "أضف رأس الصفحة",
   "Add Step": "إضافة خطوة",
-  "Add submission ID, form ID, status, and timestamps":
-    "أضف معرّف الإرسال، ومعرّف النموذج، والحالة، والطوابع الزمنية",
-  "Add workflow ID and step info to event":
-    "أضف معرّف سير العمل ومعلومات الخطوة إلى الحدث",
   "Additional Fields (JSON, optional)": "حقول إضافية (JSON، اختياري)",
-  "admin@example.com, manager@example.com":
-    "admin@example.com، manager@example.com",
+  Advanced: "متقدم",
+  "Advanced automation entities": "كيانات الأتمتة المتقدمة",
   "AI Agent": "وكيل الذكاء الاصطناعي",
-  "AI Agent Completed - After AI processing finishes":
-    "اكتملت عملية معالجة الذكاء الاصطناعي - بعد انتهاء معالجة الذكاء الاصطناعي",
-  "AI Agent Failed - When AI processing errors":
-    "فشل وكيل الذكاء الاصطناعي - عند حدوث أخطاء في معالجة الذكاء الاصطناعي",
   "AI Suggestions": "اقتراحات الذكاء الاصطناعي",
   "All forms": "جميع النماذج",
-  "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or transformations.":
-    "اسمح للنموذج بتقييم تعبيرات جافا سكريبت الصغيرة المعزولة لإجراء العمليات الحسابية أو التحويلات.",
-  "Allow the model to fetch and ground answers from explicit HTTPS URLs.":
-    "اسمح للنموذج بجلب الإجابات وتحديد موقعها من عناوين URL الخاصة ببروتوكول HTTPS الصريحة.",
   "Always run when the trigger matches": "يتم التشغيل دائمًا عند تطابق المحفز",
   Answer: "الإجابة",
-  "Answer the request using the submission context and any available knowledge base evidence.":
-    "أجب عن الطلب باستخدام سياق التقديم وأي أدلة متاحة من قاعدة المعرفة.",
   Any: "أيّ",
   "Appears in:": "يظهر في:",
   "archive@example.com": "archive@example.com",
-  "Auto - model decides if a tool is needed":
-    "يحدد النموذج التلقائي ما إذا كانت هناك حاجة إلى أداة أم لا",
   "Automated Workflows": "سير العمل الآلي",
-  "Backoff multiplier": "مضاعف التراجع",
   "Backoff Multiplier": "مضاعف التراجع",
+  "Backoff multiplier": "مضاعف التراجع",
   "BCC (optional)": "نسخة مخفية (اختياري)",
   "Call Webhook": "استدعاء Webhook",
   Cancel: "إلغاء",
   "CC (optional)": "نسخة (اختياري)",
-  "Change submission status after successful event publish":
-    "تغيير حالة الإرسال بعد نشر الحدث بنجاح",
-  "Change submission status immediately after the AI request event is published":
-    "قم بتغيير حالة الإرسال فور نشر حدث طلب الذكاء الاصطناعي",
-  "Choose a form to see field-specific template variables":
-    "اختر نموذجًا لعرض متغيرات القالب الخاصة بكل حقل",
   "Choose a template": "اختر قالبًا",
   "Choose webhook endpoint (optional)": "اختر نقطة نهاية webhook (اختياري)",
   Classify: "التصنيف",
-  "Classify the submission and explain briefly why that classification fits.":
-    "صنّف الطلب واشرح بإيجاز سبب ملاءمة هذا التصنيف.",
   Clear: "مسح",
   Code: "شفرة",
   "Code Interpreter": "مترجم الشفرة",
@@ -71,16 +41,9 @@ export const arDict: Record<string, string> = {
   Condition: "حالة",
   "Configuration (JSON)": "ملف التكوين (JSON)",
   Contains: "يتضمن",
-  "Controls how Bedrock may use the enabled tools below.":
-    "يتحكم هذا الخيار في كيفية استخدام Bedrock للأدوات المفعّلة أدناه.",
-  "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.":
-    "أنشئ قوالب بريد إلكتروني وقم بإدارتها للردود الآلية وإشعارات سير العمل. تدعم القوالب صيغة Handlebars للمحتوى الديناميكي.",
-  "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.":
-    "أنشئ مسارات عمل مؤتمتة يتم تشغيلها عند إرسال النماذج. يمكن لمسارات العمل إرسال رسائل البريد الإلكتروني، وإجراء طلبات HTTP، وتنفيذ منطق شرطي.",
   Created: "مخلوق",
   "Created At": "تم الإنشاء في",
-  "CRUD and preview follow the OpenAPI contract directly: list responses return items, create/update return the full template object, and preview returns subject, htmlBody, and textBody.":
-    "تتبع عمليات CRUD والمعاينة عقد OpenAPI بشكل مباشر: حيث تُرجع استجابات القائمة العناصر، وتُرجع عمليات الإنشاء/التحديث كائن القالب الكامل، وتُرجع المعاينة الموضوع و htmlBody و textBody.",
+  "CRM lead intake webhook": "Webhook لاستقبال العملاء المحتملين في CRM",
   "Current submission status": "حالة التقديم الحالية",
   "Current webhook payload": "حمولة الويب هوك الحالية",
   "Current workflow payload": "حمولة سير العمل الحالية",
@@ -90,6 +53,7 @@ export const arDict: Record<string, string> = {
   default: "تقصير",
   "Delay/Wait": "التأخير/الانتظار",
   Delete: "حذف",
+  "Delete step": "حذف الخطوة",
   "Delete submission": "حذف الطلب",
   "Delete template": "حذف القالب",
   "Delete webhook endpoint": "حذف نقطة نهاية Webhook",
@@ -113,18 +77,14 @@ export const arDict: Record<string, string> = {
   "Edit Template Variable": "تحرير متغيرات القالب",
   Email: "بريد إلكتروني",
   "Email associated with submission": "البريد الإلكتروني المرتبط بالطلب",
-  "Email subject line (Handlebars variables supported)":
-    "عنوان البريد الإلكتروني (يدعم متغيرات Handlebars)",
   "Email Template": "نموذج بريد إلكتروني",
-  "Email templates": "قوالب البريد الإلكتروني",
   "Email Templates": "قوالب البريد الإلكتروني",
+  "Email templates": "قوالب البريد الإلكتروني",
   "en, hu, de": "en, hu, de",
   "Enable reasoning": "تمكين الاستدلال",
   "Enable retry on failure": "تفعيل إعادة المحاولة عند الفشل",
   Enabled: "مُفعّل",
   "Enabled Tools": "الأدوات المُفعّلة",
-  "Enables Bedrock reasoning config for this step.":
-    "يُفعّل هذا الخيار إعدادات منطق Bedrock لهذه الخطوة.",
   "Ends With": "ينتهي بـ",
   Engine: "محرك",
   Equals: "يساوي",
@@ -133,18 +93,14 @@ export const arDict: Record<string, string> = {
   "Event Name": "اسم الحدث",
   "Event Source": "مصدر الحدث",
   "Event timeline": "الجدول الزمني للأحداث",
+  "Event Type": "نوع الحدث",
   "EventBridge Event": "فعالية إيفنت بريدج",
   Events: "الفعاليات",
-  "Exponential backoff factor (2 = double delay each retry)":
-    "عامل التراجع الأسي (2 = تأخير مضاعف في كل محاولة إعادة)",
   "Extract structured data": "استخراج البيانات المنظمة",
-  "Extract the requested structured data from the submission and return only supported values.":
-    "استخرج البيانات المنظمة المطلوبة من الطلب وأعد القيم المدعومة فقط.",
+  "Failed to create linked entity": "فشل إنشاء الكيان المرتبط",
   "Failed to load template": "فشل تحميل القالب",
   Field: "مجال",
   "Flow Operations": "عمليات التدفق",
-  "For status-based workflows, choose whether the workflow should run every time the matching status is reached, or only the first time per submission.":
-    "بالنسبة لسير العمل القائم على الحالة، اختر ما إذا كان يجب تشغيل سير العمل في كل مرة يتم فيها الوصول إلى الحالة المطابقة، أو في المرة الأولى فقط لكل عملية إرسال.",
   Form: "نموذج",
   "Form field:": "حقل النموذج:",
   "Form ID": "معرف النموذج",
@@ -154,11 +110,7 @@ export const arDict: Record<string, string> = {
   "From email": "بريد المرسل الإلكتروني",
   "From name": "اسم المرسل",
   "Full Submission Data": "بيانات التقديم الكاملة",
-  "Get this URL from your Zapier webhook trigger":
-    "احصل على هذا الرابط من مُشغّل Zapier webhook الخاص بك",
   "Greater Than": "أكبر من",
-  "has an invalid Response Constraint JSON schema.":
-    "يحتوي على مخطط JSON غير صالح لقيد الاستجابة.",
   "Header name": "اسم العنوان",
   "Header value": "قيمة العنوان",
   Headers: "العناوين",
@@ -166,12 +118,6 @@ export const arDict: Record<string, string> = {
   Hide: "يخفي",
   "Hide details": "إخفاء التفاصيل",
   High: "عالي",
-  "High-level intent passed to the AI agent":
-    "تم تمرير النية عالية المستوى إلى وكيل الذكاء الاصطناعي",
-  "How long to wait before the next step":
-    "كم من الوقت يجب الانتظار قبل الخطوة التالية؟",
-  "How many times to retry failed deliveries":
-    "كم مرة يجب إعادة محاولة عمليات التسليم الفاشلة؟",
   "How to construct the event payload": "كيفية إنشاء حمولة الحدث",
   "HTML body": "نص HTML",
   "HTTP Method": "طريقة HTTP",
@@ -181,10 +127,6 @@ export const arDict: Record<string, string> = {
   "Include workflow metadata": "تضمين بيانات تعريف سير العمل",
   "Insert Variable": "إدراج المتغيرات",
   "Internal notes": "مذكرة داخلية",
-  "Internal notes to add to the submission":
-    "ملاحظات داخلية لإضافتها إلى الطلب",
-  "Internal tags for categorization and filtering":
-    "وسوم داخلية للتصنيف والتصفية",
   "Internal updates": "تحديثات داخلية",
   "Is Empty": "فارغ",
   "Is Not Empty": "ليس فارغًا",
@@ -196,10 +138,6 @@ export const arDict: Record<string, string> = {
   "Language code": "رمز اللغة",
   "lead.requested": "طلب قائد",
   "Leave empty to disable signing": "اترك هذا الحقل فارغًا لتعطيل التوقيع",
-  "Leave empty to use default event bus":
-    "اتركه فارغًا لاستخدام ناقل الأحداث الافتراضي",
-  "Leave empty to use the backend default KB configuration":
-    "اترك هذا الحقل فارغًا لاستخدام إعدادات قاعدة المعرفة الافتراضية للواجهة الخلفية.",
   "Less Than": "أقل من",
   loaded: "تم التحميل",
   "Loading editor...": "جارٍ تحميل المحرر...",
@@ -207,14 +145,12 @@ export const arDict: Record<string, string> = {
   "Loading…": "تحميل…",
   Locale: "الموقع",
   Low: "قليل",
-  "Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported.":
-    "مطالبة المستخدم الرئيسية. هذا مطلوب أثناء التشغيل. يتم دعم قوالب مثل {{submission.email}}.",
   "Manual workflow actions": "إجراءات سير العمل اليدوية",
   "Mark completed": "أكمل مارك",
   "Mark resolved": "قرر مارك",
   "Mark seen": "مارك شوهد",
-  "Max attempts": "أقصى عدد من المحاولات",
   "Max Attempts": "أقصى عدد من المحاولات",
+  "Max attempts": "أقصى عدد من المحاولات",
   "Maximum retrieved KB chunks": "الحد الأقصى لحجم أجزاء الكيلوبايت المسترجعة",
   Medium: "واسطة",
   "Merged (Submission + Custom)": "تم الدمج (الطلب + التخصيص)",
@@ -230,88 +166,54 @@ export const arDict: Record<string, string> = {
   "New webhook": "رابط ويب جديد",
   "New workflow": "سير عمل جديد",
   No: "لا",
-  "No conditions set - workflow will run on every trigger event":
-    "لم يتم تحديد أي شروط - سيتم تشغيل سير العمل عند كل حدث تشغيل.",
   "No data": "لا توجد بيانات",
-  "No enabled manual actions were found for the current submission status.":
-    "لم يتم العثور على أي إجراءات يدوية مفعلة لحالة الإرسال الحالية.",
   "No events configured": "لم يتم تكوين أي أحداث",
-  "No events returned for this submission.":
-    "لم يتم العثور على أي نتائج لهذا الطلب.",
   "No headers configured": "لم يتم تكوين أي رؤوس",
   "No metadata": "لا توجد بيانات وصفية",
-  "No steps configured - add a step to define what happens when the workflow triggers":
-    "لم يتم تكوين أي خطوات - أضف خطوة لتحديد ما يحدث عند بدء سير العمل",
   "noreply@example.com": "noreply@example.com",
   "Not Contains": "لا يحتوي على",
   "Not Equals": "لا يساوي",
   "Not used": "غير مستخدم",
-  "Note: All conditions must be satisfied (AND logic)":
-    "ملاحظة: يجب استيفاء جميع الشروط (منطق AND)",
-  "Note: Delays are useful for rate limiting or waiting for external processes":
-    "ملاحظة: تُعدّ التأخيرات مفيدة لتحديد معدل الطلبات أو انتظار العمليات الخارجية.",
   "Notes (optional)": "ملاحظات (اختيارية)",
   "Open in new tab": "افتح في علامة تبويب جديدة",
   Operator: "المشغل",
-  "Optional description of this email template's purpose":
-    "وصف اختياري لغرض قالب البريد الإلكتروني هذا",
-  "Optional description of what this webhook is used for":
-    "وصف اختياري لاستخدام هذا الرابط الإلكتروني",
-  "Optional description of what this workflow does":
-    "وصف اختياري لما تقوم به هذه العملية",
-  "Optional secret for HMAC signature verification":
-    "سر اختياري للتحقق من توقيع HMAC",
-  "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.":
-    "اختياري. إذا تركت هذا الحقل فارغًا، فسيستخدم نظام الذكاء الاصطناعي قالب الإجابة/مطالبة النظام المدمجة فيه.",
+  "Order confirmation email": "رسالة تأكيد الطلب",
   Other: "آخر",
   "Payload Mode": "وضع الحمولة",
   "Press Enter to add a tag": "اضغط على مفتاح الإدخال لإضافة علامة",
   Preview: "معاينة",
   Primary: "أساسي",
-  "Primary label": "العلامة التجارية الأساسية",
   "Primary Label": "العلامة الأساسية",
-  "Private notes visible only to administrators":
-    "ملاحظات خاصة مرئية للمسؤولين فقط",
+  "Primary label": "العلامة التجارية الأساسية",
   "PRO Feature": "ميزة احترافية",
+  "Process Maps": "خرائط العمليات",
+  "Process-map step triggers": "مشغلات خطوات خريطة العمليات",
   "Prompt Text": "نص التوجيه",
   Ran: "ران",
   "Reasoning Effort": "جهد التفكير",
   "Recipient Email": "البريد الإلكتروني للمستلم",
-  "Reference form (for field suggestions)":
-    "نموذج مرجعي (للاقتراحات الميدانية)",
   "Rendered preview": "معاينة مُعالجة",
+  "Rendering model": "نموذج العرض",
   "Repeat policy": "سياسة التكرار",
   "Reply address": "عنوان الرد",
   "Reply-to": "الرد إلى",
   "Request Body (JSON)": "نص الطلب (JSON)",
-  "Require tool use - model must use one enabled tool":
-    "يتطلب استخدام أداة - يجب أن يستخدم النموذج أداة واحدة مفعلة",
-  "Response Constraint (JSON schema, optional)":
-    "قيد الاستجابة (مخطط JSON، اختياري)",
   "Response Schema Presets": "إعدادات مسبقة لمخطط الاستجابة",
-  "Return a server-side fallback when the model asks for interactive browser or desktop control.":
-    "قم بإرجاع خيار احتياطي من جانب الخادم عندما يطلب النموذج التحكم التفاعلي عبر المتصفح أو سطح المكتب.",
   "Reviewed / Continued": "تمت المراجعة / المتابعة",
   "Run action": "تشغيل الإجراء",
   "Run manual workflow action": "تشغيل إجراء سير العمل اليدوي",
-  "Run only the first time per submission":
-    "يتم تشغيلها مرة واحدة فقط لكل عملية إرسال",
   Save: "يحفظ",
   "Save internal fields": "حفظ الحقول الداخلية",
   "Save template": "حفظ القالب",
   "Save webhook": "حفظ رابط الويب",
   "Save workflow": "حفظ سير العمل",
+  "Screen structure": "بنية الشاشة",
   Search: "يبحث",
   "Select a form to see its fields": "حدد نموذجًا لعرض حقوله",
-  "Select a predefined webhook or leave empty for inline URL":
-    "حدد رابط ويب مُعد مسبقًا أو اتركه فارغًا لعنوان URL المضمن",
   "Select date": "حدد التاريخ",
   "Select form": "اختر النموذج",
-  "Select the template to use for this email":
-    "اختر القالب الذي تريد استخدامه لهذه الرسالة الإلكترونية",
   Selected: "مختار",
   "Selected suggestion ID": "معرّف الاقتراح المحدد",
-  "Send all submission fields to Zapier": "أرسل جميع حقول الإرسال إلى Zapier",
   "Send Email": "إرسال بريد إلكتروني",
   "Sender display name": "اسم عرض المرسل",
   "Sender email address": "عنوان البريد الإلكتروني للمرسل",
@@ -320,31 +222,28 @@ export const arDict: Record<string, string> = {
   "Signing secret": "سر التوقيع",
   "Site Name": "اسم الموقع",
   "smartcloud.flow": "smartcloud.flow",
+  "Source Channel": "قناة المصدر",
+  "Source System": "نظام المصدر",
   "Sources used": "المصادر المستخدمة",
   "Starts With": "يبدأ بـ",
   Status: "حالة",
   "Status updated by workflow": "تم تحديث الحالة بواسطة سير العمل",
   Step: "خطوة",
+  "Step for workflow": "خطوة لسير العمل",
   Steps: "خطوات",
   Subject: "الموضوع",
   Submission: "استسلام",
-  "Submission Created - When a new form is submitted":
-    "تم إنشاء الطلب - عند إرسال نموذج جديد",
   "Submission creation date": "تاريخ إنشاء الطلب",
   "Submission Data": "بيانات الإرسال",
   "Submission deleted": "تم حذف الطلب",
   "Submission Email": "إرسال البريد الإلكتروني",
   "Submission Fields": "حقول الإرسال",
   "Submission updated": "تم تحديث الطلب",
-  "Submission Updated - When submission status or fields change":
-    "تم تحديث الطلب - عند تغيير حالة الطلب أو الحقول",
   "submission.fields.name": "اسم حقول التقديم",
   Submissions: "المشاركات",
   "Submitted fields": "الحقول المُرسلة",
   Suggestions: "اقتراحات",
   Summarize: "لخص",
-  "Summarize the submission context concisely and highlight the most important points.":
-    "لخص سياق التقديم بإيجاز وسلط الضوء على أهم النقاط.",
   Summary: "ملخص",
   "support@example.com": "support@example.com",
   "System Prompt": "موجه النظام",
@@ -356,82 +255,39 @@ export const arDict: Record<string, string> = {
   "Template key": "مفتاح القالب",
   "Template saved": "تم حفظ القالب",
   "Text body": "نص النص",
-  "Thank you {{fullName}} for your submission":
-    "شكراً لك {{fullName}} على مشاركتك",
   "The endpoint to send the webhook to":
-    "نقطة النهاية التي يتم إرسال رابط الويب إليها",
-  "The endpoint where webhook events will be sent":
-    "نقطة النهاية التي سيتم إرسال أحداث webhook إليها",
-  "The schema is currently invalid JSON. Fix the editor content before saving.":
-    "المخطط غير صالح حاليًا بصيغة JSON. يُرجى إصلاح محتوى المحرر قبل الحفظ.",
-  "The source identifier for the event (default: smartcloud.flow)":
-    "معرّف المصدر للحدث (الافتراضي: smartcloud.flow)",
+    "نقطة النهاية التي سيتم إرسال الـ webhook إليها",
   "The status to set on the submission": "الحالة التي سيتم تحديدها على الطلب",
-  "The type of event to publish (required)": "نوع الحدث المراد نشره (مطلوب)",
-  "The workflow screen now also includes webhook endpoint management because the backend exposes both /admin/workflows and /admin/webhook-endpoints as first-class admin resources.":
-    "تتضمن شاشة سير العمل الآن أيضًا إدارة نقطة نهاية webhook لأن الواجهة الخلفية تعرض كلاً من /admin/workflows و /admin/webhook-endpoints كموارد إدارية من الدرجة الأولى.",
-  "This action publishes an event to EventBridge. Configure AWS EventBridge rules in your account to route events to Lambda, Step Functions, or other targets.":
-    "ينشر هذا الإجراء حدثًا على EventBridge. قم بتكوين قواعد AWS EventBridge في حسابك لتوجيه الأحداث إلى Lambda أو Step Functions أو وجهات أخرى.",
-  "This feature is available in the PRO version of the plugin.":
-    "هذه الميزة متوفرة في النسخة الاحترافية من البرنامج المساعد.",
-  "This site is not connected to a backend workspace yet.":
-    "هذا الموقع غير متصل بمساحة عمل خلفية حتى الآن.",
-  "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.":
-    "تُصدر هذه الخطوة حدث `ai.agent.requested`. ثم يُصدر نظام الذكاء الاصطناعي حدث `ai.agent.completed` أو `ai.agent.failed`، مما قد يُفعّل عمليات سير العمل اللاحقة.",
-  "This submission does not contain AI suggestion analytics metadata.":
-    "لا يحتوي هذا الطلب على بيانات وصفية لتحليلات اقتراحات الذكاء الاصطناعي.",
-  "This template is used for sending welcome emails to new subscribers...":
-    "يُستخدم هذا القالب لإرسال رسائل ترحيبية للمشتركين الجدد...",
+  "This step belongs to the current process map. It is persisted inside the process map metadata and projected into workflow actions when the map is saved.":
+    "تنتمي هذه الخطوة إلى خريطة العملية الحالية. يتم الاحتفاظ بها في البيانات الوصفية لخريطة العملية، ويتم إسقاطها على إجراءات سير العمل عند حفظ الخريطة.",
+  "This step references a not-yet-saved linked entity. It will only be created when you save the template or webhook editor.":
+    "تشير هذه الخطوة إلى كيان مرتبط لم يتم حفظه بعد. ولن يتم إنشاؤه إلا عند حفظ محرر القالب أو webhook.",
   "This template key already exists": "مفتاح القالب هذا موجود بالفعل",
-  "This webhook sends form submissions to our CRM system...":
-    "يقوم هذا الرابط الإلكتروني بإرسال نماذج الطلبات إلى نظام إدارة علاقات العملاء الخاص بنا...",
+  "This will detach the linked template or webhook from this step on the current process map canvas.":
+    "سيؤدي هذا إلى فصل القالب أو الـ webhook المرتبطين عن هذه الخطوة على لوحة خريطة العملية الحالية.",
+  "This will remove the selected step from the current process map canvas.":
+    "سيؤدي هذا إلى إزالة الخطوة المحددة من لوحة خريطة العملية الحالية.",
+  "This will remove the workflow node and its attached steps from the current process map canvas.":
+    "سيؤدي هذا إلى إزالة عقدة سير العمل والخطوات المرتبطة بها من لوحة خريطة العملية الحالية.",
   "This will delete submission": "سيؤدي هذا إلى حذف الطلب",
-  "This will permanently delete the selected email template.":
-    "سيؤدي هذا إلى حذف قالب البريد الإلكتروني المحدد نهائيًا.",
-  "This will permanently delete the selected webhook endpoint.":
-    "سيؤدي هذا إلى حذف نقطة نهاية Webhook المحددة نهائيًا.",
-  "This will permanently delete the selected workflow.":
-    "سيؤدي هذا إلى حذف سير العمل المحدد نهائيًا.",
-  "This will run the selected manual workflow action for this submission.":
-    "سيؤدي هذا إلى تشغيل إجراء سير العمل اليدوي المحدد لهذا الإرسال.",
-  "This workflow sends a welcome email to new subscribers...":
-    "تقوم هذه العملية بإرسال بريد إلكتروني ترحيبي للمشتركين الجدد...",
   To: "إلى",
-  'To send an email when a submission is marked as \\"resolved\\":':
-    'لإرسال بريد إلكتروني عند وضع علامة \\"تم الحل\\" على طلب ما:',
   "Tool Invocation Policy": "سياسة استدعاء الأدوات",
   "Top K (optional)": "أعلى حرف K (اختياري)",
   Trigger: "مشغل",
   "Trigger Conditions": "شروط التشغيل",
   "Trigger event": "حدث التشغيل",
-  "Unique identifier (lowercase, hyphens, underscores)":
-    "معرّف فريد (أحرف صغيرة، شرطات، شرطات سفلية)",
+  "Trigger model": "نموذج المشغل",
   unknown: "مجهول",
   "Untitled suggestion": "اقتراح بدون عنوان",
   "Update Status": "تحديث الحالة",
-  "Update Status on Dispatch (optional)": "تحديث الحالة عند الإرسال (اختياري)",
   "Update Status on Success (optional)": "تحديث الحالة عند النجاح (اختياري)",
   Updated: "تم التحديث",
   "Updated At": "تم التحديث في",
   URL: "عنوان URL",
-  "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.":
-    "استخدم مخطط كائن JSON. سيبقى JSON غير الصالح في المحرر حتى تقوم بإصلاحه، وستحتفظ آلية العمل بالنص المسودة بدلاً من تجاهله.",
   "Use preset for current mode": "استخدم الإعدادات المسبقة للوضع الحالي",
-  "Use the tabs to manage submissions, email templates, and workflows from the frontend.":
-    "استخدم علامات التبويب لإدارة عمليات الإرسال وقوالب البريد الإلكتروني وسير العمل من واجهة المستخدم.",
   "Use Webhook Endpoint": "استخدم نقطة نهاية Webhook",
-  "Use {{submission.email}} for submitter's email":
-    "استخدم {{submission.email}} لبريد المُرسِل الإلكتروني",
-  "Use {{submission.fields.fieldName}} for template variables":
-    "استخدم {{submission.fields.fieldName}} لمتغيرات القالب",
-  "Use {{submission.field}} for dynamic values":
-    "استخدم {{submission.field}} للقيم الديناميكية",
-  "Use {{submission}} to include submission data":
-    "استخدم {{submission}} لإدراج بيانات الإرسال",
   Value: "قيمة",
   "Variable Path": "مسار متغير",
-  "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.":
-    "يمكنك عرض وإدارة عمليات إرسال النماذج من موقع ووردبريس الخاص بك. يتم تخزين جميع عمليات الإرسال في قاعدة بيانات AWS DynamoDB.",
   Visual: "مرئي",
   "Web Grounding": "تأريض الشبكة",
   "Webhook deleted": "تم حذف Webhook",
@@ -439,11 +295,9 @@ export const arDict: Record<string, string> = {
   "Webhook endpoints": "نقاط نهاية Webhook",
   "Webhook key": "مفتاح Webhook",
   "Webhook name": "اسم Webhook",
-  "Webhook Requested - External webhook trigger":
-    "طلب Webhook - مُشغّل Webhook خارجي",
   "Webhook saved": "تم حفظ Webhook",
   "Webhook URL (if not using endpoint)":
-    "عنوان URL الخاص بخطاف الويب (في حال عدم استخدام نقطة النهاية)",
+    "رابط الـ webhook (إذا لم يتم استخدام نقطة نهاية)",
   When: "متى",
   "When should this workflow run?": "متى يجب تشغيل سير العمل هذا؟",
   "Workflow definitions": "تعريفات سير العمل",
@@ -453,12 +307,12 @@ export const arDict: Record<string, string> = {
   "Workflow name": "اسم سير العمل",
   "Workflow saved": "حفظ سير العمل",
   "Workflow Steps": "خطوات سير العمل",
+  "Workflow steps": "خطوات سير العمل",
   Workflows: "سير العمل",
   "Write your email template here...": "اكتب نموذج بريدك الإلكتروني هنا...",
   Yes: "نعم",
   "Zapier (Webhook Preset)": "Zapier (إعداد مسبق لخطاف الويب)",
-  "Zapier webhook calls are made with POST method and application/json content type.":
-    "يتم إجراء استدعاءات Zapier webhook باستخدام طريقة POST ونوع المحتوى application/json.",
   "Zapier Webhook URL": "رابط ويب هوك زابير",
-  "{{submission.email}}": "{{submission.email}}",
 };
+
+export default arDict;

@@ -104,6 +104,10 @@
   box-shadow: var(--flow-field-shadow);
 }
 
+.smartcloud-flow-shadow-root .flow-block__group {
+  flex-direction: row;
+}
+
 .smartcloud-flow-shadow-root .flow-block :where(label) {
   color: var(--flow-field-label-color);
   font-size: var(--flow-field-label-size);
@@ -219,13 +223,13 @@
   color: var(--flow-rating-inactive-color);
 }
 
-.smartcloud-flow-shadow-root .flow-block--fieldset fieldset {
+.smartcloud-flow-shadow-root .flow-block__fieldset fieldset {
   border: var(--flow-fieldset-border);
   border-radius: var(--flow-fieldset-radius);
   padding: var(--flow-fieldset-padding);
 }
 
-.smartcloud-flow-shadow-root .flow-block--fieldset legend {
+.smartcloud-flow-shadow-root .flow-block__fieldset legend {
   color: var(--flow-fieldset-legend-color);
 }
 

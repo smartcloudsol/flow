@@ -34,9 +34,23 @@
       "type": "string",
       "default": ""
     },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
     "required": {
       "type": "boolean",
       "default": false
+    },
+    "autosize": {
+      "type": "boolean",
+      "default": true
+    },
+    "inputSize": {
+      "type": "string"
     },
     "placeholder": {
       "type": "string",
@@ -45,6 +59,17 @@
     "minRows": {
       "type": "number",
       "default": 4
+    },
+    "maxRows": {
+      "type": "number"
+    },
+    "pointer": {
+      "type": "boolean",
+      "default": false
+    },
+    "resize": {
+      "type": "string",
+      "default": "vertical"
     },
     "validationType": {
       "type": "string",
@@ -77,5 +102,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

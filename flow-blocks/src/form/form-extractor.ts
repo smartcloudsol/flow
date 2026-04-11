@@ -35,7 +35,6 @@ export interface FormBlockAttributes {
   draftResumeTitle?: string;
   draftResumeDescription?: string;
   draftSaveSuccessMessage?: string;
-  autoReplyTemplate?: string;
   autoReplyTemplateKey?: string;
   actions?: FormActionDefinition[];
   workflowIds?: string[];
@@ -205,9 +204,6 @@ export function extractCanonicalFormConfig(
     typeof attributes.autoReplyTemplateKey === "string" &&
     attributes.autoReplyTemplateKey.trim()
       ? attributes.autoReplyTemplateKey.trim()
-      : typeof attributes.autoReplyTemplate === "string" &&
-        attributes.autoReplyTemplate.trim()
-      ? attributes.autoReplyTemplate.trim()
       : "";
 
   let sourceType = "pattern";

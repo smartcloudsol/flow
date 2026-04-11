@@ -70,6 +70,7 @@ declare const observeStore: (observableStore: Store, selector: (state: State) =>
 
 type ContextKind = "admin" | "frontend";
 type BackendTransport = "gatey" | "fetch";
+type FlowHighlightedSubmissionAction = "seen" | "resolved" | "completed";
 type FlowLanguageCode = "ar" | "en" | "zh" | "nl" | "fr" | "de" | "he" | "hi" | "hu" | "id" | "it" | "ja" | "ko" | "no" | "pl" | "pt" | "ru" | "es" | "sv" | "th" | "tr" | "uk";
 /**
  * FlowSettings - general settings stored in WordPress options.
@@ -78,8 +79,6 @@ type FlowLanguageCode = "ar" | "en" | "zh" | "nl" | "fr" | "de" | "he" | "hi" | 
 interface FlowSettings {
     /** Optional URL to custom translations JSON file. */
     customTranslationsUrl?: string;
-    /** Chat optimization: number of seconds a successful reCAPTCHA assessment remains valid. */
-    reCaptchaChatTtlSeconds?: number;
     /** Whether to show "Powered by WPSuite Flow" branding in UIs. */
     enablePoweredBy?: boolean;
     /** Whether to enable server-side debug logging for Flow. */
@@ -90,6 +89,8 @@ interface FlowSettings {
     formsAllowPermanentDelete?: boolean;
     /** AI suggestions presets available for the user. */
     aiSuggestionsPresets?: AiSuggestionPreset[];
+    /** Highlighted quick status actions shown on the submission detail popup. */
+    highlightedSubmissionActions?: FlowHighlightedSubmissionAction[];
 }
 interface FlowFeatures {
     readonly store: Promise<Store>;
@@ -194,4 +195,4 @@ declare const resolveBackend: (...args: Parameters<Capabilities["resolveBackend"
 declare const dispatchBackend: (...args: Parameters<Backend<unknown>["dispatchBackend"]>) => Promise<unknown>;
 declare const initializeFlow: () => FlowPlugin;
 
-export { type AiSuggestion, type AiSuggestionPreset, type AiSuggestionsState, type Backend, type BackendCallOptions, BackendError, type BackendTransport, type Capabilities, type CapabilityDecision, type ContextKind, type CustomTranslations, type Flow, type FlowConfig, type FlowErrorEvent, type FlowFeatures, type FlowLanguageCode, type FlowPlugin, type FlowReadyEvent, type FlowSettings, type FlowStatusEvent, type FlowStatusStep, LANGUAGE_OPTIONS, type State, type Store, TEXT_DOMAIN, decideCapability, dispatchBackend, getFlowPlugin, getStore, getStoreDispatch, getStoreSelect, initializeFlow, observeStore, reloadConfig, resolveBackend, sanitizeFlowConfig, waitForFlowReady };
+export { type AiSuggestion, type AiSuggestionPreset, type AiSuggestionsState, type Backend, type BackendCallOptions, BackendError, type BackendTransport, type Capabilities, type CapabilityDecision, type ContextKind, type CustomTranslations, type Flow, type FlowConfig, type FlowErrorEvent, type FlowFeatures, type FlowHighlightedSubmissionAction, type FlowLanguageCode, type FlowPlugin, type FlowReadyEvent, type FlowSettings, type FlowStatusEvent, type FlowStatusStep, LANGUAGE_OPTIONS, type State, type Store, TEXT_DOMAIN, decideCapability, dispatchBackend, getFlowPlugin, getStore, getStoreDispatch, getStoreSelect, initializeFlow, observeStore, reloadConfig, resolveBackend, sanitizeFlowConfig, waitForFlowReady };

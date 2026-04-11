@@ -5,7 +5,9 @@ import {
   useBlockProps,
 } from "@wordpress/block-editor";
 import {
+  __experimentalNumberControl as NumberControl,
   PanelBody,
+  SelectControl,
   TextControl,
   TextareaControl,
   ToggleControl,
@@ -15,8 +17,10 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import { SIZE_OPTIONS } from "../shared/mantine-editor-options";
 import { parseOptions } from "../shared/field-utils";
 import { OptionsSourceEditor } from "../shared/options-source-editor";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { SelectFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -88,13 +92,186 @@ export default function Edit({
             onChange={(placeholder) => setAttributes({ placeholder })}
             help={__("Placeholder text shown inside the select.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={Boolean(attributes.required)}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Block size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__(
+              "Controls the outer field width and spacing.",
+              TEXT_DOMAIN,
+            )}
           />
-
+          <SelectControl
+            label={__("Input size", TEXT_DOMAIN)}
+            value={attributes.inputSize ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(inputSize) =>
+              setAttributes({ inputSize: inputSize || undefined })
+            }
+            help={__(
+              "Controls the input height and internal spacing.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__("Chevron color", TEXT_DOMAIN)}
+            value={attributes.chevronColor ?? ""}
+            onChange={(chevronColor) => setAttributes({ chevronColor })}
+            help={__("Overrides the dropdown icon color.", TEXT_DOMAIN)}
+          />
+          <NumberControl
+            label={__("Limit", TEXT_DOMAIN)}
+            value={attributes.limit}
+            onChange={(value) =>
+              setAttributes({ limit: value ? Number(value) : undefined })
+            }
+            help={__("Limits how many options are shown at once.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
+            label={__("Hidden", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hidden)}
+            onChange={(hidden) => setAttributes({ hidden })}
+            help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={4}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "searchable",
+                label: __("Searchable", TEXT_DOMAIN),
+                checked: Boolean(attributes.searchable),
+                onChange: (searchable) => setAttributes({ searchable }),
+                help: __(
+                  "Allow users to search within the options list.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "clearable",
+                label: __("Clearable", TEXT_DOMAIN),
+                checked: Boolean(attributes.clearable),
+                onChange: (clearable) => setAttributes({ clearable }),
+                help: __("Allow clearing the current selection.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __("Prevent users from editing this field.", TEXT_DOMAIN),
+              },
+              {
+                key: "multiple",
+                label: __("Multiple", TEXT_DOMAIN),
+                checked: Boolean(attributes.multiple),
+                onChange: (multiple) => setAttributes({ multiple }),
+                help: __(
+                  "Store the selected values as an array instead of a single value.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "allowDeselect",
+                label: __("Allow deselect", TEXT_DOMAIN),
+                checked: attributes.allowDeselect ?? true,
+                onChange: (allowDeselect) => setAttributes({ allowDeselect }),
+                help: __(
+                  "Allow clicking the active option again to clear it.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "autoSelectOnBlur",
+                label: __("Auto select on blur", TEXT_DOMAIN),
+                checked: Boolean(attributes.autoSelectOnBlur),
+                onChange: (autoSelectOnBlur) =>
+                  setAttributes({ autoSelectOnBlur }),
+                help: __(
+                  "Select the highlighted option when the field loses focus.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "defaultDropdownOpened",
+                label: __("Default dropdown opened", TEXT_DOMAIN),
+                checked: Boolean(attributes.defaultDropdownOpened),
+                onChange: (defaultDropdownOpened) =>
+                  setAttributes({ defaultDropdownOpened }),
+                help: __(
+                  "Open the options dropdown immediately on initial render.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "pointer",
+                label: __("Pointer cursor", TEXT_DOMAIN),
+                checked: Boolean(attributes.pointer),
+                onChange: (pointer) => setAttributes({ pointer }),
+                help: __(
+                  "Use a pointer cursor when hovering the input.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "selectFirstOptionOnChange",
+                label: __("Select first option on change", TEXT_DOMAIN),
+                checked: Boolean(attributes.selectFirstOptionOnChange),
+                onChange: (selectFirstOptionOnChange) =>
+                  setAttributes({ selectFirstOptionOnChange }),
+                help: __(
+                  "Automatically pick the first matching option after search changes.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "withAlignedLabels",
+                label: __("Aligned labels", TEXT_DOMAIN),
+                checked: Boolean(attributes.withAlignedLabels),
+                onChange: (withAlignedLabels) =>
+                  setAttributes({ withAlignedLabels }),
+                help: __(
+                  "Align option labels in a fixed-width layout.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "withCheckIcon",
+                label: __("Check icon", TEXT_DOMAIN),
+                checked: attributes.withCheckIcon ?? true,
+                onChange: (withCheckIcon) => setAttributes({ withCheckIcon }),
+                help: __(
+                  "Show a check icon next to selected options.",
+                  TEXT_DOMAIN,
+                ),
+              },
+              {
+                key: "withScrollArea",
+                label: __("Scroll area", TEXT_DOMAIN),
+                checked: attributes.withScrollArea ?? true,
+                onChange: (withScrollArea) => setAttributes({ withScrollArea }),
+                help: __(
+                  "Wrap long option lists in a scrollable dropdown.",
+                  TEXT_DOMAIN,
+                ),
+              },
+            ]}
+          />
+        </PanelBody>
+        <PanelBody title={__("Options", TEXT_DOMAIN)} initialOpen={true}>
           <OptionsSourceEditor
             value={{
               optionsSource: attributes.optionsSource || "static",
@@ -104,6 +281,8 @@ export default function Edit({
               apiHeaders: attributes.apiHeaders,
               apiParams: attributes.apiParams,
               apiResponsePath: attributes.apiResponsePath,
+              apiLabelPath: attributes.apiLabelPath,
+              apiValuePath: attributes.apiValuePath,
               cacheEnabled: attributes.cacheEnabled,
               cacheTTL: attributes.cacheTTL,
               autocompleteMinChars: attributes.autocompleteMinChars,
@@ -121,6 +300,8 @@ export default function Edit({
                 apiHeaders: next.apiHeaders,
                 apiParams: next.apiParams,
                 apiResponsePath: next.apiResponsePath,
+                apiLabelPath: next.apiLabelPath,
+                apiValuePath: next.apiValuePath,
                 cacheEnabled: next.cacheEnabled,
                 cacheTTL: next.cacheTTL,
                 autocompleteMinChars: next.autocompleteMinChars,
@@ -128,13 +309,6 @@ export default function Edit({
                 searchParam: next.searchParam,
               })
             }
-          />
-
-          <ToggleControl
-            label={__("Hidden", TEXT_DOMAIN)}
-            checked={Boolean(attributes.hidden)}
-            onChange={(hidden) => setAttributes({ hidden })}
-            help={__("Hide this block by default.", TEXT_DOMAIN)}
           />
         </PanelBody>
         <ConditionalLogicPanel

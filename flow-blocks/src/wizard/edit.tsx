@@ -70,6 +70,12 @@ export default function Edit({
             help={__("Optional wizard subtitle", TEXT_DOMAIN)}
           />
           <ToggleControl
+            label={__("Hidden", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hidden)}
+            onChange={(hidden) => setAttributes({ hidden })}
+            help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
             label={__("Show Progress", TEXT_DOMAIN)}
             checked={attributes.showProgress ?? true}
             onChange={(showProgress) => setAttributes({ showProgress })}
@@ -117,13 +123,6 @@ export default function Edit({
             onChange={(gap: "xs" | "sm" | "md" | "lg" | "xl") =>
               setAttributes({ gap })
             }
-          />
-
-          <ToggleControl
-            label={__("Hidden", TEXT_DOMAIN)}
-            checked={Boolean(attributes.hidden)}
-            onChange={(hidden) => setAttributes({ hidden })}
-            help={__("Hide this block by default.", TEXT_DOMAIN)}
           />
         </PanelBody>
         <ConditionalLogicPanel

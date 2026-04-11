@@ -48,7 +48,7 @@ async function init() {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <MantineProvider theme={theme}>
-          <Notifications position="top-right" zIndex={100002} />
+          <Notifications position="top-right" zIndex={300010} />
           <ModalsProvider modalProps={{ zIndex: 100001 }}>
             <Main {...validatedFlow} store={store} />
           </ModalsProvider>

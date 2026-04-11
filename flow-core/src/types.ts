@@ -54,9 +54,6 @@ export interface FlowSettings {
   /** Whether to allow permanent deletion of forms (vs archive). */
   formsAllowPermanentDelete?: boolean;
 
-  /** AI suggestions presets available for the user. */
-  aiSuggestionsPresets?: AiSuggestionPreset[];
-
   /** Highlighted quick status actions shown on the submission detail popup. */
   highlightedSubmissionActions?: FlowHighlightedSubmissionAction[];
 }
@@ -106,14 +103,6 @@ export interface AiSuggestionsState {
   rawText?: string;
   metadata?: Record<string, unknown>;
   citations?: unknown;
-}
-
-export interface AiSuggestionPreset {
-  id: string;
-  name: string;
-  template: string;
-  useKnowledgeBase: boolean;
-  topK?: number;
 }
 
 export interface BackendCallOptions {

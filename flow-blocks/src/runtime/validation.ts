@@ -7,7 +7,7 @@ import type {
   ValidationRule,
   RuntimeFieldStateMap,
 } from "../shared/types";
-import { evaluateRule } from "./conditional-engine";
+import { evaluateRule, getRuntimeKey } from "./conditional-engine";
 
 /**
  * Helper function to get translated string with parameter substitution
@@ -327,6 +327,16 @@ function validateFieldValue(
       return parsed.success ? undefined : parsed.error.issues[0]?.message;
     }
     case "select":
+      if (field.multiple) {
+        if (!isStringArray(value)) {
+          return t("{fieldLabel} must be a list of values.", { fieldLabel });
+        }
+        return undefined;
+      }
+      if (typeof value !== "string") {
+        return t("{fieldLabel} must be text.", { fieldLabel });
+      }
+      return undefined;
     case "date":
     case "radio":
     case "password":
@@ -361,11 +371,19 @@ function isWizardStepVisible(
   return visible;
 }
 
+type ValidatableFieldEntry = {
+  field: FieldConfig;
+  runtimeKey: string;
+};
+
 function collectValidatableFields(
   fields: FieldConfig[],
   values: FormValues,
-): FieldConfig[] {
-  return fields.flatMap((field) => {
+  path: number[] = [],
+): ValidatableFieldEntry[] {
+  return fields.flatMap((field, index) => {
+    const currentPath = [...path, index];
+
     if (
       field.type === "submit" ||
       field.type === "save-draft" ||
@@ -382,18 +400,21 @@ function collectValidatableFields(
       field.type === "collapse" ||
       field.type === "visuallyhidden"
     ) {
-      return collectValidatableFields(field.children, values);
+      return collectValidatableFields(field.children, values, currentPath);
     }
 
     if (field.type === "wizard") {
-      return field.steps.flatMap((step) =>
+      return field.steps.flatMap((step, stepIndex) =>
         isWizardStepVisible(step, values)
-          ? collectValidatableFields(step.children, values)
+          ? collectValidatableFields(step.children, values, [
+              ...currentPath,
+              stepIndex,
+            ])
           : [],
       );
     }
 
-    return [field];
+    return [{ field, runtimeKey: getRuntimeKey(field, currentPath) }];
   });
 }
 
@@ -401,11 +422,13 @@ export function validateValues(
   fields: FieldConfig[],
   values: FormValues,
   fieldStates: RuntimeFieldStateMap = {},
+  path: number[] = [],
 ): FormErrors {
-  return collectValidatableFields(fields, values).reduce<FormErrors>(
-    (acc, field) => {
+  return collectValidatableFields(fields, values, path).reduce<FormErrors>(
+    (acc, entry) => {
+      const { field, runtimeKey } = entry;
       if (!("name" in field)) return acc;
-      const runtimeState = fieldStates[field.name];
+      const runtimeState = fieldStates[runtimeKey];
       if (runtimeState && (!runtimeState.visible || !runtimeState.enabled)) {
         return acc;
       }
@@ -428,10 +451,17 @@ export function validateField(
   fields: FieldConfig[],
   values: FormValues,
   fieldStates: RuntimeFieldStateMap = {},
+  runtimeKey?: string,
 ): string | undefined {
   // Find the field config
-  const findField = (fieldList: FieldConfig[]): FieldConfig | undefined => {
-    for (const field of fieldList) {
+  const findField = (
+    fieldList: FieldConfig[],
+    path: number[] = [],
+  ): ValidatableFieldEntry | undefined => {
+    for (const [index, field] of fieldList.entries()) {
+      const currentPath = [...path, index];
+      const currentRuntimeKey = getRuntimeKey(field, currentPath);
+
       if (field.type === "submit" || field.type === "divider") continue;
 
       if (
@@ -442,24 +472,30 @@ export function validateField(
         field.type === "collapse" ||
         field.type === "visuallyhidden"
       ) {
-        const found = findField(field.children);
+        const found = findField(field.children, currentPath);
         if (found) return found;
       } else if (field.type === "wizard") {
-        for (const step of field.steps) {
-          const found = findField(step.children);
+        for (const [stepIndex, step] of field.steps.entries()) {
+          const found = findField(step.children, [...currentPath, stepIndex]);
           if (found) return found;
         }
-      } else if ("name" in field && field.name === fieldName) {
-        return field;
+      } else if (
+        runtimeKey
+          ? currentRuntimeKey === runtimeKey
+          : "name" in field && field.name === fieldName
+      ) {
+        return { field, runtimeKey: currentRuntimeKey };
       }
     }
     return undefined;
   };
 
-  const field = findField(fields);
-  if (!field) {
+  const entry = findField(fields);
+  if (!entry) {
     return undefined;
   }
+
+  const { field, runtimeKey: matchedRuntimeKey } = entry;
 
   // Skip validation for non-input fields
   if (
@@ -481,7 +517,7 @@ export function validateField(
   }
 
   const validatedField = field;
-  const runtimeState = fieldStates[validatedField.name];
+  const runtimeState = fieldStates[matchedRuntimeKey];
 
   if (runtimeState && (!runtimeState.visible || !runtimeState.enabled)) {
     return undefined;

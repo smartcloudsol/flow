@@ -88,13 +88,14 @@ final class Flow
     public function init(): void
     {
         $this->registerBlocks();
-        add_filter('block_categories_all', [$this, 'registerBlockCategory'], 20, 2);
 
         add_action('wp_enqueue_scripts', [$this, 'enqueueFrontendAssets'], 20);
-        add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorAssets'], 20);
-        add_action('elementor/preview/after_enqueue_scripts', [$this, 'enqueueEditorAssets'], 20);
+        add_action('elementor/preview/after_enqueue_scripts', [$this, 'enqueueFrontendAssets'], 20);
 
-        add_action('admin_menu', [$this, 'createAdminMenu'], 22);
+        add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorAssets'], 20);
+        add_filter('block_categories_all', [$this, 'registerBlockCategory'], 20, 2);
+
+        add_action('admin_menu', [$this, 'createAdminMenu'], 30);
 
         // Shortcode registration
         add_shortcode('smartcloud-flow-form', [$this, 'shortcodeFlowForm']);
@@ -237,6 +238,7 @@ final class Flow
     {
         $atts = array_change_key_case((array) $atts, CASE_LOWER);
         $pattern_id = isset($atts['id']) ? intval($atts['id']) : 0;
+
         if (!$pattern_id) {
             return '<div class="smartcloud-flow-form-error">Missing pattern ID</div>';
         }
@@ -361,7 +363,7 @@ final class Flow
             $main_script_dependencies[] = 'smartcloud-wpsuite-main-script';
         }
         $main_script_asset['dependencies'] = array_values(array_unique($main_script_dependencies));
-        wp_enqueue_script('smartcloud-flow-main-script', SMARTCLOUD_FLOW_URL . 'main/index.js', $main_script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, false);
+        wp_enqueue_script('smartcloud-flow-main-script', SMARTCLOUD_FLOW_URL . 'main/index.js', $main_script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('strategy' => 'defer'));
         //wp_enqueue_style('smartcloud-flow-main-style', SMARTCLOUD_FLOW_URL . 'main/index.css', array(), SMARTCLOUD_FLOW_VERSION);
         //add_editor_style(SMARTCLOUD_FLOW_URL . 'main/index.css');
 
@@ -388,16 +390,37 @@ final class Flow
 Object.assign(__flowGlobal.WpSuite.plugins.flow, ' . wp_json_encode($data) . ');
 __flowGlobal.WpSuite.constants = __flowGlobal.WpSuite.constants ?? {};
 __flowGlobal.WpSuite.constants.flow = {
-    mantineCssHref: "' . SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css",
+    mantineCssHref: "' . esc_url(SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css') . '",
+    operationsRuntimeCssHref: "' . esc_url(SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.css') . '",
 };
     var WpSuite = __flowGlobal.WpSuite;
 ';
         wp_add_inline_script('smartcloud-flow-main-script', $js, 'before');
     }
 
+    private function enqueueFormViewAssets(): void
+    {
+        $this->registerOperationsRuntimeAssets();
+
+        $view_script_asset = array();
+        if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'blocks/view.asset.php')) {
+            $view_script_asset = require(SMARTCLOUD_FLOW_PATH . 'blocks/view.asset.php');
+        }
+        $view_script_dependencies = array_merge(
+            $view_script_asset['dependencies'] ?? array(),
+            array('smartcloud-flow-main-script', 'smartcloud-flow-operations-runtime-script')
+        );
+        if (wp_script_is('smartcloud-wpsuite-main-script', 'registered')) {
+            $view_script_dependencies[] = 'smartcloud-wpsuite-main-script';
+        }
+        $view_script_asset['dependencies'] = array_values(array_unique($view_script_dependencies));
+        wp_enqueue_script('smartcloud-flow-view-script', SMARTCLOUD_FLOW_URL . 'blocks/view.js', $view_script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('strategy' => 'defer'));
+    }
+
     public function enqueueFrontendAssets(): void
     {
         $this->enqueueMainRuntimeScript();
+        $this->enqueueFormViewAssets();
     }
 
     public function enqueueAdminRuntimeAssets(): void
@@ -410,23 +433,7 @@ __flowGlobal.WpSuite.constants.flow = {
         $this->enqueueMainRuntimeScript();
         $this->registerEditorRuntimeAssets();
 
-        $editor_script_asset = array();
-        if (file_exists(SMARTCLOUD_FLOW_PATH . 'blocks/editor.asset.php')) {
-            $editor_script_asset = require(SMARTCLOUD_FLOW_PATH . 'blocks/editor.asset.php');
-        }
-
-        $editor_script_asset['dependencies'] = array_merge(
-            $editor_script_asset['dependencies'] ?? array(),
-            array('smartcloud-flow-main-script', 'smartcloud-flow-editor-runtime-script')
-        );
-
-        wp_enqueue_script(
-            'smartcloud-flow-blocks-editor-script',
-            SMARTCLOUD_FLOW_URL . 'blocks/editor.js',
-            $editor_script_asset['dependencies'],
-            SMARTCLOUD_FLOW_VERSION,
-            false
-        );
+        $this->attachEditorRuntimeDependencies();
 
         if (file_exists(SMARTCLOUD_FLOW_PATH . 'blocks/editor.css')) {
             wp_enqueue_style(
@@ -440,6 +447,15 @@ __flowGlobal.WpSuite.constants.flow = {
 
     private function registerEditorRuntimeAssets(): void
     {
+        $blocks_script_asset = array();
+        if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'blocks/editor.asset.php')) {
+            $blocks_script_asset = require(SMARTCLOUD_FLOW_PATH . 'blocks/editor.asset.php');
+        }
+        $blocks_script_asset['dependencies'] = array_merge($blocks_script_asset['dependencies'], array('smartcloud-flow-main-script'));
+        wp_enqueue_script('smartcloud-flow-blocks-editor-script', SMARTCLOUD_FLOW_URL . 'blocks/editor.js', $blocks_script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('strategy' => 'defer'));
+        wp_enqueue_style('smartcloud-flow-blocks-editor-style', SMARTCLOUD_FLOW_URL . 'blocks/editor.css', array(), SMARTCLOUD_FLOW_VERSION);
+        add_editor_style(SMARTCLOUD_FLOW_URL . 'blocks/editor.css');
+
         $editor_runtime_script_path = SMARTCLOUD_FLOW_PATH . 'admin/editor-runtime.js';
         $editor_runtime_asset_path = SMARTCLOUD_FLOW_PATH . 'admin/editor-runtime.asset.php';
 
@@ -464,15 +480,46 @@ __flowGlobal.WpSuite.constants.flow = {
                 SMARTCLOUD_FLOW_URL . 'admin/editor-runtime.js',
                 $dependencies,
                 $editor_runtime_asset['version'] ?? SMARTCLOUD_FLOW_VERSION,
-                true
+                array('strategy' => 'defer')
             );
+        }
+    }
+
+    private function attachEditorRuntimeDependencies(): void
+    {
+        if (!class_exists('\WP_Block_Type_Registry')) {
+            return;
+        }
+
+        $registry = \WP_Block_Type_Registry::get_instance();
+        $scripts = wp_scripts();
+        $required_deps = array('smartcloud-flow-main-script', 'smartcloud-flow-editor-runtime-script');
+
+        foreach ($registry->get_all_registered() as $block_type) {
+            if (!is_object($block_type) || !isset($block_type->name) || !str_starts_with((string) $block_type->name, 'smartcloud-flow/')) {
+                continue;
+            }
+
+            $handles = isset($block_type->editor_script_handles) && is_array($block_type->editor_script_handles)
+                ? $block_type->editor_script_handles
+                : array();
+
+            foreach ($handles as $handle) {
+                if (!is_string($handle) || !isset($scripts->registered[$handle])) {
+                    continue;
+                }
+
+                $scripts->registered[$handle]->deps = array_values(array_unique(array_merge(
+                    $scripts->registered[$handle]->deps ?? array(),
+                    $required_deps
+                )));
+            }
         }
     }
 
     private function registerOperationsRuntimeAssets(): void
     {
         $operations_runtime_script_path = SMARTCLOUD_FLOW_PATH . 'admin/operations-runtime.js';
-        $operations_runtime_style_path = SMARTCLOUD_FLOW_PATH . 'admin/operations-runtime.css';
         $operations_runtime_asset_path = SMARTCLOUD_FLOW_PATH . 'admin/operations-runtime.asset.php';
 
         if (file_exists($operations_runtime_script_path) && !wp_script_is('smartcloud-flow-operations-runtime-script', 'registered')) {
@@ -495,16 +542,7 @@ __flowGlobal.WpSuite.constants.flow = {
                 SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.js',
                 $dependencies,
                 $operations_runtime_asset['version'] ?? SMARTCLOUD_FLOW_VERSION,
-                true
-            );
-        }
-
-        if (file_exists($operations_runtime_style_path) && !wp_style_is('smartcloud-flow-operations-runtime-style', 'registered')) {
-            wp_register_style(
-                'smartcloud-flow-operations-runtime-style',
-                SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.css',
-                array(),
-                SMARTCLOUD_FLOW_VERSION
+                array('strategy' => 'defer')
             );
         }
     }

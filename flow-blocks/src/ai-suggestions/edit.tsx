@@ -1,4 +1,4 @@
-import { TEXT_DOMAIN, getFlowPlugin } from "@smart-cloud/flow-core";
+import { TEXT_DOMAIN } from "@smart-cloud/flow-core";
 import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
 import {
   PanelBody,
@@ -11,7 +11,7 @@ import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 
 interface AiSuggestionsBlockAttributes {
-  presetId?: string;
+  promptOverride?: string;
   title?: string;
   description?: string;
   mode?: "auto" | "manual";
@@ -34,28 +34,11 @@ export default function Edit({
   setAttributes: (next: Partial<AiSuggestionsBlockAttributes>) => void;
   clientId: string;
 }) {
-  const configuredPresets =
-    getFlowPlugin()?.settings?.aiSuggestionsPresets || [];
-  const options = [
-    { label: "Use form default preset", value: "" },
-    ...(
-      configuredPresets as Array<{
-        id: string;
-        name: string;
-      }>
-    ).map((item) => ({ label: item.name, value: item.id })),
-  ];
   const isHidden = Boolean(attributes.hidden);
   return (
     <>
       <InspectorControls>
         <PanelBody title={__("AI Suggestions", TEXT_DOMAIN)}>
-          <SelectControl
-            label={__("Preset", TEXT_DOMAIN)}
-            value={attributes.presetId || ""}
-            options={options}
-            onChange={(value) => setAttributes({ presetId: value })}
-          />
           <SelectControl
             label={__("Mode", TEXT_DOMAIN)}
             value={attributes.mode || "manual"}
@@ -93,6 +76,15 @@ export default function Edit({
             onChange={(value) => setAttributes({ continueLabel: value })}
           />
           <TextareaControl
+            label={__("Prompt override", TEXT_DOMAIN)}
+            value={attributes.promptOverride || ""}
+            onChange={(value) => setAttributes({ promptOverride: value })}
+            help={__(
+              "Optional custom prompt template. Leave empty to use the built-in runtime default.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextareaControl
             label={__("Continue description", TEXT_DOMAIN)}
             value={attributes.continueDescription || ""}
             onChange={(value) => setAttributes({ continueDescription: value })}
@@ -107,16 +99,19 @@ export default function Edit({
             onChange={(value) => setAttributes({ emptyStateText: value })}
           />
           <ToggleControl
-            label={__("Fallback to raw text", TEXT_DOMAIN)}
-            checked={attributes.fallbackToRawText !== false}
-            onChange={(value) => setAttributes({ fallbackToRawText: value })}
-          />
-
-          <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
+            label={__("Fallback to raw text", TEXT_DOMAIN)}
+            checked={attributes.fallbackToRawText !== false}
+            onChange={(value) => setAttributes({ fallbackToRawText: value })}
+            help={__(
+              "Show the raw model response when structured suggestions are incomplete.",
+              TEXT_DOMAIN,
+            )}
           />
         </PanelBody>
         <ConditionalLogicPanel

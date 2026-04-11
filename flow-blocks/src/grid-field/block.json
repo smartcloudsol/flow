@@ -26,6 +26,21 @@
       "type": "number",
       "default": 2
     },
+    "rows": {
+      "type": "number"
+    },
+    "gutter": {
+      "type": "string",
+      "default": "md"
+    },
+    "justify": {
+      "type": "string",
+      "default": "stretch"
+    },
+    "overflow": {
+      "type": "string",
+      "default": "visible"
+    },
     "spacing": {
       "type": "string",
       "default": "md"
@@ -47,5 +62,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

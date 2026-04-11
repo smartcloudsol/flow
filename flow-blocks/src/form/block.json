@@ -111,8 +111,7 @@
       }
     }
   },
-  "editorScript": "file:../editor.js",
-  "viewStyle": "file:./view.css",
-  "viewScript": "file:./view.js",
+  "editorScript": "smartcloud-flow-blocks-editor-script",
+  "viewScript": "smartcloud-flow-view-script",
   "render": "file:./render.php"
 }

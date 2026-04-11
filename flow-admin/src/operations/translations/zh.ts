@@ -1,62 +1,36 @@
 export const zhDict: Record<string, string> = {
   "A descriptive name for the workflow": "工作流程的描述性名称",
-  "A descriptive name for this webhook endpoint": "此 Webhook 端点的描述性名称",
-  "A friendly name for this event in Zapier": "Zapier 中此事件的友好名称",
   Accepted: "公认",
-  "Action Invoked - When a manual action is triggered":
-    "操作已触发 - 当手动操作被触发时",
   "Action invoked successfully": "操作已成功执行",
+  "Action Key": "操作键",
   "Action Type": "行动类型",
   Actions: "操作",
   Actor: "执行者",
   "Add Condition": "添加条件",
-  "Add custom fields to the Zapier payload": "向 Zapier 有效负载添加自定义字段",
   "Add Event": "添加事件",
   "Add Header": "添加标题",
   "Add Step": "添加步骤",
-  "Add submission ID, form ID, status, and timestamps":
-    "添加提交 ID、表单 ID、状态和时间戳",
-  "Add workflow ID and step info to event":
-    "将工作流 ID 和步骤信息添加到事件中",
   "Additional Fields (JSON, optional)": "附加字段（JSON，可选）",
-  "admin@example.com, manager@example.com":
-    "admin@example.com，manager@example.com",
+  Advanced: "高级",
+  "Advanced automation entities": "高级自动化实体",
   "AI Agent": "人工智能代理",
-  "AI Agent Completed - After AI processing finishes":
-    "AI代理完成 - AI处理完成后",
-  "AI Agent Failed - When AI processing errors": "AI代理失败 - 当AI处理错误时",
   "AI Suggestions": "人工智能建议",
   "All forms": "所有表单",
-  "Allow the model to evaluate small sandboxed JavaScript expressions for calculations or transformations.":
-    "允许模型评估用于计算或转换的小型沙盒 JavaScript 表达式。",
-  "Allow the model to fetch and ground answers from explicit HTTPS URLs.":
-    "允许模型从明确的 HTTPS URL 获取和解析答案。",
   "Always run when the trigger matches": "当触发条件匹配时始终运行",
   Answer: "回答",
-  "Answer the request using the submission context and any available knowledge base evidence.":
-    "根据提交内容和任何可用的知识库证据回答请求。",
   Any: "任意",
   "Appears in:": "显示于：",
   "archive@example.com": "archive@example.com",
-  "Auto - model decides if a tool is needed": "自动车型决定是否需要工具",
   "Automated Workflows": "自动化工作流程",
-  "Backoff multiplier": "退避倍数",
   "Backoff Multiplier": "退避倍数",
+  "Backoff multiplier": "退避倍数",
   "BCC (optional)": "密送（可选）",
   "Call Webhook": "调用 Webhook",
   Cancel: "取消",
   "CC (optional)": "CC（可选）",
-  "Change submission status after successful event publish":
-    "事件发布成功后更改提交状态",
-  "Change submission status immediately after the AI request event is published":
-    "AI请求事件发布后立即更改提交状态",
-  "Choose a form to see field-specific template variables":
-    "选择表单以查看特定字段的模板变量",
   "Choose a template": "选择模板",
   "Choose webhook endpoint (optional)": "选择 webhook 端点（可选）",
   Classify: "分类",
-  "Classify the submission and explain briefly why that classification fits.":
-    "对提交的内容进行分类，并简要解释该分类的理由。",
   Clear: "清除",
   Code: "代码",
   "Code Interpreter": "代码解释器",
@@ -67,16 +41,9 @@ export const zhDict: Record<string, string> = {
   Condition: "健康）状况",
   "Configuration (JSON)": "配置（JSON）",
   Contains: "包含",
-  "Controls how Bedrock may use the enabled tools below.":
-    "控制基岩版如何使用以下已启用的工具。",
-  "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.":
-    "创建和管理用于自动回复和工作流通知的电子邮件模板。模板支持 Handlebars 语法，可用于动态内容。",
-  "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests, and execute conditional logic.":
-    "创建表单提交时触发的自动化工作流。工作流可以发送电子邮件、发出HTTP请求和执行条件逻辑。",
   Created: "创建",
   "Created At": "创建于",
-  "CRUD and preview follow the OpenAPI contract directly: list responses return items, create/update return the full template object, and preview returns subject, htmlBody, and textBody.":
-    "CRUD 和预览直接遵循 OpenAPI 协议：列表响应返回项目，创建/更新返回完整的模板对象，预览返回主题、htmlBody 和 textBody。",
+  "CRM lead intake webhook": "CRM 线索接收 Webhook",
   "Current submission status": "当前提交状态",
   "Current webhook payload": "当前 webhook 有效负载",
   "Current workflow payload": "当前工作流程有效负载",
@@ -86,6 +53,7 @@ export const zhDict: Record<string, string> = {
   default: "默认",
   "Delay/Wait": "延迟/等待",
   Delete: "删除",
+  "Delete step": "删除步骤",
   "Delete submission": "删除提交",
   "Delete template": "删除模板",
   "Delete webhook endpoint": "删除 Webhook 端点",
@@ -109,18 +77,14 @@ export const zhDict: Record<string, string> = {
   "Edit Template Variable": "编辑模板变量",
   Email: "电子邮件",
   "Email associated with submission": "与提交相关的电子邮件",
-  "Email subject line (Handlebars variables supported)":
-    "电子邮件主题行（支持 Handlebars 变量）",
   "Email Template": "电子邮件模板",
-  "Email templates": "电子邮件模板",
   "Email Templates": "电子邮件模板",
+  "Email templates": "电子邮件模板",
   "en, hu, de": "en, hu, de",
   "Enable reasoning": "启用推理",
   "Enable retry on failure": "失败时启用重试",
   Enabled: "已启用",
   "Enabled Tools": "已启用工具",
-  "Enables Bedrock reasoning config for this step.":
-    "启用此步骤的基岩版推理配置。",
   "Ends With": "以……结尾",
   Engine: "引擎",
   Equals: "等于",
@@ -129,18 +93,14 @@ export const zhDict: Record<string, string> = {
   "Event Name": "事件名称",
   "Event Source": "事件源",
   "Event timeline": "事件时间表",
+  "Event Type": "事件类型",
   "EventBridge Event": "EventBridge 活动",
   Events: "活动",
-  "Exponential backoff factor (2 = double delay each retry)":
-    "指数退避因子（2 = 每次重试延迟翻倍）",
   "Extract structured data": "提取结构化数据",
-  "Extract the requested structured data from the submission and return only supported values.":
-    "从提交内容中提取请求的结构化数据，并仅返回支持的值。",
+  "Failed to create linked entity": "无法创建关联实体",
   "Failed to load template": "模板加载失败",
   Field: "场地",
   "Flow Operations": "流程操作",
-  "For status-based workflows, choose whether the workflow should run every time the matching status is reached, or only the first time per submission.":
-    "对于基于状态的工作流，请选择工作流是在每次达到匹配状态时运行，还是仅在每次提交时运行。",
   Form: "表单",
   "Form field:": "表单字段：",
   "Form ID": "表单 ID",
@@ -150,10 +110,7 @@ export const zhDict: Record<string, string> = {
   "From email": "发件人邮箱",
   "From name": "发件人名称",
   "Full Submission Data": "完整提交数据",
-  "Get this URL from your Zapier webhook trigger":
-    "从您的 Zapier webhook 触发器中获取此 URL",
   "Greater Than": "大于",
-  "has an invalid Response Constraint JSON schema.": "响应约束 JSON 模式无效。",
   "Header name": "标题名称",
   "Header value": "标题值",
   Headers: "标题",
@@ -161,9 +118,6 @@ export const zhDict: Record<string, string> = {
   Hide: "隐藏",
   "Hide details": "隐藏详情",
   High: "高的",
-  "High-level intent passed to the AI agent": "传递给人工智能代理的高级意图",
-  "How long to wait before the next step": "下一步之前需要等待多久",
-  "How many times to retry failed deliveries": "失败投递需要重试多少次？",
   "How to construct the event payload": "如何构建事件有效载荷",
   "HTML body": "HTML正文",
   "HTTP Method": "HTTP 方法",
@@ -173,8 +127,6 @@ export const zhDict: Record<string, string> = {
   "Include workflow metadata": "包含工作流元数据",
   "Insert Variable": "插入变量",
   "Internal notes": "内部笔记",
-  "Internal notes to add to the submission": "提交材料中需添加的内部说明",
-  "Internal tags for categorization and filtering": "用于分类和筛选的内部标签",
   "Internal updates": "内部更新",
   "Is Empty": "为空",
   "Is Not Empty": "不为空",
@@ -186,9 +138,6 @@ export const zhDict: Record<string, string> = {
   "Language code": "语言代码",
   "lead.requested": "请求领导",
   "Leave empty to disable signing": "留空则禁用签名",
-  "Leave empty to use default event bus": "留空则使用默认事件总线",
-  "Leave empty to use the backend default KB configuration":
-    "留空则使用后端默认知识库配置",
   "Less Than": "少于",
   loaded: "已加载",
   "Loading editor...": "正在加载编辑器...",
@@ -196,14 +145,12 @@ export const zhDict: Record<string, string> = {
   "Loading…": "加载中…",
   Locale: "本地化",
   Low: "低的",
-  "Main user prompt. This is required at runtime. Templates like {{submission.email}} are supported.":
-    "主用户提示。这是运行时必需的。支持类似 {{submission.email}} 的模板。",
   "Manual workflow actions": "手动工作流程操作",
   "Mark completed": "马克完成了",
   "Mark resolved": "马克解决了",
   "Mark seen": "马克·西恩",
-  "Max attempts": "最大尝试次数",
   "Max Attempts": "最大尝试次数",
+  "Max attempts": "最大尝试次数",
   "Maximum retrieved KB chunks": "最大检索KB块",
   Medium: "中等的",
   "Merged (Submission + Custom)": "合并（提交 + 自定义）",
@@ -219,82 +166,54 @@ export const zhDict: Record<string, string> = {
   "New webhook": "新的 webhook",
   "New workflow": "新工作流程",
   No: "否",
-  "No conditions set - workflow will run on every trigger event":
-    "未设置任何条件 - 工作流将在每个触发事件时运行",
   "No data": "无数据",
-  "No enabled manual actions were found for the current submission status.":
-    "当前提交状态下未找到任何已启用的手动操作。",
   "No events configured": "未配置任何事件",
-  "No events returned for this submission.": "本次提交未返回任何事件。",
   "No headers configured": "未配置标头",
   "No metadata": "无元数据",
-  "No steps configured - add a step to define what happens when the workflow triggers":
-    "未配置任何步骤 - 添加步骤以定义工作流触发时发生的情况",
   "noreply@example.com": "noreply@example.com",
   "Not Contains": "不含",
   "Not Equals": "不等于",
   "Not used": "未使用",
-  "Note: All conditions must be satisfied (AND logic)":
-    "注意：所有条件必须满足（AND 逻辑）",
-  "Note: Delays are useful for rate limiting or waiting for external processes":
-    "注意：延迟可用于限制速率或等待外部进程。",
   "Notes (optional)": "备注（可选）",
   "Open in new tab": "在新标签页中打开",
   Operator: "操作员",
-  "Optional description of this email template's purpose":
-    "此电子邮件模板用途的可选说明",
-  "Optional description of what this webhook is used for":
-    "可选描述此 Webhook 的用途",
-  "Optional description of what this workflow does":
-    "（可选）描述此工作流程的功能",
-  "Optional secret for HMAC signature verification":
-    "用于 HMAC 签名验证的可选密钥",
-  "Optional. If you leave this empty, the AI backend uses its built-in answer template/system prompt.":
-    "可选。如果留空，AI 后端将使用其内置的答案模板/系统提示。",
+  "Order confirmation email": "订单确认邮件",
   Other: "其他",
   "Payload Mode": "有效载荷模式",
   "Press Enter to add a tag": "按回车键添加标签",
   Preview: "预览",
   Primary: "基本的",
-  "Primary label": "主标签",
   "Primary Label": "主标签",
-  "Private notes visible only to administrators": "仅管理员可见的私密备注",
+  "Primary label": "主标签",
   "PRO Feature": "专业功能",
+  "Process Maps": "流程图",
+  "Process-map step triggers": "流程图步骤触发器",
   "Prompt Text": "提示文本",
   Ran: "兰",
   "Reasoning Effort": "推理努力",
   "Recipient Email": "收件人电子邮件",
-  "Reference form (for field suggestions)": "参考表格（用于字段建议）",
   "Rendered preview": "渲染预览",
+  "Rendering model": "渲染模型",
   "Repeat policy": "重复政策",
   "Reply address": "回复地址",
   "Reply-to": "回复",
   "Request Body (JSON)": "请求正文（JSON）",
-  "Require tool use - model must use one enabled tool":
-    "需要使用工具 - 模型必须使用一种已启用的工具",
-  "Response Constraint (JSON schema, optional)": "响应约束（JSON 模式，可选）",
   "Response Schema Presets": "响应模式预设",
-  "Return a server-side fallback when the model asks for interactive browser or desktop control.":
-    "当模型请求交互式浏览器或桌面控件时，返回服务器端回退方案。",
   "Reviewed / Continued": "已审核/续",
   "Run action": "运行操作",
   "Run manual workflow action": "运行手动工作流操作",
-  "Run only the first time per submission": "每次提交仅运行一次",
   Save: "节省",
   "Save internal fields": "保存内部字段",
   "Save template": "保存模板",
   "Save webhook": "保存 webhook",
   "Save workflow": "保存工作流程",
+  "Screen structure": "界面结构",
   Search: "搜索",
   "Select a form to see its fields": "选择表单以查看其字段",
-  "Select a predefined webhook or leave empty for inline URL":
-    "选择预定义的 Webhook，或留空以使用内联 URL。",
   "Select date": "选择日期",
   "Select form": "选择表单",
-  "Select the template to use for this email": "请选择此电子邮件要使用的模板。",
   Selected: "已选",
   "Selected suggestion ID": "已选建议 ID",
-  "Send all submission fields to Zapier": "将所有提交字段发送到 Zapier",
   "Send Email": "发送电子邮件",
   "Sender display name": "发件人显示名称",
   "Sender email address": "发件人电子邮件地址",
@@ -303,31 +222,28 @@ export const zhDict: Record<string, string> = {
   "Signing secret": "签署秘密",
   "Site Name": "网站名称",
   "smartcloud.flow": "智能云流",
+  "Source Channel": "来源渠道",
+  "Source System": "来源系统",
   "Sources used": "所用资料来源",
   "Starts With": "以……开头",
   Status: "地位",
   "Status updated by workflow": "状态已由工作流程更新",
   Step: "步",
+  "Step for workflow": "工作流的步骤",
   Steps: "步骤",
   Subject: "主题",
   Submission: "提交",
-  "Submission Created - When a new form is submitted":
-    "提交已创建 - 当提交新表单时",
   "Submission creation date": "提交创建日期",
   "Submission Data": "提交数据",
   "Submission deleted": "提交内容已删除",
   "Submission Email": "提交邮件",
   "Submission Fields": "提交字段",
   "Submission updated": "提交内容已更新",
-  "Submission Updated - When submission status or fields change":
-    "提交已更新 - 当提交状态或字段发生变化时",
   "submission.fields.name": "提交字段名称",
   Submissions: "提交",
   "Submitted fields": "提交字段",
   Suggestions: "建议",
   Summarize: "总结",
-  "Summarize the submission context concisely and highlight the most important points.":
-    "简明扼要地概括投稿背景，并突出重点。",
   Summary: "概括",
   "support@example.com": "support@example.com",
   "System Prompt": "系统提示",
@@ -339,80 +255,38 @@ export const zhDict: Record<string, string> = {
   "Template key": "模板键",
   "Template saved": "模板已保存",
   "Text body": "正文",
-  "Thank you {{fullName}} for your submission": "感谢 {{fullName}} 的投稿",
   "The endpoint to send the webhook to": "要发送 webhook 的端点",
-  "The endpoint where webhook events will be sent":
-    "webhook 事件将发送到的端点",
-  "The schema is currently invalid JSON. Fix the editor content before saving.":
-    "当前架构为无效的 JSON。请在保存前修复编辑器内容。",
-  "The source identifier for the event (default: smartcloud.flow)":
-    "事件的源标识符（默认值：smartcloud.flow）",
   "The status to set on the submission": "要设置的提交状态",
-  "The type of event to publish (required)": "要发布的事件类型（必填）",
-  "The workflow screen now also includes webhook endpoint management because the backend exposes both /admin/workflows and /admin/webhook-endpoints as first-class admin resources.":
-    "工作流屏幕现在也包含了 webhook 端点管理，因为后端将 /admin/workflows 和 /admin/webhook-endpoints 都作为一流的管理资源公开。",
-  "This action publishes an event to EventBridge. Configure AWS EventBridge rules in your account to route events to Lambda, Step Functions, or other targets.":
-    "此操作会将事件发布到 EventBridge。请在您的账户中配置 AWS EventBridge 规则，以将事件路由到 Lambda、Step Functions 或其他目标。",
-  "This feature is available in the PRO version of the plugin.":
-    "此功能仅在插件的专业版中提供。",
-  "This site is not connected to a backend workspace yet.":
-    "该网站尚未连接到后端工作区。",
-  "This step emits an `ai.agent.requested` event. The AI backend then emits `ai.agent.completed` or `ai.agent.failed`, which can trigger downstream workflows.":
-    "此步骤会发出 `ai.agent.requested` 事件。随后，AI 后端会发出 `ai.agent.completed` 或 `ai.agent.failed` 事件，这些事件可以触发下游工作流程。",
-  "This submission does not contain AI suggestion analytics metadata.":
-    "此提交内容不包含人工智能建议分析元数据。",
-  "This template is used for sending welcome emails to new subscribers...":
-    "此模板用于向新订阅者发送欢迎邮件……",
+  "This step belongs to the current process map. It is persisted inside the process map metadata and projected into workflow actions when the map is saved.":
+    "此步骤属于当前流程图。它会保存在流程图元数据中，并在保存流程图时投射到工作流动作中。",
+  "This step references a not-yet-saved linked entity. It will only be created when you save the template or webhook editor.":
+    "此步骤引用了一个尚未保存的关联实体。只有在你保存模板或 webhook 编辑器时才会创建它。",
   "This template key already exists": "此模板键已存在",
-  "This webhook sends form submissions to our CRM system...":
-    "此网络钩子会将表单提交内容发送到我们的客户关系管理系统……",
+  "This will detach the linked template or webhook from this step on the current process map canvas.":
+    "这将从当前流程图画布中的该步骤解绑已关联的模板或 webhook。",
+  "This will remove the selected step from the current process map canvas.":
+    "这将从当前流程图画布中移除所选步骤。",
+  "This will remove the workflow node and its attached steps from the current process map canvas.":
+    "这将从当前流程图画布中移除工作流节点及其附属步骤。",
   "This will delete submission": "这将删除提交内容。",
-  "This will permanently delete the selected email template.":
-    "这将永久删除所选的电子邮件模板。",
-  "This will permanently delete the selected webhook endpoint.":
-    "这将永久删除所选的 Webhook 端点。",
-  "This will permanently delete the selected workflow.":
-    "这将永久删除所选的工作流。",
-  "This will run the selected manual workflow action for this submission.":
-    "这将为此提交运行所选的手动工作流操作。",
-  "This workflow sends a welcome email to new subscribers...":
-    "此工作流程会向新订阅者发送欢迎邮件……",
   To: "收件人",
-  'To send an email when a submission is marked as \\"resolved\\":':
-    "当提交内容被标记为“已解决”时，发送电子邮件：",
   "Tool Invocation Policy": "工具调用策略",
   "Top K (optional)": "顶部 K（可选）",
   Trigger: "扳机",
   "Trigger Conditions": "触发条件",
   "Trigger event": "触发事件",
-  "Unique identifier (lowercase, hyphens, underscores)":
-    "唯一标识符（小写字母、连字符、下划线）",
+  "Trigger model": "触发器模型",
   unknown: "未知",
   "Untitled suggestion": "无标题建议",
   "Update Status": "更新状态",
-  "Update Status on Dispatch (optional)": "更新发货状态（可选）",
   "Update Status on Success (optional)": "成功后更新状态（可选）",
   Updated: "更新",
   "Updated At": "更新于",
   URL: "URL",
-  "Use a JSON object schema. Invalid JSON stays in the editor until you fix it, and the workflow keeps the draft text instead of discarding it.":
-    "使用 JSON 对象架构。无效的 JSON 数据会保留在编辑器中，直到您修复它，并且工作流程会保留草稿文本，而不是将其丢弃。",
   "Use preset for current mode": "使用当前模式的预设",
-  "Use the tabs to manage submissions, email templates, and workflows from the frontend.":
-    "使用选项卡从前端管理提交内容、电子邮件模板和工作流程。",
   "Use Webhook Endpoint": "使用 Webhook 端点",
-  "Use {{submission.email}} for submitter's email":
-    "请使用 {{submission.email}} 作为提交者的电子邮件地址",
-  "Use {{submission.fields.fieldName}} for template variables":
-    "请使用 {{submission.fields.fieldName}} 作为模板变量",
-  "Use {{submission.field}} for dynamic values":
-    "使用 {{submission.field}} 表示动态值",
-  "Use {{submission}} to include submission data":
-    "使用 {{submission}} 来包含提交数据",
   Value: "价值",
   "Variable Path": "可变路径",
-  "View and manage form submissions from your WordPress site. All submissions are stored in AWS DynamoDB.":
-    "查看和管理 WordPress 网站上的表单提交内容。所有提交内容都存储在 AWS DynamoDB 中。",
   Visual: "视觉的",
   "Web Grounding": "Web Grounding",
   "Webhook deleted": "Webhook 已删除",
@@ -420,8 +294,6 @@ export const zhDict: Record<string, string> = {
   "Webhook endpoints": "Webhook 端点",
   "Webhook key": "Webhook 密钥",
   "Webhook name": "Webhook名称",
-  "Webhook Requested - External webhook trigger":
-    "已请求 Webhook - 外部 Webhook 触发器",
   "Webhook saved": "Webhook 已保存",
   "Webhook URL (if not using endpoint)": "Webhook URL（如果未使用端点）",
   When: "什么时候",
@@ -433,12 +305,12 @@ export const zhDict: Record<string, string> = {
   "Workflow name": "工作流名称",
   "Workflow saved": "工作流已保存",
   "Workflow Steps": "工作流程步骤",
+  "Workflow steps": "工作流步骤",
   Workflows: "工作流程",
   "Write your email template here...": "在这里编写您的电子邮件模板……",
   Yes: "是的",
   "Zapier (Webhook Preset)": "Zapier（Webhook 预设）",
-  "Zapier webhook calls are made with POST method and application/json content type.":
-    "Zapier webhook 调用采用 POST 方法和 application/json 内容类型。",
   "Zapier Webhook URL": "Zapier Webhook URL",
-  "{{submission.email}}": "{{submission.email}}",
 };
+
+export default zhDict;

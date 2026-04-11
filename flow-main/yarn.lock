@@ -3236,19 +3236,19 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@smart-cloud/flow-core@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.0.4.tgz#a5d84f7a129f8f36d1878f9577c6015788cc4ca6"
-  integrity sha512-28bU9Eo2vFJ6JgEy8zSxQh7WQUBaNAM/CWOb8UdmFoavabBALcs03sIxJoKbKDARawsqQrIXaJK4S0yCmI+XBQ==
+"@smart-cloud/flow-core@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.0.6.tgz#62911f230d81a9a90e788826746483f68750c3e1"
+  integrity sha512-TOod8128vMKObvH3TqM7H1yTqSJOA/2LAzGuetxBLFz+ilPvnGyjDL3ztULXYeqYf1awBYatsU4C+y11jwzjKg==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.2.2"
+    "@smart-cloud/gatey-core" "^2.2.7"
     "@smart-cloud/wpsuite-core" "^2.2.10"
     aws-amplify "^6.16.3"
 
-"@smart-cloud/gatey-core@^2.2.2":
-  version "2.2.2"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.2.2.tgz#518b6ed4112e11fece3213cfe3a58c9e203b0e67"
-  integrity sha512-bC5A6OBNEUUFDp3v+onw88WKSRdpVV4v7JY2/MVnKds2ore1wJNhDcoRmkSyPo2yfuHJ214sJOLxTjRozOairg==
+"@smart-cloud/gatey-core@^2.2.7":
+  version "2.2.7"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.2.7.tgz#07d7e0964c075ac28863166ceebf95c273971b5b"
+  integrity sha512-CbEVt8Qwjw/UUHThx30cVM4A6u6dnY74o0ZgBpZbKKJascC+2fiy1g0n6Hi2BmuRBakWdEdT0BWsx10QW0vQZg==
   dependencies:
     "@smart-cloud/wpsuite-core" "^2.2.10"
 

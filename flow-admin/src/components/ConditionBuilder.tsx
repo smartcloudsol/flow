@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Autocomplete,
   Button,
   Card,
   Group,
@@ -12,6 +13,11 @@ import { DateInput } from "@mantine/dates";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import type { FormDefinition } from "../api/types";
 import { t } from "../operations/i18n";
+import {
+  getConditionFieldOptions,
+  normalizeConditionFieldValue,
+  normalizeConditionStoredValue,
+} from "./condition-builder-utils";
 import {
   useOperationsComboboxProps,
   useOperationsPopoverProps,
@@ -30,16 +36,7 @@ export interface ConditionBuilderProps {
 }
 
 function getFieldOptions() {
-  return [
-    { value: "status", label: t("Status") },
-    { value: "email", label: t("Email") },
-    { value: "formId", label: t("Form ID") },
-    { value: "primaryLabel", label: t("Primary Label") },
-    { value: "summary", label: t("Summary") },
-    { value: "tags", label: t("Tags") },
-    { value: "createdAt", label: t("Created At") },
-    { value: "updatedAt", label: t("Updated At") },
-  ];
+  return getConditionFieldOptions();
 }
 
 function getOperatorOptions() {
@@ -74,6 +71,16 @@ export default function ConditionBuilder({
   forms = [],
 }: ConditionBuilderProps) {
   const fieldOptions = getFieldOptions();
+  const fieldSuggestions = fieldOptions.map((option) => ({
+    value: option.value,
+    label: `${option.label} (${option.value})`,
+  }));
+  const formSuggestions = forms
+    .map((form) => ({
+      value: form.formId,
+      label: `${form.name || form.formId} (${form.formId})`,
+    }))
+    .sort((left, right) => left.label.localeCompare(right.label));
   const operatorOptions = getOperatorOptions();
   const comboboxProps = useOperationsComboboxProps(100001);
   const popoverProps = useOperationsPopoverProps(100001);
@@ -99,32 +106,44 @@ export default function ConditionBuilder({
   };
 
   const renderValueInput = (condition: WorkflowCondition, index: number) => {
-    switch (condition.field) {
+    const normalizedField = normalizeConditionFieldValue(condition.field);
+    const normalizedValue = normalizeConditionStoredValue(
+      normalizedField,
+      condition.value,
+      forms,
+    );
+
+    switch (normalizedField) {
       case "status":
         return (
-          <Select
+          <Autocomplete
             placeholder={t("Value")}
             data={STATUS_VALUES}
             value={condition.value}
-            onChange={(value) => updateCondition(index, { value: value ?? "" })}
+            onChange={(value) => updateCondition(index, { value })}
             style={{ flex: 1 }}
-            searchable
             comboboxProps={comboboxProps}
+            autoComplete="off"
           />
         );
       case "formId":
         return (
-          <Select
-            placeholder={t("Select form")}
-            data={forms.map((f) => ({
-              value: f.formId,
-              label: `${f.name || f.formId} (${f.formId})`,
-            }))}
-            value={condition.value}
-            onChange={(value) => updateCondition(index, { value: value ?? "" })}
+          <Autocomplete
+            placeholder={
+              forms.length > 0
+                ? t("Select form or type backend form ID")
+                : t("Type backend form ID")
+            }
+            data={formSuggestions}
+            value={normalizedValue}
+            onChange={(value) =>
+              updateCondition(index, {
+                value: normalizeConditionStoredValue("formId", value, forms),
+              })
+            }
             style={{ flex: 1 }}
-            searchable
             comboboxProps={comboboxProps}
+            autoComplete="off"
           />
         );
       case "createdAt":
@@ -170,6 +189,11 @@ export default function ConditionBuilder({
           {t("Add Condition")}
         </Button>
       </Group>
+      <Text size="xs" c="dimmed">
+        {t(
+          "Use dotted paths for nested event fields, for example event.result.routing.route or event.result.ticketId.",
+        )}
+      </Text>
 
       {conditions.length === 0 ? (
         <Text size="sm" c="dimmed">
@@ -180,12 +204,14 @@ export default function ConditionBuilder({
           {conditions.map((condition, index) => (
             <Card key={index} withBorder p="sm" style={{ overflow: "visible" }}>
               <Group gap="xs" wrap="nowrap">
-                <Select
-                  placeholder={t("Field")}
-                  data={fieldOptions}
-                  value={condition.field}
+                <Autocomplete
+                  placeholder={t("Field path")}
+                  data={fieldSuggestions}
+                  value={normalizeConditionFieldValue(condition.field)}
                   onChange={(value) =>
-                    updateCondition(index, { field: value ?? "status" })
+                    updateCondition(index, {
+                      field: normalizeConditionFieldValue(value),
+                    })
                   }
                   style={{ flex: 1 }}
                   comboboxProps={comboboxProps}

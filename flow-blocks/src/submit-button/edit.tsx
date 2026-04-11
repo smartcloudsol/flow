@@ -48,6 +48,12 @@ export default function Edit({
             help={__("Text to display on the submit button", TEXT_DOMAIN)}
           />
           <ToggleControl
+            label={__("Hidden", TEXT_DOMAIN)}
+            checked={Boolean(attributes.hidden)}
+            onChange={(hidden) => setAttributes({ hidden })}
+            help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleControl
             label={__("Show Title", TEXT_DOMAIN)}
             checked={showTitle}
             onChange={(value) => setAttributes({ showTitle: value })}
@@ -81,13 +87,6 @@ export default function Edit({
               />
             </>
           )}
-
-          <ToggleControl
-            label={__("Hidden", TEXT_DOMAIN)}
-            checked={Boolean(attributes.hidden)}
-            onChange={(hidden) => setAttributes({ hidden })}
-            help={__("Hide this block by default.", TEXT_DOMAIN)}
-          />
         </PanelBody>
         <ConditionalLogicPanel
           attributes={attributes as Record<string, unknown>}

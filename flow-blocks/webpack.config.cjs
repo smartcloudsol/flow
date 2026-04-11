@@ -41,9 +41,9 @@ module.exports = function () {
     ...defaultConfig,
     entry: {
       editor: [path.resolve(process.cwd(), "src", "editor.tsx")],
-      "form/view": [path.resolve(process.cwd(), "src", "form", "view.tsx")],
-      "operations/view": [
-        path.resolve(process.cwd(), "src", "operations", "view.tsx"),
+      view: [
+        path.resolve(process.cwd(), "src", "form", "view.tsx"),
+        path.resolve(process.cwd(), "src", "operations", "view.tsx")
       ],
     },
     optimization: {

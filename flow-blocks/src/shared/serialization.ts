@@ -1,5 +1,10 @@
 import YAML from "yaml";
 import { parseOptions } from "./field-utils";
+import {
+  normalizeNumberTuple,
+  normalizeSliderMarks,
+  normalizeStringArray,
+} from "./mantine-prop-utils";
 import type {
   FieldConfig,
   FormAttributes,
@@ -28,8 +33,42 @@ export function filterWordPressAttributes(
     className: _className,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     style: _style,
+    // Some editor extensions inject transient generated class metadata into
+    // block attributes. If we serialize that into the payload, later reloads
+    // can fail validation when the extension no longer provides the same value.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    epGeneratedClass: _epGeneratedClass,
     ...fieldAttributes
   } = attributes;
+
+  for (const key of Object.keys(fieldAttributes)) {
+    if (/generatedclass$/i.test(key) && key !== "className") {
+      delete fieldAttributes[key];
+    }
+  }
+
+  if (fieldAttributes.hidden === false) {
+    delete fieldAttributes.hidden;
+  }
+
+  if (
+    fieldAttributes.conditionalLogic &&
+    typeof fieldAttributes.conditionalLogic === "object" &&
+    !Array.isArray(fieldAttributes.conditionalLogic)
+  ) {
+    const conditionalLogic = fieldAttributes.conditionalLogic as Record<
+      string,
+      unknown
+    >;
+    const rules = Array.isArray(conditionalLogic.rules)
+      ? conditionalLogic.rules
+      : [];
+
+    if (conditionalLogic.enabled !== true && rules.length === 0) {
+      delete fieldAttributes.conditionalLogic;
+    }
+  }
+
   return fieldAttributes;
 }
 
@@ -38,7 +77,34 @@ export function encodeData<T>(value: T): string {
 }
 
 export function decodeData<T>(value: string): T {
-  return JSON.parse(decodeURIComponent(window.atob(value))) as T;
+  const v = window.atob(value);
+  try {
+    return JSON.parse(decodeURIComponent(v)) as T;
+  } catch {
+    return JSON.parse(v) as T;
+  }
+}
+
+function resolveFormRoot(element: HTMLElement): HTMLElement {
+  if (typeof element.dataset.config === "string") {
+    return element;
+  }
+
+  const closestRoot = element.closest<HTMLElement>(
+    ".smartcloud-flow-form[data-config]",
+  );
+  if (closestRoot) {
+    return closestRoot;
+  }
+
+  const nestedRoot = element.querySelector<HTMLElement>(
+    ".smartcloud-flow-form[data-config]",
+  );
+  if (nestedRoot) {
+    return nestedRoot;
+  }
+
+  throw new Error("Missing form config");
 }
 
 export function parseFormElement(element: HTMLElement): {
@@ -46,7 +112,8 @@ export function parseFormElement(element: HTMLElement): {
   fields: FieldConfig[];
   states: FormStateContents;
 } {
-  const formEncoded = element.dataset.config;
+  const formRoot = resolveFormRoot(element);
+  const formEncoded = formRoot.dataset.config;
   if (!formEncoded) {
     throw new Error("Missing form config");
   }
@@ -79,21 +146,40 @@ export function parseFormElement(element: HTMLElement): {
   config = normalizeFormAttributes(config);
 
   // Find the config container (where InnerBlocks.Content is rendered)
-  const configContainers = element.querySelectorAll<HTMLElement>(
+  const configContainers = formRoot.querySelectorAll<HTMLElement>(
     ".smartcloud-flow-form__config",
   );
   const configContainer =
-    configContainers[configContainers.length - 1] || element;
+    configContainers[configContainers.length - 1] || formRoot;
 
   // Parse fields recursively (handle nested containers)
-  const fields = parseFieldsRecursive(configContainer);
+  const fields = applyFieldOverrides(
+    parseFieldsRecursive(configContainer),
+    config.fieldOverrides,
+  );
   const states = parseFormStates(configContainer);
+
+  delete config.fieldOverrides;
 
   return {
     form: config,
     fields,
     states,
   };
+}
+
+function getScopedFieldNodes(container: HTMLElement): HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      "[data-smartcloud-flow-form-field]",
+    ),
+  ).filter((node) => {
+    const nearestFieldAncestor = node.parentElement?.closest<HTMLElement>(
+      "[data-smartcloud-flow-form-field]",
+    );
+
+    return !nearestFieldAncestor || nearestFieldAncestor === container;
+  });
 }
 
 function parseFormStates(container: HTMLElement): FormStateContents {
@@ -199,8 +285,59 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
   // Double cast needed due to FieldConfig being a union type
   const mutableField = field as unknown as Record<string, unknown>;
 
+  delete mutableField.epGeneratedClass;
+  for (const key of Object.keys(mutableField)) {
+    if (/generatedclass$/i.test(key) && key !== "className") {
+      delete mutableField[key];
+    }
+  }
+
   // Boolean fields
-  const booleanFields = ["required", "cacheEnabled"];
+  const booleanFields = [
+    "required",
+    "cacheEnabled",
+    "hidden",
+    "disabled",
+    "pointer",
+    "autosize",
+    "allowDeselect",
+    "autoSelectOnBlur",
+    "clearable",
+    "defaultDropdownOpened",
+    "searchable",
+    "selectFirstOptionOnChange",
+    "withAlignedLabels",
+    "withCheckIcon",
+    "withScrollArea",
+    "autoContrast",
+    "withThumbIndicator",
+    "allowLeadingZeros",
+    "fixedDecimalScale",
+    "hideControls",
+    "closeOnColorSwatchClick",
+    "disallowInput",
+    "withPreview",
+    "multiple",
+    "inverted",
+    "labelAlwaysOn",
+    "restrictToMarks",
+    "pushOnOverlap",
+    "acceptValueOnBlur",
+    "allowDuplicates",
+    "loading",
+    "animateOpacity",
+    "expanded",
+    "preventGrowOverflow",
+    "grow",
+    "wrap",
+    "allowNegative",
+    "allowDecimal",
+    "withPicker",
+    "withEyeDropper",
+    "mask",
+    "visible",
+    "defaultVisible",
+  ];
   for (const fieldName of booleanFields) {
     if (fieldName in mutableField) {
       const val = mutableField[fieldName];
@@ -219,9 +356,31 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
     "minLength",
     "maxLength",
     "minRows",
+    "maxRows",
     "cacheTTL",
     "autocompleteMinChars",
     "autocompleteDebounce",
+    "limit",
+    "swatchesPerRow",
+    "maxSize",
+    "maxFiles",
+    "min",
+    "max",
+    "step",
+    "decimalScale",
+    "startValue",
+    "length",
+    "gap",
+    "thumbSize",
+    "precision",
+    "maxRange",
+    "minRange",
+    "maxDropdownHeight",
+    "maxTags",
+    "count",
+    "fractions",
+    "rows",
+    "columns",
   ];
   for (const fieldName of numberFields) {
     if (
@@ -236,15 +395,63 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
   }
 
   if (
-    (mutableField.type === "radio" || mutableField.type === "checkbox-group") &&
+    (mutableField.type === "radio" ||
+      mutableField.type === "checkbox-group" ||
+      mutableField.type === "tags") &&
     !Array.isArray(mutableField.options) &&
     typeof mutableField.optionsText === "string"
   ) {
     mutableField.options = parseOptions(mutableField.optionsText);
   }
 
-  if (mutableField.type === "radio" || mutableField.type === "checkbox-group") {
+  if (
+    mutableField.type === "radio" ||
+    mutableField.type === "checkbox-group" ||
+    mutableField.type === "tags"
+  ) {
     delete mutableField.optionsText;
+  }
+
+  const stringArrayFields = ["allowedDecimalSeparators", "swatches"];
+  for (const fieldName of stringArrayFields) {
+    if (fieldName in mutableField) {
+      const normalized = normalizeStringArray(mutableField[fieldName]);
+      if (normalized?.length) {
+        mutableField[fieldName] = normalized;
+      }
+    }
+  }
+
+  if ("domain" in mutableField) {
+    const normalized = normalizeNumberTuple(mutableField.domain);
+    if (normalized) {
+      mutableField.domain = normalized;
+    }
+  }
+
+  if ("marksData" in mutableField && !Array.isArray(mutableField.marks)) {
+    const normalizedMarks = normalizeSliderMarks(mutableField.marksData);
+    if (normalizedMarks?.length) {
+      mutableField.marks = normalizedMarks;
+    }
+    delete mutableField.marksData;
+  }
+
+  if (Array.isArray(mutableField.marks)) {
+    const normalizedMarks = normalizeSliderMarks(mutableField.marks);
+    if (normalizedMarks?.length) {
+      mutableField.marks = normalizedMarks;
+    }
+  } else if (mutableField.marks === true) {
+    const min = Number(mutableField.min);
+    const max = Number(mutableField.max);
+    if (Number.isFinite(min) && Number.isFinite(max)) {
+      mutableField.marks = [{ value: min }, { value: max }];
+    } else {
+      delete mutableField.marks;
+    }
+  } else if (mutableField.marks === false) {
+    delete mutableField.marks;
   }
 
   // Normalize conditional logic (migrate legacy format, filter empty options, ensure IDs)
@@ -346,14 +553,7 @@ function coerceLegacyFieldData(
  * Recursively parse field elements and their nested children
  */
 function parseFieldsRecursive(container: HTMLElement): FieldConfig[] {
-  const directChildren: HTMLElement[] = [];
-
-  // Get only direct children with data-smartcloud-flow-form-field (not nested)
-  for (const child of Array.from(container.children)) {
-    if (child.hasAttribute("data-smartcloud-flow-form-field")) {
-      directChildren.push(child as HTMLElement);
-    }
-  }
+  const directChildren = getScopedFieldNodes(container);
 
   return directChildren.map((node) => {
     const decodedFieldData = decodeData<Record<string, unknown>>(
@@ -383,13 +583,7 @@ function parseFieldsRecursive(container: HTMLElement): FieldConfig[] {
     }
 
     if (normalizedField.type === "wizard") {
-      const wizardStepNodes = Array.from(node.children).filter(
-        (child): child is HTMLElement =>
-          child instanceof HTMLElement &&
-          (child.hasAttribute("data-smartcloud-flow-form-field") ||
-            child.hasAttribute("data-wizard-step-title") ||
-            child.hasAttribute("data-wizard-step-description")),
-      );
+      const wizardStepNodes = getScopedFieldNodes(node);
 
       const steps = wizardStepNodes
         .map((stepNode) => {
@@ -439,5 +633,74 @@ function parseFieldsRecursive(container: HTMLElement): FieldConfig[] {
     }
 
     return normalizedField;
+  });
+}
+
+function getFieldOverride(
+  overrides: unknown,
+  key: string | undefined,
+): Record<string, unknown> | undefined {
+  if (!key || !overrides || typeof overrides !== "object") {
+    return undefined;
+  }
+
+  const candidate = (overrides as Record<string, unknown>)[key];
+  return candidate && typeof candidate === "object" && !Array.isArray(candidate)
+    ? (candidate as Record<string, unknown>)
+    : undefined;
+}
+
+function applyFieldOverrides(
+  fields: FieldConfig[],
+  overrides: unknown,
+  path: number[] = [],
+): FieldConfig[] {
+  return fields.map((field, index) => {
+    const fieldPath = [...path, index];
+    const legacyPathKey = fieldPath.join(".");
+    const oneBasedPathKey = fieldPath.map((segment) => segment + 1).join(".");
+    const fieldName = (field as { name?: unknown }).name;
+    const nameKey = typeof fieldName === "string" ? fieldName : undefined;
+    const mergedOverride = {
+      ...getFieldOverride(overrides, nameKey),
+      ...getFieldOverride(overrides, legacyPathKey),
+      ...getFieldOverride(overrides, oneBasedPathKey),
+    };
+
+    const nextField = Object.keys(mergedOverride).length
+      ? normalizeFieldAttributes({
+          ...field,
+          ...mergedOverride,
+        } as FieldConfig)
+      : field;
+
+    if (
+      nextField.type === "stack" ||
+      nextField.type === "group" ||
+      nextField.type === "grid" ||
+      nextField.type === "fieldset" ||
+      nextField.type === "collapse" ||
+      nextField.type === "visuallyhidden"
+    ) {
+      return {
+        ...nextField,
+        children: applyFieldOverrides(nextField.children, overrides, fieldPath),
+      } as FieldConfig;
+    }
+
+    if (nextField.type === "wizard") {
+      return {
+        ...nextField,
+        steps: nextField.steps.map((step, stepIndex) => ({
+          ...step,
+          children: applyFieldOverrides(step.children, overrides, [
+            ...fieldPath,
+            stepIndex,
+          ]),
+        })),
+      } as FieldConfig;
+    }
+
+    return nextField;
   });
 }

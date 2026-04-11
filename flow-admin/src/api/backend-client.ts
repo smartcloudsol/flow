@@ -3,6 +3,7 @@ import type {
   EmailTemplate,
   FormDefinition,
   ListResponse,
+  ProcessMap,
   Submission,
   SubmissionActionResponse,
   SubmissionDetail,
@@ -106,11 +107,15 @@ export class FlowBackendClient {
     );
   }
 
-  listTemplates(limit = 100): Promise<ListResponse<EmailTemplate>> {
+  listTemplates(
+    limit = 100,
+    cursor?: string,
+  ): Promise<ListResponse<EmailTemplate>> {
     const qs = buildQuery({
       accountId: this.boot.accountId,
       siteId: this.boot.siteId,
       limit,
+      cursor,
     });
     return this.request(`/templates?${qs}`);
   }
@@ -143,11 +148,12 @@ export class FlowBackendClient {
     });
   }
 
-  listWorkflows(limit = 100): Promise<ListResponse<Workflow>> {
+  listWorkflows(limit = 100, cursor?: string): Promise<ListResponse<Workflow>> {
     const qs = buildQuery({
       accountId: this.boot.accountId,
       siteId: this.boot.siteId,
       limit,
+      cursor,
     });
     return this.request(`/workflows?${qs}`);
   }
@@ -168,11 +174,15 @@ export class FlowBackendClient {
     return this.request(`/workflows/${workflowId}`, "DELETE");
   }
 
-  listWebhookEndpoints(limit = 100): Promise<ListResponse<WebhookEndpoint>> {
+  listWebhookEndpoints(
+    limit = 100,
+    cursor?: string,
+  ): Promise<ListResponse<WebhookEndpoint>> {
     const qs = buildQuery({
       accountId: this.boot.accountId,
       siteId: this.boot.siteId,
       limit,
+      cursor,
     });
     return this.request(`/webhook-endpoints?${qs}`);
   }
@@ -194,5 +204,37 @@ export class FlowBackendClient {
 
   deleteWebhookEndpoint(webhookKey: string): Promise<void> {
     return this.request(`/webhook-endpoints/${webhookKey}`, "DELETE");
+  }
+
+  listProcessMaps(
+    limit = 100,
+    cursor?: string,
+  ): Promise<ListResponse<ProcessMap>> {
+    const qs = buildQuery({
+      accountId: this.boot.accountId,
+      siteId: this.boot.siteId,
+      limit,
+      cursor,
+    });
+    return this.request(`/process-maps?${qs}`);
+  }
+
+  getProcessMap(processMapId: string): Promise<ProcessMap> {
+    return this.request(`/process-maps/${processMapId}`);
+  }
+
+  createProcessMap(body: ProcessMap): Promise<ProcessMap> {
+    return this.request(`/process-maps`, "POST", body);
+  }
+
+  updateProcessMap(
+    processMapId: string,
+    body: ProcessMap,
+  ): Promise<ProcessMap> {
+    return this.request(`/process-maps/${processMapId}`, "PUT", body);
+  }
+
+  deleteProcessMap(processMapId: string): Promise<void> {
+    return this.request(`/process-maps/${processMapId}`, "DELETE");
   }
 }

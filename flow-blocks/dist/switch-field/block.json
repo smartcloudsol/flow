@@ -34,9 +34,24 @@
       "type": "string",
       "default": ""
     },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
     "required": {
       "type": "boolean",
       "default": false
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "labelPosition": {
+      "type": "string",
+      "default": "right"
     },
     "onLabel": {
       "type": "string",
@@ -45,6 +60,14 @@
     "offLabel": {
       "type": "string",
       "default": ""
+    },
+    "thumbIcon": {
+      "type": "string",
+      "default": ""
+    },
+    "withThumbIndicator": {
+      "type": "boolean",
+      "default": false
     },
     "conditionalLogic": {
       "type": "object",
@@ -59,5 +82,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }

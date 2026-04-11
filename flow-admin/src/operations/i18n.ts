@@ -11,6 +11,7 @@ import { operationsTranslations } from "./translations";
 type TranslateFn = (key: string) => string;
 
 let translate: TranslateFn = (key) => key;
+let currentOperationsLanguage: string | undefined;
 
 export function t(key: string): string {
   return translate(key) || key;
@@ -23,6 +24,10 @@ export function initWordPressOperationsI18n(): void {
 export function initAmplifyOperationsI18n(): void {
   I18n.putVocabularies(operationsTranslations);
   translate = (key) => I18n.get(key) || key;
+}
+
+export function getOperationsLanguage(): string | undefined {
+  return currentOperationsLanguage;
 }
 
 export function syncAmplifyOperationsI18n(
@@ -43,8 +48,10 @@ export function syncAmplifyOperationsI18n(
   const language = overrides?.language ?? getStoreSelect(store).getLanguage();
   if (!language || language === "system") {
     I18n.setLanguage("");
+    currentOperationsLanguage = undefined;
   } else {
     I18n.setLanguage(language);
+    currentOperationsLanguage = String(language);
   }
 
   return {

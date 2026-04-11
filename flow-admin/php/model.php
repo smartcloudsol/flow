@@ -21,7 +21,6 @@ class FlowAdminSettings
         public bool $debugLoggingEnabled = false,
         public bool $formsBackendSyncEnabled = true,
         public bool $formsAllowPermanentDelete = false,
-        public array $aiSuggestionsPresets = [],
         public array $highlightedSubmissionActions = ['seen', 'resolved', 'completed'],
     ) {
     }
@@ -58,7 +57,6 @@ class FlowAdminSettings
                 debugLoggingEnabled: (bool) ($raw->debugLoggingEnabled ?? false),
                 formsBackendSyncEnabled: (bool) ($raw->formsBackendSyncEnabled ?? true),
                 formsAllowPermanentDelete: (bool) ($raw->formsAllowPermanentDelete ?? false),
-                aiSuggestionsPresets: is_array($raw->aiSuggestionsPresets ?? null) ? $raw->aiSuggestionsPresets : [],
                 highlightedSubmissionActions: self::normalizeHighlightedSubmissionActions($raw->highlightedSubmissionActions ?? null),
             );
         }
@@ -77,7 +75,6 @@ class FlowAdminSettings
             debugLoggingEnabled: (bool) ($arr['debugLoggingEnabled'] ?? false),
             formsBackendSyncEnabled: (bool) ($arr['formsBackendSyncEnabled'] ?? true),
             formsAllowPermanentDelete: (bool) ($arr['formsAllowPermanentDelete'] ?? false),
-            aiSuggestionsPresets: is_array($arr['aiSuggestionsPresets'] ?? null) ? $arr['aiSuggestionsPresets'] : [],
             highlightedSubmissionActions: self::normalizeHighlightedSubmissionActions($arr['highlightedSubmissionActions'] ?? null),
         );
     }

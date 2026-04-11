@@ -130,12 +130,20 @@ export interface TemplatePreviewResponse {
 export interface WorkflowStep {
   stepId?: string;
   actionType?: string;
-  type?: "email" | "webhook" | "status-change" | "delay" | "condition";
   config?: Record<string, unknown>;
-  retryPolicy?: {
-    maxAttempts?: number;
-    backoffMultiplier?: number;
-  };
+}
+
+export interface WorkflowTriggerCondition {
+  field?: string;
+  operator?: string;
+  value?: unknown;
+}
+
+export interface WorkflowTrigger {
+  eventType?: string;
+  sourceStepIds?: string[];
+  conditions?: WorkflowTriggerCondition[];
+  repeatPolicy?: "always" | "first-match-only";
 }
 
 export interface Workflow {
@@ -145,11 +153,7 @@ export interface Workflow {
   name: string;
   description?: string;
   enabled?: boolean;
-  trigger?: {
-    eventType?: string;
-    conditions?: Record<string, unknown>[];
-    repeatPolicy?: "always" | "first-match-only";
-  };
+  trigger?: WorkflowTrigger;
   steps?: WorkflowStep[];
   createdAt?: string;
   updatedAt?: string;
@@ -160,16 +164,14 @@ export interface WebhookEndpoint {
   accountId: string;
   siteId: string;
   url: string;
+  provider?: "generic" | "zapier";
   name?: string;
   description?: string;
   enabled?: boolean;
-  events?: string[];
-  signingSecret?: string;
+  method?: "POST" | "PUT";
+  signingMode?: "none" | "hmac";
+  signingSecretParameterName?: string;
   headers?: Record<string, string>;
-  retryPolicy?: {
-    maxAttempts?: number;
-    backoffMultiplier?: number;
-  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -185,4 +187,108 @@ export interface SubmissionListQuery {
   email?: string;
   sortBy?: "createdAt" | "updatedAt" | "status";
   sortDir?: "asc" | "desc";
+}
+
+// ─── Process Map types ────────────────────────────────────────────────────────
+
+export interface ProcessNodeLayout {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  collapsed?: boolean;
+}
+
+export interface ProcessLayout {
+  nodes: Record<string, ProcessNodeLayout>;
+  viewport?: {
+    x: number;
+    y: number;
+    zoom: number;
+  };
+}
+
+export type ProcessConnectionType = "event" | "logical";
+
+export interface ProcessEventConnection {
+  id: string;
+  type: "event";
+  sourceWorkflowId: string;
+  targetWorkflowId: string;
+  eventName: string;
+  filter?: Record<string, unknown>;
+}
+
+export interface ProcessLogicalConnection {
+  id: string;
+  type: "logical";
+  sourceWorkflowId: string;
+  targetWorkflowId: string;
+  label?: string;
+}
+
+export type ProcessConnection =
+  | ProcessEventConnection
+  | ProcessLogicalConnection;
+
+export type ProcessDraftStepActionType =
+  | "email.send"
+  | "webhook.call"
+  | "ai.agent"
+  | "eventbridge.event"
+  | "status.update"
+  | "delay";
+
+export interface ProcessDraftLinkedEntity {
+  entityType: "template" | "webhook";
+  mode: "existing" | "draft";
+  key?: string;
+  draftId?: string;
+  name?: string;
+}
+
+export interface ProcessDraftStepNode {
+  stepId: string;
+  parentWorkflowId: string;
+  actionType: ProcessDraftStepActionType;
+  name: string;
+  config?: Record<string, unknown>;
+  linkedEntity?: ProcessDraftLinkedEntity;
+  order?: number;
+}
+
+export interface ProcessDraftEdge {
+  id: string;
+  source: string;
+  target: string;
+  kind: "workflow-step" | "step-trigger";
+  label?: string;
+  branchKey?: string;
+  triggerEvent?: string;
+  sourceActionType?: ProcessDraftStepActionType;
+}
+
+export interface ProcessDraftGraph {
+  stepNodes: ProcessDraftStepNode[];
+  edges: ProcessDraftEdge[];
+}
+
+export interface ProcessMap {
+  processMapId: string;
+  accountId: string;
+  siteId: string;
+  name: string;
+  description?: string;
+  workflowIds: string[];
+  connections: ProcessConnection[];
+  layout: ProcessLayout;
+  metadata?: {
+    version?: number;
+    updatedAt?: string;
+    updatedBy?: string;
+    draftGraph?: ProcessDraftGraph;
+    workflowTriggerBaselines?: Record<string, WorkflowTrigger | undefined>;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }

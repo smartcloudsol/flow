@@ -17,6 +17,11 @@ import { useEffect } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
+import {
+  INPUT_MODE_OPTIONS,
+  SIZE_OPTIONS,
+} from "../shared/mantine-editor-options";
+import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
 import type { PinFieldAttributes } from "../shared/types";
 
 export default function Edit({
@@ -89,6 +94,23 @@ export default function Edit({
             help={__("Number of PIN digits.", TEXT_DOMAIN)}
           />
           <SelectControl
+            label={__("Size", TEXT_DOMAIN)}
+            value={attributes.size ?? ""}
+            options={[
+              { label: __("Default", TEXT_DOMAIN), value: "" },
+              ...SIZE_OPTIONS,
+            ]}
+            onChange={(size) => setAttributes({ size: size || undefined })}
+            help={__("Controls the input size and spacing.", TEXT_DOMAIN)}
+          />
+          <SelectControl
+            label={__("Gap", TEXT_DOMAIN)}
+            value={attributes.gap ?? "md"}
+            options={SIZE_OPTIONS}
+            onChange={(gap) => setAttributes({ gap: gap || undefined })}
+            help={__("Spacing between individual PIN boxes.", TEXT_DOMAIN)}
+          />
+          <SelectControl
             label={__("Input type", TEXT_DOMAIN)}
             value={attributes.inputType ?? attributes.type ?? "number"}
             onChange={(inputType) =>
@@ -102,24 +124,60 @@ export default function Edit({
             ]}
             help={__("Type of characters allowed.", TEXT_DOMAIN)}
           />
-          <ToggleControl
-            label={__("Mask input", TEXT_DOMAIN)}
-            checked={attributes.mask ?? true}
-            onChange={(mask) => setAttributes({ mask })}
-            help={__("Hide PIN characters.", TEXT_DOMAIN)}
+          <SelectControl
+            label={__("Input mode", TEXT_DOMAIN)}
+            value={attributes.inputMode ?? "numeric"}
+            options={INPUT_MODE_OPTIONS}
+            onChange={(inputMode) =>
+              setAttributes({
+                inputMode: inputMode as PinFieldAttributes["inputMode"],
+              })
+            }
+            help={__(
+              "Hints the preferred mobile keyboard layout.",
+              TEXT_DOMAIN,
+            )}
           />
-          <ToggleControl
-            label={__("Required", TEXT_DOMAIN)}
-            checked={attributes.required}
-            onChange={(required) => setAttributes({ required })}
-            help={__("Mark this field as required.", TEXT_DOMAIN)}
+          <TextControl
+            label={__("Placeholder", TEXT_DOMAIN)}
+            value={attributes.placeholder ?? ""}
+            onChange={(placeholder) => setAttributes({ placeholder })}
+            help={__(
+              "Placeholder text shown inside each PIN box.",
+              TEXT_DOMAIN,
+            )}
           />
-
           <ToggleControl
             label={__("Hidden", TEXT_DOMAIN)}
             checked={Boolean(attributes.hidden)}
             onChange={(hidden) => setAttributes({ hidden })}
             help={__("Hide this block by default.", TEXT_DOMAIN)}
+          />
+          <ToggleSettingsSection
+            visibleCount={2}
+            items={[
+              {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
+                key: "mask",
+                label: __("Mask input", TEXT_DOMAIN),
+                checked: attributes.mask ?? true,
+                onChange: (mask) => setAttributes({ mask }),
+                help: __("Hide PIN characters as the user types.", TEXT_DOMAIN),
+              },
+              {
+                key: "disabled",
+                label: __("Disabled", TEXT_DOMAIN),
+                checked: Boolean(attributes.disabled),
+                onChange: (disabled) => setAttributes({ disabled }),
+                help: __("Prevent users from editing this field.", TEXT_DOMAIN),
+              },
+            ]}
           />
         </PanelBody>
         <ConditionalLogicPanel

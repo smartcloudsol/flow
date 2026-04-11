@@ -8,9 +8,11 @@ import {
   Title,
 } from "@mantine/core";
 import { I18n } from "aws-amplify/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { WizardContainerConfig } from "../../shared/types";
+import { getRuntimeKey } from "../conditional-engine";
 import { evaluateRule } from "../conditional-engine";
+import { useFormPreview } from "../context/FormPreviewContext";
 import { useFormRuntime } from "../hooks/useFormRuntime";
 import { validateValues } from "../validation";
 import { FieldRenderer } from "./field-renderers";
@@ -53,9 +55,20 @@ export function WizardContainer({
   runtimeKey: string;
   path: number[];
 }) {
-  const [activeStep, setActiveStep] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const hasMountedRef = useRef(false);
+  const previousStepRef = useRef<number | null>(null);
   const runtime = useRuntimeByKey(runtimeKey);
-  const { values, fieldStates, setErrors } = useFormRuntime();
+  const preview = useFormPreview();
+  const {
+    evaluationValues,
+    fieldStates,
+    setErrors,
+    emitFormEvent,
+    formId,
+    formReturnIntent,
+    clearFormReturnIntent,
+  } = useFormRuntime();
 
   const {
     title,
@@ -69,13 +82,49 @@ export function WizardContainer({
     gap = "md",
   } = field;
 
+  const previewWizardPath = path.join(".");
+  const isPreviewingThisWizard =
+    preview.mode === "wizard-step" && preview.wizardPath === previewWizardPath;
+  const previewStepIndex =
+    isPreviewingThisWizard && typeof preview.stepIndex === "number"
+      ? preview.stepIndex
+      : -1;
+
   const visibleSteps = useMemo(
     () =>
       steps
         .map((step, index) => ({ step, index }))
-        .filter(({ step }) => isStepVisible(step, values)),
-    [steps, values],
+        .filter(
+          ({ step, index }) =>
+            index === previewStepIndex || isStepVisible(step, evaluationValues),
+        ),
+    [evaluationValues, previewStepIndex, steps],
   );
+  const previewedVisibleStep = useMemo(() => {
+    if (previewStepIndex < 0) {
+      return -1;
+    }
+
+    return visibleSteps.findIndex(({ index }) => index === previewStepIndex);
+  }, [previewStepIndex, visibleSteps]);
+
+  const [activeStep, setActiveStep] = useState(() => {
+    if (previewedVisibleStep >= 0) {
+      return previewedVisibleStep;
+    }
+
+    if (formReturnIntent === "last-step") {
+      return Math.max(visibleSteps.length - 1, 0);
+    }
+
+    return 0;
+  });
+  const boundedActiveStep = Math.min(
+    activeStep,
+    Math.max(visibleSteps.length - 1, 0),
+  );
+  const currentActiveStep =
+    previewedVisibleStep >= 0 ? previewedVisibleStep : boundedActiveStep;
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -90,24 +139,90 @@ export function WizardContainer({
     });
   }, [activeStep, visibleSteps]);
 
+  useEffect(() => {
+    if (formReturnIntent !== "last-step") {
+      return;
+    }
+
+    clearFormReturnIntent();
+  }, [clearFormReturnIntent, formReturnIntent]);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    containerRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+  }, [currentActiveStep]);
+
+  useEffect(() => {
+    if (preview.mode !== "form") {
+      previousStepRef.current = currentActiveStep;
+      return;
+    }
+
+    if (previousStepRef.current === null) {
+      previousStepRef.current = currentActiveStep;
+      return;
+    }
+
+    if (previousStepRef.current === currentActiveStep) {
+      return;
+    }
+
+    const previousStepEntry = visibleSteps[previousStepRef.current];
+    const nextStepEntry = visibleSteps[currentActiveStep];
+
+    emitFormEvent("smartcloud-flow:wizard-step-change", {
+      action: "wizard-step-change",
+      formId,
+      wizardPath: previewWizardPath,
+      wizardTitle: field.title,
+      previousVisibleStepIndex: previousStepRef.current,
+      previousStepIndex: previousStepEntry?.index,
+      previousStepTitle: previousStepEntry?.step.title,
+      stepIndex: nextStepEntry?.index,
+      visibleStepIndex: currentActiveStep,
+      stepTitle: nextStepEntry?.step.title,
+      totalVisibleSteps: visibleSteps.length,
+    });
+
+    previousStepRef.current = currentActiveStep;
+  }, [
+    currentActiveStep,
+    emitFormEvent,
+    field.title,
+    formId,
+    previewWizardPath,
+    preview.mode,
+    visibleSteps,
+  ]);
+
   if (isHidden(runtime)) return null;
 
   if (!Array.isArray(visibleSteps) || visibleSteps.length === 0) {
     return null;
   }
 
-  const currentStepEntry = visibleSteps[activeStep];
+  const currentStepEntry = visibleSteps[currentActiveStep];
   const currentStepConfig = currentStepEntry?.step;
-  const isFirstStep = activeStep === 0;
-  const isLastStep = activeStep === visibleSteps.length - 1;
+  const isFirstStep = currentActiveStep === 0;
+  const isLastStep = currentActiveStep === visibleSteps.length - 1;
 
   // Validate current step fields only
   const validateCurrentStep = (): boolean => {
     if (!currentStepConfig) return false;
     const errors = validateValues(
       currentStepConfig.children,
-      values,
+      evaluationValues,
       fieldStates,
+      [...path, currentStepEntry.index],
     );
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -118,25 +233,25 @@ export function WizardContainer({
 
   const handleNext = () => {
     if (validateCurrentStep() && !isLastStep) {
-      setActiveStep((current) => current + 1);
+      setActiveStep(currentActiveStep + 1);
     }
   };
 
   const handlePrev = () => {
     if (!isFirstStep) {
-      setActiveStep((current) => current - 1);
+      setActiveStep(currentActiveStep - 1);
     }
   };
 
   const handleStepClick = (stepIndex: number) => {
-    if (stepIndex === activeStep) return;
+    if (stepIndex === currentActiveStep) return;
 
-    if (stepIndex < activeStep) {
+    if (stepIndex < currentActiveStep) {
       setActiveStep(stepIndex);
       return;
     }
 
-    if (stepIndex === activeStep + 1) {
+    if (stepIndex === currentActiveStep + 1) {
       if (validateCurrentStep()) {
         setActiveStep(stepIndex);
       }
@@ -146,12 +261,13 @@ export function WizardContainer({
     if (!allowStepNavigation) return;
 
     // If trying to go forward, validate all steps up to the target
-    if (stepIndex > activeStep) {
-      for (let i = activeStep; i < stepIndex; i++) {
+    if (stepIndex > currentActiveStep) {
+      for (let i = currentActiveStep; i < stepIndex; i++) {
         const stepErrors = validateValues(
           visibleSteps[i].step.children,
-          values,
+          evaluationValues,
           fieldStates,
+          [...path, visibleSteps[i].index],
         );
         if (Object.keys(stepErrors).length > 0) {
           setErrors(stepErrors);
@@ -164,133 +280,147 @@ export function WizardContainer({
   };
 
   const canClickStep = (stepIndex: number) => {
-    if (stepIndex === activeStep) return true;
-    if (stepIndex < activeStep) return true;
-    if (stepIndex === activeStep + 1) return true;
+    if (stepIndex === currentActiveStep) return true;
+    if (stepIndex < currentActiveStep) return true;
+    if (stepIndex === currentActiveStep + 1) return true;
     return allowStepNavigation;
   };
 
   return (
-    <Stack gap={gap} className="flow-wizard-container">
-      {/* Header */}
-      {(title || subtitle) && (
-        <div className="flow-wizard-header">
-          {title && (
-            <Title order={3} className="flow-wizard-title">
-              {title}
-            </Title>
-          )}
-          {subtitle && (
-            <Text size="sm" c="dimmed" className="flow-wizard-subtitle">
-              {subtitle}
-            </Text>
-          )}
-        </div>
-      )}
-
-      {/* Progress indicator */}
-      {showProgress && (
-        <div className="flow-wizard-progress">
-          {progressType === "bar" ? (
-            <Progress
-              value={((activeStep + 1) / visibleSteps.length) * 100}
-              size="sm"
-              radius="xl"
-              className="flow-wizard-progress-bar"
-            />
-          ) : progressType === "dots" ? (
-            <Stepper
-              active={activeStep}
-              onStepClick={handleStepClick}
-              size="sm"
-              className="flow-wizard-stepper"
-            >
-              {visibleSteps.map(({ step }, index) => (
-                <Stepper.Step
-                  key={index}
-                  label={step.title}
-                  description={step.description}
-                  allowStepSelect={index !== activeStep && canClickStep(index)}
-                />
-              ))}
-            </Stepper>
-          ) : (
-            <Group
-              justify="center"
-              gap="xs"
-              className="flow-wizard-step-numbers"
-            >
-              {visibleSteps.map((_, index) => (
-                <Button
-                  key={index}
-                  variant={index === activeStep ? "filled" : "light"}
-                  size="xs"
-                  radius="xl"
-                  onClick={
-                    index === activeStep
-                      ? undefined
-                      : () => handleStepClick(index)
-                  }
-                  disabled={index === activeStep || !canClickStep(index)}
-                  className={`flow-wizard-step-number ${
-                    index === activeStep ? "flow-wizard-step-active" : ""
-                  }`}
-                >
-                  {index + 1}
-                </Button>
-              ))}
-            </Group>
-          )}
-        </div>
-      )}
-
-      {/* Current step content */}
-      {currentStepConfig && (
-        <Stack gap={gap} className="flow-wizard-step-content">
-          {currentStepConfig.title && (
-            <Title order={4} className="flow-wizard-step-title">
-              {currentStepConfig.title}
-            </Title>
-          )}
-          {currentStepConfig.description && (
-            <Text size="sm" c="dimmed" className="flow-wizard-step-description">
-              {currentStepConfig.description}
-            </Text>
-          )}
-          <div className="flow-wizard-step-fields">
-            {currentStepConfig.children.map((child, index) => {
-              if (child.type === "submit" && !isLastStep) {
-                return null;
-              }
-
-              return (
-                <FieldRenderer
-                  key={index}
-                  field={child}
-                  path={[...path, currentStepEntry.index, index]}
-                />
-              );
-            })}
+    <div ref={containerRef}>
+      <Stack gap={gap} className="flow-wizard-container">
+        {/* Header */}
+        {(title || subtitle) && (
+          <div className="flow-wizard-header">
+            {title && (
+              <Title order={3} className="flow-wizard-title">
+                {title}
+              </Title>
+            )}
+            {subtitle && (
+              <Text size="sm" c="dimmed" className="flow-wizard-subtitle">
+                {subtitle}
+              </Text>
+            )}
           </div>
-        </Stack>
-      )}
-
-      {/* Navigation controls */}
-      <Group justify="space-between" className="flow-wizard-controls">
-        <Button
-          variant="default"
-          onClick={handlePrev}
-          disabled={isFirstStep}
-          className="flow-wizard-prev-button"
-        >
-          {prevButtonLabel || I18n.get("Previous") || "Previous"}
-        </Button>
-        {!isLastStep && (
-          <Button onClick={handleNext} className="flow-wizard-next-button">
-            {nextButtonLabel || I18n.get("Next") || "Next"}
-          </Button>
         )}
-      </Group>
-    </Stack>
+
+        {/* Progress indicator */}
+        {showProgress && (
+          <div className="flow-wizard-progress">
+            {progressType === "bar" ? (
+              <Progress
+                value={((currentActiveStep + 1) / visibleSteps.length) * 100}
+                size="sm"
+                radius="xl"
+                className="flow-wizard-progress-bar"
+              />
+            ) : progressType === "dots" ? (
+              <Stepper
+                active={currentActiveStep}
+                onStepClick={handleStepClick}
+                size="sm"
+                className="flow-wizard-stepper"
+              >
+                {visibleSteps.map(({ step }, index) => (
+                  <Stepper.Step
+                    key={index}
+                    label={step.title}
+                    description={step.description}
+                    allowStepSelect={
+                      index !== currentActiveStep && canClickStep(index)
+                    }
+                  />
+                ))}
+              </Stepper>
+            ) : (
+              <Group
+                justify="center"
+                gap="xs"
+                className="flow-wizard-step-numbers"
+              >
+                {visibleSteps.map((_, index) => (
+                  <Button
+                    key={index}
+                    variant={index === currentActiveStep ? "filled" : "light"}
+                    size="xs"
+                    radius="xl"
+                    onClick={
+                      index === currentActiveStep
+                        ? undefined
+                        : () => handleStepClick(index)
+                    }
+                    disabled={
+                      index === currentActiveStep || !canClickStep(index)
+                    }
+                    className={`flow-wizard-step-number ${
+                      index === currentActiveStep
+                        ? "flow-wizard-step-active"
+                        : ""
+                    }`}
+                  >
+                    {index + 1}
+                  </Button>
+                ))}
+              </Group>
+            )}
+          </div>
+        )}
+
+        {/* Current step content */}
+        {currentStepConfig && (
+          <Stack gap={gap} className="flow-wizard-step-content">
+            {currentStepConfig.title && (
+              <Title order={4} className="flow-wizard-step-title">
+                {currentStepConfig.title}
+              </Title>
+            )}
+            {currentStepConfig.description && (
+              <Text
+                size="sm"
+                c="dimmed"
+                className="flow-wizard-step-description"
+              >
+                {currentStepConfig.description}
+              </Text>
+            )}
+            <div className="flow-wizard-step-fields">
+              {currentStepConfig.children.map((child, index) => {
+                if (child.type === "submit" && !isLastStep) {
+                  return null;
+                }
+
+                const childPath = [...path, currentStepEntry.index, index];
+
+                return (
+                  <FieldRenderer
+                    key={getRuntimeKey(child, childPath)}
+                    field={child}
+                    path={childPath}
+                  />
+                );
+              })}
+            </div>
+          </Stack>
+        )}
+
+        {/* Navigation controls */}
+        <Group justify="space-between" className="flow-wizard-controls">
+          <Button
+            variant="default"
+            onClick={handlePrev}
+            disabled={isFirstStep}
+            className="flow-wizard-prev-button"
+          >
+            {prevButtonLabel || I18n.get("Previous") || "Previous"}
+          </Button>
+          {!isLastStep && (
+            <Button onClick={handleNext} className="flow-wizard-next-button">
+              {nextButtonLabel || I18n.get("Next") || "Next"}
+            </Button>
+          )}
+        </Group>
+      </Stack>
+    </div>
   );
 }

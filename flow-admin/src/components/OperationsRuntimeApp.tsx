@@ -19,10 +19,9 @@ import {
   OPERATIONS_VIEW_ORDER,
 } from "../operations/views";
 import SubmissionsEditor from "../paid-features/SubmissionsEditor";
-import TemplatesEditor from "../paid-features/TemplatesEditor";
 import WorkflowsEditor from "../paid-features/WorkflowsEditor";
 
-type OperationsTab = "submissions" | "templates" | "workflows";
+type OperationsTab = "submissions" | "workflows";
 type FlowHighlightedSubmissionAction = "seen" | "resolved" | "completed";
 
 type SubmissionsEditorBoot = {
@@ -162,7 +161,7 @@ export default function OperationsRuntimeApp({
             <Title order={3}>{title ? t(title) : t("Flow Operations")}</Title>
             <Text size="sm" c="dimmed">
               {t(
-                "Use the tabs to manage submissions, email templates, and workflows from the frontend.",
+                "Use the tabs to manage submissions and the unified workflows/process maps surface from the frontend.",
               )}
             </Text>
           </Stack>
@@ -180,11 +179,6 @@ export default function OperationsRuntimeApp({
                 {t(OPERATIONS_VIEW_DEFINITIONS.submissions.title)}
               </Tabs.Tab>
             ) : null}
-            {tabs.includes("templates") ? (
-              <Tabs.Tab value="templates">
-                {t(OPERATIONS_VIEW_DEFINITIONS.templates.title)}
-              </Tabs.Tab>
-            ) : null}
             {tabs.includes("workflows") ? (
               <Tabs.Tab value="workflows">
                 {t(OPERATIONS_VIEW_DEFINITIONS.workflows.title)}
@@ -197,14 +191,13 @@ export default function OperationsRuntimeApp({
               <SubmissionsEditor client={client} boot={submissionsBoot} />
             </Tabs.Panel>
           ) : null}
-          {tabs.includes("templates") ? (
-            <Tabs.Panel value="templates" pt="md">
-              <TemplatesEditor client={client} boot={boot} />
-            </Tabs.Panel>
-          ) : null}
           {tabs.includes("workflows") ? (
             <Tabs.Panel value="workflows" pt="md">
-              <WorkflowsEditor client={client} boot={boot} />
+              <WorkflowsEditor
+                client={client}
+                boot={boot}
+                navigationMode="segmented"
+              />
             </Tabs.Panel>
           ) : null}
         </Tabs>

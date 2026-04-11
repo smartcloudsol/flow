@@ -2,27 +2,20 @@ import {
   Accordion,
   ActionIcon,
   Alert,
-  Badge,
   Box,
   Button,
   Card,
-  Code,
   DEFAULT_THEME,
   Group,
-  Modal,
   NavLink,
   Stack,
   Switch,
-  Table,
   Text,
-  TextInput,
   Title,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { useModals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import Editor from "@monaco-editor/react";
-import type { AiSuggestionPreset, FlowSettings } from "@smart-cloud/flow-core";
+import type { FlowSettings } from "@smart-cloud/flow-core";
 import {
   getFlowPlugin,
   sanitizeFlowConfig,
@@ -36,16 +29,12 @@ import {
   IconApi,
   IconCheck,
   IconChevronRight,
-  IconEdit,
   IconExclamationCircle,
   IconForms,
   IconInfoCircle,
   IconLock,
-  IconMail,
-  IconPlus,
   IconRouteAltLeft,
   IconSettings,
-  IconTrash,
 } from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelect } from "@wordpress/data";
@@ -137,15 +126,6 @@ const SubmissionsEditor = lazy(
     ),
 );
 
-const TemplatesEditor = lazy(
-  () =>
-    import(
-      process.env.WPSUITE_PREMIUM
-        ? "./paid-features/TemplatesEditor"
-        : "./free-features/NullEditor"
-    ),
-);
-
 const WorkflowsEditor = lazy(
   () =>
     import(
@@ -221,282 +201,11 @@ export interface SettingsEditorProps {
   }) => JSX.Element;
 }
 
-function createDefaultAiPreset(index: number): AiSuggestionPreset {
-  return {
-    id: `preset-${Math.random().toString(36).slice(2, 10)}`,
-    name: `Preset ${index}`,
-    template: `User submitted the following form:
-
-{{fields}}
-
-Generate helpful suggestions.
-
-Return JSON:
-{
-  "suggestions": [
-    {
-      "title": "...",
-      "description": "...",
-      "confidence": 0.8
-    }
-  ]
-}`,
-    useKnowledgeBase: true,
-    topK: 5,
-  } satisfies AiSuggestionPreset;
-}
-
-function normalizeAiPreset(preset: AiSuggestionPreset): AiSuggestionPreset {
-  return {
-    ...preset,
-    id: preset.id || `preset-${Math.random().toString(36).slice(2, 10)}`,
-    name: preset.name?.trim() || "Untitled preset",
-    template: preset.template ?? "",
-    useKnowledgeBase: preset.useKnowledgeBase !== false,
-    topK:
-      typeof preset.topK === "number" && Number.isFinite(preset.topK)
-        ? preset.topK
-        : undefined,
-  };
-}
-
 const DEFAULT_HIGHLIGHTED_SUBMISSION_ACTIONS = [
   "seen",
   "resolved",
   "completed",
 ] satisfies HighlightedSubmissionAction[];
-
-function AiPresetModalEditor({
-  opened,
-  preset,
-  onClose,
-  onSubmit,
-}: {
-  opened: boolean;
-  preset: AiSuggestionPreset | null;
-  onClose: () => void;
-  onSubmit: (preset: AiSuggestionPreset) => void;
-}) {
-  const [draft, setDraft] = useState<AiSuggestionPreset | null>(preset);
-
-  useEffect(() => {
-    setDraft(preset);
-  }, [preset]);
-
-  const handleSubmit = () => {
-    if (!draft) return;
-    onSubmit(normalizeAiPreset(draft));
-  };
-
-  return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={preset?.id ? "Edit preset" : "New preset"}
-      size="xl"
-      zIndex={100000}
-    >
-      {draft ? (
-        <Stack gap="md">
-          <TextInput
-            label="Preset name"
-            value={draft.name}
-            onChange={(event) =>
-              setDraft({ ...draft, name: event.currentTarget.value })
-            }
-          />
-          <Group align="end">
-            <Switch
-              checked={draft.useKnowledgeBase}
-              onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  useKnowledgeBase: event.currentTarget.checked,
-                })
-              }
-              label="Use Knowledge Base"
-            />
-            <TextInput
-              label="Top K"
-              value={draft.topK != null ? String(draft.topK) : ""}
-              onChange={(event) => {
-                const value = event.currentTarget.value.trim();
-                setDraft({
-                  ...draft,
-                  topK: value === "" ? undefined : Number(value),
-                });
-              }}
-              style={{ maxWidth: 160 }}
-            />
-          </Group>
-          <Box>
-            <Text size="sm" fw={500} mb="xs">
-              Template
-            </Text>
-            <Editor
-              height="360px"
-              defaultLanguage="markdown"
-              value={draft.template}
-              onChange={(value) =>
-                setDraft({ ...draft, template: value || "" })
-              }
-              options={{ minimap: { enabled: false }, wordWrap: "on" }}
-            />
-          </Box>
-          <Group justify="space-between">
-            <Text size="sm" c="dimmed">
-              Changes are saved into the general settings form. Use{" "}
-              <strong>Save General Settings</strong> to persist them.
-            </Text>
-            <Group>
-              <Button variant="default" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button onClick={handleSubmit}>Save preset</Button>
-            </Group>
-          </Group>
-        </Stack>
-      ) : null}
-    </Modal>
-  );
-}
-
-function AiSuggestionsPresetEditor({
-  value,
-  onChange,
-}: {
-  value: AiSuggestionPreset[] | undefined;
-  onChange: (next: AiSuggestionPreset[]) => void;
-}) {
-  const modals = useModals();
-  const presets = (value || []).map(normalizeAiPreset);
-  const [editorOpened, setEditorOpened] = useState(false);
-  const [editingPreset, setEditingPreset] = useState<AiSuggestionPreset | null>(
-    null,
-  );
-
-  const openCreate = () => {
-    setEditingPreset(createDefaultAiPreset(presets.length + 1));
-    setEditorOpened(true);
-  };
-
-  const openEdit = (preset: AiSuggestionPreset) => {
-    setEditingPreset({ ...preset });
-    setEditorOpened(true);
-  };
-
-  const handleDelete = (preset: AiSuggestionPreset) => {
-    modals.openConfirmModal({
-      title: "Delete preset",
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete <strong>{preset.name}</strong>? This
-          change will only be stored after you save the general settings.
-        </Text>
-      ),
-      labels: { confirm: "Delete", cancel: "Cancel" },
-      confirmProps: { color: "red" },
-      onConfirm: () => {
-        onChange(presets.filter((item) => item.id !== preset.id));
-      },
-    });
-  };
-
-  const handleSubmit = (nextPreset: AiSuggestionPreset) => {
-    const exists = presets.some((item) => item.id === nextPreset.id);
-    const next = exists
-      ? presets.map((item) => (item.id === nextPreset.id ? nextPreset : item))
-      : [...presets, nextPreset];
-    onChange(next);
-    setEditorOpened(false);
-    setEditingPreset(null);
-  };
-
-  return (
-    <Card withBorder>
-      <Stack gap="md">
-        <Group justify="space-between">
-          <div>
-            <Text fw={600}>AI Suggestions presets</Text>
-            <Text size="sm" c="dimmed">
-              Create and manage reusable prompt presets for the AI Suggestions
-              block.
-            </Text>
-          </div>
-          <Button leftSection={<IconPlus size={16} />} onClick={openCreate}>
-            Add preset
-          </Button>
-        </Group>
-
-        {presets.length ? (
-          <Table striped highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Name</Table.Th>
-                <Table.Th>Knowledge Base</Table.Th>
-                <Table.Th>Top K</Table.Th>
-                <Table.Th>Template</Table.Th>
-                <Table.Th>Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {presets.map((preset) => (
-                <Table.Tr key={preset.id}>
-                  <Table.Td>{preset.name}</Table.Td>
-                  <Table.Td>{preset.useKnowledgeBase ? "Yes" : "No"}</Table.Td>
-                  <Table.Td>{preset.topK ?? "—"}</Table.Td>
-                  <Table.Td>
-                    <Code style={{ whiteSpace: "nowrap" }}>{preset.id}</Code>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap="xs">
-                      <Button
-                        size="xs"
-                        variant="light"
-                        leftSection={<IconEdit size={14} />}
-                        onClick={() => openEdit(preset)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="xs"
-                        color="red"
-                        variant="light"
-                        leftSection={<IconTrash size={14} />}
-                        onClick={() => handleDelete(preset)}
-                      >
-                        Delete
-                      </Button>
-                    </Group>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        ) : (
-          <Alert color="blue" variant="light">
-            No presets configured yet.
-          </Alert>
-        )}
-
-        <Text size="sm" c="dimmed">
-          Preset changes are kept in the general settings form until you click{" "}
-          <strong>Save General Settings</strong>.
-        </Text>
-      </Stack>
-
-      <AiPresetModalEditor
-        opened={editorOpened}
-        preset={editingPreset}
-        onClose={() => {
-          setEditorOpened(false);
-          setEditingPreset(null);
-        }}
-        onSubmit={handleSubmit}
-      />
-    </Card>
-  );
-}
 
 interface MainProps {
   nonce: string;
@@ -570,7 +279,6 @@ export default function Main({ nonce, settings, store }: MainProps) {
       debugLoggingEnabled: settings?.debugLoggingEnabled || false,
       formsBackendSyncEnabled: settings?.formsBackendSyncEnabled ?? true,
       formsAllowPermanentDelete: settings?.formsAllowPermanentDelete || false,
-      aiSuggestionsPresets: settings?.aiSuggestionsPresets || [],
       highlightedSubmissionActions: settings?.highlightedSubmissionActions
         ?.length
         ? (settings.highlightedSubmissionActions as HighlightedSubmissionAction[])
@@ -586,20 +294,6 @@ export default function Main({ nonce, settings, store }: MainProps) {
   useEffect(() => {
     setSettingsFormData(initialSettingsFormData);
   }, [initialSettingsFormData]);
-
-  const [lastSavedSettings, setLastSavedSettings] = useState<AdminFlowSettings>(
-    initialSettingsFormData,
-  );
-
-  useEffect(() => {
-    setLastSavedSettings(initialSettingsFormData);
-  }, [initialSettingsFormData]);
-
-  const generalSettingsDirty = useMemo(
-    () =>
-      JSON.stringify(lastSavedSettings) !== JSON.stringify(settingsFormData),
-    [lastSavedSettings, settingsFormData],
-  );
 
   const clearCache = useCallback(
     async (subscriber: boolean) => {
@@ -639,7 +333,6 @@ export default function Main({ nonce, settings, store }: MainProps) {
           credentials: "same-origin",
         });
         if (response.ok) {
-          setLastSavedSettings(settingsFormData);
           notifications.show({
             title: "Settings saved",
             message: "General settings saved successfully.",
@@ -749,12 +442,6 @@ export default function Main({ nonce, settings, store }: MainProps) {
         disabled: paidSettingsDisabled,
       },
       {
-        value: "templates",
-        label: "Templates",
-        icon: <IconMail size={16} stroke={1.5} />,
-        disabled: paidSettingsDisabled,
-      },
-      {
         value: "workflows",
         label: "Workflows",
         icon: <IconRouteAltLeft size={16} stroke={1.5} />,
@@ -788,11 +475,13 @@ export default function Main({ nonce, settings, store }: MainProps) {
     }
   }, [clearCache, resolvedConfig]);
 
+  const normalizedOperationsPage =
+    activePage === "templates" ? "workflows" : activePage;
+
   const activeOperationsView =
-    activePage === "submissions" ||
-    activePage === "templates" ||
-    activePage === "workflows"
-      ? (activePage as OperationsView)
+    normalizedOperationsPage === "submissions" ||
+    normalizedOperationsPage === "workflows"
+      ? (normalizedOperationsPage as OperationsView)
       : null;
 
   const operationsEditor =
@@ -801,8 +490,6 @@ export default function Main({ nonce, settings, store }: MainProps) {
         client={backendClient}
         boot={{ settings: settingsFormData }}
       />
-    ) : activeOperationsView === "templates" ? (
-      <TemplatesEditor client={backendClient} boot={boot} />
     ) : activeOperationsView === "workflows" ? (
       <WorkflowsEditor client={backendClient} boot={boot} />
     ) : null;
@@ -812,7 +499,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
       <DocSidebar
         opened={opened}
         close={close}
-        page={activePage as never}
+        page={normalizedOperationsPage as never}
         scrollToId={scrollToId}
       />
       <SettingsTitle />
@@ -1102,33 +789,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                 </Switch.Group>
               </Stack>
 
-              <Box mt="md">
-                <AiSuggestionsPresetEditor
-                  value={settingsFormData.aiSuggestionsPresets}
-                  onChange={(aiSuggestionsPresets) =>
-                    setSettingsFormData({
-                      ...settingsFormData,
-                      aiSuggestionsPresets,
-                    })
-                  }
-                />
-              </Box>
-
-              <Group justify="space-between" mt="lg">
-                <Group gap="xs">
-                  <Badge
-                    color={generalSettingsDirty ? "yellow" : "green"}
-                    variant="light"
-                  >
-                    {generalSettingsDirty
-                      ? "Unsaved changes"
-                      : "All changes saved"}
-                  </Badge>
-                  <Text size="sm" c="dimmed">
-                    Changes made to AI presets and general options only take
-                    effect after saving.
-                  </Text>
-                </Group>
+              <Group justify="flex-end" mt="lg">
                 <Button
                   loading={isSaving}
                   variant="gradient"

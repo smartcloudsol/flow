@@ -4,12 +4,131 @@ import {
   RangeControl,
   SelectControl,
   TextControl,
-  TextareaControl,
   ToggleControl,
 } from "@wordpress/components";
+import { useEffect, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { parseOptions } from "./field-utils";
 import type { ConditionalRuleOptionSource, OptionsSource } from "./types";
+
+type KeyValueRow = {
+  key: string;
+  value: string;
+};
+
+function parseKeyValueRows(raw: string | undefined): KeyValueRow[] {
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return [];
+    }
+
+    return Object.entries(parsed).map(([key, value]) => ({
+      key,
+      value: typeof value === "string" ? value : JSON.stringify(value),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function stringifyKeyValueRows(rows: KeyValueRow[]): string {
+  return JSON.stringify(
+    rows.reduce<Record<string, string>>((acc, row) => {
+      if (!row.key.trim()) {
+        return acc;
+      }
+
+      acc[row.key.trim()] = row.value;
+      return acc;
+    }, {}),
+    null,
+    2,
+  );
+}
+
+function KeyValueListEditor({
+  label,
+  value,
+  onChange,
+  keyPlaceholder,
+  valuePlaceholder,
+}: {
+  label: string;
+  value: string | undefined;
+  onChange: (next: string) => void;
+  keyPlaceholder: string;
+  valuePlaceholder: string;
+}) {
+  const [rows, setRows] = useState<KeyValueRow[]>(() =>
+    parseKeyValueRows(value),
+  );
+
+  useEffect(() => {
+    setRows(parseKeyValueRows(value));
+  }, [value]);
+
+  const updateRows = (nextRows: KeyValueRow[]) => {
+    setRows(nextRows);
+    onChange(stringifyKeyValueRows(nextRows));
+  };
+
+  const addRow = () => {
+    updateRows([...rows, { key: "", value: "" }]);
+  };
+
+  const updateRow = (index: number, patch: Partial<KeyValueRow>) => {
+    const nextRows = [...rows];
+    nextRows[index] = { ...nextRows[index], ...patch };
+    updateRows(nextRows);
+  };
+
+  const removeRow = (index: number) => {
+    updateRows(rows.filter((_, rowIndex) => rowIndex !== index));
+  };
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ fontWeight: 500, marginBottom: 8 }}>{label}</div>
+      {rows.map((row, index) => (
+        <div
+          key={`${label}-${index}`}
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            gap: 8,
+            marginBottom: 8,
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <TextControl
+              label={__("Key", TEXT_DOMAIN)}
+              value={row.key}
+              onChange={(nextKey) => updateRow(index, { key: nextKey })}
+              placeholder={keyPlaceholder}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <TextControl
+              label={__("Value", TEXT_DOMAIN)}
+              value={row.value}
+              onChange={(nextValue) => updateRow(index, { value: nextValue })}
+              placeholder={valuePlaceholder}
+            />
+          </div>
+          <Button variant="secondary" onClick={() => removeRow(index)}>
+            {__("Remove", TEXT_DOMAIN)}
+          </Button>
+        </div>
+      ))}
+      <Button variant="secondary" onClick={addRow}>
+        {__("Add item", TEXT_DOMAIN)}
+      </Button>
+    </div>
+  );
+}
 
 interface Props {
   value: ConditionalRuleOptionSource;
@@ -77,23 +196,45 @@ export function OptionsSourceEditor({ value, onChange, prefix }: Props) {
               update({ apiMethod: apiMethod as "GET" | "POST" })
             }
           />
-          <TextareaControl
-            label={__(`${labelPrefix}Headers (JSON)`, TEXT_DOMAIN)}
-            value={value.apiHeaders || "{}"}
+          <KeyValueListEditor
+            label={__(`${labelPrefix}Headers`, TEXT_DOMAIN)}
+            value={value.apiHeaders}
             onChange={(apiHeaders) => update({ apiHeaders })}
-            placeholder='{"X-API-Key": "your-key"}'
+            keyPlaceholder="X-API-Key"
+            valuePlaceholder="your-key"
           />
-          <TextareaControl
-            label={__(`${labelPrefix}Parameters (JSON)`, TEXT_DOMAIN)}
-            value={value.apiParams || "{}"}
+          <KeyValueListEditor
+            label={__(`${labelPrefix}Parameters`, TEXT_DOMAIN)}
+            value={value.apiParams}
             onChange={(apiParams) => update({ apiParams })}
-            placeholder='{"category": "countries"}'
+            keyPlaceholder="category"
+            valuePlaceholder="countries"
           />
           <TextControl
             label={__(`${labelPrefix}Response Path`, TEXT_DOMAIN)}
             value={value.apiResponsePath || ""}
             onChange={(apiResponsePath) => update({ apiResponsePath })}
             placeholder="data.options"
+          />
+          <TextControl
+            label={__(`${labelPrefix}Label Path`, TEXT_DOMAIN)}
+            value={value.apiLabelPath || ""}
+            onChange={(apiLabelPath) => update({ apiLabelPath })}
+            placeholder="description"
+            help={__(
+              "Path inside each result item for the displayed label, e.g. response[].description or description.",
+              TEXT_DOMAIN,
+            )}
+          />
+          <TextControl
+            label={__(`${labelPrefix}Value Path`, TEXT_DOMAIN)}
+            value={value.apiValuePath || ""}
+            onChange={(apiValuePath) => update({ apiValuePath })}
+            placeholder="id"
+            help={__(
+              "Path inside each result item for the stored value, e.g. response[].id or id.",
+              TEXT_DOMAIN,
+            )}
           />
           <ToggleControl
             label={__(`${labelPrefix}Cache Enabled`, TEXT_DOMAIN)}

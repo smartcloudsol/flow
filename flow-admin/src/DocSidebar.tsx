@@ -39,7 +39,7 @@ const pages = {
       </Text>{" "}
       <Text mt="xs">
         {__(
-          "Use the API Settings tab to configure how Flow connects to your backend, and the Submissions/Templates/Workflows tabs to manage your workflow automation.",
+          "Use the API Settings tab to configure how Flow connects to your backend, and the Submissions and Workflows areas to manage your workflow automation. Email templates now live inside the Advanced tab under Workflows.",
           TEXT_DOMAIN,
         )}
       </Text>
@@ -239,7 +239,19 @@ const pages = {
       </Title>
       <Text>
         {__(
-          "Create and manage email templates for automated responses and workflow notifications. Templates support Handlebars syntax for dynamic content.",
+          "Create and manage reusable email templates for automated responses and workflow notifications. Templates are first-class backend resources and can be referenced directly from workflow email steps and process-map draft steps.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="template-rendering-model">
+        <span className="highlightable">
+          {__("Rendering model", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "A template stores the message definition separately from workflow logic. This lets you reuse the same message across multiple automations and update content without rewriting every workflow step that sends it.",
           TEXT_DOMAIN,
         )}
       </Text>
@@ -277,13 +289,27 @@ const pages = {
       </Title>
       <Text>
         {__(
-          "The subject line of the email. Supports Handlebars variables like {{fullName}} or {{formName}}.",
+          "The subject line of the email. Supports template variables like {{submission.fields.fullName}} and simple fallbacks like {{submission.fields.fullName | Customer}}.",
           TEXT_DOMAIN,
         )}
       </Text>
       <Text mt="xs">
         <strong>{__("Example:", TEXT_DOMAIN)}</strong>{" "}
-        <Code>{"Thank you {{fullName}} for your submission"}</Code>
+        <Code>
+          {
+            "Thank you {{submission.fields.fullName | Customer}} for your submission"
+          }
+        </Code>
+      </Text>
+
+      <Title order={3} mt="md" id="template-preview">
+        <span className="highlightable">{__("Preview", TEXT_DOMAIN)}</span>
+      </Title>
+      <Text>
+        {__(
+          "Preview support helps you verify the rendered subject and body before attaching the template to a live workflow. This is especially useful when the output depends on submission fields or nested payload values.",
+          TEXT_DOMAIN,
+        )}
       </Text>
 
       <Title order={3} mt="md" id="template-body-html">
@@ -293,7 +319,7 @@ const pages = {
       </Title>
       <Text>
         {__(
-          "The HTML content of the email. You can use Handlebars variables to insert form field values and other dynamic content.",
+          "The HTML content of the email. You can use template variables and optional fallback text to insert dynamic values.",
           TEXT_DOMAIN,
         )}
       </Text>
@@ -328,22 +354,48 @@ const pages = {
           TEXT_DOMAIN,
         )}
       </Text>
+      <Text mt="xs">
+        {__(
+          "Providing both HTML and plain text improves deliverability and gives you tighter control over how the message appears across email clients.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
     </>
   ),
 
   workflows: (
     <>
       <Title order={2} id="workflows">
-        <span className="highlightable">
-          {__("Automated Workflows", TEXT_DOMAIN)}
-        </span>
+        <span className="highlightable">{__("Workflows", TEXT_DOMAIN)}</span>
       </Title>
       <Text>
         {__(
-          "Create automated workflows that are triggered when forms are submitted. Workflows can send emails, make HTTP requests to external APIs, and execute conditional logic.",
+          "The Workflows area is now organized around Process Maps as the primary orchestration surface, with an Advanced tab for direct workflow, webhook, and template management. Together they define what events Flow reacts to, what actions it runs, and how separate workflows relate to each other.",
           TEXT_DOMAIN,
         )}
       </Text>
+
+      <Title order={3} mt="md" id="workflow-surface-overview">
+        <span className="highlightable">
+          {__("Screen structure", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <List size="sm" spacing="xs" withPadding>
+        <List.Item>
+          <strong>{__("Process Maps", TEXT_DOMAIN)}:</strong>{" "}
+          {__(
+            "the default visual orchestration surface where you connect workflows, draft steps, templates, and webhook endpoints.",
+            TEXT_DOMAIN,
+          )}
+        </List.Item>
+        <List.Item>
+          <strong>{__("Advanced", TEXT_DOMAIN)}:</strong>{" "}
+          {__(
+            "the direct CRUD fallback for executable workflows, reusable webhook endpoints, and email templates.",
+            TEXT_DOMAIN,
+          )}
+        </List.Item>
+      </List>
 
       <Title order={3} mt="md" id="workflow-name">
         <span className="highlightable">
@@ -369,6 +421,24 @@ const pages = {
         )}
       </Text>
 
+      <Title order={3} mt="md" id="workflow-trigger-model">
+        <span className="highlightable">
+          {__("Trigger model", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Each workflow currently materializes to a single trigger definition. A trigger listens for one event type and can optionally be scoped by conditions or, when assigned from a process map step-trigger connection, by the originating source step as well.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "This allows downstream workflows to react to the exact AI or status step that emitted an event, not just to a global event name like ai.agent.completed.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
       <Title order={3} mt="md" id="workflow-conditions">
         <span className="highlightable">{__("Conditions", TEXT_DOMAIN)}</span>
       </Title>
@@ -382,6 +452,118 @@ const pages = {
         <strong>{__("Example:", TEXT_DOMAIN)}</strong>{" "}
         {__(
           "Only send notification if email contains '@company.com'",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-step-model">
+        <span className="highlightable">
+          {__("Workflow steps", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Workflow steps run in order after the trigger matches. Depending on configuration, a workflow can send email, call a webhook endpoint, publish a custom event, update submission status, invoke AI-related actions, or wait before continuing.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "In the process-map editor these executable steps can also exist as draft nodes before they are materialized back into the workflow definition during save.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-ai-agent-step">
+        <span className="highlightable">
+          {__("AI Agent step", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "The AI Agent step publishes an ai.agent.requested event into the backend workflow system. The AI backend then emits ai.agent.completed or ai.agent.failed, and downstream workflows can react to those results.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Use this step when you want classification, routing, structured extraction, or draft generation inside a workflow. Think of it as an AI decision or enrichment step, not as a final delivery action by itself.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-ai-mode">
+        <span className="highlightable">{__("Mode", TEXT_DOMAIN)}</span>
+      </Title>
+      <Text>
+        {__(
+          "Mode is the high-level intent passed to the AI backend. Answer is for general responses, Summarize is for condensation, Classify is best for branching decisions, and Extract structured data is best when you need predictable JSON fields.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-ai-internal-routing">
+        <span className="highlightable">
+          {__("Internal routing", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Internal routing enables Flow's platform-owned routing contract. Use No internal routing for free-form output, Route by category when the AI should choose a stable route like support or sales, Route by outcomes when the AI should return actionable next-step outcomes, and Draft reply only when the goal is a structured reply draft without routing metadata.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-ai-routing-keys">
+        <span className="highlightable">
+          {__("Route, outcome, and signal keys", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Route Keys define allowed high-level categories such as support or billing. Outcome Types define reusable action families such as invoke_webhook or invoke_workflow. Signal Keys define auxiliary structured metadata such as priority or language.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Use stable generic keys. These values feed process-map branch suggestions and later become runtime trigger conditions for downstream workflows.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-ai-prompting">
+        <span className="highlightable">
+          {__("Prompting fields", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Prompt Text is the main task instruction and is the most important user-authored field. Platform System Block is automatically injected by Flow and enforces the selected routing preset. Additional System Guidance is your own policy or behavior guidance appended after the platform block.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Best practice is to keep the task itself in Prompt Text and use Additional System Guidance only for tone, constraints, or business policy. Avoid restating the whole routing contract there.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="workflow-ai-response-constraint">
+        <span className="highlightable">
+          {__("Response schema and status", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Response Schema Presets can generate a starting JSON schema for the current mode or routing preset. Response Constraint is the actual runtime JSON schema contract for the AI output. Update Status on Dispatch changes the submission status immediately after the ai.agent.requested event is published, before the final AI result comes back.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "If you want process-map branching from the AI result, prefer a routing preset plus the generated routing schema. If you only need draft generation, use Draft reply only or disable routing entirely.",
           TEXT_DOMAIN,
         )}
       </Text>
@@ -403,7 +585,19 @@ const pages = {
       </Title>
       <Text>
         {__(
-          "Send HTTP requests to external APIs when the workflow triggers. Useful for integrating with CRM systems, analytics platforms, or custom backends.",
+          "Send HTTP requests to external APIs when the workflow triggers. Workflow steps reference reusable webhook endpoints so transport details live in one place and can be reused across multiple automations.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-endpoints">
+        <span className="highlightable">
+          {__("Webhook endpoints", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Webhook endpoints are managed alongside workflows as standalone admin resources. Define the target URL, provider preset, HTTP method, headers, and optional signing once, then reference that endpoint from workflow or process-map webhook steps.",
           TEXT_DOMAIN,
         )}
       </Text>
@@ -465,7 +659,41 @@ const pages = {
       </Title>
       <Text>
         {__(
-          "Specify which events should trigger the webhook. Common events include form submission, validation failure, or workflow completion.",
+          "Webhook calls are typically triggered by workflow steps rather than being subscribed directly to an event list in this screen. The effective path is: event trigger -> workflow match -> workflow step -> webhook endpoint invocation.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="process-maps">
+        <span className="highlightable">{__("Process Maps", TEXT_DOMAIN)}</span>
+      </Title>
+      <Text>
+        {__(
+          "Process maps provide the main visual orchestration layer above individual workflows. They let you place workflow nodes on a canvas, connect them with event or logical edges, and sketch draft steps directly on the map before those steps are materialized into executable workflow actions.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Template and webhook draft nodes can either point to existing linked backend entities or stay as unsaved draft references until you explicitly save the template or webhook editor.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="process-map-step-triggers">
+        <span className="highlightable">
+          {__("Process-map step triggers", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "A step-trigger connection can scope a downstream workflow to the exact source step that emitted an event. On save, Flow projects that visual connection into the target workflow trigger metadata, so runtime dispatch only matches events coming from the linked step.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "At the moment, a workflow still materializes to a single trigger, so conflicting multiple incoming step-trigger sources for the same workflow are intentionally rejected during process-map save.",
           TEXT_DOMAIN,
         )}
       </Text>

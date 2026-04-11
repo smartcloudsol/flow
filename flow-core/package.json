@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -29,7 +29,7 @@
     "scope": "@smart-cloud/flow-core"
   },
   "dependencies": {
-    "@smart-cloud/gatey-core": "^2.2.2",
+    "@smart-cloud/gatey-core": "^2.2.7",
     "@smart-cloud/wpsuite-core": "^2.2.10",
     "aws-amplify": "^6.16.3"
   },

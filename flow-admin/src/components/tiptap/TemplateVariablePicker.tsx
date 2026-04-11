@@ -51,6 +51,16 @@ function getDefaultVariables(): TemplateVariableOption[] {
       label: "Site Name",
       description: t("Name of the site"),
     },
+    {
+      path: "site.baseUrl",
+      label: "Site Base URL",
+      description: t("Base URL of the current site"),
+    },
+    {
+      path: "currentYear",
+      label: "Current Year",
+      description: t("Current year calculated at send time"),
+    },
   ];
 }
 
@@ -311,6 +321,7 @@ interface TemplateVariablePickerProps {
   formDefinition?: FormDefinition;
   variables?: TemplateVariableOption[];
   size?: "xs" | "sm" | "md" | "lg";
+  zIndex?: number;
   onInsert?: (path: string, label: string) => void;
 }
 
@@ -319,6 +330,7 @@ export default function TemplateVariablePicker({
   formDefinition,
   variables,
   size = "xs",
+  zIndex = 100003,
   onInsert,
 }: TemplateVariablePickerProps) {
   const { fieldVars, commonFields, ungroupedFields, stepGroups, allVariables } =
@@ -385,7 +397,7 @@ export default function TemplateVariablePicker({
     ));
 
   return (
-    <Menu shadow="md" width={280} position="bottom-start" zIndex={100003}>
+    <Menu shadow="md" width={280} position="bottom-start" zIndex={zIndex}>
       <Menu.Target>
         <Button
           size={size}

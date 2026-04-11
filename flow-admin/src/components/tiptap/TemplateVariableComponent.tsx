@@ -55,8 +55,7 @@ export default function TemplateVariableComponent({
       width={340}
       position="bottom-start"
       shadow="md"
-      withinPortal={false}
-      zIndex={100002}
+      zIndex={300002}
     >
       <Popover.Target>
         <NodeViewWrapper

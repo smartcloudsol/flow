@@ -45,9 +45,9 @@ export interface FormAttributes {
   colors?: Record<string, string>;
 
   themeOverrides?: string;
+  fieldOverrides?: Record<string, Record<string, unknown>>;
   configB64?: string;
   configFormat?: string;
-  aiSuggestionsPresetId?: string;
 }
 
 export interface FormStateContent {
@@ -95,6 +95,53 @@ export interface SelectOption {
   value: string;
 }
 
+export type FlowControlSize = "xs" | "sm" | "md" | "lg" | "xl" | (string & {});
+export type FlowClampBehavior = "none" | "blur" | "strict";
+export type FlowThousandsGroupStyle = "none" | "thousand" | "lakh" | "wan";
+export type FlowInputMode =
+  | "search"
+  | "text"
+  | "none"
+  | "tel"
+  | "url"
+  | "email"
+  | "numeric"
+  | "decimal";
+export type FlowLoaderPosition = "left" | "right";
+export type FlowCheckboxIcon = "check" | "x" | "minus" | (string & {});
+export type FlowRadioIcon = "dot" | "check" | "x" | (string & {});
+export type FlowSwitchThumbIcon =
+  | "check"
+  | "x"
+  | "star"
+  | "heart"
+  | "thumb-up"
+  | "sun"
+  | "moon"
+  | (string & {});
+export type FlowIconName =
+  | FlowCheckboxIcon
+  | FlowRadioIcon
+  | FlowSwitchThumbIcon;
+export type FlowRatingSymbol =
+  | "star"
+  | "heart"
+  | "check"
+  | "dot"
+  | "smile"
+  | (string & {});
+export type FlowRatingSymbolName = FlowRatingSymbol;
+
+export interface FlowSliderMark {
+  value: number;
+  label?: string;
+}
+
+export interface CommonFieldAppearanceAttributes {
+  disabled?: boolean;
+  size?: FlowControlSize;
+}
+
 export type OptionsSource = "static" | "api" | "autocomplete";
 
 export interface ConditionalRuleOptionSource {
@@ -105,6 +152,8 @@ export interface ConditionalRuleOptionSource {
   apiHeaders?: string;
   apiParams?: string;
   apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
   cacheEnabled?: boolean;
   cacheTTL?: number;
   autocompleteMinChars?: number;
@@ -139,6 +188,8 @@ export interface ConditionalRule {
       apiHeaders?: string;
       apiParams?: string;
       apiResponsePath?: string;
+      apiLabelPath?: string;
+      apiValuePath?: string;
       cacheEnabled?: boolean;
       cacheTTL?: number;
       autocompleteMinChars?: number;
@@ -159,11 +210,15 @@ export interface ConditionalAttributes {
 }
 
 // Field block attributes (for Gutenberg editor)
-export interface TextFieldAttributes extends ConditionalAttributes {
+export interface TextFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  inputSize?: FlowControlSize;
+  pointer?: boolean;
   required?: boolean;
   validationType?:
     | "none"
@@ -180,13 +235,20 @@ export interface TextFieldAttributes extends ConditionalAttributes {
   anchor?: string; // WordPress anchor attribute
 }
 
-export interface TextareaFieldAttributes extends ConditionalAttributes {
+export interface TextareaFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  autosize?: boolean;
+  inputSize?: FlowControlSize;
   required?: boolean;
   minRows?: number;
+  maxRows?: number;
+  pointer?: boolean;
+  resize?: "none" | "vertical" | "horizontal" | "both";
   validationType?:
     | "none"
     | "email"
@@ -202,12 +264,28 @@ export interface TextareaFieldAttributes extends ConditionalAttributes {
   anchor?: string;
 }
 
-export interface SelectFieldAttributes extends ConditionalAttributes {
+export interface SelectFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  allowDeselect?: boolean;
+  autoSelectOnBlur?: boolean;
+  chevronColor?: string;
+  clearable?: boolean;
+  defaultDropdownOpened?: boolean;
+  inputSize?: FlowControlSize;
+  limit?: number;
+  multiple?: boolean;
+  pointer?: boolean;
   required?: boolean;
+  searchable?: boolean;
+  selectFirstOptionOnChange?: boolean;
+  withAlignedLabels?: boolean;
+  withCheckIcon?: boolean;
+  withScrollArea?: boolean;
   optionsText?: string; // Stored as text in Gutenberg
   optionsSource?: OptionsSource;
   apiEndpoint?: string;
@@ -215,6 +293,8 @@ export interface SelectFieldAttributes extends ConditionalAttributes {
   apiHeaders?: string;
   apiParams?: string;
   apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
   cacheEnabled?: boolean;
   cacheTTL?: number;
   autocompleteMinChars?: number;
@@ -223,156 +303,299 @@ export interface SelectFieldAttributes extends ConditionalAttributes {
   anchor?: string;
 }
 
-export interface CheckboxFieldAttributes extends ConditionalAttributes {
+export interface CheckboxFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  autoContrast?: boolean;
   checkedLabel?: string;
+  color?: string;
+  icon?: FlowCheckboxIcon;
+  iconColor?: string;
   required?: boolean;
   anchor?: string;
 }
 
-export interface DateFieldAttributes extends ConditionalAttributes {
+export interface DateFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  inputSize?: FlowControlSize;
   required?: boolean;
   anchor?: string;
 }
 
-export interface SwitchFieldAttributes extends ConditionalAttributes {
+export interface SwitchFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  color?: string;
+  labelPosition?: "left" | "right";
   required?: boolean;
   onLabel?: string;
   offLabel?: string;
+  thumbIcon?: FlowSwitchThumbIcon;
+  withThumbIndicator?: boolean;
   anchor?: string;
 }
 
-export interface NumberFieldAttributes extends ConditionalAttributes {
+export interface NumberFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  allowedDecimalSeparators?: string[];
+  allowLeadingZeros?: boolean;
   required?: boolean;
   min?: number;
   max?: number;
   step?: number;
+  clampBehavior?: FlowClampBehavior;
   decimalScale?: number;
+  decimalSeparator?: string;
   allowNegative?: boolean;
   allowDecimal?: boolean;
+  fixedDecimalScale?: boolean;
+  hideControls?: boolean;
+  inputSize?: FlowControlSize;
+  prefix?: string;
+  startValue?: number;
+  suffix?: string;
+  thousandSeparator?: string;
+  thousandsGroupStyle?: FlowThousandsGroupStyle;
   anchor?: string;
 }
 
-export interface RadioFieldAttributes extends ConditionalAttributes {
+export interface RadioFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
+  name?: string;
+  label?: string;
+  description?: string;
+  autoContrast?: boolean;
+  color?: string;
+  icon?: FlowRadioIcon;
+  iconColor?: string;
+  required?: boolean;
+  optionsText?: string;
+  optionsSource?: OptionsSource;
+  apiEndpoint?: string;
+  apiMethod?: "GET" | "POST";
+  apiHeaders?: string;
+  apiParams?: string;
+  apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  autocompleteMinChars?: number;
+  autocompleteDebounce?: number;
+  searchParam?: string;
+  anchor?: string;
+}
+
+export interface CheckboxGroupFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   required?: boolean;
   optionsText?: string;
+  optionsSource?: OptionsSource;
+  apiEndpoint?: string;
+  apiMethod?: "GET" | "POST";
+  apiHeaders?: string;
+  apiParams?: string;
+  apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  autocompleteMinChars?: number;
+  autocompleteDebounce?: number;
+  searchParam?: string;
   anchor?: string;
 }
 
-export interface CheckboxGroupFieldAttributes extends ConditionalAttributes {
-  name?: string;
-  label?: string;
-  description?: string;
-  required?: boolean;
-  optionsText?: string;
-  anchor?: string;
-}
-
-export interface PasswordFieldAttributes extends ConditionalAttributes {
+export interface PasswordFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  defaultVisible?: boolean;
+  inputSize?: FlowControlSize;
+  loading?: boolean;
+  loadingPosition?: FlowLoaderPosition;
   required?: boolean;
   visible?: boolean;
   anchor?: string;
 }
 
-export interface PinFieldAttributes extends ConditionalAttributes {
+export interface PinFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  gap?: FlowControlSize;
+  inputMode?: FlowInputMode;
   required?: boolean;
   length?: number;
   mask?: boolean;
+  placeholder?: string;
   inputType?: "number" | "alphanumeric";
   type?: "number" | "alphanumeric";
   anchor?: string;
 }
 
-export interface ColorFieldAttributes extends ConditionalAttributes {
+export interface ColorFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  closeOnColorSwatchClick?: boolean;
+  disallowInput?: boolean;
   required?: boolean;
   format?: "hex" | "rgb" | "rgba" | "hsl" | "hsla";
+  pointer?: boolean;
+  swatches?: string[];
+  swatchesPerRow?: number;
   withPicker?: boolean;
   withEyeDropper?: boolean;
+  withPreview?: boolean;
   anchor?: string;
 }
 
-export interface FileFieldAttributes extends ConditionalAttributes {
+export interface FileFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   required?: boolean;
   accept?: string;
+  capture?: string;
+  clearable?: boolean;
+  inputSize?: FlowControlSize;
   multiple?: boolean;
   maxSize?: number;
   maxFiles?: number;
   anchor?: string;
 }
 
-export interface SliderFieldAttributes extends ConditionalAttributes {
+export interface SliderFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  color?: string;
+  domain?: [number, number];
+  inverted?: boolean;
+  labelAlwaysOn?: boolean;
+  marksData?: FlowSliderMark[];
+  marks?: FlowSliderMark[];
+  marksEnabled?: boolean;
+  precision?: number;
   required?: boolean;
   min?: number;
   max?: number;
   step?: number;
-  marks?: boolean;
+  restrictToMarks?: boolean;
   showLabelOnHover?: boolean;
+  thumbSize?: number;
   anchor?: string;
 }
 
-export interface RangeSliderFieldAttributes extends ConditionalAttributes {
+export interface RangeSliderFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  color?: string;
+  domain?: [number, number];
+  inverted?: boolean;
+  labelAlwaysOn?: boolean;
+  marksData?: FlowSliderMark[];
+  marks?: FlowSliderMark[];
+  marksEnabled?: boolean;
+  maxRange?: number;
   required?: boolean;
   min?: number;
+  minRange?: number;
   max?: number;
+  precision?: number;
+  pushOnOverlap?: boolean;
   step?: number;
-  marks?: boolean;
+  restrictToMarks?: boolean;
   showLabelOnHover?: boolean;
+  thumbSize?: number;
   anchor?: string;
 }
 
-export interface TagsFieldAttributes extends ConditionalAttributes {
+export interface TagsFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
   placeholder?: string;
+  acceptValueOnBlur?: boolean;
+  allowDuplicates?: boolean;
+  inputSize?: FlowControlSize;
+  limit?: number;
+  loading?: boolean;
+  loadingPosition?: FlowLoaderPosition;
+  maxDropdownHeight?: number;
   required?: boolean;
   maxTags?: number;
+  optionsText?: string;
+  optionsSource?: OptionsSource;
+  apiEndpoint?: string;
+  apiMethod?: "GET" | "POST";
+  apiHeaders?: string;
+  apiParams?: string;
+  apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  autocompleteMinChars?: number;
+  autocompleteDebounce?: number;
+  pointer?: boolean;
   splitChars?: string;
+  searchParam?: string;
+  withScrollArea?: boolean;
   anchor?: string;
 }
 
-export interface RatingFieldAttributes extends ConditionalAttributes {
+export interface RatingFieldAttributes
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   name?: string;
   label?: string;
   description?: string;
+  color?: string;
   required?: boolean;
   count?: number;
+  emptySymbol?: FlowRatingSymbol;
   fractions?: number;
+  fullSymbol?: FlowRatingSymbol;
+  highlightSelectedOnly?: boolean;
   anchor?: string;
 }
 
@@ -396,7 +619,9 @@ export type ValidationRule =
   | { minLength: number; message?: string }
   | { maxLength: number; message?: string };
 
-export interface BaseFieldConfig extends ConditionalAttributes {
+export interface BaseFieldConfig
+  extends ConditionalAttributes,
+    CommonFieldAppearanceAttributes {
   id: string;
   name: string;
   label: string;
@@ -409,17 +634,38 @@ export interface BaseFieldConfig extends ConditionalAttributes {
 export interface TextFieldConfig extends BaseFieldConfig {
   type: "text";
   placeholder?: string;
+  inputSize?: FlowControlSize;
+  pointer?: boolean;
 }
 
 export interface TextareaFieldConfig extends BaseFieldConfig {
   type: "textarea";
+  autosize?: boolean;
+  inputSize?: FlowControlSize;
+  maxRows?: number;
   placeholder?: string;
   minRows?: number;
+  pointer?: boolean;
+  resize?: "none" | "vertical" | "horizontal" | "both";
 }
 
 export interface SelectFieldConfig extends BaseFieldConfig {
   type: "select";
+  allowDeselect?: boolean;
+  autoSelectOnBlur?: boolean;
+  chevronColor?: string;
+  clearable?: boolean;
+  defaultDropdownOpened?: boolean;
+  inputSize?: FlowControlSize;
+  limit?: number;
+  multiple?: boolean;
+  pointer?: boolean;
   placeholder?: string;
+  searchable?: boolean;
+  selectFirstOptionOnChange?: boolean;
+  withAlignedLabels?: boolean;
+  withCheckIcon?: boolean;
+  withScrollArea?: boolean;
 
   // Static mode
   options?: SelectOption[];
@@ -431,6 +677,8 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   apiHeaders?: string; // JSON string
   apiParams?: string; // JSON string
   apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
   cacheEnabled?: boolean;
   cacheTTL?: number;
 
@@ -442,26 +690,47 @@ export interface SelectFieldConfig extends BaseFieldConfig {
 
 export interface CheckboxFieldConfig extends BaseFieldConfig {
   type: "checkbox";
+  autoContrast?: boolean;
   checkedLabel?: string;
+  color?: string;
+  icon?: FlowCheckboxIcon;
+  iconColor?: string;
 }
 
 export interface DateFieldConfig extends BaseFieldConfig {
   type: "date";
+  inputSize?: FlowControlSize;
   placeholder?: string;
 }
 
 export interface SwitchFieldConfig extends BaseFieldConfig {
   type: "switch";
+  color?: string;
+  labelPosition?: "left" | "right";
   onLabel?: string;
   offLabel?: string;
+  thumbIcon?: FlowSwitchThumbIcon;
+  withThumbIndicator?: boolean;
 }
 
 export interface NumberFieldConfig extends BaseFieldConfig {
   type: "number";
+  allowedDecimalSeparators?: string[];
+  allowLeadingZeros?: boolean;
+  clampBehavior?: FlowClampBehavior;
+  decimalSeparator?: string;
   placeholder?: string;
+  fixedDecimalScale?: boolean;
+  hideControls?: boolean;
+  inputSize?: FlowControlSize;
   min?: number;
   max?: number;
+  prefix?: string;
+  startValue?: number;
   step?: number;
+  suffix?: string;
+  thousandSeparator?: string;
+  thousandsGroupStyle?: FlowThousandsGroupStyle;
   decimalScale?: number;
   allowNegative?: boolean;
   allowDecimal?: boolean;
@@ -469,37 +738,83 @@ export interface NumberFieldConfig extends BaseFieldConfig {
 
 export interface RadioFieldConfig extends BaseFieldConfig {
   type: "radio";
+  autoContrast?: boolean;
+  color?: string;
+  icon?: FlowRadioIcon;
+  iconColor?: string;
   options?: SelectOption[];
+  optionsSource?: OptionsSource;
+  apiEndpoint?: string;
+  apiMethod?: "GET" | "POST";
+  apiHeaders?: string;
+  apiParams?: string;
+  apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  autocompleteMinChars?: number;
+  autocompleteDebounce?: number;
+  searchParam?: string;
 }
 
 export interface CheckboxGroupFieldConfig extends BaseFieldConfig {
   type: "checkbox-group";
   options?: SelectOption[];
+  optionsSource?: OptionsSource;
+  apiEndpoint?: string;
+  apiMethod?: "GET" | "POST";
+  apiHeaders?: string;
+  apiParams?: string;
+  apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  autocompleteMinChars?: number;
+  autocompleteDebounce?: number;
+  searchParam?: string;
 }
 
 export interface PasswordFieldConfig extends BaseFieldConfig {
   type: "password";
+  defaultVisible?: boolean;
+  inputSize?: FlowControlSize;
+  loading?: boolean;
+  loadingPosition?: FlowLoaderPosition;
   placeholder?: string;
   visible?: boolean;
 }
 
 export interface PinFieldConfig extends BaseFieldConfig {
   type: "pin";
+  gap?: FlowControlSize;
+  inputMode?: FlowInputMode;
   length?: number;
   mask?: boolean;
   inputType?: "number" | "alphanumeric";
+  placeholder?: string;
 }
 
 export interface ColorFieldConfig extends BaseFieldConfig {
   type: "color";
+  closeOnColorSwatchClick?: boolean;
+  disallowInput?: boolean;
   format?: "hex" | "rgb" | "rgba" | "hsl" | "hsla";
+  pointer?: boolean;
+  swatches?: string[];
+  swatchesPerRow?: number;
   withPicker?: boolean;
   withEyeDropper?: boolean;
+  withPreview?: boolean;
 }
 
 export interface FileFieldConfig extends BaseFieldConfig {
   type: "file";
   accept?: string;
+  capture?: string;
+  clearable?: boolean;
+  inputSize?: FlowControlSize;
   multiple?: boolean;
   maxSize?: number;
   maxFiles?: number;
@@ -507,33 +822,77 @@ export interface FileFieldConfig extends BaseFieldConfig {
 
 export interface SliderFieldConfig extends BaseFieldConfig {
   type: "slider";
+  color?: string;
+  domain?: [number, number];
+  inverted?: boolean;
+  labelAlwaysOn?: boolean;
+  marks?: FlowSliderMark[];
   min?: number;
   max?: number;
+  precision?: number;
+  restrictToMarks?: boolean;
   step?: number;
-  marks?: boolean;
   showLabelOnHover?: boolean;
+  thumbSize?: number;
 }
 
 export interface RangeSliderFieldConfig extends BaseFieldConfig {
   type: "rangeslider";
+  color?: string;
+  domain?: [number, number];
+  inverted?: boolean;
+  labelAlwaysOn?: boolean;
+  marks?: FlowSliderMark[];
+  maxRange?: number;
   min?: number;
+  minRange?: number;
   max?: number;
+  precision?: number;
+  pushOnOverlap?: boolean;
+  restrictToMarks?: boolean;
   step?: number;
-  marks?: boolean;
   showLabelOnHover?: boolean;
+  thumbSize?: number;
 }
 
 export interface TagsFieldConfig extends BaseFieldConfig {
   type: "tags";
+  acceptValueOnBlur?: boolean;
+  allowDuplicates?: boolean;
+  inputSize?: FlowControlSize;
+  limit?: number;
+  loading?: boolean;
+  loadingPosition?: FlowLoaderPosition;
+  maxDropdownHeight?: number;
+  options?: SelectOption[];
+  optionsSource?: OptionsSource;
+  apiEndpoint?: string;
+  apiMethod?: "GET" | "POST";
+  apiHeaders?: string;
+  apiParams?: string;
+  apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
+  cacheEnabled?: boolean;
+  cacheTTL?: number;
+  autocompleteMinChars?: number;
+  autocompleteDebounce?: number;
   placeholder?: string;
   maxTags?: number;
+  pointer?: boolean;
   splitChars?: string;
+  searchParam?: string;
+  withScrollArea?: boolean;
 }
 
 export interface RatingFieldConfig extends BaseFieldConfig {
   type: "rating";
+  color?: string;
   count?: number;
+  emptySymbol?: FlowRatingSymbol;
   fractions?: number;
+  fullSymbol?: FlowRatingSymbol;
+  highlightSelectedOnly?: boolean;
 }
 
 export interface SubmitButtonConfig extends ConditionalAttributes {
@@ -574,7 +933,7 @@ export interface AiSuggestionReference {
 
 export interface AiSuggestionsConfig extends ConditionalAttributes {
   type: "ai-suggestions";
-  presetId?: string;
+  promptOverride?: string;
   title?: string;
   description?: string;
   mode?: "auto" | "manual";
@@ -594,6 +953,8 @@ export interface FieldsetContainerConfig extends ConditionalAttributes {
 
 export interface CollapseContainerConfig extends ConditionalAttributes {
   type: "collapse";
+  animateOpacity?: boolean;
+  expanded?: boolean;
   title?: string;
   defaultOpened?: boolean;
   children: FieldConfig[];
@@ -603,6 +964,7 @@ export interface DividerConfig extends ConditionalAttributes {
   type: "divider";
   label?: string;
   labelPosition?: "left" | "center" | "right";
+  orientation?: "horizontal" | "vertical";
   size?: string;
 }
 
@@ -625,12 +987,18 @@ export interface GroupContainerConfig extends ConditionalAttributes {
   align?: string;
   justify?: string;
   grow?: boolean;
+  preventGrowOverflow?: boolean;
+  wrap?: "nowrap" | "wrap" | "wrap-reverse";
   children: FieldConfig[];
 }
 
 export interface GridContainerConfig extends ConditionalAttributes {
   type: "grid";
   columns?: number;
+  gutter?: string;
+  justify?: string;
+  overflow?: string;
+  rows?: number;
   spacing?: string;
   verticalSpacing?: string;
   children: FieldConfig[];
@@ -699,6 +1067,8 @@ export interface RuntimeFieldState {
   apiHeaders?: string;
   apiParams?: string;
   apiResponsePath?: string;
+  apiLabelPath?: string;
+  apiValuePath?: string;
   cacheEnabled?: boolean;
   cacheTTL?: number;
   autocompleteMinChars?: number;
@@ -729,6 +1099,12 @@ export interface FormSubmitRequest {
   formId: string;
   formName?: string;
   values: FormValues;
+  context?: {
+    pageUrl?: string;
+    pageTitle?: string;
+    baseUrl?: string;
+    locale?: string;
+  };
   metadata?: {
     pageUrl?: string;
     pageTitle?: string;
@@ -752,6 +1128,12 @@ export interface FormDraftRequest {
   formId: string;
   formName?: string;
   values: FormValues;
+  context?: {
+    pageUrl?: string;
+    pageTitle?: string;
+    baseUrl?: string;
+    locale?: string;
+  };
   metadata?: {
     pageUrl?: string;
     pageTitle?: string;

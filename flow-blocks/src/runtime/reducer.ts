@@ -10,6 +10,7 @@ import type {
 export interface FormRuntimeState {
   status: FormStatus;
   values: FormValues;
+  evaluationValues: FormValues;
   errors: FormErrors;
   fields: FieldConfig[];
   submitCount: number;
@@ -87,7 +88,22 @@ function collectInitialValues(
       return;
     }
 
+    if (field.type === "number" && field.startValue !== undefined) {
+      acc[field.name] = field.startValue;
+      return;
+    }
+
     if (field.type === "checkbox-group") {
+      acc[field.name] = [];
+      return;
+    }
+
+    if (field.type === "tags") {
+      acc[field.name] = [];
+      return;
+    }
+
+    if (field.type === "select" && field.multiple) {
       acc[field.name] = [];
       return;
     }
@@ -113,6 +129,7 @@ export function formReducer(
       return {
         status: "idle",
         values: action.values,
+        evaluationValues: action.values,
         errors: {},
         fields: action.fields,
         submitCount: 0,

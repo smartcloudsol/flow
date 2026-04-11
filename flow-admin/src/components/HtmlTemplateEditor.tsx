@@ -10,9 +10,10 @@ import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import type { editor } from "monaco-editor";
 import type { Selection } from "monaco-editor";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormDefinition } from "../api/types";
 import MonacoEditor from "./MonacoEditor";
+import { HtmlAttributeSupport, HtmlDiv } from "./tiptap/HtmlElementSupport";
 import {
   TemplateVariable,
   convertTemplateVariablesToSpans,
@@ -26,6 +27,7 @@ export interface HtmlTemplateEditorProps {
   height?: string | number;
   placeholder?: string;
   formDefinition?: FormDefinition;
+  variablePickerZIndex?: number;
 }
 
 export default function HtmlTemplateEditor({
@@ -34,19 +36,55 @@ export default function HtmlTemplateEditor({
   height = "400px",
   placeholder,
   formDefinition,
+  variablePickerZIndex = 100003,
 }: HtmlTemplateEditorProps) {
-  const [mode, setMode] = useState<"visual" | "code">("visual");
+  const [mode, setMode] = useState<"visual" | "code" | "preview">("visual");
+  const resolvedHeight = typeof height === "number" ? `${height}px` : height;
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const codeSelectionRef = useRef<Selection | null>(null);
-  const modeRef = useRef<"visual" | "code">(mode);
+  const modeRef = useRef<"visual" | "code" | "preview">(mode);
   const lastEmittedVisualValue = useRef<string>("");
+  const styleBlocksRef = useRef<string[]>([]);
+
+  const extractStyleBlocks = useCallback(
+    (
+      html: string,
+    ): {
+      styles: string[];
+      bodyHtml: string;
+    } => {
+      const styles: string[] = [];
+
+      const bodyHtml = html.replace(
+        /<style\b[^>]*>[\s\S]*?<\/style>/gi,
+        (match) => {
+          styles.push(match);
+          return "";
+        },
+      );
+
+      return {
+        styles,
+        bodyHtml: bodyHtml.trim(),
+      };
+    },
+    [],
+  );
+
+  const initialExtracted = extractStyleBlocks(value || "");
 
   const normalizeHtml = (html: string) => html.replace(/\s+/g, " ").trim();
+
+  useEffect(() => {
+    styleBlocksRef.current = extractStyleBlocks(value || "").styles;
+  }, [extractStyleBlocks, value]);
 
   // Tiptap editor for visual mode
   const tiptapEditor = useEditor({
     extensions: [
       StarterKit,
+      HtmlAttributeSupport,
+      HtmlDiv,
       Underline,
       TiptapLink.configure({
         openOnClick: false,
@@ -55,7 +93,7 @@ export default function HtmlTemplateEditor({
           target: "_blank",
         },
       }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TextAlign.configure({ types: ["heading", "paragraph", "div"] }),
       Placeholder.configure({
         placeholder: placeholder || t("Write your email template here..."),
       }),
@@ -63,10 +101,13 @@ export default function HtmlTemplateEditor({
       Color,
       TemplateVariable,
     ],
-    content: convertTemplateVariablesToSpans(value || ""),
+    content: convertTemplateVariablesToSpans(initialExtracted.bodyHtml || ""),
     onUpdate: ({ editor }) => {
       if (modeRef.current === "visual") {
-        const nextHtml = editor.getHTML();
+        const nextBodyHtml = editor.getHTML();
+        const nextHtml = `${styleBlocksRef.current.join(
+          "\n",
+        )}\n${nextBodyHtml}`.trim();
         lastEmittedVisualValue.current = normalizeHtml(nextHtml);
         onChange?.(nextHtml);
       }
@@ -82,16 +123,21 @@ export default function HtmlTemplateEditor({
     if (!tiptapEditor) return;
 
     if (mode === "visual") {
-      // Always convert {{...}} patterns to spans for visual mode
-      const convertedValue = convertTemplateVariablesToSpans(value || "");
-      const normalizedConverted = normalizeHtml(convertedValue);
-      const currentContent = tiptapEditor.getHTML();
+      const extracted = extractStyleBlocks(value || "");
+      styleBlocksRef.current = extracted.styles;
 
+      // Always convert {{...}} patterns to spans for visual mode
+      const convertedValue = convertTemplateVariablesToSpans(
+        extracted.bodyHtml || "",
+      );
+      const normalizedConverted = normalizeHtml(
+        `${styleBlocksRef.current.join("\n")}\n${convertedValue}`,
+      );
       // Skip self-originated updates to preserve the caret position.
       if (normalizedConverted === lastEmittedVisualValue.current) {
         return;
       }
-
+      const currentContent = tiptapEditor.getHTML();
       const normalizedCurrent = normalizeHtml(currentContent);
 
       if (normalizedConverted !== normalizedCurrent) {
@@ -100,7 +146,7 @@ export default function HtmlTemplateEditor({
         });
       }
     }
-  }, [value, tiptapEditor, mode]);
+  }, [value, tiptapEditor, mode, extractStyleBlocks]);
 
   const insertText = (text: string, offsetBefore = 0, offsetAfter = 0) => {
     const editor = editorRef.current;
@@ -190,10 +236,11 @@ export default function HtmlTemplateEditor({
       <Group gap="xs" wrap="wrap">
         <SegmentedControl
           value={mode}
-          onChange={(value) => setMode(value as "visual" | "code")}
+          onChange={(value) => setMode(value as "visual" | "code" | "preview")}
           data={[
             { label: t("Visual"), value: "visual" },
             { label: t("Code"), value: "code" },
+            { label: t("Preview"), value: "preview" },
           ]}
           size="xs"
         />
@@ -207,16 +254,19 @@ export default function HtmlTemplateEditor({
           }}
         />
 
-        {mode === "visual" ? (
+        {mode === "visual" && (
           <TemplateVariablePicker
             editor={tiptapEditor}
             formDefinition={formDefinition}
             size="xs"
+            zIndex={variablePickerZIndex}
           />
-        ) : (
+        )}
+        {mode === "code" && (
           <TemplateVariablePicker
             formDefinition={formDefinition}
             size="xs"
+            zIndex={variablePickerZIndex}
             onInsert={(path) => insertText(`{{${path}}}`, path.length + 4, 0)}
           />
         )}
@@ -229,44 +279,69 @@ export default function HtmlTemplateEditor({
       )}
 
       {mode === "visual" ? (
-        <RichTextEditor editor={tiptapEditor}>
-          <RichTextEditor.Toolbar sticky stickyOffset={60}>
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.Bold />
-              <RichTextEditor.Italic />
-              <RichTextEditor.Underline />
-              <RichTextEditor.ClearFormatting />
-            </RichTextEditor.ControlsGroup>
+        <Box
+          style={{
+            height: resolvedHeight,
+            minHeight: resolvedHeight,
+            overflow: "hidden",
+            resize: "vertical",
+          }}
+        >
+          <RichTextEditor
+            editor={tiptapEditor}
+            style={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            <RichTextEditor.Toolbar>
+              <RichTextEditor.ControlsGroup>
+                <RichTextEditor.Bold />
+                <RichTextEditor.Italic />
+                <RichTextEditor.Underline />
+                <RichTextEditor.ClearFormatting />
+              </RichTextEditor.ControlsGroup>
 
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.H1 />
-              <RichTextEditor.H2 />
-              <RichTextEditor.H3 />
-            </RichTextEditor.ControlsGroup>
+              <RichTextEditor.ControlsGroup>
+                <RichTextEditor.H1 />
+                <RichTextEditor.H2 />
+                <RichTextEditor.H3 />
+              </RichTextEditor.ControlsGroup>
 
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.BulletList />
-              <RichTextEditor.OrderedList />
-            </RichTextEditor.ControlsGroup>
+              <RichTextEditor.ControlsGroup>
+                <RichTextEditor.BulletList />
+                <RichTextEditor.OrderedList />
+              </RichTextEditor.ControlsGroup>
 
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.Link />
-              <RichTextEditor.Unlink />
-            </RichTextEditor.ControlsGroup>
+              <RichTextEditor.ControlsGroup>
+                <RichTextEditor.Link />
+                <RichTextEditor.Unlink />
+              </RichTextEditor.ControlsGroup>
 
-            <RichTextEditor.ControlsGroup>
-              <RichTextEditor.AlignLeft />
-              <RichTextEditor.AlignCenter />
-              <RichTextEditor.AlignRight />
-            </RichTextEditor.ControlsGroup>
-          </RichTextEditor.Toolbar>
+              <RichTextEditor.ControlsGroup>
+                <RichTextEditor.AlignLeft />
+                <RichTextEditor.AlignCenter />
+                <RichTextEditor.AlignRight />
+              </RichTextEditor.ControlsGroup>
+            </RichTextEditor.Toolbar>
 
-          <RichTextEditor.Content style={{ minHeight: height }} />
-        </RichTextEditor>
-      ) : (
+            <RichTextEditor.Content
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+                overflowX: "hidden",
+              }}
+            />
+          </RichTextEditor>
+        </Box>
+      ) : mode === "code" ? (
         <MonacoEditor
           language="html"
           height={height}
+          minHeight={height}
           value={value}
           onChange={(newValue) => {
             if (onChange) {
@@ -275,6 +350,32 @@ export default function HtmlTemplateEditor({
           }}
           onMount={handleEditorMount}
         />
+      ) : (
+        <Box
+          style={{
+            height: resolvedHeight,
+            border: "1px solid var(--mantine-color-gray-3)",
+          }}
+        >
+          <iframe
+            title="Template preview"
+            style={{
+              width: "100%",
+              height: "100%",
+              border: 0,
+              background: "#fff",
+            }}
+            srcDoc={`<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body style="margin:0;padding:0;">
+    ${value || ""}
+  </body>
+</html>`}
+          />
+        </Box>
       )}
     </Stack>
   );

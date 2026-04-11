@@ -171,6 +171,14 @@ This plugin may integrate with the following external services, depending on con
      - AWS Service Terms: https://aws.amazon.com/service-terms/
      - AWS Privacy: https://aws.amazon.com/privacy/
 
+5. **Stripe (optional; subscription/purchase flow)**
+   - **When it applies:** Only when the user opens the optional WPSuite subscription / purchase flow in the shared admin component.
+   - **What it’s used for:** Displaying hosted pricing/subscription UI for optional paid features.
+   - **What data may be sent:** Browser/session data required by Stripe to render the hosted purchase UI and process the purchase flow.
+   - **Links:**
+     - Terms: https://stripe.com/legal/consumer
+     - Privacy: https://stripe.com/privacy
+
 == Trademark Notice ==
 
 Amazon Web Services, AWS, Amazon EventBridge, Amazon DynamoDB, Amazon SES, and Amazon Cognito are trademarks of Amazon.com, Inc. or its affiliates.

@@ -30,6 +30,10 @@
       "type": "string",
       "default": "center"
     },
+    "orientation": {
+      "type": "string",
+      "default": "horizontal"
+    },
     "size": {
       "type": "string",
       "default": "md"
@@ -46,5 +50,5 @@
       "default": false
     }
   },
-  "editorScript": "file:../editor.js"
+  "editorScript": "smartcloud-flow-blocks-editor-script"
 }
