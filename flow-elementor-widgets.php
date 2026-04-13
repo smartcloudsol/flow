@@ -156,6 +156,71 @@ class Flow_Form_Widget extends Flow_Base_Widget
             'description' => __('Leave both options unselected to inherit the pattern value. Select Yes or No only when you want to override it.', 'smartcloud-flow'),
         ]);
 
+        $this->add_control('allowDrafts', [
+            'label' => __('Allow Draft Saving', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'true' => [
+                    'title' => __('Yes', 'smartcloud-flow'),
+                    'icon' => 'eicon-check-circle-o',
+                ],
+                'false' => [
+                    'title' => __('No', 'smartcloud-flow'),
+                    'icon' => 'eicon-ban',
+                ],
+            ],
+            'default' => '',
+            'toggle' => true,
+            'description' => __('Leave unselected to inherit the pattern value.', 'smartcloud-flow'),
+        ]);
+
+        $this->add_control('showDraftResumePanel', [
+            'label' => __('Show Draft Resume Panel', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'true' => [
+                    'title' => __('Yes', 'smartcloud-flow'),
+                    'icon' => 'eicon-check-circle-o',
+                ],
+                'false' => [
+                    'title' => __('No', 'smartcloud-flow'),
+                    'icon' => 'eicon-ban',
+                ],
+            ],
+            'default' => '',
+            'toggle' => true,
+            'description' => __('Leave unselected to inherit the pattern value.', 'smartcloud-flow'),
+        ]);
+
+        $this->add_control('draftAllowDelete', [
+            'label' => __('Allow Draft Deletion', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'true' => [
+                    'title' => __('Yes', 'smartcloud-flow'),
+                    'icon' => 'eicon-check-circle-o',
+                ],
+                'false' => [
+                    'title' => __('No', 'smartcloud-flow'),
+                    'icon' => 'eicon-ban',
+                ],
+            ],
+            'default' => '',
+            'toggle' => true,
+            'description' => __('Leave unselected to inherit the pattern value.', 'smartcloud-flow'),
+        ]);
+
+        $this->add_control('draftExpiryDays', [
+            'label' => __('Draft Expiry (Days)', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::NUMBER,
+            'description' => __('Leave empty to inherit the pattern value.', 'smartcloud-flow'),
+            'min' => 1,
+        ]);
+
+        $this->add_control('draftResumeTitle', ['label' => __('Draft Resume Title', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('draftResumeDescription', ['label' => __('Draft Resume Description', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXTAREA]);
+        $this->add_control('draftSaveSuccessMessage', ['label' => __('Draft Save Success Message', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+
         $this->add_control('colorMode', [
             'label' => __('Color Mode', 'smartcloud-flow'),
             'type' => \Elementor\Controls_Manager::SELECT,
@@ -326,6 +391,13 @@ class Flow_Form_Widget extends Flow_Base_Widget
             'errorMessage',
             'endpointPath',
             'hideFormOnSuccess',
+            'allowDrafts',
+            'showDraftResumePanel',
+            'draftExpiryDays',
+            'draftAllowDelete',
+            'draftResumeTitle',
+            'draftResumeDescription',
+            'draftSaveSuccessMessage',
             'colorMode',
             'primaryColor'
         ];

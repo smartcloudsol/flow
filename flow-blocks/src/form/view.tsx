@@ -36,13 +36,21 @@ function getConfigContainer(element: HTMLElement): HTMLElement | null {
   return configContainers[configContainers.length - 1] || null;
 }
 
+function hashStringDjb2(str: string): string {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+}
+
 function getConfigSignature(element: HTMLElement): string {
   const configContainer = getConfigContainer(element);
   if (!configContainer) {
     return "";
   }
 
-  return configContainer.innerHTML;
+  return hashStringDjb2(configContainer.innerHTML);
 }
 
 function isConfigReady(element: HTMLElement): boolean {

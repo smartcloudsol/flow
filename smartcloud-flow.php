@@ -265,7 +265,7 @@ final class Flow
         $block_atts = $form_block['attrs'] ?? [];
 
         // Merge shortcode attributes (override block)
-        $allowed = ['formid', 'formname', 'submitlabel', 'successmessage', 'errormessage', 'endpointpath', 'hideformonsuccess', 'colormode', 'primarycolor', 'themeoverrides'];
+        $allowed = ['formid', 'formname', 'submitlabel', 'successmessage', 'errormessage', 'endpointpath', 'hideformonsuccess', 'colormode', 'primarycolor', 'themeoverrides', 'allowdrafts', 'showdraftresumepanel', 'draftexpirydays', 'draftallowdelete', 'draftresumetitle', 'draftresumedescription', 'draftsavesuccessmessage'];
         foreach ($allowed as $key) {
             if (isset($atts[$key])) {
                 $value = $atts[$key];
@@ -325,6 +325,13 @@ final class Flow
             'errorMessage' => null,
             'endpointPath' => null,
             'hideFormOnSuccess' => true,
+            'allowDrafts' => null,
+            'showDraftResumePanel' => null,
+            'draftExpiryDays' => null,
+            'draftAllowDelete' => null,
+            'draftResumeTitle' => null,
+            'draftResumeDescription' => null,
+            'draftSaveSuccessMessage' => null,
             'colorMode' => null,
             'primaryColor' => null,
             'primaryShade' => null,
