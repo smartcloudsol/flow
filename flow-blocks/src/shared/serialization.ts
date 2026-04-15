@@ -18,6 +18,26 @@ const decodeB64Utf8 = (b64: string): string => {
   return new TextDecoder("utf-8").decode(bytes);
 };
 
+function normalizeCustomClassList(...sources: unknown[]): string[] {
+  const tokens = sources.flatMap((source) => {
+    if (typeof source === "string") {
+      return source.split(/\s+/);
+    }
+
+    if (Array.isArray(source)) {
+      return source.flatMap((entry) =>
+        typeof entry === "string" ? entry.split(/\s+/) : [],
+      );
+    }
+
+    return [];
+  });
+
+  return Array.from(
+    new Set(tokens.map((token) => token.trim()).filter(Boolean)),
+  );
+}
+
 /**
  * Filter out WordPress-specific attributes that should not be serialized to field config
  */
@@ -29,8 +49,8 @@ export function filterWordPressAttributes(
     anchor: _anchor,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     lock: _lock,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    className: _className,
+    className,
+    classNames,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     style: _style,
     // Some editor extensions inject transient generated class metadata into
@@ -45,6 +65,11 @@ export function filterWordPressAttributes(
     if (/generatedclass$/i.test(key) && key !== "className") {
       delete fieldAttributes[key];
     }
+  }
+
+  const normalizedClassNames = normalizeCustomClassList(classNames, className);
+  if (normalizedClassNames.length > 0) {
+    fieldAttributes.classNames = normalizedClassNames;
   }
 
   if (fieldAttributes.hidden === false) {
@@ -215,6 +240,21 @@ function parseFormStates(container: HTMLElement): FormStateContents {
  * Normalize form attributes: convert string values to proper types
  */
 function normalizeFormAttributes(config: FormAttributes): FormAttributes {
+  const mutableConfig = config as unknown as Record<string, unknown>;
+
+  const normalizedClassNames = normalizeCustomClassList(
+    mutableConfig.classNames,
+    mutableConfig.className,
+  );
+
+  if (normalizedClassNames.length > 0) {
+    mutableConfig.classNames = normalizedClassNames;
+  } else {
+    delete mutableConfig.classNames;
+  }
+
+  delete mutableConfig.className;
+
   // Boolean fields
   const booleanFields: Array<keyof FormAttributes> = [
     "allowDrafts",
@@ -291,6 +331,17 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
       delete mutableField[key];
     }
   }
+
+  const normalizedClassNames = normalizeCustomClassList(
+    mutableField.classNames,
+    mutableField.className,
+  );
+  if (normalizedClassNames.length > 0) {
+    mutableField.classNames = normalizedClassNames;
+  } else {
+    delete mutableField.classNames;
+  }
+  delete mutableField.className;
 
   // Boolean fields
   const booleanFields = [

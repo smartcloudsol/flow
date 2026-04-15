@@ -135,6 +135,13 @@ export default function Edit({
             visibleCount={2}
             items={[
               {
+                key: "required",
+                label: __("Required", TEXT_DOMAIN),
+                checked: Boolean(attributes.required),
+                onChange: (required) => setAttributes({ required }),
+                help: __("Mark this field as required.", TEXT_DOMAIN),
+              },
+              {
                 key: "disabled",
                 label: __("Disabled", TEXT_DOMAIN),
                 checked: Boolean(attributes.disabled),

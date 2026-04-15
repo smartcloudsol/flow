@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./build/types",
+    "rootDir": "./src",
+    "stripInternal": true
+  },
+  "include": ["src/editor-runtime.ts", "src/operations-runtime.tsx"],
+  "exclude": ["dist", "build", "node_modules"]
+}

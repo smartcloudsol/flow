@@ -68,6 +68,9 @@ export function WizardContainer({
     formId,
     formReturnIntent,
     clearFormReturnIntent,
+    allowDrafts,
+    saveDraft,
+    isPending,
   } = useFormRuntime();
 
   const {
@@ -410,15 +413,30 @@ export function WizardContainer({
             variant="default"
             onClick={handlePrev}
             disabled={isFirstStep}
-            className="flow-wizard-prev-button"
+            className="flow-wizard-prev-button flow-wizard-action-button"
           >
             {prevButtonLabel || I18n.get("Previous") || "Previous"}
           </Button>
-          {!isLastStep && (
-            <Button onClick={handleNext} className="flow-wizard-next-button">
-              {nextButtonLabel || I18n.get("Next") || "Next"}
-            </Button>
-          )}
+          <Group gap="sm" className="flow-wizard-primary-actions">
+            {allowDrafts && (
+              <Button
+                variant="outline"
+                loading={isPending}
+                onClick={() => void saveDraft()}
+                className="flow-wizard-save-draft-button flow-wizard-action-button flow-action-button flow-action-button__save-draft"
+              >
+                {I18n.get("Save draft") || "Save draft"}
+              </Button>
+            )}
+            {!isLastStep && (
+              <Button
+                onClick={handleNext}
+                className="flow-wizard-next-button flow-wizard-action-button"
+              >
+                {nextButtonLabel || I18n.get("Next") || "Next"}
+              </Button>
+            )}
+          </Group>
         </Group>
       </Stack>
     </div>

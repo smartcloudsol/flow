@@ -20,7 +20,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["jquery"]
+    "types": ["jquery"],
+    "paths": {
+      "monaco-editor/esm/*": ["./node_modules/monaco-editor/esm/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["dist", "build", "node_modules"],

@@ -174,7 +174,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 48em) {
   .flow-wizard-container {
     --flow-wizard-padding: var(--mantine-spacing-sm);
   }
@@ -189,11 +189,26 @@
 
   .flow-wizard-controls {
     flex-direction: column;
+    align-items: stretch;
     width: 100%;
   }
 
   .flow-wizard-controls > * {
     width: 100%;
+  }
+
+  .flow-wizard-primary-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .flow-wizard-action-button {
+    width: 100% !important;
+  }
+
+  .flow-wizard-primary-actions > .mantine-Button-root,
+  .flow-wizard-controls > .mantine-Button-root {
+    width: 100% !important;
   }
 }
 

@@ -198,7 +198,7 @@ export default function HtmlTemplateEditor({
 
   const handleEditorMount = (
     editor: editor.IStandaloneCodeEditor,
-    monaco: typeof import("monaco-editor"),
+    monaco: typeof import("monaco-editor/esm/vs/editor/editor.api"),
   ) => {
     editorRef.current = editor;
     codeSelectionRef.current = editor.getSelection();

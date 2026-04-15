@@ -10,6 +10,7 @@ import {
   MantineProvider,
   type MantineColorsTuple,
 } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
 import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
@@ -38,6 +39,23 @@ function hashStringDjb2(str: string): string {
     hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
   }
   return (hash >>> 0).toString(36);
+}
+
+function normalizeClassNames(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .flatMap((entry) =>
+          typeof entry === "string" ? entry.split(/\s+/) : [],
+        )
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
+  );
 }
 
 function createFormTheme(form: FormAttributes) {
@@ -188,6 +206,11 @@ export async function renderForm(
 ): Promise<RenderFormHandle> {
   const { target, form, fields } = args;
   const states = args.states ?? {};
+  const customFormClassNames = normalizeClassNames(form.classNames);
+  const shadowRootClassName = [
+    "smartcloud-flow-shadow-root",
+    ...customFormClassNames,
+  ].join(" ");
 
   // Initialize I18n with translations
   I18n.putVocabularies(translations);
@@ -250,7 +273,7 @@ export async function renderForm(
 
     // Create mount point inside shadow DOM
     rootEl = document.createElement("div");
-    rootEl.className = "smartcloud-flow-shadow-root";
+    rootEl.className = shadowRootClassName;
     rootEl.setAttribute("data-mantine-color-scheme", resolvedColorMode);
     rootEl.style.position = "relative";
     rootEl.style.minHeight = "100px";
@@ -258,6 +281,7 @@ export async function renderForm(
     shadow.appendChild(rootEl);
   } else {
     // Re-render: update existing structure
+    rootEl!.className = shadowRootClassName;
     rootEl!.setAttribute("data-mantine-color-scheme", resolvedColorMode);
 
     // Update theme overrides if changed
@@ -297,15 +321,17 @@ export async function renderForm(
       forceColorScheme={resolvedColorMode}
       getRootElement={() => rootEl!}
     >
-      <FormShell
-        form={form}
-        fields={fields}
-        states={states}
-        preview={args.preview}
-        store={store}
-        rootElement={rootEl!}
-        hostElement={target as HTMLDivElement}
-      />
+      <ModalsProvider modalProps={{ withinPortal: false, zIndex: 100002 }}>
+        <FormShell
+          form={form}
+          fields={fields}
+          states={states}
+          preview={args.preview}
+          store={store}
+          rootElement={rootEl!}
+          hostElement={target as HTMLDivElement}
+        />
+      </ModalsProvider>
     </MantineProvider>,
   );
 

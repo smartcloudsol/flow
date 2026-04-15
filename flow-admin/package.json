@@ -4,21 +4,20 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    "./editor-runtime": "./src/editor-runtime.ts",
-    "./operations-runtime": "./src/operations-runtime.tsx",
-    "./api/backend-client": "./src/api/backend-client.ts",
-    "./api/backend-utils": "./src/api/backend-utils.ts",
-    "./api/types": "./src/api/types.ts",
-    "./operations/i18n": "./src/operations/i18n.ts",
-    "./operations/views": "./src/operations/views.ts",
-    "./paid-features/SubmissionsEditor": "./src/paid-features/SubmissionsEditor.tsx",
-    "./paid-features/TemplatesEditor": "./src/paid-features/TemplatesEditor.tsx",
-    "./paid-features/WorkflowsEditor": "./src/paid-features/WorkflowsEditor.tsx"
+    "./editor-runtime": {
+      "types": "./build/types/editor-runtime.d.ts",
+      "default": "./dist/editor-runtime.js"
+    },
+    "./operations-runtime": {
+      "types": "./build/types/operations-runtime.d.ts",
+      "default": "./dist/operations-runtime.js"
+    }
   },
   "license": "ISC",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build",
+    "build": "tsc && tsc -p tsconfig.types.json && vite build",
+    "build:types": "tsc -p tsconfig.types.json",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx' 'src/index.tsx' --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview --host",
     "build-wp": "wp-scripts build --config=webpack.config.cjs --webpack-copy-php --stats-error-details --output-path",

@@ -45,6 +45,7 @@ export interface FormAttributes {
   colors?: Record<string, string>;
 
   themeOverrides?: string;
+  classNames?: string[];
   fieldOverrides?: Record<string, Record<string, unknown>>;
   configB64?: string;
   configFormat?: string;
@@ -629,6 +630,7 @@ export interface BaseFieldConfig
   required?: boolean;
   validation?: ValidationRule | ValidationRule[];
   defaultValue?: unknown;
+  classNames?: string[];
 }
 
 export interface TextFieldConfig extends BaseFieldConfig {

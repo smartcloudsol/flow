@@ -518,6 +518,36 @@
   width: min(100%, 44rem);
 }
 
+@media (max-width: 48em) {
+  .smartcloud-flow-shadow-root .flow-draft-resume-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .smartcloud-flow-shadow-root .flow-draft-resume-action,
+  .smartcloud-flow-shadow-root
+    .flow-draft-resume-actions
+    > .mantine-Button-root {
+    width: 100% !important;
+  }
+
+  .smartcloud-flow-shadow-root .flow-wizard-controls,
+  .smartcloud-flow-shadow-root .flow-wizard-primary-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .smartcloud-flow-shadow-root .flow-wizard-action-button,
+  .smartcloud-flow-shadow-root .flow-wizard-controls > .mantine-Button-root,
+  .smartcloud-flow-shadow-root
+    .flow-wizard-primary-actions
+    > .mantine-Button-root {
+    width: 100% !important;
+  }
+}
+
 .smartcloud-flow-shadow-root .flow-submission-meta__copy {
   appearance: none;
   border: var(--flow-submission-meta-copy-border);

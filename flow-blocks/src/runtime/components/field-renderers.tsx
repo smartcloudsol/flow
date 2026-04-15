@@ -70,6 +70,32 @@ function getControlClassName(type: string, extraClassName?: string) {
   );
 }
 
+function getFieldExtraClassName(field: FieldConfig): string | undefined {
+  const candidate = field as unknown as {
+    classNames?: unknown;
+    className?: unknown;
+  };
+
+  const tokens = [
+    ...(Array.isArray(candidate.classNames)
+      ? candidate.classNames.flatMap((value) =>
+          typeof value === "string" ? value.split(/\s+/) : [],
+        )
+      : []),
+    ...(typeof candidate.className === "string"
+      ? candidate.className.split(/\s+/)
+      : []),
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    return undefined;
+  }
+
+  return Array.from(new Set(tokens)).join(" ");
+}
+
 function getFieldRenderKey(field: FieldConfig, path: number[]) {
   return getRuntimeKey(field, path);
 }
@@ -776,7 +802,7 @@ function TextField({
   const { validateField } = useFormRuntime();
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="text">
+    <FieldBlock type="text" className={getFieldExtraClassName(field)}>
       <TextInput
         className={getControlClassName("text")}
         label={field.label}
@@ -808,7 +834,7 @@ function TextareaField({
   const { validateField } = useFormRuntime();
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="textarea">
+    <FieldBlock type="textarea" className={getFieldExtraClassName(field)}>
       <Textarea
         className={getControlClassName("textarea")}
         label={field.label}
@@ -858,7 +884,7 @@ function SelectField({
       : [];
 
     return (
-      <FieldBlock type="select">
+      <FieldBlock type="select" className={getFieldExtraClassName(field)}>
         <MultiSelect
           className={getControlClassName("select")}
           clearable={field.clearable}
@@ -889,7 +915,7 @@ function SelectField({
   }
 
   return (
-    <FieldBlock type="select">
+    <FieldBlock type="select" className={getFieldExtraClassName(field)}>
       <Select
         className={getControlClassName("select")}
         allowDeselect={field.allowDeselect}
@@ -935,7 +961,7 @@ function CheckboxField({
     useFormField(field.name, runtimeKey);
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="checkbox">
+    <FieldBlock type="checkbox" className={getFieldExtraClassName(field)}>
       <Checkbox
         className={getControlClassName("checkbox")}
         autoContrast={field.autoContrast}
@@ -991,7 +1017,7 @@ function CheckboxGroupField({
   };
 
   return (
-    <FieldBlock type="checkbox-group">
+    <FieldBlock type="checkbox-group" className={getFieldExtraClassName(field)}>
       {isAutocompleteSource ? (
         <TextInput
           className={getControlClassName("checkbox-group-search")}
@@ -1041,7 +1067,7 @@ function DateField({
   const { validateField } = useFormRuntime();
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="date">
+    <FieldBlock type="date" className={getFieldExtraClassName(field)}>
       <DateInput
         className={getControlClassName("date")}
         label={field.label}
@@ -1073,7 +1099,7 @@ function SaveDraftField({
   const label = field.label || I18n.get("Save draft") || "Save draft";
   const showTitle = field.showTitle ?? true;
   return (
-    <FieldBlock type="save-draft">
+    <FieldBlock type="save-draft" className={getFieldExtraClassName(field)}>
       <Button
         className={joinClassNames(
           getControlClassName("save-draft"),
@@ -1227,7 +1253,13 @@ function AiSuggestionsField({
     .join(" ");
 
   return (
-    <FieldBlock type="ai-suggestions" className="flow-ai-suggestions">
+    <FieldBlock
+      type="ai-suggestions"
+      className={joinClassNames(
+        "flow-ai-suggestions",
+        getFieldExtraClassName(field),
+      )}
+    >
       <div
         className="flow-ai-suggestions-border"
         data-flow-active={isGenerating ? "true" : "false"}
@@ -1554,7 +1586,7 @@ function SubmitField({
 
   const icon = renderIcon();
   return (
-    <FieldBlock type="submit">
+    <FieldBlock type="submit" className={getFieldExtraClassName(field)}>
       <Button
         className={joinClassNames(
           getControlClassName("submit"),
@@ -1586,7 +1618,7 @@ function StackContainer({
   if (isHidden(runtime)) return null;
   return (
     <Stack
-      className={getBlockClassName("stack")}
+      className={getBlockClassName("stack", getFieldExtraClassName(field))}
       gap={field.gap}
       align={field.align as React.CSSProperties["alignItems"]}
       justify={field.justify as React.CSSProperties["justifyContent"]}
@@ -1618,7 +1650,7 @@ function GroupContainer({
   if (isHidden(runtime)) return null;
   return (
     <Group
-      className={getBlockClassName("group")}
+      className={getBlockClassName("group", getFieldExtraClassName(field))}
       gap={field.gap}
       align={field.align as React.CSSProperties["alignItems"]}
       justify={field.justify as React.CSSProperties["justifyContent"]}
@@ -1653,7 +1685,7 @@ function GridContainer({
   if (isHidden(runtime)) return null;
   return (
     <SimpleGrid
-      className={getBlockClassName("grid")}
+      className={getBlockClassName("grid", getFieldExtraClassName(field))}
       cols={field.columns}
       spacing={field.gutter ?? field.spacing}
       verticalSpacing={field.verticalSpacing}
@@ -1690,7 +1722,7 @@ function SwitchField({
     useFormField(field.name, runtimeKey);
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="switch">
+    <FieldBlock type="switch" className={getFieldExtraClassName(field)}>
       <Switch
         className={getControlClassName("switch")}
         color={field.color || undefined}
@@ -1724,7 +1756,7 @@ function NumberField({
   const { validateField } = useFormRuntime();
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="number">
+    <FieldBlock type="number" className={getFieldExtraClassName(field)}>
       <NumberInput
         className={getControlClassName("number")}
         allowDecimal={field.allowDecimal}
@@ -1790,7 +1822,7 @@ function RadioField({
   };
 
   return (
-    <FieldBlock type="radio">
+    <FieldBlock type="radio" className={getFieldExtraClassName(field)}>
       {isAutocompleteSource ? (
         <TextInput
           className={getControlClassName("radio-search")}
@@ -1853,7 +1885,7 @@ function PasswordField({
     : {};
 
   return (
-    <FieldBlock type="password">
+    <FieldBlock type="password" className={getFieldExtraClassName(field)}>
       <PasswordInput
         className={getControlClassName("password")}
         label={field.label}
@@ -1888,7 +1920,7 @@ function PinField({
     useFormField(field.name, runtimeKey);
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="pin">
+    <FieldBlock type="pin" className={getFieldExtraClassName(field)}>
       <PinInput
         className={getControlClassName("pin")}
         gap={field.gap}
@@ -1923,7 +1955,7 @@ function ColorField({
   );
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="color">
+    <FieldBlock type="color" className={getFieldExtraClassName(field)}>
       <ColorInput
         className={getControlClassName("color")}
         closeOnColorSwatchClick={field.closeOnColorSwatchClick}
@@ -1960,7 +1992,7 @@ function FileField({
   const uploadedFiles = getUploadedFileReferences(value);
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="file">
+    <FieldBlock type="file" className={getFieldExtraClassName(field)}>
       <FileInput
         className={getControlClassName("file")}
         label={field.label}
@@ -2002,7 +2034,7 @@ function SliderField({
   );
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="slider">
+    <FieldBlock type="slider" className={getFieldExtraClassName(field)}>
       <Slider
         className={getControlClassName("slider")}
         color={field.color || undefined}
@@ -2040,7 +2072,7 @@ function RangeSliderField({
   );
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="rangeslider">
+    <FieldBlock type="rangeslider" className={getFieldExtraClassName(field)}>
       <RangeSlider
         className={getControlClassName("rangeslider")}
         color={field.color || undefined}
@@ -2091,7 +2123,7 @@ function TagsField({
     (runtime?.optionsSource || field.optionsSource) === "autocomplete";
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="tags">
+    <FieldBlock type="tags" className={getFieldExtraClassName(field)}>
       {(field.loading && field.loadingPosition === "left") || isLoading ? (
         <Loader size="xs" />
       ) : null}
@@ -2137,7 +2169,7 @@ function RatingField({
   );
   if (isHidden(runtime)) return null;
   return (
-    <FieldBlock type="rating">
+    <FieldBlock type="rating" className={getFieldExtraClassName(field)}>
       <Rating
         className={getControlClassName("rating")}
         color={field.color || undefined}
@@ -2168,7 +2200,10 @@ function FieldsetContainer({
   const runtime = useRuntimeByKey(runtimeKey);
   if (isHidden(runtime)) return null;
   return (
-    <Fieldset className={getBlockClassName("fieldset")} legend={field.legend}>
+    <Fieldset
+      className={getBlockClassName("fieldset", getFieldExtraClassName(field))}
+      legend={field.legend}
+    >
       <Stack>
         {field.children.map((child, index) => {
           const childPath = [...path, index];
@@ -2200,7 +2235,10 @@ function CollapseContainer({
     typeof field.expanded === "boolean" ? field.expanded : opened;
   if (isHidden(runtime)) return null;
   return (
-    <Stack gap="xs" className={getBlockClassName("collapse")}>
+    <Stack
+      gap="xs"
+      className={getBlockClassName("collapse", getFieldExtraClassName(field))}
+    >
       <UnstyledButton
         className="flow-collapse-toggle"
         type="button"
@@ -2249,7 +2287,7 @@ function DividerElement({
   if (isHidden(runtime)) return null;
   return (
     <Divider
-      className={getBlockClassName("divider")}
+      className={getBlockClassName("divider", getFieldExtraClassName(field))}
       label={field.label}
       labelPosition={field.labelPosition}
       orientation={field.orientation}

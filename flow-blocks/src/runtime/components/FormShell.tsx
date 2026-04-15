@@ -12,6 +12,7 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
+import { useModals } from "@mantine/modals";
 import {
   dispatchBackend,
   getStoreSelect,
@@ -543,6 +544,7 @@ export function FormShell({
   rootElement: HTMLDivElement;
   hostElement: HTMLDivElement;
 }) {
+  const modals = useModals();
   const languageInStore = useSelect(
     () => getStoreSelect(store).getLanguage(),
     [store],
@@ -1456,6 +1458,36 @@ export function FormShell({
     ],
   );
 
+  const confirmDeleteDraft = useCallback(() => {
+    if (!resumeDraftIdInput || !resumePasswordInput || !form.draftAllowDelete) {
+      return;
+    }
+
+    modals.openConfirmModal({
+      title: I18n.get("Delete saved draft") || "Delete saved draft",
+      children: (
+        <Text size="sm">
+          {I18n.get("This will permanently delete the saved draft.") ||
+            "This will permanently delete the saved draft."}
+        </Text>
+      ),
+      labels: {
+        confirm: I18n.get("Delete") || "Delete",
+        cancel: I18n.get("Cancel") || "Cancel",
+      },
+      confirmProps: { color: "red" },
+      onConfirm: () => {
+        void actions.deleteDraft();
+      },
+    });
+  }, [
+    actions,
+    form.draftAllowDelete,
+    modals,
+    resumeDraftIdInput,
+    resumePasswordInput,
+  ]);
+
   const successStates = states.successStates || {};
   const acceptedAiSuggestion = useMemo(
     () =>
@@ -1700,8 +1732,9 @@ export function FormShell({
                         setResumePasswordInput(event.currentTarget.value)
                       }
                     />
-                    <Group>
+                    <Group className="flow-draft-resume-actions">
                       <Button
+                        className="flow-draft-resume-action flow-draft-resume-action--load"
                         onClick={() => void actions.loadDraft()}
                         disabled={!resumeDraftIdInput || !resumePasswordInput}
                         loading={state.status === "loading-draft"}
@@ -1710,16 +1743,21 @@ export function FormShell({
                       </Button>
                       {form.draftAllowDelete ? (
                         <Button
+                          className="flow-draft-resume-action flow-draft-resume-action--delete"
                           variant="outline"
                           color="red"
-                          onClick={() => void actions.deleteDraft()}
+                          onClick={confirmDeleteDraft}
                           disabled={!resumeDraftIdInput || !resumePasswordInput}
                           loading={state.status === "deleting-draft"}
                         >
                           {I18n.get("Delete")}
                         </Button>
                       ) : null}
-                      <Button variant="subtle" onClick={actions.startNewForm}>
+                      <Button
+                        className="flow-draft-resume-action flow-draft-resume-action--new"
+                        variant="subtle"
+                        onClick={actions.startNewForm}
+                      >
                         {I18n.get("New form")}
                       </Button>
                     </Group>
