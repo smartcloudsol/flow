@@ -18,10 +18,6 @@ if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'admin/form-sync-meta.php')) {
     require_once SMARTCLOUD_FLOW_PATH . 'admin/form-sync-meta.php';
 }
 
-if (file_exists(SMARTCLOUD_FLOW_PATH . 'admin/logger.php')) {
-    require_once SMARTCLOUD_FLOW_PATH . 'admin/logger.php';
-}
-
 final class Admin
 {
     private FlowAdminSettings $settings;

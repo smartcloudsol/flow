@@ -258,6 +258,12 @@
   border: var(--flow-save-draft-border);
 }
 
+.smartcloud-flow-shadow-root .mantine-Modal-inner {
+  left: 0 !important;
+  right: 0 !important;
+  inset-inline: 0 !important;
+}
+
 .smartcloud-flow-shadow-root .flow-ai-suggestions {
   gap: 0.875rem;
 }

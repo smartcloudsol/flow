@@ -247,6 +247,15 @@ export interface ProcessDraftLinkedEntity {
   name?: string;
 }
 
+export interface ExternalProcessorNode {
+  processorId: string;
+  name: string;
+  description?: string;
+  inputEventType: string;
+  outputEventType: string;
+  outputSchema?: string;
+}
+
 export interface ProcessDraftStepNode {
   stepId: string;
   parentWorkflowId: string;
@@ -261,15 +270,21 @@ export interface ProcessDraftEdge {
   id: string;
   source: string;
   target: string;
-  kind: "workflow-step" | "step-trigger";
+  kind:
+    | "workflow-step"
+    | "step-trigger"
+    | "step-processor"
+    | "processor-trigger";
   label?: string;
   branchKey?: string;
   triggerEvent?: string;
   sourceActionType?: ProcessDraftStepActionType;
+  processorOutputEventType?: string;
 }
 
 export interface ProcessDraftGraph {
   stepNodes: ProcessDraftStepNode[];
+  externalProcessors?: ExternalProcessorNode[];
   edges: ProcessDraftEdge[];
 }
 

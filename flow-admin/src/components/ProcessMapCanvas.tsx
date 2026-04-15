@@ -3,10 +3,13 @@ import {
   applyNodeChanges,
   Background,
   BackgroundVariant,
+  BaseEdge,
   ControlButton,
   Controls,
   Edge,
   EdgeLabelRenderer,
+  type EdgeProps,
+  getSmoothStepPath,
   Handle,
   MarkerType,
   MiniMap,
@@ -18,6 +21,7 @@ import {
   ReactFlow,
   ReactFlowProvider,
   SelectionMode,
+  useInternalNode,
   type NodeChange,
   useEdgesState,
   useReactFlow,
@@ -45,7 +49,9 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowsMaximize,
+  IconBolt,
   IconBrain,
+  IconChevronLeft,
   IconClockHour4,
   IconCloud,
   IconDeviceFloppy,
@@ -75,6 +81,7 @@ import type { FlowBackendClient } from "../api/backend-client";
 import type {
   BootConfig,
   EmailTemplate,
+  ExternalProcessorNode,
   ProcessConnection,
   ProcessDraftEdge,
   ProcessDraftLinkedEntity,
@@ -114,7 +121,17 @@ interface StepNodeData extends Record<string, unknown> {
   order?: number;
 }
 
-type CanvasNodeData = WorkflowNodeData | StepNodeData;
+interface ProcessorNodeData extends Record<string, unknown> {
+  nodeKind: "processor";
+  processorId: string;
+  name: string;
+  description?: string;
+  inputEventType: string;
+  outputEventType: string;
+  outputSchema?: string;
+}
+
+type CanvasNodeData = WorkflowNodeData | StepNodeData | ProcessorNodeData;
 
 interface WorkflowConnectionEdgeData extends Record<string, unknown> {
   edgeKind: "workflow-connection";
@@ -136,10 +153,21 @@ interface AiBranchEdgeData extends Record<string, unknown> {
   sourceActionType?: ProcessDraftStepActionType;
 }
 
+interface StepProcessorEdgeData extends Record<string, unknown> {
+  edgeKind: "step-processor";
+}
+
+interface ProcessorTriggerEdgeData extends Record<string, unknown> {
+  edgeKind: "processor-trigger";
+  processorOutputEventType: string;
+}
+
 type CanvasEdgeData =
   | WorkflowConnectionEdgeData
   | WorkflowStepEdgeData
-  | AiBranchEdgeData;
+  | AiBranchEdgeData
+  | StepProcessorEdgeData
+  | ProcessorTriggerEdgeData;
 
 type StepEntityType = ProcessDraftLinkedEntity["entityType"];
 
@@ -267,6 +295,7 @@ interface ProcessMapActionsCtxValue {
   onAddStep: (workflowId: string) => void;
   onAddTriggeredWorkflow: (stepNodeId: string) => void;
   onEditLinkedEntity: (stepNodeId: string) => void;
+  onEditProcessor: (processorNodeId: string) => void;
 }
 
 const ProcessMapActionsCtx = createContext<ProcessMapActionsCtxValue>({
@@ -274,6 +303,7 @@ const ProcessMapActionsCtx = createContext<ProcessMapActionsCtxValue>({
   onAddStep: () => {},
   onAddTriggeredWorkflow: () => {},
   onEditLinkedEntity: () => {},
+  onEditProcessor: () => {},
 });
 
 function makeId(prefix: string): string {
@@ -381,6 +411,51 @@ function isWorkflowNode(
 
 function isStepNode(node: Node | null | undefined): node is Node<StepNodeData> {
   return Boolean(node && node.type === "step");
+}
+
+function isProcessorNode(
+  node: Node | null | undefined,
+): node is Node<ProcessorNodeData> {
+  return Boolean(node && node.type === "processor");
+}
+
+function getProcessorNodeId(processorId: string): string {
+  return `proc:${processorId}`;
+}
+
+function processorToNode(
+  proc: ExternalProcessorNode,
+  x: number,
+  y: number,
+  layoutOverride?: { x: number; y: number },
+): Node<ProcessorNodeData> {
+  return {
+    id: getProcessorNodeId(proc.processorId),
+    type: "processor",
+    position: layoutOverride ?? { x, y },
+    data: {
+      nodeKind: "processor",
+      processorId: proc.processorId,
+      name: proc.name,
+      description: proc.description,
+      inputEventType: proc.inputEventType,
+      outputEventType: proc.outputEventType,
+      outputSchema: proc.outputSchema,
+    },
+  };
+}
+
+function processorNodeToData(
+  node: Node<ProcessorNodeData>,
+): ExternalProcessorNode {
+  return {
+    processorId: node.data.processorId,
+    name: node.data.name,
+    description: node.data.description,
+    inputEventType: node.data.inputEventType,
+    outputEventType: node.data.outputEventType,
+    outputSchema: node.data.outputSchema,
+  };
 }
 
 function slugifyKeyPart(value: string, fallback: string): string {
@@ -793,6 +868,17 @@ function normalizeForDirtyCheck(map: ProcessMap): Record<string, unknown> {
               String((right as { stepId?: string }).stepId ?? ""),
             ),
           ),
+        externalProcessors: [
+          ...(map.metadata?.draftGraph?.externalProcessors ?? []),
+        ]
+          .map((proc) => normalizeJsonValue(proc))
+          .sort((left, right) =>
+            String(
+              (left as { processorId?: string }).processorId ?? "",
+            ).localeCompare(
+              String((right as { processorId?: string }).processorId ?? ""),
+            ),
+          ),
         edges: [...(map.metadata?.draftGraph?.edges ?? [])]
           .map((edge) => normalizeJsonValue(edge))
           .sort((left, right) =>
@@ -815,7 +901,7 @@ function connectionToEdge(c: ProcessConnection): Edge<CanvasEdgeData> {
     source: c.sourceWorkflowId,
     target: c.targetWorkflowId,
     label: c.type === "event" ? c.eventName : c.label ?? "",
-    type: "smoothstep",
+    type: "dynamic",
     animated: c.type === "event",
     markerEnd: { type: MarkerType.ArrowClosed },
     style: {
@@ -840,7 +926,7 @@ function draftEdgeToEdge(edge: ProcessDraftEdge): Edge<CanvasEdgeData> {
       id: edge.id,
       source: edge.source,
       target: edge.target,
-      type: "smoothstep",
+      type: "dynamic",
       label: edge.label || edge.branchKey || "completed",
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed },
@@ -858,11 +944,46 @@ function draftEdgeToEdge(edge: ProcessDraftEdge): Edge<CanvasEdgeData> {
     };
   }
 
+  if (edge.kind === "step-processor") {
+    return {
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: "dynamic",
+      markerEnd: { type: MarkerType.ArrowClosed },
+      style: {
+        stroke: "var(--mantine-color-violet-5)",
+        strokeDasharray: "4 4",
+      },
+      data: { edgeKind: "step-processor" },
+    };
+  }
+
+  if (edge.kind === "processor-trigger") {
+    return {
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: "dynamic",
+      label: edge.label || edge.processorOutputEventType || "",
+      animated: true,
+      markerEnd: { type: MarkerType.ArrowClosed },
+      style: {
+        stroke: "var(--mantine-color-violet-5)",
+        strokeDasharray: "6 4",
+      },
+      data: {
+        edgeKind: "processor-trigger",
+        processorOutputEventType: edge.processorOutputEventType ?? "",
+      },
+    };
+  }
+
   return {
     id: edge.id,
     source: edge.source,
     target: edge.target,
-    type: "smoothstep",
+    type: "dynamic",
     markerEnd: { type: MarkerType.ArrowClosed },
     style: {
       stroke: "var(--mantine-color-gray-4)",
@@ -921,6 +1042,24 @@ function edgeToDraftEdge(edge: Edge<CanvasEdgeData>): ProcessDraftEdge | null {
       branchKey: data.branchKey,
       triggerEvent: data.triggerEvent,
       sourceActionType: data.sourceActionType,
+    };
+  }
+  if (data.edgeKind === "step-processor") {
+    return {
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      kind: "step-processor",
+    };
+  }
+  if (data.edgeKind === "processor-trigger") {
+    return {
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      kind: "processor-trigger",
+      label: String(data.processorOutputEventType ?? ""),
+      processorOutputEventType: data.processorOutputEventType,
     };
   }
   return null;
@@ -1166,9 +1305,228 @@ function StepNode({ data, selected }: NodeProps) {
             </Text>
           ) : null}
         </Stack>
-        {def.canTriggerWorkflow ? (
-          <Handle type="source" position={Position.Right} />
-        ) : null}
+        <Handle type="source" position={Position.Right} />
+      </Box>
+    </>
+  );
+}
+
+function computeEdgePathFromNodes(
+  sourceX: number,
+  sourceY: number,
+  sourceW: number,
+  sourceH: number,
+  targetX: number,
+  targetY: number,
+  targetW: number,
+  targetH: number,
+  borderRadius = 8,
+): ReturnType<typeof getSmoothStepPath> {
+  const scx = sourceX + sourceW / 2;
+  const scy = sourceY + sourceH / 2;
+  const tcx = targetX + targetW / 2;
+  const tcy = targetY + targetH / 2;
+  const dx = tcx - scx;
+  const dy = tcy - scy;
+
+  let svx: number, svy: number, tvx: number, tvy: number;
+  let sourcePosition: Position, targetPosition: Position;
+
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    if (dx >= 0) {
+      sourcePosition = Position.Right;
+      targetPosition = Position.Left;
+      svx = sourceX + sourceW;
+      svy = scy;
+      tvx = targetX;
+      tvy = tcy;
+    } else {
+      sourcePosition = Position.Left;
+      targetPosition = Position.Right;
+      svx = sourceX;
+      svy = scy;
+      tvx = targetX + targetW;
+      tvy = tcy;
+    }
+  } else {
+    if (dy >= 0) {
+      sourcePosition = Position.Bottom;
+      targetPosition = Position.Top;
+      svx = scx;
+      svy = sourceY + sourceH;
+      tvx = tcx;
+      tvy = targetY;
+    } else {
+      sourcePosition = Position.Top;
+      targetPosition = Position.Bottom;
+      svx = scx;
+      svy = sourceY;
+      tvx = tcx;
+      tvy = targetY + targetH;
+    }
+  }
+
+  return getSmoothStepPath({
+    sourceX: svx,
+    sourceY: svy,
+    sourcePosition,
+    targetX: tvx,
+    targetY: tvy,
+    targetPosition,
+    borderRadius,
+  });
+}
+
+function DynamicSmoothEdge({
+  id,
+  source,
+  target,
+  markerEnd,
+  markerStart,
+  style,
+  label,
+  animated,
+  selected,
+}: EdgeProps) {
+  void selected;
+  const sourceNode = useInternalNode(source);
+  const targetNode = useInternalNode(target);
+
+  if (!sourceNode || !targetNode) return null;
+
+  const sx = sourceNode.internals.positionAbsolute.x;
+  const sy = sourceNode.internals.positionAbsolute.y;
+  const sw = sourceNode.measured?.width ?? 240;
+  const sh = sourceNode.measured?.height ?? 108;
+  const tx = targetNode.internals.positionAbsolute.x;
+  const ty = targetNode.internals.positionAbsolute.y;
+  const tw = targetNode.measured?.width ?? 240;
+  const th = targetNode.measured?.height ?? 108;
+
+  const [edgePath, labelX, labelY] = computeEdgePathFromNodes(
+    sx,
+    sy,
+    sw,
+    sh,
+    tx,
+    ty,
+    tw,
+    th,
+  );
+
+  const edgeStyle = {
+    ...(style ?? {}),
+    ...(animated ? { strokeDasharray: "6 4" } : {}),
+  };
+
+  return (
+    <>
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        markerEnd={markerEnd}
+        markerStart={markerStart}
+        style={edgeStyle}
+      />
+      {label ? (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              background: "white",
+              border: "1px solid var(--mantine-color-gray-3)",
+              borderRadius: 4,
+              padding: "1px 6px",
+              fontSize: 11,
+              pointerEvents: "all",
+            }}
+            className="nodrag nopan"
+          >
+            {label as React.ReactNode}
+          </div>
+        </EdgeLabelRenderer>
+      ) : null}
+    </>
+  );
+}
+
+function ProcessorNode({ data, selected }: NodeProps) {
+  const d = data as unknown as ProcessorNodeData;
+  const ctx = useContext(ProcessMapActionsCtx);
+
+  return (
+    <>
+      <NodeToolbar isVisible={selected} position={Position.Top} offset={8}>
+        <Group gap={6}>
+          <Button
+            size="xs"
+            variant="light"
+            color="violet"
+            leftSection={<IconEdit size={12} />}
+            className="nopan"
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.onEditProcessor(getProcessorNodeId(d.processorId));
+            }}
+          >
+            {t("Edit processor")}
+          </Button>
+          <Button
+            size="xs"
+            variant="light"
+            color="orange"
+            leftSection={<IconPlus size={12} />}
+            className="nopan"
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.onAddTriggeredWorkflow(getProcessorNodeId(d.processorId));
+            }}
+          >
+            {t("Add triggered workflow")}
+          </Button>
+        </Group>
+      </NodeToolbar>
+      <Box
+        style={{
+          background: "var(--mantine-color-white)",
+          border: `1px solid var(--mantine-color-violet-5)`,
+          borderLeft: `6px solid var(--mantine-color-violet-6)`,
+          borderRadius: "var(--mantine-radius-md)",
+          padding: "10px 12px",
+          minWidth: 220,
+          position: "relative",
+          boxShadow: selected
+            ? "0 0 0 3px var(--mantine-color-violet-1)"
+            : "0 1px 3px rgba(0,0,0,0.08)",
+        }}
+        onDoubleClick={() =>
+          ctx.onEditProcessor(getProcessorNodeId(d.processorId))
+        }
+      >
+        <Handle type="target" position={Position.Left} />
+        <Stack gap={3}>
+          <Group justify="space-between" wrap="nowrap">
+            <Group gap={6} wrap="nowrap">
+              <IconBolt size={15} />
+              <Text fw={600} size="sm" truncate>
+                {d.name || t("External Processor")}
+              </Text>
+            </Group>
+            <Badge size="xs" color="violet" variant="light">
+              {t("Processor")}
+            </Badge>
+          </Group>
+          <Text size="xs" c="dimmed" truncate>
+            {d.inputEventType || "—"} → {d.outputEventType || "—"}
+          </Text>
+          {d.description ? (
+            <Text size="xs" c="dimmed" truncate>
+              {d.description}
+            </Text>
+          ) : null}
+        </Stack>
+        <Handle type="source" position={Position.Right} />
       </Box>
     </>
   );
@@ -1177,6 +1535,11 @@ function StepNode({ data, selected }: NodeProps) {
 const nodeTypes = {
   workflow: WorkflowNode,
   step: StepNode,
+  processor: ProcessorNode,
+};
+
+const edgeTypes = {
+  dynamic: DynamicSmoothEdge,
 };
 
 interface PendingConnection {
@@ -1860,6 +2223,7 @@ interface DetailPanelProps {
   onDeleteEdge: (edgeId: string) => void;
   onUpdateEdge: (edgeId: string, update: EdgeFieldUpdate) => void;
   onEditWorkflow: (workflowId: string) => void;
+  onEditProcessor: (processorNodeId: string) => void;
   onUpdateStep: (nodeId: string, update: Partial<ProcessDraftStepNode>) => void;
   onOpenStepDetails: (nodeId: string) => void;
   onEditLinkedEntity: (stepNodeId: string) => void;
@@ -1875,6 +2239,7 @@ function DetailPanel({
   onDeleteEdge,
   onUpdateEdge,
   onEditWorkflow,
+  onEditProcessor,
   onUpdateStep,
   onOpenStepDetails,
   onEditLinkedEntity,
@@ -1918,7 +2283,7 @@ function DetailPanel({
     const node = selected as unknown as Node<CanvasNodeData>;
 
     if (node.data.nodeKind === "workflow") {
-      const d = node.data;
+      const d = node.data as WorkflowNodeData;
       return (
         <Card withBorder w={280}>
           <Stack gap="xs">
@@ -1964,6 +2329,89 @@ function DetailPanel({
             >
               {d.enabled ? t("Enabled") : t("Disabled")}
             </Badge>
+          </Stack>
+        </Card>
+      );
+    }
+
+    if (node.data.nodeKind === "processor") {
+      const d = node.data as ProcessorNodeData;
+      return (
+        <Card withBorder w={280}>
+          <Stack gap="xs">
+            <Group justify="space-between">
+              <Title order={6}>{t("External Processor")}</Title>
+              <Group gap={4}>
+                <ActionIcon
+                  color="violet"
+                  variant="subtle"
+                  size="sm"
+                  onClick={() => onEditProcessor(node.id)}
+                >
+                  <IconEdit size={14} />
+                </ActionIcon>
+                <ActionIcon
+                  color="red"
+                  variant="subtle"
+                  size="sm"
+                  onClick={() => onDeleteNode(node.id)}
+                >
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Group>
+            </Group>
+            <Divider />
+            <Text size="sm" fw={500}>
+              {d.name}
+            </Text>
+            {d.description ? (
+              <Text size="xs" c="dimmed">
+                {d.description}
+              </Text>
+            ) : null}
+            <Text size="xs">
+              <Text span fw={500}>
+                {t("Input:")}{" "}
+              </Text>
+              {d.inputEventType || "—"}
+            </Text>
+            <Text size="xs">
+              <Text span fw={500}>
+                {t("Output:")}{" "}
+              </Text>
+              {d.outputEventType || "—"}
+            </Text>
+            {d.outputSchema ? (
+              <>
+                <Divider />
+                <Text size="xs" fw={500}>
+                  {t("Output schema")}
+                </Text>
+                <Box
+                  style={{
+                    background: "var(--mantine-color-gray-0)",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                    maxHeight: 140,
+                    overflowY: "auto",
+                  }}
+                >
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    ff="monospace"
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                  >
+                    {d.outputSchema}
+                  </Text>
+                </Box>
+              </>
+            ) : null}
+            <Text size="xs" c="dimmed">
+              {t(
+                "Represents an external EventBridge processor. Connect steps to it and connect it to downstream workflows.",
+              )}
+            </Text>
           </Stack>
         </Card>
       );
@@ -2323,29 +2771,87 @@ function DetailPanel({
 interface WorkflowPaletteProps {
   workflows: Workflow[];
   presentIds: Set<string>;
+  externalProcessors: ExternalProcessorNode[];
+  presentProcessorIds: Set<string>;
   onAdd: (workflow: Workflow) => void;
   onNew: () => void;
+  onAddProcessor: () => void;
+  onAddExistingProcessor: (processorId: string) => void;
+  onEditProcessor: (processorNodeId: string) => void;
 }
 
 function WorkflowPalette({
   workflows,
   presentIds,
+  externalProcessors,
+  presentProcessorIds,
   onAdd,
   onNew,
+  onAddProcessor,
+  onAddExistingProcessor,
+  onEditProcessor,
 }: WorkflowPaletteProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const available = workflows.filter(
     (workflow) => !presentIds.has(workflow.workflowId),
   );
+  const sortedExternalProcessors = [...externalProcessors].sort((left, right) =>
+    (left.name || left.processorId).localeCompare(
+      right.name || right.processorId,
+    ),
+  );
+
+  if (isCollapsed) {
+    return (
+      <Tooltip label={t("Expand panel")} position="right">
+        <Card
+          withBorder
+          style={{
+            width: 36,
+            padding: "6px 0",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setIsCollapsed(false)}
+        >
+          <IconLayoutGrid size={16} />
+        </Card>
+      </Tooltip>
+    );
+  }
 
   return (
     <Card withBorder w={220} style={{ maxHeight: 400, overflowY: "auto" }}>
       <Group justify="space-between" mb="xs">
         <Title order={6}>{t("Workflows")}</Title>
-        <Tooltip label={t("Create new workflow")}>
-          <ActionIcon size="xs" variant="filled" onClick={onNew}>
-            <IconPlus size={12} />
-          </ActionIcon>
-        </Tooltip>
+        <Group gap={4}>
+          <Tooltip label={t("Add external processor")}>
+            <ActionIcon
+              size="xs"
+              variant="light"
+              color="violet"
+              onClick={onAddProcessor}
+            >
+              <IconBolt size={12} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={t("Create new workflow")}>
+            <ActionIcon size="xs" variant="filled" onClick={onNew}>
+              <IconPlus size={12} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={t("Collapse panel")}>
+            <ActionIcon
+              size="xs"
+              variant="subtle"
+              onClick={() => setIsCollapsed(true)}
+            >
+              <IconChevronLeft size={12} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
       </Group>
       {available.length === 0 ? (
         <Text size="xs" c="dimmed">
@@ -2380,7 +2886,199 @@ function WorkflowPalette({
           ))}
         </Stack>
       )}
+
+      <Divider my="sm" />
+      <Text size="xs" fw={600} mb="xs">
+        {t("External processors")}
+      </Text>
+      {sortedExternalProcessors.length === 0 ? (
+        <Text size="xs" c="dimmed">
+          {t("No external processors yet.")}
+        </Text>
+      ) : (
+        <Stack gap="xs">
+          {sortedExternalProcessors.map((processor) => {
+            const isOnCanvas = presentProcessorIds.has(processor.processorId);
+            return (
+              <Group
+                key={processor.processorId}
+                justify="space-between"
+                wrap="nowrap"
+              >
+                <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
+                  <Group gap={6} wrap="nowrap">
+                    <Text size="xs" fw={500} truncate>
+                      {processor.name || processor.processorId}
+                    </Text>
+                    <Badge
+                      size="xs"
+                      color={isOnCanvas ? "green" : "gray"}
+                      variant="light"
+                    >
+                      {isOnCanvas ? t("On canvas") : t("Hidden")}
+                    </Badge>
+                  </Group>
+                  <Text size="xs" c="dimmed" truncate>
+                    {processor.inputEventType || "—"} →
+                    {` ${processor.outputEventType || "—"}`}
+                  </Text>
+                </Stack>
+                {isOnCanvas ? (
+                  <Tooltip label={t("Edit processor")}>
+                    <ActionIcon
+                      size="xs"
+                      variant="light"
+                      color="violet"
+                      onClick={() =>
+                        onEditProcessor(
+                          getProcessorNodeId(processor.processorId),
+                        )
+                      }
+                    >
+                      <IconEdit size={12} />
+                    </ActionIcon>
+                  </Tooltip>
+                ) : (
+                  <Tooltip label={t("Add to canvas")}>
+                    <ActionIcon
+                      size="xs"
+                      variant="light"
+                      color="violet"
+                      onClick={() =>
+                        onAddExistingProcessor(processor.processorId)
+                      }
+                    >
+                      <IconPlus size={12} />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </Group>
+            );
+          })}
+        </Stack>
+      )}
     </Card>
+  );
+}
+
+interface ExternalProcessorModalProps {
+  opened: boolean;
+  initial: ExternalProcessorNode | null;
+  onClose: () => void;
+  onSave: (proc: ExternalProcessorNode) => void;
+}
+
+function ExternalProcessorModal({
+  opened,
+  initial,
+  onClose,
+  onSave,
+}: ExternalProcessorModalProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [inputEventType, setInputEventType] = useState("");
+  const [outputEventType, setOutputEventType] = useState("");
+  const [outputSchema, setOutputSchema] = useState("");
+
+  useEffect(() => {
+    if (!opened) return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setName(initial?.name ?? "");
+      setDescription(initial?.description ?? "");
+      setInputEventType(initial?.inputEventType ?? "");
+      setOutputEventType(initial?.outputEventType ?? "");
+      setOutputSchema(initial?.outputSchema ?? "");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [opened, initial]);
+
+  const handleSave = () => {
+    const processorId = initial?.processorId ?? makeId("proc");
+    onSave({
+      processorId,
+      name: name.trim() || t("External Processor"),
+      description: description.trim() || undefined,
+      inputEventType: inputEventType.trim(),
+      outputEventType: outputEventType.trim(),
+      outputSchema: outputSchema.trim() || undefined,
+    });
+  };
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={
+        initial ? t("Edit external processor") : t("Add external processor")
+      }
+      size="md"
+      zIndex={200001}
+    >
+      <Stack>
+        <TextInput
+          label={t("Name")}
+          description={t("Human-readable label shown on the canvas")}
+          value={name}
+          onChange={(e) => setName(e.currentTarget.value)}
+          required
+        />
+        <TextInput
+          label={t("Description (optional)")}
+          value={description}
+          onChange={(e) => setDescription(e.currentTarget.value)}
+        />
+        <TextInput
+          label={t("Input event type")}
+          description={t(
+            "The EventBridge event this processor listens for, e.g. contact.intake.requested",
+          )}
+          placeholder="contact.intake.requested"
+          value={inputEventType}
+          onChange={(e) => setInputEventType(e.currentTarget.value)}
+          required
+        />
+        <TextInput
+          label={t("Output event type")}
+          description={t(
+            "The EventBridge event this processor emits when done, e.g. contact.intake.completed",
+          )}
+          placeholder="contact.intake.completed"
+          value={outputEventType}
+          onChange={(e) => setOutputEventType(e.currentTarget.value)}
+          required
+        />
+        <Textarea
+          label={t("Output event schema (JSON Schema, optional)")}
+          description={t(
+            "Describes the structure of the output event. Used for documentation and trigger condition hints only — not enforced.",
+          )}
+          minRows={4}
+          placeholder='{"type":"object","properties":{"submissionId":{"type":"string"},"dealId":{"type":"string"}}}'
+          value={outputSchema}
+          onChange={(e) => setOutputSchema(e.currentTarget.value)}
+        />
+        <Text size="xs" c="dimmed">
+          {t(
+            "This node is a visual placeholder representing an external EventBridge processor (e.g. a Lambda). It does not execute any Flow logic itself.",
+          )}
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onClose}>
+            {t("Cancel")}
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={!inputEventType.trim() || !outputEventType.trim()}
+          >
+            {t("Save")}
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
   );
 }
 
@@ -2509,6 +3207,12 @@ function ProcessMapCanvasInner({
   } | null>(null);
   const [wfModalManagedByProcessMap, setWfModalManagedByProcessMap] =
     useState(false);
+  const [processorModalOpened, setProcessorModalOpened] = useState(false);
+  const [processorModalInitial, setProcessorModalInitial] =
+    useState<ExternalProcessorNode | null>(null);
+  const [processorModalNodeId, setProcessorModalNodeId] = useState<
+    string | null
+  >(null);
 
   const pendingAiBranchSourceIdRef = useRef<string | null>(null);
   const sessionKeyRef = useRef<string | null>(null);
@@ -2573,6 +3277,23 @@ function ProcessMapCanvasInner({
 
   const getManagedTriggerConfigForWorkflow = useCallback(
     (workflowId: string) => {
+      // Check for incoming processor-trigger edges first
+      const incomingProcessorEdge = edges.find((edge) => {
+        if (edge.target !== workflowId) return false;
+        const data = (edge.data ?? {}) as CanvasEdgeData;
+        return data.edgeKind === "processor-trigger";
+      });
+
+      if (incomingProcessorEdge) {
+        const data = (incomingProcessorEdge.data ??
+          {}) as ProcessorTriggerEdgeData;
+        const outputEventType = data.processorOutputEventType;
+        return {
+          allowedTriggerEvents: outputEventType ? [outputEventType] : undefined,
+          defaultTriggerEvent: outputEventType || undefined,
+        };
+      }
+
       const incomingStepTriggerEdges = edges
         .map((edge) => ({
           edge,
@@ -2854,7 +3575,10 @@ function ProcessMapCanvasInner({
       const layoutNodes: ProcessMap["layout"]["nodes"] = {};
 
       sourceNodes
-        .filter((node) => isWorkflowNode(node) || isStepNode(node))
+        .filter(
+          (node) =>
+            isWorkflowNode(node) || isStepNode(node) || isProcessorNode(node),
+        )
         .forEach((node) => {
           layoutNodes[node.id] = {
             x: node.position.x,
@@ -2864,6 +3588,7 @@ function ProcessMapCanvasInner({
 
       const workflowNodes = sourceNodes.filter(isWorkflowNode);
       const stepNodes = sourceNodes.filter(isStepNode);
+      const processorNodes = sourceNodes.filter(isProcessorNode);
       const localDraftWorkflowIds = new Set(Object.keys(workflowOverrides));
       const persistedWorkflows = workflowNodes
         .map(
@@ -2892,6 +3617,9 @@ function ProcessMapCanvasInner({
       const draftEdges = sourceEdges
         .map((edge) => edgeToDraftEdge(edge))
         .filter((edge): edge is ProcessDraftEdge => Boolean(edge));
+      const externalProcessors = processorNodes.map((node) =>
+        processorNodeToData(node),
+      );
 
       return {
         processMapId: processMap?.processMapId ?? "",
@@ -2906,6 +3634,8 @@ function ProcessMapCanvasInner({
           ...processMap?.metadata,
           draftGraph: {
             stepNodes: persistedDraftSteps,
+            externalProcessors:
+              externalProcessors.length > 0 ? externalProcessors : undefined,
             edges: draftEdges,
           },
         },
@@ -2995,6 +3725,22 @@ function ProcessMapCanvasInner({
       ),
     );
 
+    const processorDefs =
+      processMap?.metadata?.draftGraph?.externalProcessors ?? [];
+    const initialProcessorNodes: Node[] = processorDefs.map((proc, index) =>
+      processorToNode(
+        proc,
+        0,
+        0,
+        currentLayoutNodes[getProcessorNodeId(proc.processorId)] ??
+          existingLayoutNodes[getProcessorNodeId(proc.processorId)] ??
+          gridPosition(
+            visibleWorkflows.length + index,
+            visibleWorkflows.length + processorDefs.length + 1,
+          ),
+      ),
+    );
+
     const workflowConnections = isSessionChanged
       ? processMap?.connections ?? []
       : currentEdges
@@ -3025,7 +3771,11 @@ function ProcessMapCanvasInner({
       connections: workflowConnections,
       layout: {
         nodes: Object.fromEntries(
-          [...initialWorkflowNodes, ...initialStepNodes].map((node) => [
+          [
+            ...initialWorkflowNodes,
+            ...initialStepNodes,
+            ...initialProcessorNodes,
+          ].map((node) => [
             node.id,
             {
               x: node.position.x,
@@ -3040,6 +3790,8 @@ function ProcessMapCanvasInner({
           stepNodes: initialStepNodes
             .filter(isStepNode)
             .map((node) => nodeToDraftStep(node)),
+          externalProcessors:
+            processorDefs.length > 0 ? processorDefs : undefined,
           edges: draftEdgesSource,
         },
       },
@@ -3056,7 +3808,11 @@ function ProcessMapCanvasInner({
       setMapName(processMap?.name ?? "");
       setMapDescription(processMap?.description ?? "");
       setNodes(
-        syncLinkedEntityNodes([...initialWorkflowNodes, ...initialStepNodes]),
+        syncLinkedEntityNodes([
+          ...initialWorkflowNodes,
+          ...initialStepNodes,
+          ...initialProcessorNodes,
+        ]),
       );
       setEdges([...workflowEdges, ...draftEdges]);
       if (isSessionChanged) {
@@ -3158,9 +3914,37 @@ function ProcessMapCanvasInner({
           sourceActionType: sourceNode.data.actionType,
           sourceConfig: sourceNode.data.config,
         });
+        return;
+      }
+
+      if (isStepNode(sourceNode) && isProcessorNode(targetNode)) {
+        setEdges((current) => [
+          ...current,
+          draftEdgeToEdge({
+            id: makeId("step-processor"),
+            source: sourceNode.id,
+            target: targetNode.id,
+            kind: "step-processor",
+          }),
+        ]);
+        return;
+      }
+
+      if (isProcessorNode(sourceNode) && isWorkflowNode(targetNode)) {
+        const outputEventType = sourceNode.data.outputEventType;
+        setEdges((current) => [
+          ...current,
+          draftEdgeToEdge({
+            id: makeId("processor-trigger"),
+            source: sourceNode.id,
+            target: targetNode.id,
+            kind: "processor-trigger",
+            processorOutputEventType: outputEventType,
+          }),
+        ]);
       }
     },
-    [getNodes, handleWorkflowConnect],
+    [getNodes, handleWorkflowConnect, setEdges],
   );
 
   const handleConnectEnd = useCallback(
@@ -3170,6 +3954,20 @@ function ProcessMapCanvasInner({
         toNode?: Node | null;
       };
       if (state?.toNode || !state?.fromNode) return;
+
+      if (isProcessorNode(state.fromNode)) {
+        const outputEventType = state.fromNode.data.outputEventType;
+        pendingAiBranchSourceIdRef.current = state.fromNode.id;
+        setWfModalInitial(null);
+        setWfModalManagedByProcessMap(true);
+        setWfModalAllowedTriggers(
+          outputEventType ? [outputEventType] : undefined,
+        );
+        setWfModalDefaultTrigger(outputEventType || undefined);
+        setWfModalOpened(true);
+        return;
+      }
+
       if (
         !isStepNode(state.fromNode) ||
         !getStepActionDef(state.fromNode.data.actionType).canTriggerWorkflow
@@ -3310,25 +4108,26 @@ function ProcessMapCanvasInner({
   const confirmDeleteNode = useCallback(
     (nodeId: string) => {
       const node = getNodes().find((item) => item.id === nodeId) ?? null;
+      const title = isWorkflowNode(node)
+        ? t("Delete workflow node")
+        : isProcessorNode(node)
+        ? t("Delete processor")
+        : t("Delete step");
+      const message = isWorkflowNode(node)
+        ? t(
+            "This will remove the workflow node and its attached steps from the current process map canvas.",
+          )
+        : isProcessorNode(node)
+        ? t(
+            "This will remove the external processor node and its connections from the canvas. No AWS resources are affected.",
+          )
+        : t(
+            "This will remove the selected step from the current process map canvas.",
+          );
       modals.openConfirmModal({
-        title: isWorkflowNode(node)
-          ? t("Delete workflow node")
-          : t("Delete step"),
-        children: (
-          <Text size="sm">
-            {isWorkflowNode(node)
-              ? t(
-                  "This will remove the workflow node and its attached steps from the current process map canvas.",
-                )
-              : t(
-                  "This will remove the selected step from the current process map canvas.",
-                )}
-          </Text>
-        ),
-        labels: {
-          confirm: t("Delete"),
-          cancel: t("Cancel"),
-        },
+        title,
+        children: <Text size="sm">{message}</Text>,
+        labels: { confirm: t("Delete"), cancel: t("Cancel") },
         confirmProps: { color: "red" },
         onConfirm: () => handleDeleteNode(nodeId),
       });
@@ -3551,6 +4350,79 @@ function ProcessMapCanvasInner({
     setWfModalOpened(true);
   }, []);
 
+  const handleAddProcessor = useCallback(() => {
+    setProcessorModalInitial(null);
+    setProcessorModalNodeId(null);
+    setProcessorModalOpened(true);
+  }, []);
+
+  const handleEditProcessor = useCallback(
+    (processorNodeId: string) => {
+      const node = getNodes().find((n) => n.id === processorNodeId) ?? null;
+      if (!isProcessorNode(node)) return;
+      setProcessorModalInitial(processorNodeToData(node));
+      setProcessorModalNodeId(processorNodeId);
+      setProcessorModalOpened(true);
+    },
+    [getNodes],
+  );
+
+  const handleProcessorSaved = useCallback(
+    (proc: ExternalProcessorNode) => {
+      if (processorModalNodeId) {
+        setNodes((existing) =>
+          syncLinkedEntityNodes(
+            existing.map((node) => {
+              if (node.id !== processorModalNodeId || !isProcessorNode(node)) {
+                return node;
+              }
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  name: proc.name,
+                  description: proc.description,
+                  inputEventType: proc.inputEventType,
+                  outputEventType: proc.outputEventType,
+                  outputSchema: proc.outputSchema,
+                },
+              };
+            }),
+          ),
+        );
+        setEdges((existing) =>
+          existing.map((edge) => {
+            const edgeData = (edge.data ?? {}) as CanvasEdgeData;
+            if (
+              edgeData.edgeKind !== "processor-trigger" ||
+              edge.source !== processorModalNodeId
+            ) {
+              return edge;
+            }
+            return {
+              ...edge,
+              label: proc.outputEventType,
+              data: {
+                ...edgeData,
+                processorOutputEventType: proc.outputEventType,
+              },
+            };
+          }),
+        );
+      } else {
+        const currentNodes = getNodes();
+        const baseCount = currentNodes.length;
+        const pos = gridPosition(baseCount, baseCount + 1);
+        const node = processorToNode(proc, pos.x, pos.y);
+        setNodes((existing) => syncLinkedEntityNodes([...existing, node]));
+      }
+      setProcessorModalOpened(false);
+      setProcessorModalInitial(null);
+      setProcessorModalNodeId(null);
+    },
+    [processorModalNodeId, getNodes, setNodes, setEdges],
+  );
+
   const handleStepCreated = useCallback(
     async (step: ProcessDraftStepNode) => {
       const currentNodes = getNodes();
@@ -3693,14 +4565,30 @@ function ProcessMapCanvasInner({
         if (pendingSourceId) {
           const sourceNode =
             getNodes().find((node) => node.id === pendingSourceId) ?? null;
-          setPendingAiBranch({
-            source: pendingSourceId,
-            target: workflow.workflowId,
-            sourceActionType: isStepNode(sourceNode)
-              ? sourceNode.data.actionType
-              : "ai.agent",
-            sourceConfig: isStepNode(sourceNode) ? sourceNode.data.config : {},
-          });
+          if (isProcessorNode(sourceNode)) {
+            const outputEventType = sourceNode.data.outputEventType;
+            setEdges((current) => [
+              ...current,
+              draftEdgeToEdge({
+                id: makeId("processor-trigger"),
+                source: pendingSourceId,
+                target: workflow.workflowId,
+                kind: "processor-trigger",
+                processorOutputEventType: outputEventType,
+              }),
+            ]);
+          } else {
+            setPendingAiBranch({
+              source: pendingSourceId,
+              target: workflow.workflowId,
+              sourceActionType: isStepNode(sourceNode)
+                ? sourceNode.data.actionType
+                : "ai.agent",
+              sourceConfig: isStepNode(sourceNode)
+                ? sourceNode.data.config
+                : {},
+            });
+          }
         }
       } else {
         setNodes((existing) =>
@@ -3855,6 +4743,54 @@ function ProcessMapCanvasInner({
   const presentIds = new Set(
     nodes.filter(isWorkflowNode).map((node) => node.id),
   );
+  const presentProcessorIds = new Set(
+    nodes.filter(isProcessorNode).map((node) => node.data.processorId),
+  );
+  const externalProcessorCatalog = useMemo(() => {
+    const catalog = new Map<string, ExternalProcessorNode>();
+
+    for (const processor of processMap?.metadata?.draftGraph
+      ?.externalProcessors ?? []) {
+      if (processor?.processorId) {
+        catalog.set(processor.processorId, processor);
+      }
+    }
+
+    for (const node of nodes.filter(isProcessorNode)) {
+      const processor = processorNodeToData(node);
+      if (processor.processorId) {
+        catalog.set(processor.processorId, processor);
+      }
+    }
+
+    return Array.from(catalog.values());
+  }, [nodes, processMap?.metadata?.draftGraph?.externalProcessors]);
+
+  const handleAddExistingProcessor = useCallback(
+    (processorId: string) => {
+      const processor = externalProcessorCatalog.find(
+        (item) => item.processorId === processorId,
+      );
+      if (!processor) {
+        return;
+      }
+
+      if (
+        getNodes().some(
+          (node) =>
+            isProcessorNode(node) && node.data.processorId === processorId,
+        )
+      ) {
+        return;
+      }
+
+      const current = getNodes();
+      const pos = gridPosition(current.length, current.length + 1);
+      const node = processorToNode(processor, pos.x, pos.y);
+      setNodes((existing) => syncLinkedEntityNodes([...existing, node]));
+    },
+    [externalProcessorCatalog, getNodes, setNodes],
+  );
 
   const actionsCtxValue = useMemo(
     () => ({
@@ -3864,12 +4800,14 @@ function ProcessMapCanvasInner({
       onEditLinkedEntity: (stepNodeId: string) => {
         void openLinkedEntityEditor(stepNodeId);
       },
+      onEditProcessor: handleEditProcessor,
     }),
     [
       handleEditWorkflow,
       handleOpenStepModal,
       handleCreateAiBranchWorkflow,
       openLinkedEntityEditor,
+      handleEditProcessor,
     ],
   );
 
@@ -4020,12 +4958,16 @@ function ProcessMapCanvasInner({
               onConnect={handleConnect}
               onConnectEnd={handleConnectEnd}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
               onNodeDoubleClick={(_evt, node) => {
                 if (isWorkflowNode(node)) {
                   handleEditWorkflow(node.id);
                 }
                 if (isStepNode(node)) {
                   handleOpenDetailedStepEditor(node.id);
+                }
+                if (isProcessorNode(node)) {
+                  handleEditProcessor(node.id);
                 }
               }}
               fitView
@@ -4091,8 +5033,13 @@ function ProcessMapCanvasInner({
                 <WorkflowPalette
                   workflows={workflows}
                   presentIds={presentIds}
+                  externalProcessors={externalProcessorCatalog}
+                  presentProcessorIds={presentProcessorIds}
                   onAdd={handleAddWorkflow}
                   onNew={handleNewWorkflow}
+                  onAddProcessor={handleAddProcessor}
+                  onAddExistingProcessor={handleAddExistingProcessor}
+                  onEditProcessor={handleEditProcessor}
                 />
               </Panel>
 
@@ -4106,6 +5053,7 @@ function ProcessMapCanvasInner({
                   onDeleteEdge={confirmDeleteEdge}
                   onUpdateEdge={handleUpdateEdge}
                   onEditWorkflow={handleEditWorkflow}
+                  onEditProcessor={handleEditProcessor}
                   onUpdateStep={handleUpdateStep}
                   onOpenStepDetails={handleOpenDetailedStepEditor}
                   onEditLinkedEntity={(stepNodeId) => {
@@ -4266,6 +5214,17 @@ function ProcessMapCanvasInner({
               </Stack>
             ) : null}
           </Modal>
+
+          <ExternalProcessorModal
+            opened={processorModalOpened}
+            initial={processorModalInitial}
+            onClose={() => {
+              setProcessorModalOpened(false);
+              setProcessorModalInitial(null);
+              setProcessorModalNodeId(null);
+            }}
+            onSave={handleProcessorSaved}
+          />
 
           <TemplateEditorModal
             opened={Boolean(editingTemplate)}

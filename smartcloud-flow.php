@@ -599,11 +599,17 @@ __flowGlobal.WpSuite.constants.flow = {
             require_once SMARTCLOUD_FLOW_PATH . 'vendor/autoload.php';
         }
 
-        // Hub admin classes.
+        // Logger class
+        if (file_exists(SMARTCLOUD_FLOW_PATH . 'admin/logger.php')) {
+            require_once SMARTCLOUD_FLOW_PATH . 'admin/logger.php';
+        }
+
+        // Hub admin classes
         if (file_exists(SMARTCLOUD_FLOW_PATH . 'hub-loader.php')) {
             require_once SMARTCLOUD_FLOW_PATH . 'hub-loader.php';
         }
 
+        // Admin classes
         if (file_exists(SMARTCLOUD_FLOW_PATH . 'admin/admin.php')) {
             require_once SMARTCLOUD_FLOW_PATH . 'admin/admin.php';
         }
