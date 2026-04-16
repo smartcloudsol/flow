@@ -16,6 +16,7 @@ export const FORM_CHILD_BLOCKS = [
   "smartcloud-flow/range-slider-field",
   "smartcloud-flow/tags-field",
   "smartcloud-flow/rating-field",
+  "smartcloud-flow/hidden-field",
   "smartcloud-flow/save-draft-button",
   "smartcloud-flow/ai-suggestions",
   "smartcloud-flow/submit-button",

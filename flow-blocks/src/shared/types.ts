@@ -600,6 +600,12 @@ export interface RatingFieldAttributes
   anchor?: string;
 }
 
+export interface HiddenFieldAttributes extends ConditionalAttributes {
+  name?: string;
+  defaultValue?: string;
+  anchor?: string;
+}
+
 export interface SubmitButtonAttributes extends ConditionalAttributes {
   label?: string;
   showTitle?: boolean;
@@ -897,6 +903,13 @@ export interface RatingFieldConfig extends BaseFieldConfig {
   highlightSelectedOnly?: boolean;
 }
 
+export interface HiddenFieldConfig extends ConditionalAttributes {
+  type: "hidden";
+  name: string;
+  defaultValue?: string;
+  classNames?: string[];
+}
+
 export interface SubmitButtonConfig extends ConditionalAttributes {
   type: "submit";
   label?: string;
@@ -1044,6 +1057,7 @@ export type FieldConfig =
   | RangeSliderFieldConfig
   | TagsFieldConfig
   | RatingFieldConfig
+  | HiddenFieldConfig
   | SubmitButtonConfig
   | SaveDraftButtonConfig
   | AiSuggestionsConfig

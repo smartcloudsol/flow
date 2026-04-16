@@ -260,6 +260,13 @@ function areFieldValuesEqual(left: unknown, right: unknown): boolean {
   return false;
 }
 
+function isEmptyInitialFieldValue(value: unknown): boolean {
+  if (value === undefined || value === null) return true;
+  if (typeof value === "string") return value.trim().length === 0;
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+
 function humanizeSubmissionStatus(status?: string): string | undefined {
   if (!status) return undefined;
   if (status === "accepted") {
@@ -745,6 +752,46 @@ export function FormShell({
       visibleDuplicateFieldNames,
     );
   }, [visibleDuplicateFieldNames]);
+
+  useEffect(() => {
+    const storeDefaultEntries = Object.entries(fieldDefaultValuesFromStore);
+    if (!storeDefaultEntries.length) return;
+
+    const nextValues: Record<string, unknown> = {};
+    const changedNames: string[] = [];
+
+    for (const [fieldName, defaultValue] of storeDefaultEntries) {
+      const currentValue = reducerState.values[fieldName];
+      const initialValue = initialValues[fieldName];
+      const isCurrentSyncedToInitial = areFieldValuesEqual(
+        currentValue,
+        initialValue,
+      );
+
+      // Do not override actively edited values. Apply when untouched/initial.
+      if (
+        !isCurrentSyncedToInitial &&
+        !isEmptyInitialFieldValue(currentValue)
+      ) {
+        continue;
+      }
+
+      if (areFieldValuesEqual(currentValue, defaultValue)) {
+        continue;
+      }
+
+      nextValues[fieldName] = defaultValue;
+      changedNames.push(fieldName);
+    }
+
+    if (!changedNames.length) return;
+
+    dispatch({
+      type: "RESET_FIELDS",
+      values: nextValues,
+      names: changedNames,
+    });
+  }, [fieldDefaultValuesFromStore, initialValues, reducerState.values]);
 
   const frontendApiBaseUrl = getFrontendApiBaseUrl();
   const fileFields = useMemo(() => collectFileFields(fields), [fields]);

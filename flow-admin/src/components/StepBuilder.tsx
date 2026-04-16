@@ -1198,6 +1198,22 @@ export default function StepBuilder({
                 })
               }
             />
+            <TextInput
+              label={t("Max Output Tokens (optional)")}
+              description={t(
+                "Maximum tokens the model may use for the final response.",
+              )}
+              type="number"
+              placeholder="2048"
+              value={String(step.config.maxTokens ?? "")}
+              onChange={(e) =>
+                updateStepConfig(index, {
+                  maxTokens: e.currentTarget.value
+                    ? Number(e.currentTarget.value)
+                    : undefined,
+                })
+              }
+            />
             <Checkbox
               label={t("Enable reasoning")}
               description={t("Enables Bedrock reasoning config for this step.")}

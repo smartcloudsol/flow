@@ -387,7 +387,8 @@ function collectValidatableFields(
     if (
       field.type === "submit" ||
       field.type === "save-draft" ||
-      field.type === "divider"
+      field.type === "divider" ||
+      field.type === "hidden"
     ) {
       return [];
     }
@@ -462,7 +463,12 @@ export function validateField(
       const currentPath = [...path, index];
       const currentRuntimeKey = getRuntimeKey(field, currentPath);
 
-      if (field.type === "submit" || field.type === "divider") continue;
+      if (
+        field.type === "submit" ||
+        field.type === "divider" ||
+        field.type === "hidden"
+      )
+        continue;
 
       if (
         field.type === "stack" ||
@@ -506,7 +512,8 @@ export function validateField(
     field.type === "fieldset" ||
     field.type === "collapse" ||
     field.type === "visuallyhidden" ||
-    field.type === "divider"
+    field.type === "divider" ||
+    field.type === "hidden"
   ) {
     return undefined;
   }

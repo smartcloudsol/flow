@@ -745,6 +745,8 @@ export function FieldRenderer({
       return <TagsField field={field} runtimeKey={runtimeKey} />;
     case "rating":
       return <RatingField field={field} runtimeKey={runtimeKey} />;
+    case "hidden":
+      return <HiddenField field={field} runtimeKey={runtimeKey} />;
     case "submit":
       return <SubmitField field={field} runtimeKey={runtimeKey} />;
     case "save-draft":
@@ -2184,6 +2186,22 @@ function RatingField({
         onChange={setValue as (value: number) => void}
       />
       {error ? <FieldMessage variant="error">{error}</FieldMessage> : null}
+    </FieldBlock>
+  );
+}
+
+function HiddenField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "hidden" }>;
+  runtimeKey: string;
+}) {
+  const { value } = useFormField(field.name, runtimeKey);
+
+  return (
+    <FieldBlock type="hidden" className={getFieldExtraClassName(field)}>
+      <input type="hidden" name={field.name} value={String(value ?? "")} />
     </FieldBlock>
   );
 }

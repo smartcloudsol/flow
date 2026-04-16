@@ -19,6 +19,7 @@ import "./slider-field/index";
 import "./range-slider-field/index";
 import "./tags-field/index";
 import "./rating-field/index";
+import "./hidden-field/index";
 import "./save-draft-button/index";
 import "./ai-suggestions/index";
 import "./submit-button/index";

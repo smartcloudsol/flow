@@ -2037,6 +2037,7 @@ export default function Edit({
                 "smartcloud-flow/range-slider-field",
                 "smartcloud-flow/tags-field",
                 "smartcloud-flow/rating-field",
+                "smartcloud-flow/hidden-field",
                 "smartcloud-flow/save-draft-button",
                 "smartcloud-flow/ai-suggestions",
                 "smartcloud-flow/submit-button",
