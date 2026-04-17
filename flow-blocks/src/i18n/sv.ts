@@ -32,6 +32,7 @@ export const svDict: Record<string, string> = {
   Accept: "Acceptera",
   "Accept this answer?": "Acceptera det här svaret?",
   Accepted: "Accepterad",
+  "AI suggestions": "AI-förslag",
   "accountId and siteId are required for file uploads.":
     "accountId och siteId krävs för filuppladdningar.",
   "Action not configured": "Åtgärd inte konfigurerad",
@@ -59,6 +60,7 @@ export const svDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Ange ditt utkast-ID och lösenord för att fortsätta, eller starta ett nytt formulär.",
   Field: "Fält",
+  "Failed to generate suggestions.": "Det gick inte att generera förslag.",
   "File upload failed.": "Filuppladdningen misslyckades.",
   "Form definition not found": "Formulärdefinition hittades inte",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -86,6 +88,8 @@ export const svDict: Record<string, string> = {
   "Possible answer": "Möjligt svar",
   Previous: "Föregående",
   "Related documentation": "Relaterad dokumentation",
+  "Review the generated suggestions before continuing.":
+    "Granska de genererade förslagen innan du fortsätter.",
   "Route not found": "Rutt hittades inte",
   "Save draft": "Spara utkast",
   "Save these details to continue later:":

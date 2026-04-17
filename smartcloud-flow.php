@@ -265,22 +265,57 @@ final class Flow
         $block_atts = $form_block['attrs'] ?? [];
 
         // Merge shortcode attributes (override block)
-        $allowed = ['formid', 'formname', 'submitlabel', 'successmessage', 'errormessage', 'endpointpath', 'hideformonsuccess', 'colormode', 'primarycolor', 'themeoverrides', 'allowdrafts', 'showdraftresumepanel', 'draftexpirydays', 'draftallowdelete', 'draftresumetitle', 'draftresumedescription', 'draftsavesuccessmessage'];
-        foreach ($allowed as $key) {
-            if (isset($atts[$key])) {
-                $value = $atts[$key];
-
-                // Convert Elementor SWITCHER 'yes'/'no' to boolean for hideFormOnSuccess
-                if ($key === 'hideformonsuccess') {
-                    if ($value === 'yes' || $value === 'true' || $value === '1' || $value === true) {
-                        $value = true;
-                    } elseif ($value === 'no' || $value === 'false' || $value === '0' || $value === false || $value === '') {
-                        $value = false;
-                    }
-                }
-
-                $block_atts[$key] = $value;
+        $override_attribute_map = array(
+            'formid' => 'formId',
+            'formname' => 'formName',
+            'submitlabel' => 'submitLabel',
+            'successmessage' => 'successMessage',
+            'errormessage' => 'errorMessage',
+            'endpointpath' => 'endpointPath',
+            'language' => 'language',
+            'direction' => 'direction',
+            'hideformonsuccess' => 'hideFormOnSuccess',
+            'colormode' => 'colorMode',
+            'primarycolor' => 'primaryColor',
+            'themeoverrides' => 'themeOverrides',
+            'allowdrafts' => 'allowDrafts',
+            'showdraftresumepanel' => 'showDraftResumePanel',
+            'draftexpirydays' => 'draftExpiryDays',
+            'draftallowdelete' => 'draftAllowDelete',
+            'draftresumetitle' => 'draftResumeTitle',
+            'draftresumedescription' => 'draftResumeDescription',
+            'draftsavesuccessmessage' => 'draftSaveSuccessMessage',
+        );
+        $boolean_override_keys = array(
+            'hideFormOnSuccess',
+            'allowDrafts',
+            'showDraftResumePanel',
+            'draftAllowDelete',
+        );
+        foreach ($override_attribute_map as $shortcode_key => $attribute_key) {
+            if (!array_key_exists($shortcode_key, $atts)) {
+                continue;
             }
+
+            $value = $atts[$shortcode_key];
+
+            if (in_array($attribute_key, $boolean_override_keys, true)) {
+                if ($value === 'yes' || $value === 'true' || $value === '1' || $value === true) {
+                    $value = true;
+                } elseif ($value === 'no' || $value === 'false' || $value === '0' || $value === false || $value === '') {
+                    $value = false;
+                }
+            }
+
+            if ($attribute_key === 'draftExpiryDays' && $value !== '' && $value !== null) {
+                $value = intval($value);
+            }
+
+            if ($value === '') {
+                continue;
+            }
+
+            $block_atts[$attribute_key] = $value;
         }
 
         // Parse YAML config from shortcode content (if present)
@@ -324,6 +359,8 @@ final class Flow
             'successMessage' => null,
             'errorMessage' => null,
             'endpointPath' => null,
+            'language' => null,
+            'direction' => null,
             'hideFormOnSuccess' => true,
             'allowDrafts' => null,
             'showDraftResumePanel' => null,
@@ -338,6 +375,9 @@ final class Flow
             'colors' => null,
             'uid' => strtolower(\function_exists('wp_generate_password') ? \wp_generate_password(8, false, false) : substr(md5(uniqid('', true)), 0, 8)),
             'themeOverrides' => null,
+            'actions' => array(),
+            'autoReplyTemplateKey' => null,
+            'workflowIds' => array(),
             'backendFormId' => null,
         );
 

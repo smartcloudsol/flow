@@ -34,6 +34,7 @@ export const jaDict: Record<string, string> = {
   Accept: "承認",
   "Accept this answer?": "この回答を採用しますか？",
   Accepted: "受理済み",
+  "AI suggestions": "AI候補",
   "accountId and siteId are required for file uploads.":
     "ファイルのアップロードには accountId と siteId が必要です。",
   "Action not configured": "アクションが設定されていません",
@@ -61,6 +62,7 @@ export const jaDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "続行するには下書きIDとパスワードを入力するか、新しいフォームを開始してください。",
   Field: "項目",
+  "Failed to generate suggestions.": "候補を生成できませんでした。",
   "File upload failed.": "ファイルのアップロードに失敗しました。",
   "Form definition not found": "フォーム定義が見つかりません",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -88,6 +90,8 @@ export const jaDict: Record<string, string> = {
   "Possible answer": "候補となる回答",
   Previous: "前へ",
   "Related documentation": "関連ドキュメント",
+  "Review the generated suggestions before continuing.":
+    "続行する前に生成された候補を確認してください。",
   "Route not found": "ルートが見つかりません",
   "Save draft": "下書きを保存",
   "Save these details to continue later:":

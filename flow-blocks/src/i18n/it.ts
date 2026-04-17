@@ -34,6 +34,7 @@ export const itDict: Record<string, string> = {
   Accept: "Accetta",
   "Accept this answer?": "Accettare questa risposta?",
   Accepted: "Accettato",
+  "AI suggestions": "Suggerimenti IA",
   "accountId and siteId are required for file uploads.":
     "accountId e siteId sono obbligatori per il caricamento dei file.",
   "Action not configured": "Azione non configurata",
@@ -61,6 +62,7 @@ export const itDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Inserisci l'ID e la password della bozza per continuare oppure avvia un nuovo modulo.",
   Field: "Campo",
+  "Failed to generate suggestions.": "Impossibile generare i suggerimenti.",
   "File upload failed.": "Caricamento del file non riuscito.",
   "Form definition not found": "Definizione del modulo non trovata",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -88,6 +90,8 @@ export const itDict: Record<string, string> = {
   "Possible answer": "Possibile risposta",
   Previous: "Indietro",
   "Related documentation": "Documentazione correlata",
+  "Review the generated suggestions before continuing.":
+    "Controlla i suggerimenti generati prima di continuare.",
   "Route not found": "Percorso non trovato",
   "Save draft": "Salva bozza",
   "Save these details to continue later:":

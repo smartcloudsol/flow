@@ -34,6 +34,7 @@ export const nlDict: Record<string, string> = {
   Accept: "Accepteren",
   "Accept this answer?": "Dit antwoord accepteren?",
   Accepted: "Geaccepteerd",
+  "AI suggestions": "AI-suggesties",
   "accountId and siteId are required for file uploads.":
     "accountId en siteId zijn vereist voor bestandsuploads.",
   "Action not configured": "Actie niet geconfigureerd",
@@ -60,6 +61,8 @@ export const nlDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Voer je concept-ID en wachtwoord in om verder te gaan, of start een nieuw formulier.",
   Field: "Veld",
+  "Failed to generate suggestions.":
+    "Suggesties konden niet worden gegenereerd.",
   "File upload failed.": "Uploaden van bestand mislukt.",
   "Form definition not found": "Formulierdefinitie niet gevonden",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -87,6 +90,8 @@ export const nlDict: Record<string, string> = {
   "Possible answer": "Mogelijk antwoord",
   Previous: "Vorige",
   "Related documentation": "Gerelateerde documentatie",
+  "Review the generated suggestions before continuing.":
+    "Bekijk de gegenereerde suggesties voordat je verdergaat.",
   "Route not found": "Route niet gevonden",
   "Save draft": "Concept opslaan",
   "Save these details to continue later:":

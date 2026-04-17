@@ -33,6 +33,7 @@ export const trDict: Record<string, string> = {
   Accept: "Kabul et",
   "Accept this answer?": "Bu yanıt kabul edilsin mi?",
   Accepted: "Kabul edildi",
+  "AI suggestions": "Yapay zeka önerileri",
   "accountId and siteId are required for file uploads.":
     "Dosya yüklemeleri için accountId ve siteId gereklidir.",
   "Action not configured": "İşlem yapılandırılmamış",
@@ -59,6 +60,7 @@ export const trDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Devam etmek için taslak kimliğinizi ve şifrenizi girin veya yeni bir form başlatın.",
   Field: "Alan",
+  "Failed to generate suggestions.": "Öneriler oluşturulamadı.",
   "File upload failed.": "Dosya yükleme başarısız oldu.",
   "Form definition not found": "Form tanımı bulunamadı",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -86,6 +88,8 @@ export const trDict: Record<string, string> = {
   "Possible answer": "Olası yanıt",
   Previous: "Önceki",
   "Related documentation": "İlgili dokümantasyon",
+  "Review the generated suggestions before continuing.":
+    "Devam etmeden önce oluşturulan önerileri gözden geçirin.",
   "Route not found": "Rota bulunamadı",
   "Save draft": "Taslağı kaydet",
   "Save these details to continue later:":

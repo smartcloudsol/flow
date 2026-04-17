@@ -1310,7 +1310,8 @@ export function FormShell({
             rawText:
               error instanceof Error
                 ? error.message
-                : "Failed to generate suggestions.",
+                : I18n.get("Failed to generate suggestions.") ||
+                  "Failed to generate suggestions.",
           });
         }
       },

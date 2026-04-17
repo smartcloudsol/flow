@@ -30,6 +30,7 @@ export const nbDict: Record<string, string> = {
   Accept: "Godta",
   "Accept this answer?": "Godta dette svaret?",
   Accepted: "Godtatt",
+  "AI suggestions": "AI-forslag",
   "accountId and siteId are required for file uploads.":
     "accountId og siteId kreves for filopplastinger.",
   "Action not configured": "Handling ikke konfigurert",
@@ -57,6 +58,7 @@ export const nbDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Skriv inn utkast-ID og passord for å fortsette, eller start et nytt skjema.",
   Field: "Felt",
+  "Failed to generate suggestions.": "Kunne ikke generere forslag.",
   "File upload failed.": "Filopplasting mislyktes.",
   "Form definition not found": "Skjemadefinisjon ikke funnet",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -84,6 +86,8 @@ export const nbDict: Record<string, string> = {
   "Possible answer": "Mulig svar",
   Previous: "Forrige",
   "Related documentation": "Relatert dokumentasjon",
+  "Review the generated suggestions before continuing.":
+    "Se gjennom de genererte forslagene før du fortsetter.",
   "Route not found": "Rute ikke funnet",
   "Save draft": "Lagre utkast",
   "Save these details to continue later:":

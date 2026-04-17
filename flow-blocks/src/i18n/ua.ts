@@ -33,6 +33,7 @@ export const uaDict: Record<string, string> = {
   Accept: "Прийняти",
   "Accept this answer?": "Прийняти цю відповідь?",
   Accepted: "Прийнято",
+  "AI suggestions": "Підказки ШІ",
   "accountId and siteId are required for file uploads.":
     "Для завантаження файлів потрібні accountId та siteId.",
   "Action not configured": "Дія не налаштована",
@@ -60,6 +61,7 @@ export const uaDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Введіть ID чернетки та пароль, щоб продовжити, або почніть нову форму.",
   Field: "Поле",
+  "Failed to generate suggestions.": "Не вдалося згенерувати підказки.",
   "File upload failed.": "Не вдалося завантажити файл.",
   "Form definition not found": "Визначення форми не знайдено",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -87,6 +89,8 @@ export const uaDict: Record<string, string> = {
   "Possible answer": "Можлива відповідь",
   Previous: "Назад",
   "Related documentation": "Пов’язана документація",
+  "Review the generated suggestions before continuing.":
+    "Перегляньте згенеровані підказки перед продовженням.",
   "Route not found": "Маршрут не знайдено",
   "Save draft": "Зберегти чернетку",
   "Save these details to continue later:":

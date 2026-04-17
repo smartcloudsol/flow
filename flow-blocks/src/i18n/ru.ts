@@ -34,6 +34,7 @@ export const ruDict: Record<string, string> = {
   Accept: "Принять",
   "Accept this answer?": "Принять этот ответ?",
   Accepted: "Принято",
+  "AI suggestions": "ИИ-подсказки",
   "accountId and siteId are required for file uploads.":
     "Для загрузки файлов требуются accountId и siteId.",
   "Action not configured": "Действие не настроено",
@@ -61,6 +62,7 @@ export const ruDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Введите ID черновика и пароль, чтобы продолжить, или начните новую форму.",
   Field: "Поле",
+  "Failed to generate suggestions.": "Не удалось сгенерировать подсказки.",
   "File upload failed.": "Не удалось загрузить файл.",
   "Form definition not found": "Определение формы не найдено",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -88,6 +90,8 @@ export const ruDict: Record<string, string> = {
   "Possible answer": "Возможный ответ",
   Previous: "Назад",
   "Related documentation": "Связанная документация",
+  "Review the generated suggestions before continuing.":
+    "Просмотрите сгенерированные подсказки перед продолжением.",
   "Route not found": "Маршрут не найден",
   "Save draft": "Сохранить черновик",
   "Save these details to continue later:":

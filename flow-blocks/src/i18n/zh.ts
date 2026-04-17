@@ -24,6 +24,7 @@ export const zhDict: Record<string, string> = {
   Accept: "接受",
   "Accept this answer?": "接受这个答案吗？",
   Accepted: "已接受",
+  "AI suggestions": "AI 建议",
   "accountId and siteId are required for file uploads.":
     "文件上传需要 accountId 和 siteId。",
   "Action not configured": "操作尚未配置",
@@ -49,6 +50,7 @@ export const zhDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "输入草稿 ID 和密码以继续，或开始新表单。",
   Field: "字段",
+  "Failed to generate suggestions.": "无法生成建议。",
   "File upload failed.": "文件上传失败。",
   "Form definition not found": "未找到表单定义",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -75,6 +77,8 @@ export const zhDict: Record<string, string> = {
   "Possible answer": "可能的回答",
   Previous: "上一步",
   "Related documentation": "相关文档",
+  "Review the generated suggestions before continuing.":
+    "继续之前请先查看生成的建议。",
   "Route not found": "未找到路由",
   "Save draft": "保存草稿",
   "Save these details to continue later:": "请保存以下信息以便稍后继续：",

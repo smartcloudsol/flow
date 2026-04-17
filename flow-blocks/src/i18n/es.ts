@@ -33,6 +33,7 @@ export const esDict: Record<string, string> = {
   Accept: "Aceptar",
   "Accept this answer?": "¿Aceptar esta respuesta?",
   Accepted: "Aceptado",
+  "AI suggestions": "Sugerencias de IA",
   "accountId and siteId are required for file uploads.":
     "Se requieren accountId y siteId para la carga de archivos.",
   "Action not configured": "Acción no configurada",
@@ -60,6 +61,7 @@ export const esDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Introduce el ID y la contraseña de tu borrador para continuar o inicia un formulario nuevo.",
   Field: "Campo",
+  "Failed to generate suggestions.": "No se pudieron generar las sugerencias.",
   "File upload failed.": "La carga del archivo falló.",
   "Form definition not found": "Definición de formulario no encontrada",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -87,6 +89,8 @@ export const esDict: Record<string, string> = {
   "Possible answer": "Posible respuesta",
   Previous: "Anterior",
   "Related documentation": "Documentación relacionada",
+  "Review the generated suggestions before continuing.":
+    "Revisa las sugerencias generadas antes de continuar.",
   "Route not found": "Ruta no encontrada",
   "Save draft": "Guardar borrador",
   "Save these details to continue later:":

@@ -34,6 +34,7 @@ export const deDict: Record<string, string> = {
   Accept: "Akzeptieren",
   "Accept this answer?": "Diese Antwort akzeptieren?",
   Accepted: "Akzeptiert",
+  "AI suggestions": "KI-Vorschläge",
   "accountId and siteId are required for file uploads.":
     "accountId und siteId sind für Datei-Uploads erforderlich.",
   "Action not configured": "Aktion nicht konfiguriert",
@@ -61,6 +62,8 @@ export const deDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Gib deine Entwurfs-ID und dein Passwort ein, um fortzufahren, oder starte ein neues Formular.",
   Field: "Feld",
+  "Failed to generate suggestions.":
+    "Vorschläge konnten nicht generiert werden.",
   "File upload failed.": "Datei-Upload fehlgeschlagen.",
   "Form definition not found": "Formulardefinition nicht gefunden",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -88,6 +91,8 @@ export const deDict: Record<string, string> = {
   "Possible answer": "Mögliche Antwort",
   Previous: "Zurück",
   "Related documentation": "Zugehörige Dokumentation",
+  "Review the generated suggestions before continuing.":
+    "Prüfe die generierten Vorschläge, bevor du fortfährst.",
   "Route not found": "Route nicht gefunden",
   "Save draft": "Entwurf speichern",
   "Save these details to continue later:":

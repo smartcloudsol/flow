@@ -32,6 +32,7 @@ export const huDict: Record<string, string> = {
   Accept: "Elfogadás",
   "Accept this answer?": "Elfogadod ezt a választ?",
   Accepted: "Elfogadva",
+  "AI suggestions": "MI-javaslatok",
   "accountId and siteId are required for file uploads.":
     "A fájlfeltöltéshez accountId és siteId szükséges.",
   "Action not configured": "A művelet nincs konfigurálva",
@@ -59,6 +60,7 @@ export const huDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Add meg a piszkozat azonosítóját és jelszavát a folytatáshoz, vagy indíts új űrlapot.",
   Field: "Mező",
+  "Failed to generate suggestions.": "A javaslatok generálása nem sikerült.",
   "File upload failed.": "A fájl feltöltése sikertelen.",
   "Form definition not found": "Az űrlap definíció nem található",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -86,6 +88,8 @@ export const huDict: Record<string, string> = {
   "Possible answer": "Lehetséges válasz",
   Previous: "Vissza",
   "Related documentation": "Kapcsolódó dokumentáció",
+  "Review the generated suggestions before continuing.":
+    "A folytatás előtt nézd át a generált javaslatokat.",
   "Route not found": "Az útvonal nem található",
   "Save draft": "Piszkozat mentése",
   "Save these details to continue later:":

@@ -33,6 +33,7 @@ export const ptDict: Record<string, string> = {
   Accept: "Aceitar",
   "Accept this answer?": "Aceitar esta resposta?",
   Accepted: "Aceito",
+  "AI suggestions": "Sugestões de IA",
   "accountId and siteId are required for file uploads.":
     "accountId e siteId são obrigatórios para uploads de arquivos.",
   "Action not configured": "Ação não configurada",
@@ -60,6 +61,7 @@ export const ptDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Digite o ID e a senha do rascunho para continuar ou inicie um novo formulário.",
   Field: "Campo",
+  "Failed to generate suggestions.": "Não foi possível gerar sugestões.",
   "File upload failed.": "Falha no upload do arquivo.",
   "Form definition not found": "Definição de formulário não encontrada",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -87,6 +89,8 @@ export const ptDict: Record<string, string> = {
   "Possible answer": "Possível resposta",
   Previous: "Anterior",
   "Related documentation": "Documentação relacionada",
+  "Review the generated suggestions before continuing.":
+    "Revise as sugestões geradas antes de continuar.",
   "Route not found": "Rota não encontrada",
   "Save draft": "Salvar rascunho",
   "Save these details to continue later:":

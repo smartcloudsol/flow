@@ -32,6 +32,7 @@ export const arDict: Record<string, string> = {
   Accept: "قبول",
   "Accept this answer?": "هل تقبل هذه الإجابة؟",
   Accepted: "تم القبول",
+  "AI suggestions": "اقتراحات الذكاء الاصطناعي",
   "accountId and siteId are required for file uploads.":
     "يلزم accountId و siteId لرفع الملفات.",
   "Action not configured": "لم يتم إعداد الإجراء",
@@ -58,6 +59,7 @@ export const arDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "أدخل معرّف المسودة وكلمة المرور للمتابعة، أو ابدأ نموذجًا جديدًا.",
   Field: "الحقل",
+  "Failed to generate suggestions.": "تعذر إنشاء الاقتراحات.",
   "File upload failed.": "فشل رفع الملف.",
   "Form definition not found": "تعريف النموذج غير موجود",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -85,6 +87,8 @@ export const arDict: Record<string, string> = {
   "Possible answer": "إجابة محتملة",
   Previous: "السابق",
   "Related documentation": "وثائق ذات صلة",
+  "Review the generated suggestions before continuing.":
+    "راجع الاقتراحات التي تم إنشاؤها قبل المتابعة.",
   "Route not found": "المسار غير موجود",
   "Save draft": "حفظ المسودة",
   "Save these details to continue later:": "احفظ هذه التفاصيل للمتابعة لاحقًا:",

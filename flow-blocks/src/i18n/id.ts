@@ -31,6 +31,7 @@ export const idDict: Record<string, string> = {
   Accept: "Terima",
   "Accept this answer?": "Terima jawaban ini?",
   Accepted: "Diterima",
+  "AI suggestions": "Saran AI",
   "accountId and siteId are required for file uploads.":
     "accountId dan siteId diperlukan untuk unggahan file.",
   "Action not configured": "Tindakan belum dikonfigurasi",
@@ -58,6 +59,7 @@ export const idDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Masukkan ID draf dan kata sandi Anda untuk melanjutkan, atau mulai formulir baru.",
   Field: "Bidang",
+  "Failed to generate suggestions.": "Gagal membuat saran.",
   "File upload failed.": "Unggahan file gagal.",
   "Form definition not found": "Definisi formulir tidak ditemukan",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -85,6 +87,8 @@ export const idDict: Record<string, string> = {
   "Possible answer": "Jawaban yang mungkin",
   Previous: "Sebelumnya",
   "Related documentation": "Dokumentasi terkait",
+  "Review the generated suggestions before continuing.":
+    "Tinjau saran yang dihasilkan sebelum melanjutkan.",
   "Route not found": "Rute tidak ditemukan",
   "Save draft": "Simpan draf",
   "Save these details to continue later:":

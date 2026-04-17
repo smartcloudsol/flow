@@ -32,6 +32,7 @@ export const hiDict: Record<string, string> = {
   Accept: "स्वीकार करें",
   "Accept this answer?": "क्या इस उत्तर को स्वीकार करें?",
   Accepted: "स्वीकार किया गया",
+  "AI suggestions": "AI सुझाव",
   "accountId and siteId are required for file uploads.":
     "फ़ाइल अपलोड के लिए accountId और siteId आवश्यक हैं।",
   "Action not configured": "एक्शन कॉन्फ़िगर नहीं किया गया",
@@ -59,6 +60,7 @@ export const hiDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "जारी रखने के लिए अपना ड्राफ्ट आईडी और पासवर्ड दर्ज करें, या नया फ़ॉर्म शुरू करें।",
   Field: "फ़ील्ड",
+  "Failed to generate suggestions.": "सुझाव उत्पन्न नहीं किए जा सके।",
   "File upload failed.": "फ़ाइल अपलोड विफल हुआ।",
   "Form definition not found": "फ़ॉर्म की परिभाषा नहीं मिली",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -87,6 +89,8 @@ export const hiDict: Record<string, string> = {
   "Possible answer": "संभावित उत्तर",
   Previous: "पिछला",
   "Related documentation": "संबंधित दस्तावेज़",
+  "Review the generated suggestions before continuing.":
+    "आगे बढ़ने से पहले उत्पन्न सुझावों की समीक्षा करें।",
   "Route not found": "रूट नहीं मिला",
   "Save draft": "ड्राफ्ट सहेजें",
   "Save these details to continue later:":

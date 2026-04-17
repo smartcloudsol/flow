@@ -29,6 +29,7 @@ export const heDict: Record<string, string> = {
   Accept: "קבל",
   "Accept this answer?": "לקבל את התשובה הזו?",
   Accepted: "התקבל",
+  "AI suggestions": "הצעות בינה מלאכותית",
   "accountId and siteId are required for file uploads.":
     "נדרשים accountId ו-siteId להעלאת קבצים.",
   "Action not configured": "הפעולה לא מוגדרת",
@@ -54,6 +55,7 @@ export const heDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "הזן את מזהה הטיוטה והסיסמה כדי להמשיך, או התחל טופס חדש.",
   Field: "שדה",
+  "Failed to generate suggestions.": "לא ניתן היה ליצור הצעות.",
   "File upload failed.": "העלאת הקובץ נכשלה.",
   "Form definition not found": "הגדרת הטופס לא נמצאה",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -81,6 +83,8 @@ export const heDict: Record<string, string> = {
   "Possible answer": "תשובה אפשרית",
   Previous: "הקודם",
   "Related documentation": "תיעוד קשור",
+  "Review the generated suggestions before continuing.":
+    "עיין בהצעות שנוצרו לפני ההמשך.",
   "Route not found": "הנתיב לא נמצא",
   "Save draft": "שמור טיוטה",
   "Save these details to continue later:":

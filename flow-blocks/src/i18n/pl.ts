@@ -33,6 +33,7 @@ export const plDict: Record<string, string> = {
   Accept: "Akceptuj",
   "Accept this answer?": "Zaakceptować tę odpowiedź?",
   Accepted: "Zaakceptowano",
+  "AI suggestions": "Sugestie AI",
   "accountId and siteId are required for file uploads.":
     "Do przesyłania plików wymagane są accountId i siteId.",
   "Action not configured": "Akcja nie skonfigurowana",
@@ -59,6 +60,7 @@ export const plDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Wpisz identyfikator szkicu i hasło, aby kontynuować, lub rozpocznij nowy formularz.",
   Field: "Pole",
+  "Failed to generate suggestions.": "Nie udało się wygenerować sugestii.",
   "File upload failed.": "Przesyłanie pliku nie powiodło się.",
   "Form definition not found": "Nie znaleziono definicji formularza",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -86,6 +88,8 @@ export const plDict: Record<string, string> = {
   "Possible answer": "Możliwa odpowiedź",
   Previous: "Wstecz",
   "Related documentation": "Powiązana dokumentacja",
+  "Review the generated suggestions before continuing.":
+    "Przejrzyj wygenerowane sugestie przed kontynuowaniem.",
   "Route not found": "Nie znaleziono trasy",
   "Save draft": "Zapisz szkic",
   "Save these details to continue later:":

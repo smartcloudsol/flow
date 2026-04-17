@@ -51,6 +51,8 @@ add_action('elementor/elements/categories_registered', static function ($manager
 abstract class Flow_Base_Widget extends \Elementor\Widget_Base
 {
     protected static array $COLOR_MODES;
+    protected static array $LANGUAGES;
+    protected static array $DIRECTIONS;
     protected static array $SIZE_OPTIONS;
     protected static array $BOOLEAN_OVERRIDE_OPTIONS;
 
@@ -63,6 +65,39 @@ abstract class Flow_Base_Widget extends \Elementor\Widget_Base
             'auto' => __('System', 'smartcloud-flow'),
             'light' => __('Light', 'smartcloud-flow'),
             'dark' => __('Dark', 'smartcloud-flow'),
+        ];
+
+        self::$LANGUAGES = [
+            '' => __('Default', 'smartcloud-flow'),
+            'ar' => __('Arabic', 'smartcloud-flow'),
+            'zh' => __('Chinese', 'smartcloud-flow'),
+            'nl' => __('Dutch', 'smartcloud-flow'),
+            'en' => __('English', 'smartcloud-flow'),
+            'fr' => __('French', 'smartcloud-flow'),
+            'de' => __('German', 'smartcloud-flow'),
+            'he' => __('Hebrew', 'smartcloud-flow'),
+            'hi' => __('Hindi', 'smartcloud-flow'),
+            'hu' => __('Hungarian', 'smartcloud-flow'),
+            'id' => __('Indonesian', 'smartcloud-flow'),
+            'it' => __('Italian', 'smartcloud-flow'),
+            'ja' => __('Japanese', 'smartcloud-flow'),
+            'ko' => __('Korean', 'smartcloud-flow'),
+            'nb' => __('Norwegian', 'smartcloud-flow'),
+            'pl' => __('Polish', 'smartcloud-flow'),
+            'pt' => __('Portuguese', 'smartcloud-flow'),
+            'ru' => __('Russian', 'smartcloud-flow'),
+            'es' => __('Spanish', 'smartcloud-flow'),
+            'sv' => __('Swedish', 'smartcloud-flow'),
+            'th' => __('Thai', 'smartcloud-flow'),
+            'tr' => __('Turkish', 'smartcloud-flow'),
+            'ua' => __('Ukrainian', 'smartcloud-flow'),
+        ];
+
+        self::$DIRECTIONS = [
+            '' => __('Default', 'smartcloud-flow'),
+            'auto' => __('Auto (by language)', 'smartcloud-flow'),
+            'ltr' => __('Left to Right', 'smartcloud-flow'),
+            'rtl' => __('Right to Left', 'smartcloud-flow'),
         ];
 
         self::$SIZE_OPTIONS = [
@@ -138,6 +173,20 @@ class Flow_Form_Widget extends Flow_Base_Widget
         $this->add_control('successMessage', ['label' => __('Success Message', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
         $this->add_control('errorMessage', ['label' => __('Error Message', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
         $this->add_control('endpointPath', ['label' => __('Endpoint Path', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('language', [
+            'label' => __('Language', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$LANGUAGES,
+            'default' => '',
+            'description' => __('Leave empty to inherit the pattern language.', 'smartcloud-flow'),
+        ]);
+        $this->add_control('direction', [
+            'label' => __('Direction', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$DIRECTIONS,
+            'default' => '',
+            'description' => __('Leave empty to inherit the pattern direction.', 'smartcloud-flow'),
+        ]);
         $this->add_control('hideFormOnSuccess', [
             'label' => __('Hide Form on Success', 'smartcloud-flow'),
             'type' => \Elementor\Controls_Manager::CHOOSE,
@@ -390,6 +439,8 @@ class Flow_Form_Widget extends Flow_Base_Widget
             'successMessage',
             'errorMessage',
             'endpointPath',
+            'language',
+            'direction',
             'hideFormOnSuccess',
             'allowDrafts',
             'showDraftResumePanel',

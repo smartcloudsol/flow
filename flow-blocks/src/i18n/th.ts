@@ -29,6 +29,7 @@ export const thDict: Record<string, string> = {
   Accept: "ยอมรับ",
   "Accept this answer?": "ยอมรับคำตอบนี้หรือไม่?",
   Accepted: "ยอมรับแล้ว",
+  "AI suggestions": "คำแนะนำจาก AI",
   "accountId and siteId are required for file uploads.":
     "ต้องระบุ accountId และ siteId สำหรับการอัปโหลดไฟล์",
   "Action not configured": "ยังไม่ได้กำหนดค่าการทำงาน",
@@ -55,6 +56,7 @@ export const thDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "กรอกรหัสฉบับร่างและรหัสผ่านเพื่อดำเนินการต่อ หรือเริ่มแบบฟอร์มใหม่",
   Field: "ฟิลด์",
+  "Failed to generate suggestions.": "ไม่สามารถสร้างคำแนะนำได้",
   "File upload failed.": "อัปโหลดไฟล์ไม่สำเร็จ",
   "Form definition not found": "ไม่พบคำจำกัดความของฟอร์ม",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -82,6 +84,8 @@ export const thDict: Record<string, string> = {
   "Possible answer": "คำตอบที่เป็นไปได้",
   Previous: "ก่อนหน้า",
   "Related documentation": "เอกสารที่เกี่ยวข้อง",
+  "Review the generated suggestions before continuing.":
+    "ตรวจสอบคำแนะนำที่สร้างขึ้นก่อนดำเนินการต่อ",
   "Route not found": "ไม่พบเส้นทาง",
   "Save draft": "บันทึกฉบับร่าง",
   "Save these details to continue later:":

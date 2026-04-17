@@ -30,6 +30,7 @@ export const enDict: Record<string, string> = {
   Accept: "Accept",
   "Accept this answer?": "Accept this answer?",
   Accepted: "Accepted",
+  "AI suggestions": "AI suggestions",
   "accountId and siteId are required for file uploads.":
     "accountId and siteId are required for file uploads.",
   "Action not configured": "Action not configured",
@@ -57,6 +58,7 @@ export const enDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Enter your draft ID and password to continue, or start a new form.",
   Field: "Field",
+  "Failed to generate suggestions.": "Failed to generate suggestions.",
   "File upload failed.": "File upload failed.",
   "Form definition not found": "Form definition not found",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -84,6 +86,8 @@ export const enDict: Record<string, string> = {
   "Possible answer": "Possible answer",
   Previous: "Previous",
   "Related documentation": "Related documentation",
+  "Review the generated suggestions before continuing.":
+    "Review the generated suggestions before continuing.",
   "Route not found": "Route not found",
   "Save draft": "Save draft",
   "Save these details to continue later:":

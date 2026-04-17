@@ -31,6 +31,7 @@ export const frDict: Record<string, string> = {
   Accept: "Accepter",
   "Accept this answer?": "Accepter cette réponse ?",
   Accepted: "Accepté",
+  "AI suggestions": "Suggestions IA",
   "accountId and siteId are required for file uploads.":
     "accountId et siteId sont requis pour les téléversements de fichiers.",
   "Action not configured": "Action non configurée",
@@ -58,6 +59,7 @@ export const frDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "Saisissez l'identifiant et le mot de passe de votre brouillon pour continuer, ou démarrez un nouveau formulaire.",
   Field: "Champ",
+  "Failed to generate suggestions.": "La génération des suggestions a échoué.",
   "File upload failed.": "Le téléversement du fichier a échoué.",
   "Form definition not found": "Définition de formulaire non trouvée",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -85,6 +87,8 @@ export const frDict: Record<string, string> = {
   "Possible answer": "Réponse possible",
   Previous: "Précédent",
   "Related documentation": "Documentation associée",
+  "Review the generated suggestions before continuing.":
+    "Passez en revue les suggestions générées avant de continuer.",
   "Route not found": "Route non trouvée",
   "Save draft": "Enregistrer le brouillon",
   "Save these details to continue later:":

@@ -34,6 +34,7 @@ export const koDict: Record<string, string> = {
   Accept: "수락",
   "Accept this answer?": "이 답변을 수락하시겠습니까?",
   Accepted: "수락됨",
+  "AI suggestions": "AI 제안",
   "accountId and siteId are required for file uploads.":
     "파일 업로드에는 accountId와 siteId가 필요합니다.",
   "Action not configured": "작업이 구성되어 있지 않습니다",
@@ -60,6 +61,7 @@ export const koDict: Record<string, string> = {
   "Enter your draft ID and password to continue, or start a new form.":
     "계속하려면 임시저장 ID와 비밀번호를 입력하거나 새 양식을 시작하세요.",
   Field: "필드",
+  "Failed to generate suggestions.": "제안을 생성하지 못했습니다.",
   "File upload failed.": "파일 업로드에 실패했습니다.",
   "Form definition not found": "양식 정의를 찾을 수 없습니다",
   "Form ID is missing. Please ensure the form is properly synced with the backend.":
@@ -87,6 +89,8 @@ export const koDict: Record<string, string> = {
   "Possible answer": "가능한 답변",
   Previous: "이전",
   "Related documentation": "관련 문서",
+  "Review the generated suggestions before continuing.":
+    "계속하기 전에 생성된 제안을 검토하세요.",
   "Route not found": "경로를 찾을 수 없습니다",
   "Save draft": "임시저장",
   "Save these details to continue later:":
