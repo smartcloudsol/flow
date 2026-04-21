@@ -9,7 +9,7 @@ import {
   getFlowPlugin,
 } from "@smart-cloud/flow-core";
 import { getWpSuite, type SiteSettings } from "@smart-cloud/wpsuite-core";
-import { createBlock, serialize, type BlockInstance } from "@wordpress/blocks";
+import { createBlock, serialize } from "@wordpress/blocks";
 import {
   BlockControls,
   InnerBlocks,
@@ -80,6 +80,8 @@ const EMPTY_FORM_ACTION: EditableFormAction = {
   wpHookName: "",
   enabled: true,
 };
+
+type FlowBlockInstance = ReturnType<typeof createBlock>;
 
 function normalizeActionKey(value: string): string {
   return value
@@ -209,7 +211,7 @@ function describeAction(action: FormActionDefinition): string {
   return parts.join(" · ");
 }
 
-function createContactTemplateBlocks(): BlockInstance[] {
+function createContactTemplateBlocks(): FlowBlockInstance[] {
   return [
     createBlock("smartcloud-flow/text-field", {
       name: "fullName",
@@ -231,7 +233,7 @@ function createContactTemplateBlocks(): BlockInstance[] {
   ];
 }
 
-function createNewsletterTemplateBlocks(): BlockInstance[] {
+function createNewsletterTemplateBlocks(): FlowBlockInstance[] {
   return [
     createBlock(
       "smartcloud-flow/group",
@@ -256,7 +258,7 @@ function createNewsletterTemplateBlocks(): BlockInstance[] {
   ];
 }
 
-function createDraftEnabledTemplateBlocks(): BlockInstance[] {
+function createDraftEnabledTemplateBlocks(): FlowBlockInstance[] {
   return [
     createBlock("smartcloud-flow/text-field", {
       name: "fullName",
@@ -285,7 +287,7 @@ function createDraftEnabledTemplateBlocks(): BlockInstance[] {
   ];
 }
 
-function createWizardTemplateBlocks(): BlockInstance[] {
+function createWizardTemplateBlocks(): FlowBlockInstance[] {
   return [
     createBlock(
       "smartcloud-flow/wizard",
@@ -375,7 +377,7 @@ const FIELD_BLOCK_MAPPING: Record<string, string> = {
 /**
  * Recursively convert Gutenberg blocks to FieldConfig
  */
-function blockToFieldConfig(block: BlockInstance): FieldConfig | null {
+function blockToFieldConfig(block: FlowBlockInstance): FieldConfig | null {
   const fieldType = FIELD_BLOCK_MAPPING[block.name as string];
   if (!fieldType) return null;
 
@@ -558,7 +560,7 @@ function collectWizardPreviewOptions(fields: FieldConfig[]) {
   return options;
 }
 
-function collectSuccessStatePreviewOptions(blocks: BlockInstance[]) {
+function collectSuccessStatePreviewOptions(blocks: FlowBlockInstance[]) {
   const optionsByTrigger = new Map<
     SuccessStateTrigger,
     SuccessStatePreviewOption
@@ -624,7 +626,7 @@ export default function Edit({
   const { replaceInnerBlocks } = useDispatch(blockEditorStore) as unknown as {
     replaceInnerBlocks: (
       rootClientId: string,
-      blocks: BlockInstance[],
+      blocks: FlowBlockInstance[],
       updateSelection?: boolean,
     ) => void;
   };
@@ -663,7 +665,7 @@ export default function Edit({
   const innerBlocks = useSelect(
     (select) => {
       const { getBlocks } = select(blockEditorStore) as unknown as {
-        getBlocks: (id: string) => BlockInstance[];
+        getBlocks: (id: string) => FlowBlockInstance[];
       };
       return getBlocks(clientId);
     },
@@ -761,7 +763,7 @@ export default function Edit({
   ]);
 
   const applyBuiltInTemplate = useCallback(
-    (blocks: BlockInstance[], nextAttributes: Partial<FormAttributes>) => {
+    (blocks: FlowBlockInstance[], nextAttributes: Partial<FormAttributes>) => {
       if (innerBlocks.length > 0) {
         const confirmed = window.confirm(
           __(

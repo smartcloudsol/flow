@@ -8,10 +8,12 @@ interface OperationsSectionProps {
   description: string;
   scrollToId: string;
   showProFeature: boolean;
-  infoLabelComponent: (props: {
+  InfoLabel: (props: {
     text: string;
     scrollToId: string;
+    onOpen: (targetScrollToId: string) => void;
   }) => JSX.Element;
+  openInfo: (targetScrollToId: string) => void;
   children: ReactNode;
 }
 
@@ -20,13 +22,14 @@ export function OperationsSection({
   description,
   scrollToId,
   showProFeature,
-  infoLabelComponent: InfoLabelComponent,
+  InfoLabel,
+  openInfo,
   children,
 }: OperationsSectionProps) {
   return (
     <>
       <Title order={2} mb="md">
-        <InfoLabelComponent text={t(title)} scrollToId={scrollToId} />
+        <InfoLabel text={t(title)} scrollToId={scrollToId} onOpen={openInfo} />
       </Title>
 
       <Text mb="md">{t(description)}</Text>

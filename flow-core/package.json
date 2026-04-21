@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -19,37 +19,39 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup --minify",
+    "build": "yarn build:js && yarn build:types",
+    "build:js": "tsup --minify",
+    "build:types": "tsc -p tsconfig.types.json",
     "lint": "eslint 'src/**/*.ts' --report-unused-disable-directives --max-warnings 0",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "WPSUITE_PREMIUM=true tsup --minify && npm publish --access=public"
+    "publish": "WPSUITE_PREMIUM=true yarn build && npm publish --access=public"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "scope": "@smart-cloud/flow-core"
   },
   "dependencies": {
-    "@smart-cloud/gatey-core": "^2.2.7",
-    "@smart-cloud/wpsuite-core": "^2.2.10",
-    "aws-amplify": "^6.16.3"
+    "@smart-cloud/gatey-core": "^2.2.9",
+    "@smart-cloud/wpsuite-core": "^2.2.11",
+    "aws-amplify": "^6.16.4"
   },
   "peerDependencies": {
-    "@wordpress/data": "^10.41.0",
-    "@wordpress/i18n": "^6.14.0",
+    "@wordpress/data": "^10.44.0",
+    "@wordpress/i18n": "^6.17.0",
     "react": "^18.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.0",
-    "@typescript-eslint/parser": "^8.57.0",
-    "@wordpress/data": "^10.41.0",
-    "@wordpress/i18n": "^6.14.0",
-    "eslint": "^10.0.3",
-    "globals": "^17.4.0",
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.2",
+    "@typescript-eslint/parser": "^8.58.2",
+    "@wordpress/data": "^10.44.0",
+    "@wordpress/i18n": "^6.17.0",
+    "eslint": "^10.2.1",
+    "globals": "^17.5.0",
     "react": "^18.3.1",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.58.2"
   }
 }

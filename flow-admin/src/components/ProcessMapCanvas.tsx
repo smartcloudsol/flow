@@ -45,7 +45,7 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { modals } from "@mantine/modals";
+import { useModals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowsMaximize,
@@ -2249,22 +2249,24 @@ function DetailPanel({
   const [eventFilterText, setEventFilterText] = useState("");
 
   useEffect(() => {
-    if (!selected || !("source" in selected)) {
+    queueMicrotask(() => {
+      if (!selected || !("source" in selected)) {
+        setEventFilterText("");
+        return;
+      }
+
+      const edge = selected as Edge<CanvasEdgeData>;
+      const data = (edge.data ?? {}) as CanvasEdgeData;
+      if (
+        data.edgeKind === "workflow-connection" &&
+        data.connectionType === "event"
+      ) {
+        setEventFilterText(stringifyConnectionFilter(data.filter));
+        return;
+      }
+
       setEventFilterText("");
-      return;
-    }
-
-    const edge = selected as Edge<CanvasEdgeData>;
-    const data = (edge.data ?? {}) as CanvasEdgeData;
-    if (
-      data.edgeKind === "workflow-connection" &&
-      data.connectionType === "event"
-    ) {
-      setEventFilterText(stringifyConnectionFilter(data.filter));
-      return;
-    }
-
-    setEventFilterText("");
+    });
   }, [selected]);
 
   if (!selected) {
@@ -3141,6 +3143,7 @@ function ProcessMapCanvasInner({
 }: ProcessMapCanvasProps) {
   const PROCESS_MAP_FULLSCREEN_Z_INDEX = 100000;
   const PROCESS_MAP_SNAP_GRID: [number, number] = [20, 20];
+  const modals = useModals();
   const { getNodes, getEdges, fitView } = useReactFlow();
   const queryClient = useQueryClient();
   const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
@@ -4132,7 +4135,7 @@ function ProcessMapCanvasInner({
         onConfirm: () => handleDeleteNode(nodeId),
       });
     },
-    [getNodes, handleDeleteNode],
+    [getNodes, handleDeleteNode, modals],
   );
 
   const handleDeleteEdge = useCallback(
@@ -4161,7 +4164,7 @@ function ProcessMapCanvasInner({
         onConfirm: () => handleDeleteEdge(edgeId),
       });
     },
-    [handleDeleteEdge],
+    [handleDeleteEdge, modals],
   );
 
   const handleUpdateEdge = useCallback(
@@ -4833,7 +4836,7 @@ function ProcessMapCanvasInner({
       confirmProps: { color: "red" },
       onConfirm: onCancel,
     });
-  }, [isDirty, onCancel]);
+  }, [isDirty, modals, onCancel]);
 
   const handleSave = useCallback(async () => {
     const nextMap = buildMapFromState();

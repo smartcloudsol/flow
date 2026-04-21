@@ -33,11 +33,20 @@ export default function Edit({
   setAttributes: (next: Partial<SwitchFieldAttributes>) => void;
   clientId: string;
 }) {
-  const { updateBlock } = useDispatch(blockEditorStore);
+  const { updateBlock } = useDispatch(blockEditorStore) as unknown as {
+    updateBlock: (
+      blockClientId: string,
+      next: { attributes: Record<string, unknown> },
+    ) => void;
+  };
 
   const block = useSelect(
     (select) => {
-      const { getBlock } = select(blockEditorStore);
+      const { getBlock } = select(blockEditorStore) as unknown as {
+        getBlock: (
+          blockClientId: string,
+        ) => { attributes: Record<string, unknown> } | undefined;
+      };
       return getBlock(clientId);
     },
     [clientId],

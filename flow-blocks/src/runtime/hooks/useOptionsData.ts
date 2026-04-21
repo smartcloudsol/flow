@@ -206,23 +206,27 @@ export function useOptionsData(
   );
 
   useEffect(() => {
-    if (optionsSource === "api") {
-      fetchOptions();
-    }
+    queueMicrotask(() => {
+      if (optionsSource === "api") {
+        fetchOptions();
+      }
+    });
   }, [optionsSource, fetchOptions]);
 
   useEffect(() => {
-    if (optionsSource !== "autocomplete") return;
-    if (searchQuery.length < (autocompleteMinChars || 2)) {
-      setOptions([]);
-      return;
-    }
+    queueMicrotask(() => {
+      if (optionsSource !== "autocomplete") return;
+      if (searchQuery.length < (autocompleteMinChars || 2)) {
+        setOptions([]);
+        return;
+      }
 
-    const timer = setTimeout(() => {
-      fetchOptions(searchQuery);
-    }, autocompleteDebounce || 300);
+      const timer = setTimeout(() => {
+        fetchOptions(searchQuery);
+      }, autocompleteDebounce || 300);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    });
   }, [
     autocompleteDebounce,
     autocompleteMinChars,

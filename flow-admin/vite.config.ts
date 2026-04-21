@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 
 console.log("PREMIUM BUILD:", process.env.WPSUITE_PREMIUM === "true");

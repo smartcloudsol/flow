@@ -195,10 +195,30 @@ export interface SettingsEditorProps {
   siteId: string;
   siteKey: string | undefined;
   onSave: (config: FlowConfig) => void;
-  InfoLabelComponent: (props: {
-    text: string;
-    scrollToId: string;
-  }) => JSX.Element;
+  InfoLabel: (props: InfoLabelProps) => JSX.Element;
+  openInfo: (targetScrollToId: string) => void;
+}
+
+type InfoLabelProps = {
+  text: string;
+  scrollToId: string;
+  onOpen: (targetScrollToId: string) => void;
+};
+
+function InfoLabel({ text, scrollToId, onOpen }: InfoLabelProps) {
+  return (
+    <Group align="center" gap="0.25rem">
+      {text}
+      <ActionIcon
+        component="label"
+        variant="subtle"
+        size="xs"
+        onClick={() => onOpen(scrollToId)}
+      >
+        <IconInfoCircle size={16} />
+      </ActionIcon>
+    </Group>
+  );
 }
 
 const DEFAULT_HIGHLIGHTED_SUBMISSION_ACTIONS = [
@@ -292,7 +312,9 @@ export default function Main({ nonce, settings, store }: MainProps) {
   );
 
   useEffect(() => {
-    setSettingsFormData(initialSettingsFormData);
+    queueMicrotask(() => {
+      setSettingsFormData(initialSettingsFormData);
+    });
   }, [initialSettingsFormData]);
 
   const clearCache = useCallback(
@@ -367,23 +389,11 @@ export default function Main({ nonce, settings, store }: MainProps) {
     [nonce, settingsFormData],
   );
 
-  const InfoLabelComponent = useCallback(
-    ({ text, scrollToId }: { text: string; scrollToId: string }) => (
-      <Group align="center" gap="0.25rem">
-        {text}
-        <ActionIcon
-          component="label"
-          variant="subtle"
-          size="xs"
-          onClick={() => {
-            setScrollToId(scrollToId);
-            open();
-          }}
-        >
-          <IconInfoCircle size={16} />
-        </ActionIcon>
-      </Group>
-    ),
+  const openInfo = useCallback(
+    (targetScrollToId: string) => {
+      setScrollToId(targetScrollToId);
+      open();
+    },
     [open],
   );
 
@@ -400,64 +410,72 @@ export default function Main({ nonce, settings, store }: MainProps) {
   );
 
   useEffect(() => {
-    if (isSiteError || !isSitePending || !loadSiteEnabled) {
-      setSite(isSiteError ? null : siteRecord ?? null);
-    }
+    queueMicrotask(() => {
+      if (isSiteError || !isSitePending || !loadSiteEnabled) {
+        setSite(isSiteError ? null : siteRecord ?? null);
+      }
+    });
   }, [siteRecord, loadSiteEnabled, isSitePending, isSiteError]);
 
   useEffect(() => {
-    if (site) {
-      setResolvedConfig({
-        ...sanitizeFlowConfig(site.settings ?? {}),
-        subscriptionType: site.subscriptionType,
-      });
-    } else {
-      if ((!accountId && !siteId) || isSiteError) {
-        setResolvedConfig(null);
+    queueMicrotask(() => {
+      if (site) {
+        setResolvedConfig({
+          ...sanitizeFlowConfig(site.settings ?? {}),
+          subscriptionType: site.subscriptionType,
+        });
+      } else {
+        if ((!accountId && !siteId) || isSiteError) {
+          setResolvedConfig(null);
+        }
       }
-    }
+    });
   }, [accountId, isSiteError, site, siteId]);
 
   useEffect(() => {
-    const paidSettingsDisabled =
-      decryptedConfig && accountId && siteId && siteKey
-        ? !decryptedConfig
-        : !resolvedConfig;
-    setNavigationOptions([
-      {
-        value: "general",
-        label: "General",
-        icon: <IconSettings size={16} stroke={1.5} />,
-      },
-      {
-        value: "api-settings",
-        label: "API Settings",
-        icon: <IconApi size={16} stroke={1.5} />,
-        disabled: paidSettingsDisabled,
-      },
-      {
-        value: "submissions",
-        label: "Submissions",
-        icon: <IconForms size={16} stroke={1.5} />,
-        disabled: paidSettingsDisabled,
-      },
-      {
-        value: "workflows",
-        label: "Workflows",
-        icon: <IconRouteAltLeft size={16} stroke={1.5} />,
-        disabled: paidSettingsDisabled,
-      },
-    ]);
-    if (paidSettingsDisabled) {
-      setActivePage("general");
-    }
+    queueMicrotask(() => {
+      const paidSettingsDisabled =
+        decryptedConfig && accountId && siteId && siteKey
+          ? !decryptedConfig
+          : !resolvedConfig;
+      setNavigationOptions([
+        {
+          value: "general",
+          label: "General",
+          icon: <IconSettings size={16} stroke={1.5} />,
+        },
+        {
+          value: "api-settings",
+          label: "API Settings",
+          icon: <IconApi size={16} stroke={1.5} />,
+          disabled: paidSettingsDisabled,
+        },
+        {
+          value: "submissions",
+          label: "Submissions",
+          icon: <IconForms size={16} stroke={1.5} />,
+          disabled: paidSettingsDisabled,
+        },
+        {
+          value: "workflows",
+          label: "Workflows",
+          icon: <IconRouteAltLeft size={16} stroke={1.5} />,
+          disabled: paidSettingsDisabled,
+        },
+      ]);
+      if (paidSettingsDisabled) {
+        setActivePage("general");
+      }
+    });
   }, [accountId, decryptedConfig, resolvedConfig, siteId, siteKey]);
 
   useEffect(() => {
-    if (resolvedConfig !== undefined) {
-      const fc = (resolvedConfig ?? decryptedConfig) as FlowConfig;
-      setFormConfig(fc);
-    }
+    queueMicrotask(() => {
+      if (resolvedConfig !== undefined) {
+        const fc = (resolvedConfig ?? decryptedConfig) as FlowConfig;
+        setFormConfig(fc);
+      }
+    });
   }, [resolvedConfig, decryptedConfig]);
 
   useEffect(() => {
@@ -642,9 +660,10 @@ export default function Main({ nonce, settings, store }: MainProps) {
           {activePage === "general" && (
             <form name="general" onSubmit={handleUpdateSettings}>
               <Title order={2} mb="md">
-                <InfoLabelComponent
+                <InfoLabel
                   text={__("General", TEXT_DOMAIN)}
                   scrollToId="general-overview"
+                  onOpen={openInfo}
                 />
               </Title>
 
@@ -663,9 +682,10 @@ export default function Main({ nonce, settings, store }: MainProps) {
                       : []
                   }
                   label={
-                    <InfoLabelComponent
+                    <InfoLabel
                       text={__("Forms Backend Sync", TEXT_DOMAIN)}
                       scrollToId="forms-backend-sync"
+                      onOpen={openInfo}
                     />
                   }
                   description={__(
@@ -692,9 +712,10 @@ export default function Main({ nonce, settings, store }: MainProps) {
                     settingsFormData.enablePoweredBy ? [] : ["hide"]
                   }
                   label={
-                    <InfoLabelComponent
+                    <InfoLabel
                       text={__('Hide "Powered by" attribution', TEXT_DOMAIN)}
                       scrollToId="enable-powered-by"
+                      onOpen={openInfo}
                     />
                   }
                   description={__(
@@ -723,9 +744,10 @@ export default function Main({ nonce, settings, store }: MainProps) {
                       : DEFAULT_HIGHLIGHTED_SUBMISSION_ACTIONS
                   }
                   label={
-                    <InfoLabelComponent
+                    <InfoLabel
                       text={__("Highlighted submission actions", TEXT_DOMAIN)}
                       scrollToId="highlighted-submission-actions"
+                      onOpen={openInfo}
                     />
                   }
                   description={__(
@@ -764,9 +786,10 @@ export default function Main({ nonce, settings, store }: MainProps) {
                     settingsFormData.debugLoggingEnabled ? ["enable"] : []
                   }
                   label={
-                    <InfoLabelComponent
+                    <InfoLabel
                       text={__("Enable Debug Logging", TEXT_DOMAIN)}
                       scrollToId="enable-debug-logging"
+                      onOpen={openInfo}
                     />
                   }
                   description={__(
@@ -804,9 +827,10 @@ export default function Main({ nonce, settings, store }: MainProps) {
           {activePage === "api-settings" && (
             <>
               <Title order={2} mb="md">
-                <InfoLabelComponent
+                <InfoLabel
                   text={__("API Settings", TEXT_DOMAIN)}
                   scrollToId="api-settings"
+                  onOpen={openInfo}
                 />
               </Title>
 
@@ -843,7 +867,8 @@ export default function Main({ nonce, settings, store }: MainProps) {
                     siteId={siteId!}
                     siteKey={siteKey}
                     onSave={handleConfigSave}
-                    InfoLabelComponent={InfoLabelComponent}
+                    InfoLabel={InfoLabel}
+                    openInfo={openInfo}
                   />
                 </Suspense>
               )}
@@ -862,7 +887,8 @@ export default function Main({ nonce, settings, store }: MainProps) {
                 (formConfig ?? decryptedConfig)?.subscriptionType !==
                 "PROFESSIONAL"
               }
-              infoLabelComponent={InfoLabelComponent}
+              InfoLabel={InfoLabel}
+              openInfo={openInfo}
             >
               {operationsEditor}
             </OperationsSection>

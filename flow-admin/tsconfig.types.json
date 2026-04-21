@@ -9,6 +9,10 @@
     "rootDir": "./src",
     "stripInternal": true
   },
-  "include": ["src/editor-runtime.ts", "src/operations-runtime.tsx"],
+  "include": [
+    "src/editor-runtime.ts",
+    "src/operations-runtime.tsx",
+    "src/vite-env.d.ts"
+  ],
   "exclude": ["dist", "build", "node_modules"]
 }

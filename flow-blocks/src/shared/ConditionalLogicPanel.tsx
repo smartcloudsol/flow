@@ -154,10 +154,15 @@ export function ConditionalLogicPanel<
 
   const blocks = useSelect(
     (select) => {
-      const { getBlocks, getBlockRootClientId } = select(blockEditorStore);
+      const { getBlocks, getBlockRootClientId } = select(
+        blockEditorStore,
+      ) as unknown as {
+        getBlocks: (rootClientId?: string) => EditorBlockNode[];
+        getBlockRootClientId: (blockClientId: string) => string | null;
+      };
       const scopeRootId = findFormScopeRootId(clientId, getBlockRootClientId);
 
-      return getBlocks(scopeRootId || undefined) as EditorBlockNode[];
+      return getBlocks(scopeRootId || undefined);
     },
     [clientId],
   );
