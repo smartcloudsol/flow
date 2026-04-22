@@ -46,6 +46,7 @@ export const jaDict: Record<string, string> = {
   "Apply filter": "フィルターを適用",
   "Apply routing preset": "ルーティングプリセットを適用",
   "archive@example.com": "archive@example.com",
+  "Authentication": "認証",
   "Attach existing": "既存を関連付け",
   "Auto - model decides if a tool is needed":
     "自動 - ツールが必要かどうかをモデルが判断",
@@ -64,6 +65,7 @@ export const jaDict: Record<string, string> = {
   "Choose webhook endpoint": "Webhookエンドポイントを選択",
   "Choose webhook endpoint (optional)":
     "ウェブフックエンドポイントを選択してください（オプション）",
+  "Client identifier sent to the token endpoint": "トークンエンドポイントに送信されるクライアント識別子",
   Classify: "分類する",
   Clear: "クリア",
   Close: "閉じる",
@@ -191,6 +193,8 @@ export const jaDict: Record<string, string> = {
   General: "一般",
   Generic: "汎用",
   "Generic Webhook": "汎用Webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "汎用Webhookエンドポイントでは、URL、メソッド、ヘッダー、任意のHMAC署名、任意のOAuth 2.0 client-credentials認証を、再利用可能な1か所で定義できます。",
   "Greater Than": "より大きい",
   "Header name": "ヘッダー名",
   "Header value": "ヘッダー値",
@@ -206,6 +210,8 @@ export const jaDict: Record<string, string> = {
   "How to construct the event payload": "イベントペイロードの構築方法",
   "HTML body": "HTML本文",
   "HTTP Method": "HTTPメソッド",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "client-credentialsのアクセストークン要求に使用するHTTPSトークンエンドポイント",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "キャンバスに表示される人が読めるラベル",
@@ -291,13 +297,29 @@ export const jaDict: Record<string, string> = {
   Open: "開く",
   "Open in new tab": "新しいタブで開く",
   Operator: "オペレーター",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "必要とするプロバイダー向けに、トークン要求とともに送信される任意のaudienceパラメーター",
+  "Optional authorization added before the webhook call": "Webhook呼び出しの前に追加される任意の認可",
   "Optional description of what this webhook is used for":
     "このWebhookの用途に関する任意の説明",
   "Optional description of what this workflow does":
     "このワークフローの動作に関する任意の説明",
+  "Optional request signing for receivers that verify signatures":
+    "署名を検証する受信側向けの任意のリクエスト署名",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "従来のAzure ADスタイルのトークンエンドポイント向けの任意のresourceパラメーター",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "トークン要求とともに送信される任意のscope（例: Dataverse /.default scope）",
   "Optional visible label on the branch": "分岐上の任意の表示ラベル",
   "Order confirmation email": "注文確認メール",
   Other: "他の",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret パラメーター",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "結果タイプ",
   "Output event schema (JSON Schema, optional)":
     "出力イベントスキーマ（JSON Schema、任意）",
@@ -378,6 +400,9 @@ export const jaDict: Record<string, string> = {
   "Signing Secret Parameter": "署名シークレットパラメータ",
   "Site Name": "サイト名",
   "smartcloud.flow": "スマートクラウドフロー",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "OAuth client secretを含むSSM SecureStringパラメーター名",
+  "SSM parameter name used for HMAC signing, when enabled": "有効時にHMAC署名に使用されるSSMパラメーター名",
   "Source Channel": "ソースチャネル",
   "Source System": "ソースシステム",
   "Sources used": "使用した情報源",

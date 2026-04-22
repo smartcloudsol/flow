@@ -47,6 +47,7 @@ export const deDict: Record<string, string> = {
   "Apply filter": "Filter anwenden",
   "Apply routing preset": "Routing-Vorgabe anwenden",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Authentifizierung",
   "Attach existing": "Vorhandenes anhängen",
   "Auto - model decides if a tool is needed":
     "Auto - Modell entscheidet, ob ein Werkzeug benötigt wird",
@@ -64,6 +65,8 @@ export const deDict: Record<string, string> = {
   "Choose the webhook provider preset": "Webhook-Anbieter-Vorgabe wählen",
   "Choose webhook endpoint": "Webhook-Endpunkt wählen",
   "Choose webhook endpoint (optional)": "Webhook-Endpunkt auswählen (optional)",
+  "Client identifier sent to the token endpoint":
+    "Client-ID, die an den Token-Endpunkt gesendet wird",
   Classify: "Klassifizieren",
   Clear: "Leeren",
   Close: "Schließen",
@@ -193,6 +196,8 @@ export const deDict: Record<string, string> = {
   General: "Allgemein",
   Generic: "Generisch",
   "Generic Webhook": "Generischer Webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Generische Webhook-Endpunkte können ihre URL, Methode, Header, optionale HMAC-Signierung und optionale OAuth-2.0-Client-Credentials-Authentifizierung an einer wiederverwendbaren Stelle definieren.",
   "Greater Than": "Größer als",
   "Header name": "Headername",
   "Header value": "Headerwert",
@@ -208,6 +213,8 @@ export const deDict: Record<string, string> = {
   "How to construct the event payload": "Wie man die Ereignisnutzlast erstellt",
   "HTML body": "HTML-Body",
   "HTTP Method": "HTTP-Methode",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS-Token-Endpunkt, der für Client-Credentials-Zugriffstokenanfragen verwendet wird",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Lesbare Bezeichnung auf der Arbeitsfläche",
@@ -297,14 +304,31 @@ export const deDict: Record<string, string> = {
   Open: "Öffnen",
   "Open in new tab": "In neuem Tab öffnen",
   Operator: "Operator",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Optionaler Audience-Parameter, der bei Tokenanfragen für Anbieter gesendet wird, die ihn benötigen",
+  "Optional authorization added before the webhook call":
+    "Optionale Autorisierung, die vor dem Webhook-Aufruf hinzugefügt wird",
   "Optional description of what this webhook is used for":
     "Optionale Beschreibung, wofür dieser Webhook verwendet wird",
   "Optional description of what this workflow does":
     "Optionale Beschreibung, was dieser Workflow macht",
+  "Optional request signing for receivers that verify signatures":
+    "Optionale Anfragesignierung für Empfänger, die Signaturen prüfen",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Optionaler Resource-Parameter für Token-Endpunkte im Legacy-Azure-AD-Stil",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Optionaler Scope, der mit der Tokenanfrage gesendet wird, zum Beispiel ein Dataverse-/.default-Scope",
   "Optional visible label on the branch":
     "Optionale sichtbare Bezeichnung am Zweig",
   "Order confirmation email": "Bestellbestätigungs-E-Mail",
   Other: "Andere",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client-Secret-Parameter",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0-Token-Endpunkt",
   "Outcome Types": "Ergebnistypen",
   "Output event schema (JSON Schema, optional)":
     "Ausgabe-Ereignisschema (JSON-Schema, optional)",
@@ -388,6 +412,10 @@ export const deDict: Record<string, string> = {
   "Signing Secret Parameter": "Signaturgeheimnis-Parameter",
   "Site Name": "Name der Website",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Name des SSM-SecureString-Parameters, der das OAuth-Client-Secret enthält",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Name des SSM-Parameters, der für die HMAC-Signierung verwendet wird, wenn aktiviert",
   "Source Channel": "Quellkanal",
   "Source System": "Quellsystem",
   "Sources used": "Verwendete Quellen",

@@ -47,6 +47,7 @@ export const ruDict: Record<string, string> = {
   "Apply filter": "Применить фильтр",
   "Apply routing preset": "Применить пресет маршрутизации",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Аутентификация",
   "Attach existing": "Привязать существующий",
   "Auto - model decides if a tool is needed":
     "Авто - модель решает, нужен ли инструмент",
@@ -65,6 +66,8 @@ export const ruDict: Record<string, string> = {
   "Choose webhook endpoint": "Выберите webhook-эндпоинт",
   "Choose webhook endpoint (optional)":
     "Выберите конечную точку веб-перехватчика (необязательно)",
+  "Client identifier sent to the token endpoint":
+    "Идентификатор клиента, отправляемый на конечную точку токена",
   Classify: "Классифицировать",
   Clear: "Очистить",
   Close: "Закрыть",
@@ -195,6 +198,8 @@ export const ruDict: Record<string, string> = {
   General: "Общие",
   Generic: "Общий",
   "Generic Webhook": "Общий webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Универсальные webhook-эндпоинты могут задавать URL, метод, заголовки, необязательную HMAC-подпись и необязательную OAuth 2.0 client-credentials-аутентификацию в одном переиспользуемом месте.",
   "Greater Than": "Больше чем",
   "Header name": "Название заголовка",
   "Header value": "Значение заголовка",
@@ -211,6 +216,8 @@ export const ruDict: Record<string, string> = {
     "Как сформировать полезную нагрузку события",
   "HTML body": "HTML-тело",
   "HTTP Method": "Метод HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS-эндпоинт токена, используемый для запросов access token по client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Понятная подпись, показанная на холсте",
@@ -299,14 +306,31 @@ export const ruDict: Record<string, string> = {
   Open: "Открыть",
   "Open in new tab": "Открыть в новой вкладке",
   Operator: "Оператор",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Необязательный параметр audience, отправляемый с запросом токена для провайдеров, которым он нужен",
+  "Optional authorization added before the webhook call":
+    "Необязательная авторизация, добавляемая перед вызовом webhook",
   "Optional description of what this webhook is used for":
     "Необязательное описание назначения этого webhook",
   "Optional description of what this workflow does":
     "Необязательное описание того, что делает этот workflow",
+  "Optional request signing for receivers that verify signatures":
+    "Необязательное подписание запроса для получателей, проверяющих подписи",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Необязательный параметр resource для токен-эндпоинтов в устаревшем стиле Azure AD",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Необязательный scope, отправляемый с запросом токена, например scope Dataverse /.default",
   "Optional visible label on the branch":
     "Необязательная видимая метка на ветке",
   "Order confirmation email": "Письмо с подтверждением заказа",
   Other: "Другой",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "Параметр Client Secret OAuth 2.0",
+  "OAuth 2.0 Resource": "Ресурс OAuth 2.0",
+  "OAuth 2.0 Scope": "Область OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "Конечная точка токена OAuth 2.0",
   "Outcome Types": "Типы результатов",
   "Output event schema (JSON Schema, optional)":
     "Схема выходного события (JSON Schema, необязательно)",
@@ -388,6 +412,10 @@ export const ruDict: Record<string, string> = {
   "Signing Secret Parameter": "Параметр секрета подписи",
   "Site Name": "Название сайта",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Имя параметра SSM SecureString, содержащего OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Имя параметра SSM, используемого для HMAC-подписи, когда включено",
   "Source Channel": "Исходный канал",
   "Source System": "Исходная система",
   "Sources used": "Использованные источники",

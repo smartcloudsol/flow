@@ -47,6 +47,7 @@ export const nlDict: Record<string, string> = {
   "Apply filter": "Filter toepassen",
   "Apply routing preset": "Routing-voorinstelling toepassen",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Authenticatie",
   "Attach existing": "Bestaande koppelen",
   "Auto - model decides if a tool is needed":
     "Auto - model beslist of een tool nodig is",
@@ -64,6 +65,8 @@ export const nlDict: Record<string, string> = {
   "Choose the webhook provider preset": "Kies de webhook-providerinstelling",
   "Choose webhook endpoint": "Webhook-eindpunt kiezen",
   "Choose webhook endpoint (optional)": "Kies een webhook-eindpunt (optioneel)",
+  "Client identifier sent to the token endpoint":
+    "Client-id die naar het token-endpoint wordt verzonden",
   Classify: "Classificeren",
   Clear: "Wissen",
   Close: "Sluiten",
@@ -190,6 +193,8 @@ export const nlDict: Record<string, string> = {
   General: "Algemeen",
   Generic: "Generiek",
   "Generic Webhook": "Generieke webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Generieke webhook-endpoints kunnen hun URL, methode, headers, optionele HMAC-ondertekening en optionele OAuth 2.0 client-credentials-authenticatie op één herbruikbare plek definiëren.",
   "Greater Than": "Groter dan",
   "Header name": "Kopnaam",
   "Header value": "Kopwaarde",
@@ -206,6 +211,8 @@ export const nlDict: Record<string, string> = {
     "Hoe construeer je de payload voor een gebeurtenis?",
   "HTML body": "HTML-body",
   "HTTP Method": "HTTP-methode",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS-token-endpoint dat wordt gebruikt voor client-credentials toegangstokenaanvragen",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas": "Leesbaar label op het canvas",
   ID: "ID",
@@ -291,14 +298,31 @@ export const nlDict: Record<string, string> = {
   Open: "Openen",
   "Open in new tab": "Openen in een nieuw tabblad",
   Operator: "Operator",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Optionele audience-parameter die met de tokenaanvraag wordt meegestuurd voor providers die deze vereisen",
+  "Optional authorization added before the webhook call":
+    "Optionele autorisatie die vóór de webhook-aanroep wordt toegevoegd",
   "Optional description of what this webhook is used for":
     "Optionele beschrijving waarvoor deze webhook wordt gebruikt",
   "Optional description of what this workflow does":
     "Optionele beschrijving van wat deze workflow doet",
+  "Optional request signing for receivers that verify signatures":
+    "Optionele aanvraagondertekening voor ontvangers die handtekeningen verifiëren",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Optionele resource-parameter voor token-endpoints in legacy Azure AD-stijl",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Optionele scope die met de tokenaanvraag wordt meegestuurd, bijvoorbeeld een Dataverse /.default-scope",
   "Optional visible label on the branch":
     "Optioneel zichtbaar label op de vertakking",
   "Order confirmation email": "Bestelbevestigingsmail",
   Other: "Ander",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret-parameter",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "Resultaattypen",
   "Output event schema (JSON Schema, optional)":
     "Uitvoergebeurtenisschema (JSON Schema, optioneel)",
@@ -381,6 +405,10 @@ export const nlDict: Record<string, string> = {
   "Signing Secret Parameter": "Ondertekeningsgeheim-parameter",
   "Site Name": "Sitenaam",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Naam van de SSM SecureString-parameter die het OAuth client secret bevat",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Naam van de SSM-parameter die wordt gebruikt voor HMAC-ondertekening, indien ingeschakeld",
   "Source Channel": "Bronkanaal",
   "Source System": "Bronsysteem",
   "Sources used": "Gebruikte bronnen",

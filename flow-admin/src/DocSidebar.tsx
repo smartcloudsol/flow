@@ -626,6 +626,124 @@ const pages = {
         )}
       </Text>
 
+      <Title order={3} mt="md" id="webhook-signing">
+        <span className="highlightable">
+          {__("Webhook signing", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Signing Mode controls whether Flow adds a verification signature to the outgoing webhook request. In HMAC mode, Flow computes an HMAC-SHA256 signature from the final request body and sends it in the X-WP-Suite-Signature header.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        {__(
+          "Use this when the receiving API verifies request authenticity independently from bearer-token authentication.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-signing-secret-parameter">
+        <span className="highlightable">
+          {__("Signing secret parameter", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Signing Secret Parameter is the SSM SecureString parameter name that stores the shared HMAC secret for this endpoint. If you leave it empty, Flow can fall back to the stack-level default webhook signing secret when one was configured during deployment.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-authentication">
+        <span className="highlightable">
+          {__("Webhook authentication", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Authentication controls whether Flow adds an Authorization header before the webhook call. The OAuth 2.0 Client Credentials mode first requests an access token from the configured token endpoint, then calls the target URL with a standard Bearer token.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        <Code>Authorization: Bearer &lt;token&gt;</Code>
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-oauth-token-endpoint">
+        <span className="highlightable">
+          {__("OAuth token endpoint", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "This is the HTTPS endpoint where Flow requests the OAuth access token. For Microsoft identity platform v2, this is typically a tenant-specific /oauth2/v2.0/token URL.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-oauth-client-id">
+        <span className="highlightable">
+          {__("OAuth client ID", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Client ID identifies the application at the token endpoint. Flow sends it together with the client secret and grant_type=client_credentials when it requests the access token.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-oauth-client-secret-parameter">
+        <span className="highlightable">
+          {__("OAuth client secret parameter", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "OAuth 2.0 Client Secret Parameter is the SSM SecureString parameter name that contains the confidential client secret. Flow reads the decrypted value at runtime and never stores the secret directly in the webhook endpoint record.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-oauth-scope">
+        <span className="highlightable">{__("OAuth scope", TEXT_DOMAIN)}</span>
+      </Title>
+      <Text>
+        {__(
+          "Scope is optional and is sent with the token request when the provider expects a scope value. For Dataverse on Azure, this is commonly the environment URL with a /.default suffix.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+      <Text mt="xs">
+        <Code>https://org.crm4.dynamics.com/.default</Code>
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-oauth-audience">
+        <span className="highlightable">
+          {__("OAuth audience", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Audience is optional and is only needed for identity providers that require an audience parameter during the token request. If your provider does not document it, leave it empty.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
+      <Title order={3} mt="md" id="webhook-oauth-resource">
+        <span className="highlightable">
+          {__("OAuth resource", TEXT_DOMAIN)}
+        </span>
+      </Title>
+      <Text>
+        {__(
+          "Resource is optional and mainly exists for legacy Azure AD style token endpoints that still require a resource parameter instead of, or alongside, scope. Use it only when the upstream token endpoint explicitly asks for it.",
+          TEXT_DOMAIN,
+        )}
+      </Text>
+
       <Title order={3} mt="md" id="webhook-headers">
         <span className="highlightable">
           {__("Request Headers", TEXT_DOMAIN)}

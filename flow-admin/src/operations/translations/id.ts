@@ -46,6 +46,7 @@ export const idDict: Record<string, string> = {
   "Apply filter": "Terapkan filter",
   "Apply routing preset": "Terapkan preset perutean",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Autentikasi",
   "Attach existing": "Lampirkan yang ada",
   "Auto - model decides if a tool is needed":
     "Otomatis - model memutuskan apakah alat diperlukan",
@@ -63,6 +64,8 @@ export const idDict: Record<string, string> = {
   "Choose the webhook provider preset": "Pilih preset penyedia webhook",
   "Choose webhook endpoint": "Pilih endpoint webhook",
   "Choose webhook endpoint (optional)": "Pilih titik akhir webhook (opsional)",
+  "Client identifier sent to the token endpoint":
+    "Pengenal klien yang dikirim ke endpoint token",
   Classify: "Menggolongkan",
   Clear: "Kosongkan",
   Close: "Tutup",
@@ -189,6 +192,8 @@ export const idDict: Record<string, string> = {
   General: "Umum",
   Generic: "Generik",
   "Generic Webhook": "Webhook Generik",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Endpoint webhook generik dapat mendefinisikan URL, metode, header, penandatanganan HMAC opsional, dan autentikasi OAuth 2.0 client-credentials opsional dalam satu tempat yang dapat digunakan kembali.",
   "Greater Than": "Lebih besar dari",
   "Header name": "Nama header",
   "Header value": "Nilai header",
@@ -205,6 +210,8 @@ export const idDict: Record<string, string> = {
     "Cara membangun muatan peristiwa (event payload)",
   "HTML body": "Isi HTML",
   "HTTP Method": "Metode HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "Endpoint token HTTPS yang digunakan untuk permintaan access token client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Label yang mudah dibaca ditampilkan di kanvas",
@@ -291,13 +298,30 @@ export const idDict: Record<string, string> = {
   Open: "Buka",
   "Open in new tab": "Buka di tab baru",
   Operator: "Operator",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Parameter audience opsional yang dikirim bersama permintaan token untuk penyedia yang memerlukannya",
+  "Optional authorization added before the webhook call":
+    "Otorisasi opsional yang ditambahkan sebelum panggilan webhook",
   "Optional description of what this webhook is used for":
     "Deskripsi opsional tentang kegunaan webhook ini",
   "Optional description of what this workflow does":
     "Deskripsi opsional tentang fungsi workflow ini",
+  "Optional request signing for receivers that verify signatures":
+    "Penandatanganan permintaan opsional untuk penerima yang memverifikasi tanda tangan",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Parameter resource opsional untuk endpoint token gaya Azure AD lama",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Scope opsional yang dikirim bersama permintaan token, misalnya scope Dataverse /.default",
   "Optional visible label on the branch": "Label terlihat opsional pada cabang",
   "Order confirmation email": "Email konfirmasi pesanan",
   Other: "Lainnya",
+  "OAuth 2.0 Audience": "Audience OAuth 2.0",
+  "OAuth 2.0 Client Credentials": "Client Credentials OAuth 2.0",
+  "OAuth 2.0 Client ID": "Client ID OAuth 2.0",
+  "OAuth 2.0 Client Secret Parameter": "Parameter Client Secret OAuth 2.0",
+  "OAuth 2.0 Resource": "Resource OAuth 2.0",
+  "OAuth 2.0 Scope": "Scope OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "Endpoint Token OAuth 2.0",
   "Outcome Types": "Jenis hasil",
   "Output event schema (JSON Schema, optional)":
     "Skema event output (JSON Schema, opsional)",
@@ -380,6 +404,10 @@ export const idDict: Record<string, string> = {
   "Signing Secret Parameter": "Parameter Secret Penandatanganan",
   "Site Name": "Nama Situs",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Nama parameter SSM SecureString yang berisi client secret OAuth",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Nama parameter SSM yang digunakan untuk penandatanganan HMAC, saat diaktifkan",
   "Source Channel": "Saluran sumber",
   "Source System": "Sistem sumber",
   "Sources used": "Sumber yang digunakan",

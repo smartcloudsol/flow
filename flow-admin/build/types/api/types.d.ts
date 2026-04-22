@@ -60,8 +60,10 @@ export interface Submission {
     source?: Record<string, unknown>;
     actor?: Record<string, unknown>;
     payloadRef?: {
+        uri?: string;
         bucket?: string;
         key?: string;
+        rootPrefix?: string;
         fileName?: string;
         contentType?: string;
         size?: number;
@@ -86,6 +88,26 @@ export interface SubmissionActionResponse {
     message?: string;
     submission?: Submission;
 }
+export interface TemplateAttachment {
+    attachmentId?: string;
+    key?: string;
+    draftKey?: string;
+    fileName: string;
+    contentType?: string;
+    size?: number;
+    disposition?: "attachment" | "inline";
+    contentId?: string;
+    uploadStatus?: "uploading" | "uploaded" | "error";
+    errorMessage?: string;
+}
+export interface TemplateAttachmentUploadTarget {
+    attachmentId: string;
+    bucket: string;
+    draftKey: string;
+    uploadUrl: string;
+    headers: Record<string, string>;
+    expiresIn: number;
+}
 export interface EmailTemplate {
     templateKey: string;
     accountId: string;
@@ -100,6 +122,7 @@ export interface EmailTemplate {
     fromName?: string;
     replyToEmail?: string;
     templateEngine?: "handlebars" | "mustache" | "liquid";
+    attachments?: TemplateAttachment[];
     enabled?: boolean;
     createdAt?: string;
     updatedAt?: string;

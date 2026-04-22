@@ -42,6 +42,7 @@ export const zhDict: Record<string, string> = {
   "Apply filter": "应用筛选",
   "Apply routing preset": "应用路由预设",
   "archive@example.com": "archive@example.com",
+  "Authentication": "身份验证",
   "Attach existing": "附加现有项",
   "Auto - model decides if a tool is needed": "自动 - 由模型决定是否需要工具",
   "Auto-layout": "自动布局",
@@ -58,6 +59,7 @@ export const zhDict: Record<string, string> = {
   "Choose the webhook provider preset": "选择 webhook 提供商预设",
   "Choose webhook endpoint": "选择 webhook 端点",
   "Choose webhook endpoint (optional)": "选择 webhook 端点（可选）",
+  "Client identifier sent to the token endpoint": "发送到令牌端点的客户端标识符",
   Classify: "分类",
   Clear: "清除",
   Close: "关闭",
@@ -182,6 +184,8 @@ export const zhDict: Record<string, string> = {
   General: "常规",
   Generic: "通用",
   "Generic Webhook": "通用 Webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "通用 webhook 端点可以在一个可复用的位置定义其 URL、方法、标头、可选的 HMAC 签名以及可选的 OAuth 2.0 client-credentials 身份验证。",
   "Greater Than": "大于",
   "Header name": "标题名称",
   "Header value": "标题值",
@@ -196,6 +200,8 @@ export const zhDict: Record<string, string> = {
   "How to construct the event payload": "如何构建事件有效载荷",
   "HTML body": "HTML正文",
   "HTTP Method": "HTTP 方法",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "用于 client-credentials 访问令牌请求的 HTTPS 令牌端点",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas": "显示在画布上的可读标签",
   ID: "ID",
@@ -276,13 +282,28 @@ export const zhDict: Record<string, string> = {
   Open: "打开",
   "Open in new tab": "在新标签页中打开",
   Operator: "操作员",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "对于需要该参数的提供方，随令牌请求发送的可选 audience 参数",
+  "Optional authorization added before the webhook call": "在 webhook 调用前添加的可选授权",
   "Optional description of what this webhook is used for":
     "关于此 webhook 用途的可选说明",
   "Optional description of what this workflow does":
     "关于此工作流作用的可选说明",
+  "Optional request signing for receivers that verify signatures": "用于会验证签名的接收方的可选请求签名",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "用于旧版 Azure AD 风格令牌端点的可选 resource 参数",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "随令牌请求发送的可选 scope，例如 Dataverse /.default scope",
   "Optional visible label on the branch": "分支上的可选可见标签",
   "Order confirmation email": "订单确认邮件",
   Other: "其他",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret 参数",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "结果类型",
   "Output event schema (JSON Schema, optional)":
     "输出事件架构（JSON Schema，可选）",
@@ -359,6 +380,9 @@ export const zhDict: Record<string, string> = {
   "Signing Secret Parameter": "签名密钥参数",
   "Site Name": "网站名称",
   "smartcloud.flow": "智能云流",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "包含 OAuth client secret 的 SSM SecureString 参数名称",
+  "SSM parameter name used for HMAC signing, when enabled": "启用时用于 HMAC 签名的 SSM 参数名称",
   "Source Channel": "来源渠道",
   "Source System": "来源系统",
   "Sources used": "所用资料来源",

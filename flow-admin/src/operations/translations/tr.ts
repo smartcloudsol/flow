@@ -45,6 +45,7 @@ export const trDict: Record<string, string> = {
   "Apply filter": "Filtreyi uygula",
   "Apply routing preset": "Yönlendirme önayarını uygula",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Kimlik Doğrulama",
   "Attach existing": "Var olanı bağla",
   "Auto - model decides if a tool is needed":
     "Otomatik - bir araca ihtiyaç olup olmadığına model karar verir",
@@ -63,6 +64,8 @@ export const trDict: Record<string, string> = {
   "Choose webhook endpoint": "Webhook uç noktası seçin",
   "Choose webhook endpoint (optional)":
     "Webhook uç noktasını seçin (isteğe bağlı)",
+  "Client identifier sent to the token endpoint":
+    "Token uç noktasına gönderilen istemci tanımlayıcısı",
   Classify: "Sınıflandırmak",
   Clear: "Temizle",
   Close: "Kapat",
@@ -190,6 +193,8 @@ export const trDict: Record<string, string> = {
   General: "Genel",
   Generic: "Genel",
   "Generic Webhook": "Genel Webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Genel webhook uç noktaları, URL, yöntem, başlıklar, isteğe bağlı HMAC imzalama ve isteğe bağlı OAuth 2.0 client-credentials kimlik doğrulamasını yeniden kullanılabilir tek bir yerde tanımlayabilir.",
   "Greater Than": "Büyüktür",
   "Header name": "Başlık adı",
   "Header value": "Başlık değeri",
@@ -205,6 +210,8 @@ export const trDict: Record<string, string> = {
   "How to construct the event payload": "Olay yükü nasıl oluşturulur?",
   "HTML body": "HTML gövdesi",
   "HTTP Method": "HTTP Yöntemi",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "client-credentials erişim belirteci istekleri için kullanılan HTTPS token uç noktası",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Tuvalde gösterilen okunabilir etiket",
@@ -291,14 +298,31 @@ export const trDict: Record<string, string> = {
   Open: "Aç",
   "Open in new tab": "Yeni sekmede aç",
   Operator: "Operatör",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Bunu gerektiren sağlayıcılar için token isteğiyle birlikte gönderilen isteğe bağlı audience parametresi",
+  "Optional authorization added before the webhook call":
+    "webhook çağrısından önce eklenen isteğe bağlı yetkilendirme",
   "Optional description of what this webhook is used for":
     "Bu webhook'un ne için kullanıldığına dair isteğe bağlı açıklama",
   "Optional description of what this workflow does":
     "Bu iş akışının ne yaptığına dair isteğe bağlı açıklama",
+  "Optional request signing for receivers that verify signatures":
+    "İmzaları doğrulayan alıcılar için isteğe bağlı istek imzalama",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Eski Azure AD tarzı token uç noktaları için isteğe bağlı resource parametresi",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Token isteğiyle birlikte gönderilen isteğe bağlı scope, örneğin bir Dataverse /.default scope",
   "Optional visible label on the branch":
     "Dal üzerindeki isteğe bağlı görünür etiket",
   "Order confirmation email": "Sipariş onay e-postası",
   Other: "Diğer",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret Parametresi",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "Sonuç Türleri",
   "Output event schema (JSON Schema, optional)":
     "Çıktı etkinlik şeması (JSON Schema, isteğe bağlı)",
@@ -381,6 +405,10 @@ export const trDict: Record<string, string> = {
   "Signing Secret Parameter": "İmzalama Gizli Parametresi",
   "Site Name": "Site Adı",
   "smartcloud.flow": "akıllıbulut.akış",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "OAuth client secret içeren SSM SecureString parametre adı",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Etkinleştirildiğinde HMAC imzalama için kullanılan SSM parametre adı",
   "Source Channel": "Kaynak kanal",
   "Source System": "Kaynak sistem",
   "Sources used": "Kullanılan kaynaklar",

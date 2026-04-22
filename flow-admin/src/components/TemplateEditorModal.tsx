@@ -15,12 +15,13 @@ import {
 import { notifications } from "@mantine/notifications";
 import { IconCheck } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import type { editor, Selection } from "monaco-editor";
 import type { FlowBackendClient } from "../api/backend-client";
 import type {
   BootConfig,
   EmailTemplate,
+  TemplateAttachment,
   TemplatePreviewResponse,
 } from "../api/types";
 import { t } from "../operations/i18n";
@@ -40,8 +41,34 @@ function emptyTemplate(boot: BootConfig): EmailTemplate {
     htmlBody: "<p>Hello {{submission.fields.name}}</p>",
     textBody: "Hello {{submission.fields.name}}",
     templateEngine: "handlebars",
+    attachments: [],
     enabled: true,
   };
+}
+
+function createTemplateDraftId(): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return `draft-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function formatAttachmentSize(size?: number): string {
+  if (!size || size <= 0) {
+    return t("Unknown size");
+  }
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 interface TemplateEditorModalProps {
@@ -75,8 +102,12 @@ export default function TemplateEditorModal({
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   const [templateVariablePopoverOpen, setTemplateVariablePopoverOpen] =
     useState(false);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const textBodyEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const textBodySelectionRef = useRef<Selection | null>(null);
+  const attachmentInputRef = useRef<HTMLInputElement | null>(null);
+  const draftIdRef = useRef(createTemplateDraftId());
+  const skipDraftCleanupRef = useRef(false);
 
   useEffect(() => {
     const handleTemplateVariablePopover = (event: Event) => {
@@ -107,6 +138,9 @@ export default function TemplateEditorModal({
       setPreview(null);
       setSelectedFormId(null);
       setTemplateVariablePopoverOpen(false);
+      setIsUploadingAttachment(false);
+      draftIdRef.current = createTemplateDraftId();
+      skipDraftCleanupRef.current = false;
       const editingExisting =
         mode === "existing" && Boolean(initialTemplate?.templateKey);
       setIsEditingExisting(editingExisting);
@@ -234,12 +268,26 @@ export default function TemplateEditorModal({
 
   const saveMutation = useMutation({
     mutationFn: (template: EmailTemplate) => {
+      const sanitizedTemplate: EmailTemplate = {
+        ...template,
+        attachments: (template.attachments ?? []).map((attachment) => ({
+          attachmentId: attachment.attachmentId,
+          key: attachment.key,
+          draftKey: attachment.draftKey,
+          fileName: attachment.fileName,
+          contentType: attachment.contentType,
+          size: attachment.size,
+          disposition: attachment.disposition ?? "attachment",
+          contentId: attachment.contentId,
+        })),
+      };
       if (isEditingExisting) {
-        return client.updateTemplate(template.templateKey, template);
+        return client.updateTemplate(template.templateKey, sanitizedTemplate);
       }
-      return client.createTemplate(template);
+      return client.createTemplate(sanitizedTemplate);
     },
     onSuccess: (saved) => {
+      skipDraftCleanupRef.current = true;
       notifications.show({
         message: t("Template saved"),
         color: "green",
@@ -254,10 +302,146 @@ export default function TemplateEditorModal({
       notifications.show({ message: error.message, color: "red" }),
   });
 
+  const cleanupDraftAttachments = async (attachments: TemplateAttachment[]) => {
+    const draftKeys = attachments
+      .filter((attachment) => attachment.draftKey && !attachment.key)
+      .map((attachment) => attachment.draftKey as string);
+
+    await Promise.all(
+      draftKeys.map(async (draftKey) => {
+        try {
+          await client.deleteTemplateAttachmentDraft(draftKey);
+        } catch {
+          // Ignore cleanup failures when closing the modal.
+        }
+      }),
+    );
+  };
+
+  const handleClose = () => {
+    const attachments = editing.attachments ?? [];
+    if (!skipDraftCleanupRef.current && attachments.length > 0) {
+      void cleanupDraftAttachments(attachments);
+    }
+    onClose();
+  };
+
+  const handleRemoveAttachment = async (attachment: TemplateAttachment) => {
+    if (attachment.draftKey && !attachment.key) {
+      try {
+        await client.deleteTemplateAttachmentDraft(attachment.draftKey);
+      } catch (error) {
+        notifications.show({
+          message:
+            error instanceof Error
+              ? error.message
+              : t("Failed to delete draft attachment"),
+          color: "red",
+        });
+      }
+    }
+
+    setEditing((current) => ({
+      ...current,
+      attachments: (current.attachments ?? []).filter(
+        (entry) =>
+          entry !== attachment &&
+          entry.attachmentId !== attachment.attachmentId &&
+          entry.draftKey !== attachment.draftKey,
+      ),
+    }));
+  };
+
+  const handleAttachmentSelection = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = "";
+    if (files.length === 0) {
+      return;
+    }
+
+    setIsUploadingAttachment(true);
+
+    for (const file of files) {
+      try {
+        const uploadTarget = await client.createTemplateAttachmentUploadTarget({
+          draftId: draftIdRef.current,
+          fileName: file.name,
+          contentType: file.type || "application/octet-stream",
+        });
+
+        const draftAttachment: TemplateAttachment = {
+          attachmentId: uploadTarget.attachmentId,
+          draftKey: uploadTarget.draftKey,
+          fileName: file.name,
+          contentType: file.type || "application/octet-stream",
+          size: file.size,
+          disposition: "attachment",
+          uploadStatus: "uploading",
+        };
+
+        setEditing((current) => ({
+          ...current,
+          attachments: [...(current.attachments ?? []), draftAttachment],
+        }));
+
+        const response = await fetch(uploadTarget.uploadUrl, {
+          method: "PUT",
+          headers: uploadTarget.headers,
+          body: file,
+        });
+
+        if (!response.ok) {
+          throw new Error(t("Attachment upload failed"));
+        }
+
+        setEditing((current) => ({
+          ...current,
+          attachments: (current.attachments ?? []).map((attachment) =>
+            attachment.draftKey === uploadTarget.draftKey
+              ? {
+                  ...attachment,
+                  uploadStatus: "uploaded",
+                  errorMessage: undefined,
+                }
+              : attachment,
+          ),
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : t("Attachment upload failed");
+        notifications.show({ message, color: "red" });
+        setEditing((current) => ({
+          ...current,
+          attachments: (current.attachments ?? []).map((attachment) =>
+            attachment.fileName === file.name &&
+            attachment.uploadStatus === "uploading"
+              ? {
+                  ...attachment,
+                  uploadStatus: "error",
+                  errorMessage: message,
+                }
+              : attachment,
+          ),
+        }));
+      }
+    }
+
+    setIsUploadingAttachment(false);
+  };
+
+  const attachments = editing.attachments ?? [];
+  const hasUploadingAttachments = attachments.some(
+    (attachment) => attachment.uploadStatus === "uploading",
+  );
+
   return (
     <Modal
       opened={opened}
-      onClose={onClose}
+      onClose={handleClose}
       closeOnEscape={!templateVariablePopoverOpen}
       size="xl"
       zIndex={zIndex}
@@ -383,6 +567,91 @@ export default function TemplateEditorModal({
             }
           />
 
+          <Stack gap="xs">
+            <Group justify="space-between" align="flex-end">
+              <div>
+                <Text size="sm" fw={500}>
+                  {t("Attachments")}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  {t(
+                    "Only template-owned outgoing attachments are sent with the email.",
+                  )}
+                </Text>
+              </div>
+              <Button
+                variant="light"
+                onClick={() => attachmentInputRef.current?.click()}
+                loading={isUploadingAttachment}
+              >
+                {t("Add attachment")}
+              </Button>
+            </Group>
+            <input
+              ref={attachmentInputRef}
+              type="file"
+              multiple
+              hidden
+              onChange={(event) => {
+                void handleAttachmentSelection(event);
+              }}
+            />
+            {attachments.length > 0 ? (
+              <Stack gap="xs">
+                {attachments.map((attachment) => (
+                  <Card
+                    key={
+                      attachment.draftKey ??
+                      attachment.key ??
+                      attachment.attachmentId ??
+                      attachment.fileName
+                    }
+                    withBorder
+                  >
+                    <Group
+                      justify="space-between"
+                      align="flex-start"
+                      wrap="nowrap"
+                    >
+                      <div>
+                        <Text fw={500}>{attachment.fileName}</Text>
+                        <Text size="sm" c="dimmed">
+                          {attachment.contentType || "application/octet-stream"}{" "}
+                          | {formatAttachmentSize(attachment.size)}
+                        </Text>
+                        {attachment.uploadStatus === "uploading" ? (
+                          <Text size="xs" c="blue">
+                            {t("Uploading...")}
+                          </Text>
+                        ) : null}
+                        {attachment.uploadStatus === "error" ? (
+                          <Text size="xs" c="red">
+                            {attachment.errorMessage || t("Upload failed")}
+                          </Text>
+                        ) : null}
+                      </div>
+                      <Button
+                        variant="subtle"
+                        color="red"
+                        onClick={() => {
+                          void handleRemoveAttachment(attachment);
+                        }}
+                      >
+                        {t("Remove")}
+                      </Button>
+                    </Group>
+                  </Card>
+                ))}
+              </Stack>
+            ) : (
+              <Card withBorder>
+                <Text size="sm" c="dimmed">
+                  {t("No attachments added yet.")}
+                </Text>
+              </Card>
+            )}
+          </Stack>
+
           <Select
             label={t("Reference form (for field suggestions)")}
             placeholder={t("Select a form to see its fields")}
@@ -454,7 +723,8 @@ export default function TemplateEditorModal({
             <Button
               onClick={() => void saveMutation.mutate(editing)}
               disabled={
-                !isEditingExisting && existingKeys.has(editing.templateKey)
+                (!isEditingExisting && existingKeys.has(editing.templateKey)) ||
+                hasUploadingAttachments
               }
               loading={saveMutation.isPending}
             >

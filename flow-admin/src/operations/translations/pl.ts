@@ -46,6 +46,7 @@ export const plDict: Record<string, string> = {
   "Apply filter": "Zastosuj filtr",
   "Apply routing preset": "Zastosuj preset routingu",
   "archive@example.com": "archiwum@example.com",
+  "Authentication": "Uwierzytelnianie",
   "Attach existing": "Podepnij istniejący",
   "Auto - model decides if a tool is needed":
     "Auto - model decyduje, czy narzędzie jest potrzebne",
@@ -64,6 +65,8 @@ export const plDict: Record<string, string> = {
   "Choose webhook endpoint": "Wybierz punkt webhooka",
   "Choose webhook endpoint (optional)":
     "Wybierz punkt końcowy webhooka (opcjonalnie)",
+  "Client identifier sent to the token endpoint":
+    "Identyfikator klienta wysyłany do punktu końcowego tokenu",
   Classify: "Klasyfikować",
   Clear: "Wyczyść",
   Close: "Zamknij",
@@ -190,6 +193,8 @@ export const plDict: Record<string, string> = {
   General: "Ogólne",
   Generic: "Ogólne",
   "Generic Webhook": "Ogólny webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Ogólne punkty końcowe webhook mogą definiować swój URL, metodę, nagłówki, opcjonalne podpisywanie HMAC oraz opcjonalne uwierzytelnianie OAuth 2.0 client-credentials w jednym miejscu wielokrotnego użytku.",
   "Greater Than": "Większy niż",
   "Header name": "Nazwa nagłówka",
   "Header value": "Wartość nagłówka",
@@ -205,6 +210,8 @@ export const plDict: Record<string, string> = {
   "How to construct the event payload": "Jak skonstruować ładunek zdarzenia",
   "HTML body": "Treść HTML",
   "HTTP Method": "Metoda HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "Punkt końcowy tokenu HTTPS używany do żądań tokenu dostępu client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Czytelna etykieta widoczna na płótnie",
@@ -290,13 +297,30 @@ export const plDict: Record<string, string> = {
   Open: "Otwórz",
   "Open in new tab": "Otwórz w nowej karcie",
   Operator: "Operator",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Opcjonalny parametr audience wysyłany z żądaniem tokenu dla dostawców, którzy go wymagają",
+  "Optional authorization added before the webhook call":
+    "Opcjonalna autoryzacja dodawana przed wywołaniem webhooka",
   "Optional description of what this webhook is used for":
     "Opcjonalny opis zastosowania tego webhooka",
   "Optional description of what this workflow does":
     "Opcjonalny opis działania tego workflow",
+  "Optional request signing for receivers that verify signatures":
+    "Opcjonalne podpisywanie żądania dla odbiorców weryfikujących podpisy",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Opcjonalny parametr resource dla punktów końcowych tokenu w starszym stylu Azure AD",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Opcjonalny scope wysyłany z żądaniem tokenu, na przykład scope Dataverse /.default",
   "Optional visible label on the branch": "Opcjonalna widoczna etykieta gałęzi",
   "Order confirmation email": "E-mail z potwierdzeniem zamówienia",
   Other: "Inny",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "Parametr Client Secret OAuth 2.0",
+  "OAuth 2.0 Resource": "Zasób OAuth 2.0",
+  "OAuth 2.0 Scope": "Zakres OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "Punkt końcowy tokenu OAuth 2.0",
   "Outcome Types": "Typy wyników",
   "Output event schema (JSON Schema, optional)":
     "Schemat zdarzenia wyjściowego (JSON Schema, opcjonalnie)",
@@ -379,6 +403,10 @@ export const plDict: Record<string, string> = {
   "Signing Secret Parameter": "Parametr sekretu podpisu",
   "Site Name": "Nazwa witryny",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Nazwa parametru SSM SecureString zawierającego OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Nazwa parametru SSM używana do podpisywania HMAC, gdy włączone",
   "Source Channel": "Kanał źródłowy",
   "Source System": "System źródłowy",
   "Sources used": "Źródła wykorzystane",

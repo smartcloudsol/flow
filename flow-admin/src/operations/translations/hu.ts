@@ -46,6 +46,7 @@ export const huDict: Record<string, string> = {
   "Apply filter": "Szűrő alkalmazása",
   "Apply routing preset": "Útvonali beállítás alkalmazása",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Hitelesítés",
   "Attach existing": "Meglévő csatolása",
   "Auto - model decides if a tool is needed":
     "Automatikus - a modell dönti el, kell-e eszköz",
@@ -65,6 +66,8 @@ export const huDict: Record<string, string> = {
   "Choose webhook endpoint": "Webhook végpont kiválasztása",
   "Choose webhook endpoint (optional)":
     "Webhook végpont kiválasztása (opcionális)",
+  "Client identifier sent to the token endpoint":
+    "A token végpontra küldött kliensazonosító",
   Classify: "Osztályoz",
   Clear: "Törlés",
   Close: "Bezárás",
@@ -191,6 +194,8 @@ export const huDict: Record<string, string> = {
   General: "Általános",
   Generic: "Általános",
   "Generic Webhook": "Általános webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Az általános webhook végpontok egyetlen újrahasznosítható helyen adhatják meg az URL-t, a metódust, a fejléceket, az opcionális HMAC-aláírást és az opcionális OAuth 2.0 client-credentials hitelesítést.",
   "Greater Than": "Nagyobb mint",
   "Header name": "Fejléc neve",
   "Header value": "Fejléc értéke",
@@ -207,6 +212,8 @@ export const huDict: Record<string, string> = {
     "Hogyan álljon össze az esemény payloadja",
   "HTML body": "HTML törzs",
   "HTTP Method": "HTTP metódus",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "A client-credentials hozzáférési token kérelmekhez használt HTTPS token végpont",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "A vásznon megjelenő olvasható címke",
@@ -295,13 +302,30 @@ export const huDict: Record<string, string> = {
   Open: "Megnyitás",
   "Open in new tab": "Megnyitás új lapon",
   Operator: "Operátor",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Opcionális audience paraméter, amely a tokenkérelemmel együtt kerül elküldésre azon szolgáltatókhoz, amelyek ezt megkövetelik",
+  "Optional authorization added before the webhook call":
+    "A webhook hívás előtt hozzáadott opcionális hitelesítés",
   "Optional description of what this webhook is used for":
     "Opcionális leírás arról, mire szolgál ez a webhook",
   "Optional description of what this workflow does":
     "Opcionális leírás arról, mit csinál ez a workflow",
+  "Optional request signing for receivers that verify signatures":
+    "Opcionális kérésaláírás a szignatúrákat ellenőrző fogadók számára",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Opcionális resource paraméter régi Azure AD stílusú token végpontokhoz",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "A tokenkérelemmel küldött opcionális scope, például egy Dataverse /.default scope",
   "Optional visible label on the branch": "Opcionális látható címke az ágon",
   "Order confirmation email": "Rendelés-visszaigazoló e-mail",
   Other: "Egyéb",
+  "OAuth 2.0 Audience": "OAuth 2.0 Közönség",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret paraméter",
+  "OAuth 2.0 Resource": "OAuth 2.0 erőforrás",
+  "OAuth 2.0 Scope": "OAuth 2.0 hatókör",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 token végpont",
   "Outcome Types": "Eredménytípusok",
   "Output event schema (JSON Schema, optional)":
     "Kimeneti eseményséma (JSON Schema, opcionális)",
@@ -384,6 +408,10 @@ export const huDict: Record<string, string> = {
   "Signing Secret Parameter": "Aláírási titok paraméter",
   "Site Name": "Oldal neve",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Az OAuth kliens titkot tartalmazó SSM SecureString paraméter neve",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "A HMAC-aláíráshoz használt SSM paraméter neve, ha engedélyezve van",
   "Source Channel": "Forráscsatorna",
   "Source System": "Forrásrendszer",
   "Sources used": "Felhasznált források",

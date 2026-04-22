@@ -3129,6 +3129,12 @@ export interface ProcessMapCanvasProps {
   client: FlowBackendClient;
   isSaving?: boolean;
   onWorkflowSaved?: (workflow: Workflow, isNew: boolean) => void;
+  InfoLabel?: (props: {
+    text: string;
+    scrollToId: string;
+    onOpen: (targetScrollToId: string) => void;
+  }) => JSX.Element;
+  openInfo?: (targetScrollToId: string) => void;
 }
 
 function ProcessMapCanvasInner({
@@ -3140,6 +3146,8 @@ function ProcessMapCanvasInner({
   client,
   isSaving,
   onWorkflowSaved,
+  InfoLabel,
+  openInfo,
 }: ProcessMapCanvasProps) {
   const PROCESS_MAP_FULLSCREEN_Z_INDEX = 100000;
   const PROCESS_MAP_SNAP_GRID: [number, number] = [20, 20];
@@ -5259,6 +5267,8 @@ function ProcessMapCanvasInner({
             mode={editingWebhook?.mode ?? "existing"}
             client={client}
             boot={boot}
+            InfoLabel={InfoLabel}
+            openInfo={openInfo}
             zIndex={200001}
             onSaved={(saved) => {
               updateStepLinkedEntity(

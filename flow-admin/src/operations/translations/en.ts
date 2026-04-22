@@ -45,6 +45,7 @@ export const enDict: Record<string, string> = {
   "Apply filter": "Apply filter",
   "Apply routing preset": "Apply routing preset",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Authentication",
   "Attach existing": "Attach existing",
   "Auto - model decides if a tool is needed":
     "Auto - model decides if a tool is needed",
@@ -62,6 +63,8 @@ export const enDict: Record<string, string> = {
   "Choose the webhook provider preset": "Choose the webhook provider preset",
   "Choose webhook endpoint": "Choose webhook endpoint",
   "Choose webhook endpoint (optional)": "Choose webhook endpoint (optional)",
+  "Client identifier sent to the token endpoint":
+    "Client identifier sent to the token endpoint",
   Classify: "Classify",
   Clear: "Clear",
   Close: "Close",
@@ -187,6 +190,8 @@ export const enDict: Record<string, string> = {
   General: "General",
   Generic: "Generic",
   "Generic Webhook": "Generic Webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.",
   "Greater Than": "Greater Than",
   "Header name": "Header name",
   "Header value": "Header value",
@@ -202,6 +207,8 @@ export const enDict: Record<string, string> = {
   "How to construct the event payload": "How to construct the event payload",
   "HTML body": "HTML body",
   "HTTP Method": "HTTP Method",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS token endpoint used for client-credentials access token requests",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Human-readable label shown on the canvas",
@@ -290,14 +297,31 @@ export const enDict: Record<string, string> = {
   Open: "Open",
   "Open in new tab": "Open in new tab",
   Operator: "Operator",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Optional audience parameter sent with the token request for providers that require it",
+  "Optional authorization added before the webhook call":
+    "Optional authorization added before the webhook call",
   "Optional description of what this webhook is used for":
     "Optional description of what this webhook is used for",
   "Optional description of what this workflow does":
     "Optional description of what this workflow does",
+  "Optional request signing for receivers that verify signatures":
+    "Optional request signing for receivers that verify signatures",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Optional resource parameter for legacy Azure AD style token endpoints",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Optional scope sent with the token request, for example a Dataverse /.default scope",
   "Optional visible label on the branch":
     "Optional visible label on the branch",
   "Order confirmation email": "Order confirmation email",
   Other: "Other",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret Parameter",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "Outcome Types",
   "Output event schema (JSON Schema, optional)":
     "Output event schema (JSON Schema, optional)",
@@ -379,6 +403,10 @@ export const enDict: Record<string, string> = {
   "Signing Secret Parameter": "Signing Secret Parameter",
   "Site Name": "Site Name",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "SSM SecureString parameter name containing the OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "SSM parameter name used for HMAC signing, when enabled",
   "Source Channel": "Source Channel",
   "Source System": "Source System",
   "Sources used": "Sources used",

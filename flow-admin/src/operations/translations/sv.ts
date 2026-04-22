@@ -46,6 +46,7 @@ export const svDict: Record<string, string> = {
   "Apply filter": "Använd filter",
   "Apply routing preset": "Använd routningsförval",
   "archive@example.com": "arkiv@exampel.com",
+  "Authentication": "Autentisering",
   "Attach existing": "Koppla befintlig",
   "Auto - model decides if a tool is needed":
     "Auto - modellen avgör om ett verktyg behövs",
@@ -63,6 +64,8 @@ export const svDict: Record<string, string> = {
   "Choose the webhook provider preset": "Välj förval för webhook-leverantör",
   "Choose webhook endpoint": "Välj webhook-endpoint",
   "Choose webhook endpoint (optional)": "Välj webhook-slutpunkt (valfritt)",
+  "Client identifier sent to the token endpoint":
+    "Klientidentifierare som skickas till tokenändpunkten",
   Classify: "Klassificera",
   Clear: "Rensa",
   Close: "Stäng",
@@ -188,6 +191,8 @@ export const svDict: Record<string, string> = {
   General: "Allmänt",
   Generic: "Generisk",
   "Generic Webhook": "Generisk webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Generiska webhook-ändpunkter kan definiera sin URL, metod, headers, valfri HMAC-signering och valfri OAuth 2.0 client-credentials-autentisering på ett återanvändbart ställe.",
   "Greater Than": "Större än",
   "Header name": "Rubriknamn",
   "Header value": "Rubrikvärde",
@@ -204,6 +209,8 @@ export const svDict: Record<string, string> = {
     "Hur man konstruerar händelsenyttolasten",
   "HTML body": "HTML-text",
   "HTTP Method": "HTTP-metod",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS-tokenändpunkt som används för client-credentials-åtkomsttokenförfrågningar",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Läsbar etikett som visas på arbetsytan",
@@ -289,13 +296,30 @@ export const svDict: Record<string, string> = {
   Open: "Öppna",
   "Open in new tab": "Öppna i ny flik",
   Operator: "Operatör",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Valfri audience-parameter som skickas med tokenförfrågan för leverantörer som kräver den",
+  "Optional authorization added before the webhook call":
+    "Valfri auktorisering som läggs till före webhook-anropet",
   "Optional description of what this webhook is used for":
     "Valfri beskrivning av vad denna webhook används för",
   "Optional description of what this workflow does":
     "Valfri beskrivning av vad detta arbetsflöde gör",
+  "Optional request signing for receivers that verify signatures":
+    "Valfri signering av begäran för mottagare som verifierar signaturer",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Valfri resource-parameter för tokenändpunkter i äldre Azure AD-stil",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Valfri scope som skickas med tokenförfrågan, till exempel en Dataverse /.default-scope",
   "Optional visible label on the branch": "Valfri synlig etikett på grenen",
   "Order confirmation email": "Orderbekräftelse via e-post",
   Other: "Andra",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret-parameter",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "Resultattyper",
   "Output event schema (JSON Schema, optional)":
     "Schema för utdatahändelse (JSON Schema, valfritt)",
@@ -377,6 +401,10 @@ export const svDict: Record<string, string> = {
   "Signing Secret Parameter": "Parameter för signeringshemlighet",
   "Site Name": "Webbplatsnamn",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Namn på SSM SecureString-parameter som innehåller OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Namn på SSM-parameter som används för HMAC-signering, när aktiverad",
   "Source Channel": "Källkanal",
   "Source System": "Källsystem",
   "Sources used": "Använda källor",

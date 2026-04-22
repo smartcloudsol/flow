@@ -44,6 +44,7 @@ export const heDict: Record<string, string> = {
   "Apply filter": "החל מסנן",
   "Apply routing preset": "החל תצורת ניתוב מוכנה",
   "archive@example.com": "archive@example.com",
+  "Authentication": "אימות",
   "Attach existing": "צרף קיים",
   "Auto - model decides if a tool is needed":
     "אוטומטי - המודל מחליט אם נדרש כלי",
@@ -62,6 +63,7 @@ export const heDict: Record<string, string> = {
   "Choose webhook endpoint": "בחר נקודת קצה של webhook",
   "Choose webhook endpoint (optional)":
     "בחירת נקודת קצה של webhook (אופציונלי)",
+  "Client identifier sent to the token endpoint": "מזהה לקוח שנשלח לנקודת הקצה של הטוקן",
   Classify: "סיווג",
   Clear: "נקה",
   Close: "סגור",
@@ -186,6 +188,8 @@ export const heDict: Record<string, string> = {
   General: "כללי",
   Generic: "כללי",
   "Generic Webhook": "Webhook כללי",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "נקודות קצה כלליות של webhook יכולות להגדיר את ה-URL, השיטה, הכותרות, חתימת HMAC אופציונלית ואימות OAuth 2.0 מסוג client-credentials במקום אחד שניתן לשימוש חוזר.",
   "Greater Than": "גדול מ",
   "Header name": "שם הכותרת",
   "Header value": "ערך כותרת",
@@ -201,6 +205,8 @@ export const heDict: Record<string, string> = {
   "How to construct the event payload": "כיצד לבנות את מטען האירוע",
   "HTML body": "גוף HTML",
   "HTTP Method": "שיטת HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "נקודת קצה HTTPS לטוקן המשמשת לבקשות טוקן גישה מסוג client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "תווית קריאה לאדם שמוצגת על הקנבס",
@@ -284,13 +290,30 @@ export const heDict: Record<string, string> = {
   Open: "פתח",
   "Open in new tab": "פתח בכרטיסייה חדשה",
   Operator: "מַפעִיל",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "פרמטר Audience אופציונלי שנשלח עם בקשת הטוקן עבור ספקים שדורשים אותו",
+  "Optional authorization added before the webhook call":
+    "הרשאה אופציונלית שמתווספת לפני קריאת ה-webhook",
   "Optional description of what this webhook is used for":
     "תיאור אופציונלי למה webhook זה משמש",
   "Optional description of what this workflow does":
     "תיאור אופציונלי של מה שהתהליך הזה עושה",
+  "Optional request signing for receivers that verify signatures":
+    "חתימת בקשה אופציונלית עבור מקבלים שמאמתים חתימות",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "פרמטר Resource אופציונלי עבור נקודות קצה לטוקן בסגנון Azure AD הישן",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Scope אופציונלי שנשלח עם בקשת הטוקן, למשל Scope של Dataverse /.default",
   "Optional visible label on the branch": "תווית גלויה אופציונלית על הענף",
   "Order confirmation email": "אימייל אישור הזמנה",
   Other: "אַחֵר",
+  "OAuth 2.0 Audience": "Audience של OAuth 2.0",
+  "OAuth 2.0 Client Credentials": "אישורי לקוח של OAuth 2.0",
+  "OAuth 2.0 Client ID": "מזהה לקוח של OAuth 2.0",
+  "OAuth 2.0 Client Secret Parameter": "פרמטר סוד לקוח של OAuth 2.0",
+  "OAuth 2.0 Resource": "Resource של OAuth 2.0",
+  "OAuth 2.0 Scope": "Scope של OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "נקודת קצה לטוקן של OAuth 2.0",
   "Outcome Types": "סוגי תוצאות",
   "Output event schema (JSON Schema, optional)":
     "סכמת אירוע פלט (JSON Schema, אופציונלי)",
@@ -368,6 +391,10 @@ export const heDict: Record<string, string> = {
   "Signing Secret Parameter": "פרמטר סוד חתימה",
   "Site Name": "שם האתר",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "שם פרמטר SSM SecureString שמכיל את סוד הלקוח של OAuth",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "שם פרמטר SSM המשמש לחתימת HMAC, כאשר מופעל",
   "Source Channel": "ערוץ מקור",
   "Source System": "מערכת מקור",
   "Sources used": "מקורות בהם נעשה שימוש",

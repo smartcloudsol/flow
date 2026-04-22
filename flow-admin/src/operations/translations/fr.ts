@@ -48,6 +48,7 @@ export const frDict: Record<string, string> = {
   "Apply filter": "Appliquer le filtre",
   "Apply routing preset": "Appliquer le préréglage de routage",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Authentification",
   "Attach existing": "Attacher l'existant",
   "Auto - model decides if a tool is needed":
     "Auto - le modèle décide si un outil est nécessaire",
@@ -67,6 +68,8 @@ export const frDict: Record<string, string> = {
   "Choose webhook endpoint": "Choisir le point de terminaison webhook",
   "Choose webhook endpoint (optional)":
     "Choisissez le point de terminaison du webhook (facultatif)",
+  "Client identifier sent to the token endpoint":
+    "Identifiant client envoyé au point de terminaison de jeton",
   Classify: "Classer",
   Clear: "Effacer",
   Close: "Fermer",
@@ -194,6 +197,8 @@ export const frDict: Record<string, string> = {
   General: "Général",
   Generic: "Générique",
   "Generic Webhook": "Webhook générique",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Les points de terminaison webhook génériques peuvent définir leur URL, méthode, en-têtes, signature HMAC facultative et authentification OAuth 2.0 client credentials facultative à un seul endroit réutilisable.",
   "Greater Than": "Supérieur à",
   "Header name": "Nom de l'en-tête",
   "Header value": "Valeur d'en-tête",
@@ -210,6 +215,8 @@ export const frDict: Record<string, string> = {
     "Comment construire la charge utile de l'événement",
   "HTML body": "corps HTML",
   "HTTP Method": "Méthode HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "Point de terminaison HTTPS de jeton utilisé pour les demandes de jeton d'accès client credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Libellé lisible affiché sur le canevas",
@@ -296,14 +303,31 @@ export const frDict: Record<string, string> = {
   Open: "Ouvrir",
   "Open in new tab": "Ouvrir dans un nouvel onglet",
   Operator: "Opérateur",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Paramètre d'audience facultatif envoyé avec la demande de jeton pour les fournisseurs qui l'exigent",
+  "Optional authorization added before the webhook call":
+    "Autorisation facultative ajoutée avant l'appel webhook",
   "Optional description of what this webhook is used for":
     "Description facultative de l'usage de ce webhook",
   "Optional description of what this workflow does":
     "Description facultative de ce que fait ce workflow",
+  "Optional request signing for receivers that verify signatures":
+    "Signature de requête facultative pour les destinataires qui vérifient les signatures",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Paramètre de ressource facultatif pour les points de terminaison de jeton de style Azure AD hérité",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Portée facultative envoyée avec la demande de jeton, par exemple une portée Dataverse /.default",
   "Optional visible label on the branch":
     "Libellé visible facultatif sur la branche",
   "Order confirmation email": "E-mail de confirmation de commande",
   Other: "Autre",
+  "OAuth 2.0 Audience": "Audience OAuth 2.0",
+  "OAuth 2.0 Client Credentials": "Informations d'identification client OAuth 2.0",
+  "OAuth 2.0 Client ID": "ID client OAuth 2.0",
+  "OAuth 2.0 Client Secret Parameter": "Paramètre de secret client OAuth 2.0",
+  "OAuth 2.0 Resource": "Ressource OAuth 2.0",
+  "OAuth 2.0 Scope": "Portée OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "Point de terminaison de jeton OAuth 2.0",
   "Outcome Types": "Types de résultat",
   "Output event schema (JSON Schema, optional)":
     "Schéma d'événement de sortie (JSON Schema, optionnel)",
@@ -386,6 +410,10 @@ export const frDict: Record<string, string> = {
   "Signing Secret Parameter": "Paramètre du secret de signature",
   "Site Name": "Nom du site",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Nom du paramètre SSM SecureString contenant le secret client OAuth",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Nom du paramètre SSM utilisé pour la signature HMAC, lorsqu'elle est activée",
   "Source Channel": "Canal source",
   "Source System": "Système source",
   "Sources used": "Sources utilisées",

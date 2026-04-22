@@ -45,6 +45,7 @@ export const hiDict: Record<string, string> = {
   "Apply filter": "फ़िल्टर लागू करें",
   "Apply routing preset": "routing preset लागू करें",
   "archive@example.com": "archive@example.com",
+  "Authentication": "प्रमाणीकरण",
   "Attach existing": "मौजूदा संलग्न करें",
   "Auto - model decides if a tool is needed":
     "ऑटो - मॉडल तय करता है कि टूल चाहिए या नहीं",
@@ -62,6 +63,8 @@ export const hiDict: Record<string, string> = {
   "Choose the webhook provider preset": "webhook provider preset चुनें",
   "Choose webhook endpoint": "webhook endpoint चुनें",
   "Choose webhook endpoint (optional)": "वेबहुक एंडपॉइंट चुनें (वैकल्पिक)",
+  "Client identifier sent to the token endpoint":
+    "टोकन एंडपॉइंट पर भेजा गया क्लाइंट पहचानकर्ता",
   Classify: "वर्गीकृत करें",
   Clear: "साफ़ करें",
   Close: "बंद करें",
@@ -187,6 +190,8 @@ export const hiDict: Record<string, string> = {
   General: "सामान्य",
   Generic: "सामान्य",
   "Generic Webhook": "सामान्य webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "सामान्य webhook एंडपॉइंट अपनी URL, मेथड, हेडर, वैकल्पिक HMAC साइनिंग, और वैकल्पिक OAuth 2.0 client-credentials auth को एक पुन: प्रयोज्य स्थान पर परिभाषित कर सकते हैं।",
   "Greater Than": "से अधिक",
   "Header name": "हेडर नाम",
   "Header value": "हेडर मान",
@@ -202,6 +207,8 @@ export const hiDict: Record<string, string> = {
   "How to construct the event payload": "इवेंट पेलोड का निर्माण कैसे करें",
   "HTML body": "HTML बॉडी",
   "HTTP Method": "HTTP विधि",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "client-credentials एक्सेस टोकन अनुरोधों के लिए उपयोग किया जाने वाला HTTPS टोकन एंडपॉइंट",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "कैनवास पर दिखाया जाने वाला पढ़ने योग्य लेबल",
@@ -288,13 +295,30 @@ export const hiDict: Record<string, string> = {
   Open: "खोलें",
   "Open in new tab": "वेब टेब में खोलें",
   Operator: "ऑपरेटर",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "जिन प्रदाताओं को इसकी आवश्यकता होती है उनके लिए टोकन अनुरोध के साथ भेजा जाने वाला वैकल्पिक audience पैरामीटर",
+  "Optional authorization added before the webhook call":
+    "webhook कॉल से पहले जोड़ी जाने वाली वैकल्पिक authorization",
   "Optional description of what this webhook is used for":
     "यह webhook किस लिए उपयोग होता है, उसका वैकल्पिक विवरण",
   "Optional description of what this workflow does":
     "यह workflow क्या करता है, उसका वैकल्पिक विवरण",
+  "Optional request signing for receivers that verify signatures":
+    "सिग्नेचर सत्यापित करने वाले रिसीवरों के लिए वैकल्पिक अनुरोध साइनिंग",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "पुराने Azure AD शैली के टोकन एंडपॉइंट के लिए वैकल्पिक resource पैरामीटर",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "टोकन अनुरोध के साथ भेजा जाने वाला वैकल्पिक scope, उदाहरण के लिए Dataverse /.default scope",
   "Optional visible label on the branch": "ब्रांच पर वैकल्पिक दृश्य लेबल",
   "Order confirmation email": "ऑर्डर पुष्टि ईमेल",
   Other: "अन्य",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret Parameter",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "परिणाम प्रकार",
   "Output event schema (JSON Schema, optional)":
     "आउटपुट इवेंट schema (JSON Schema, वैकल्पिक)",
@@ -376,6 +400,10 @@ export const hiDict: Record<string, string> = {
   "Signing Secret Parameter": "Signing Secret Parameter",
   "Site Name": "जगह का नाम",
   "smartcloud.flow": "स्मार्टक्लाउड.फ्लो",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "OAuth client secret रखने वाले SSM SecureString पैरामीटर का नाम",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "सक्रिय होने पर HMAC साइनिंग के लिए उपयोग किया जाने वाला SSM पैरामीटर नाम",
   "Source Channel": "स्रोत चैनल",
   "Source System": "स्रोत सिस्टम",
   "Sources used": "प्रयुक्त स्रोत",

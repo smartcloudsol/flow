@@ -46,6 +46,7 @@ export const nbDict: Record<string, string> = {
   "Apply filter": "Bruk filter",
   "Apply routing preset": "Bruk rutingforvalg",
   "archive@example.com": "arkiv@eksempel.com",
+  "Authentication": "Autentisering",
   "Attach existing": "Koble til eksisterende",
   "Auto - model decides if a tool is needed":
     "Auto - modellen avgjør om et verktøy trengs",
@@ -63,6 +64,8 @@ export const nbDict: Record<string, string> = {
   "Choose the webhook provider preset": "Velg webhook-leverandørforvalg",
   "Choose webhook endpoint": "Velg webhook-endepunkt",
   "Choose webhook endpoint (optional)": "Velg webhook-endepunkt (valgfritt)",
+  "Client identifier sent to the token endpoint":
+    "Klientidentifikator sendt til tokenendepunktet",
   Classify: "Klassifisere",
   Clear: "Tøm",
   Close: "Lukk",
@@ -188,6 +191,8 @@ export const nbDict: Record<string, string> = {
   General: "Generelt",
   Generic: "Generisk",
   "Generic Webhook": "Generisk webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Generiske webhook-endepunkter kan definere URL, metode, headere, valgfri HMAC-signering og valgfri OAuth 2.0 client-credentials-autentisering på ett gjenbrukbart sted.",
   "Greater Than": "Større enn",
   "Header name": "Navn på overskrift",
   "Header value": "Topptekstverdi",
@@ -204,6 +209,8 @@ export const nbDict: Record<string, string> = {
     "Slik konstruerer du hendelsesnyttelasten",
   "HTML body": "HTML-tekst",
   "HTTP Method": "HTTP-metoden",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS-tokenendepunkt brukt for forespørsler om client-credentials-tilgangstoken",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas": "Lesbar etikett vist på lerretet",
   ID: "ID",
@@ -288,13 +295,30 @@ export const nbDict: Record<string, string> = {
   Open: "Åpne",
   "Open in new tab": "Åpne i ny fane",
   Operator: "Operatør",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Valgfri audience-parameter sendt med tokenforespørselen for leverandører som krever den",
+  "Optional authorization added before the webhook call":
+    "Valgfri autorisasjon lagt til før webhook-kallet",
   "Optional description of what this webhook is used for":
     "Valgfri beskrivelse av hva denne webhooken brukes til",
   "Optional description of what this workflow does":
     "Valgfri beskrivelse av hva denne arbeidsflyten gjør",
+  "Optional request signing for receivers that verify signatures":
+    "Valgfri forespørselssignering for mottakere som verifiserer signaturer",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Valgfri resource-parameter for tokenendepunkter i eldre Azure AD-stil",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Valgfri scope sendt med tokenforespørselen, for eksempel en Dataverse /.default-scope",
   "Optional visible label on the branch": "Valgfri synlig etikett på grenen",
   "Order confirmation email": "Ordrebekreftelse på e-post",
   Other: "Annen",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret-parameter",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "Utfallstyper",
   "Output event schema (JSON Schema, optional)":
     "Skjema for utdatahendelse (JSON Schema, valgfritt)",
@@ -375,6 +399,10 @@ export const nbDict: Record<string, string> = {
   "Signing Secret Parameter": "Parameter for signeringshemmelighet",
   "Site Name": "Nettstedsnavn",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Navn på SSM SecureString-parameter som inneholder OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Navn på SSM-parameter brukt for HMAC-signering, når aktivert",
   "Source Channel": "Kildekanal",
   "Source System": "Kildesystem",
   "Sources used": "Kilder brukt",

@@ -47,6 +47,7 @@ export const esDict: Record<string, string> = {
   "Apply filter": "Aplicar filtro",
   "Apply routing preset": "Aplicar ajuste de enrutamiento",
   "archive@example.com": "archivo@ejemplo.com",
+  "Authentication": "Autenticación",
   "Attach existing": "Adjuntar existente",
   "Auto - model decides if a tool is needed":
     "Auto - el modelo decide si se necesita una herramienta",
@@ -66,6 +67,8 @@ export const esDict: Record<string, string> = {
   "Choose webhook endpoint": "Elegir endpoint de webhook",
   "Choose webhook endpoint (optional)":
     "Seleccione el punto final del webhook (opcional)",
+  "Client identifier sent to the token endpoint":
+    "Identificador de cliente enviado al endpoint de token",
   Classify: "Clasificar",
   Clear: "Limpiar",
   Close: "Cerrar",
@@ -195,6 +198,8 @@ export const esDict: Record<string, string> = {
   General: "General",
   Generic: "Genérico",
   "Generic Webhook": "Webhook genérico",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Los endpoints de webhook genéricos pueden definir su URL, método, encabezados, firma HMAC opcional y autenticación OAuth 2.0 de client credentials opcional en un único lugar reutilizable.",
   "Greater Than": "Más que",
   "Header name": "Nombre del encabezado",
   "Header value": "Valor del encabezado",
@@ -211,6 +216,8 @@ export const esDict: Record<string, string> = {
     "Cómo construir la carga útil del evento",
   "HTML body": "Cuerpo HTML",
   "HTTP Method": "Método HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "Endpoint de token HTTPS usado para solicitudes de token de acceso de client credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Etiqueta legible mostrada en el lienzo",
@@ -297,14 +304,31 @@ export const esDict: Record<string, string> = {
   Open: "Abrir",
   "Open in new tab": "Abrir en una pestaña nueva",
   Operator: "Operador",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Parámetro de audiencia opcional enviado con la solicitud de token para proveedores que lo requieren",
+  "Optional authorization added before the webhook call":
+    "Autorización opcional agregada antes de la llamada del webhook",
   "Optional description of what this webhook is used for":
     "Descripción opcional de para qué se usa este webhook",
   "Optional description of what this workflow does":
     "Descripción opcional de lo que hace este flujo",
+  "Optional request signing for receivers that verify signatures":
+    "Firma de solicitud opcional para receptores que verifican firmas",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Parámetro de recurso opcional para endpoints de token de estilo Azure AD heredado",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Alcance opcional enviado con la solicitud de token, por ejemplo un alcance Dataverse /.default",
   "Optional visible label on the branch":
     "Etiqueta visible opcional en la rama",
   "Order confirmation email": "Correo de confirmación del pedido",
   Other: "Otro",
+  "OAuth 2.0 Audience": "Audiencia de OAuth 2.0",
+  "OAuth 2.0 Client Credentials": "Credenciales de cliente de OAuth 2.0",
+  "OAuth 2.0 Client ID": "ID de cliente de OAuth 2.0",
+  "OAuth 2.0 Client Secret Parameter": "Parámetro de secreto de cliente de OAuth 2.0",
+  "OAuth 2.0 Resource": "Recurso de OAuth 2.0",
+  "OAuth 2.0 Scope": "Alcance de OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "Endpoint de token de OAuth 2.0",
   "Outcome Types": "Tipos de resultado",
   "Output event schema (JSON Schema, optional)":
     "Esquema del evento de salida (JSON Schema, opcional)",
@@ -387,6 +411,10 @@ export const esDict: Record<string, string> = {
   "Signing Secret Parameter": "Parámetro del secreto de firma",
   "Site Name": "Nombre del sitio",
   "smartcloud.flow": "flujo de nube inteligente",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Nombre del parámetro SecureString de SSM que contiene el secreto de cliente OAuth",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Nombre del parámetro de SSM usado para la firma HMAC, cuando está habilitada",
   "Source Channel": "Canal de origen",
   "Source System": "Sistema de origen",
   "Sources used": "Fuentes utilizadas",

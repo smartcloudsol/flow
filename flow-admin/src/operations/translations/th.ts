@@ -46,6 +46,7 @@ export const thDict: Record<string, string> = {
   "Apply filter": "ใช้ตัวกรอง",
   "Apply routing preset": "ใช้พรีเซ็ตรูตติ้ง",
   "archive@example.com": "archive@example.com",
+  "Authentication": "การยืนยันตัวตน",
   "Attach existing": "แนบที่มีอยู่",
   "Auto - model decides if a tool is needed":
     "อัตโนมัติ - โมเดลตัดสินใจว่าเครื่องมือจำเป็นหรือไม่",
@@ -63,6 +64,8 @@ export const thDict: Record<string, string> = {
   "Choose the webhook provider preset": "เลือกพรีเซ็ตผู้ให้บริการ webhook",
   "Choose webhook endpoint": "เลือกปลายทาง webhook",
   "Choose webhook endpoint (optional)": "เลือกปลายทางเว็บฮุค (ไม่จำเป็น)",
+  "Client identifier sent to the token endpoint":
+    "ตัวระบุไคลเอนต์ที่ส่งไปยังโทเค็นเอนด์พอยต์",
   Classify: "จัดประเภท",
   Clear: "ล้าง",
   Close: "ปิด",
@@ -188,6 +191,8 @@ export const thDict: Record<string, string> = {
   General: "ทั่วไป",
   Generic: "ทั่วไป",
   "Generic Webhook": "Webhook ทั่วไป",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Webhook endpoint แบบทั่วไปสามารถกำหนด URL, เมธอด, เฮดเดอร์, การลงนาม HMAC แบบเลือกได้ และการยืนยันตัวตน OAuth 2.0 แบบ client-credentials ที่เลือกได้ไว้ในที่เดียวที่นำกลับมาใช้ซ้ำได้",
   "Greater Than": "มากกว่า",
   "Header name": "ชื่อส่วนหัว",
   "Header value": "ค่าส่วนหัว",
@@ -202,6 +207,8 @@ export const thDict: Record<string, string> = {
   "How to construct the event payload": "วิธีการสร้างเพย์โหลดของเหตุการณ์",
   "HTML body": "เนื้อหา HTML",
   "HTTP Method": "วิธีการ HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "โทเค็นเอนด์พอยต์ HTTPS ที่ใช้สำหรับคำขอโทเค็นการเข้าถึงแบบ client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "ป้ายชื่อที่อ่านเข้าใจได้บนแคนวาส",
@@ -287,14 +294,31 @@ export const thDict: Record<string, string> = {
   Open: "เปิด",
   "Open in new tab": "เปิดในแท็บใหม่",
   Operator: "ผู้ปฏิบัติงาน",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "พารามิเตอร์ audience แบบเลือกได้ที่ส่งพร้อมคำขอโทเค็นสำหรับผู้ให้บริการที่ต้องใช้",
+  "Optional authorization added before the webhook call":
+    "การอนุญาตแบบเลือกได้ที่เพิ่มก่อนการเรียก webhook",
   "Optional description of what this webhook is used for":
     "คำอธิบายเพิ่มเติมว่า webhook นี้ใช้ทำอะไร",
   "Optional description of what this workflow does":
     "คำอธิบายเพิ่มเติมว่าเวิร์กโฟลว์นี้ทำอะไร",
+  "Optional request signing for receivers that verify signatures":
+    "การลงนามคำขอแบบเลือกได้สำหรับผู้รับที่ตรวจสอบลายเซ็น",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "พารามิเตอร์ resource แบบเลือกได้สำหรับโทเค็นเอนด์พอยต์สไตล์ Azure AD แบบเดิม",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "scope แบบเลือกได้ที่ส่งพร้อมคำขอโทเค็น เช่น scope Dataverse /.default",
   "Optional visible label on the branch":
     "ป้ายชื่อที่มองเห็นได้บนสาขา (ไม่บังคับ)",
   "Order confirmation email": "อีเมลยืนยันคำสั่งซื้อ",
   Other: "อื่น",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "พารามิเตอร์ Client Secret ของ OAuth 2.0",
+  "OAuth 2.0 Resource": "ทรัพยากร OAuth 2.0",
+  "OAuth 2.0 Scope": "ขอบเขต OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "ประเภทผลลัพธ์",
   "Output event schema (JSON Schema, optional)":
     "สคีมาอีเวนต์เอาต์พุต (JSON Schema, ไม่บังคับ)",
@@ -372,6 +396,10 @@ export const thDict: Record<string, string> = {
   "Signing Secret Parameter": "พารามิเตอร์ secret สำหรับลงนาม",
   "Site Name": "ชื่อไซต์",
   "smartcloud.flow": "สมาร์ทคลาวด์โฟลว์",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "ชื่อพารามิเตอร์ SSM SecureString ที่มี OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "ชื่อพารามิเตอร์ SSM ที่ใช้สำหรับการลงนาม HMAC เมื่อเปิดใช้งาน",
   "Source Channel": "ช่องทางต้นทาง",
   "Source System": "ระบบต้นทาง",
   "Sources used": "แหล่งข้อมูลที่ใช้",

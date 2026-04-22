@@ -45,6 +45,7 @@ export const uaDict: Record<string, string> = {
   "Apply filter": "Застосувати фільтр",
   "Apply routing preset": "Застосувати пресет маршрутизації",
   "archive@example.com": "archive@example.com",
+  "Authentication": "Автентифікація",
   "Attach existing": "Приєднати наявний",
   "Auto - model decides if a tool is needed":
     "Авто - модель вирішує, чи потрібен інструмент",
@@ -63,6 +64,8 @@ export const uaDict: Record<string, string> = {
   "Choose webhook endpoint": "Виберіть webhook-ендпойнт",
   "Choose webhook endpoint (optional)":
     "Виберіть кінцеву точку вебхука (необов'язково)",
+  "Client identifier sent to the token endpoint":
+    "Ідентифікатор клієнта, що надсилається до токен-ендпоінта",
   Classify: "Класифікувати",
   Clear: "Очистити",
   Close: "Закрити",
@@ -191,6 +194,8 @@ export const uaDict: Record<string, string> = {
   General: "Загальні",
   Generic: "Загальний",
   "Generic Webhook": "Загальний webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "Універсальні webhook-ендпоінти можуть визначати URL, метод, заголовки, необов'язкове HMAC-підписування та необов'язкову OAuth 2.0 client-credentials автентифікацію в одному повторно використовуваному місці.",
   "Greater Than": "Більше ніж",
   "Header name": "Назва заголовка",
   "Header value": "Значення заголовка",
@@ -207,6 +212,8 @@ export const uaDict: Record<string, string> = {
     "Як створити корисне навантаження події",
   "HTML body": "Текст HTML",
   "HTTP Method": "Метод HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "HTTPS токен-ендпоінт, що використовується для запитів access token за client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "Зрозумілий підпис, показаний на полотні",
@@ -293,13 +300,30 @@ export const uaDict: Record<string, string> = {
   Open: "Відкрити",
   "Open in new tab": "Відкрити в новій вкладці",
   Operator: "Оператор",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "Необов'язковий параметр audience, що надсилається із запитом токена для провайдерів, яким він потрібен",
+  "Optional authorization added before the webhook call":
+    "Необов'язкова авторизація, що додається перед викликом webhook",
   "Optional description of what this webhook is used for":
     "Необов'язковий опис того, для чого використовується цей webhook",
   "Optional description of what this workflow does":
     "Необов'язковий опис того, що робить цей workflow",
+  "Optional request signing for receivers that verify signatures":
+    "Необов'язкове підписування запиту для отримувачів, які перевіряють підписи",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "Необов'язковий параметр resource для токен-ендпоінтів у застарілому стилі Azure AD",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "Необов'язковий scope, що надсилається із запитом токена, наприклад scope Dataverse /.default",
   "Optional visible label on the branch": "Необов'язкова видима мітка на гілці",
   "Order confirmation email": "Лист підтвердження замовлення",
   Other: "Інше",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "Параметр Client Secret OAuth 2.0",
+  "OAuth 2.0 Resource": "Ресурс OAuth 2.0",
+  "OAuth 2.0 Scope": "Область OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "Типи результатів",
   "Output event schema (JSON Schema, optional)":
     "Схема вихідної події (JSON Schema, необов'язково)",
@@ -381,6 +405,10 @@ export const uaDict: Record<string, string> = {
   "Signing Secret Parameter": "Параметр секрету підпису",
   "Site Name": "Назва сайту",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "Назва параметра SSM SecureString, що містить OAuth client secret",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "Назва параметра SSM, що використовується для HMAC-підписування, коли увімкнено",
   "Source Channel": "Канал джерела",
   "Source System": "Система джерела",
   "Sources used": "Використані джерела",

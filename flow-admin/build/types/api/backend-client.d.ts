@@ -1,4 +1,4 @@
-import type { BootConfig, EmailTemplate, FormDefinition, ListResponse, ProcessMap, Submission, SubmissionActionResponse, SubmissionDetail, SubmissionEvent, SubmissionListQuery, TemplatePreviewResponse, WebhookEndpoint, Workflow } from "./types";
+import type { BootConfig, EmailTemplate, FormDefinition, ListResponse, ProcessMap, Submission, SubmissionActionResponse, SubmissionDetail, SubmissionEvent, SubmissionListQuery, TemplateAttachmentUploadTarget, TemplatePreviewResponse, WebhookEndpoint, Workflow } from "./types";
 export declare class FlowBackendClient {
     private readonly boot;
     constructor(boot: BootConfig);
@@ -19,6 +19,12 @@ export declare class FlowBackendClient {
     updateTemplate(templateKey: string, body: EmailTemplate): Promise<EmailTemplate>;
     deleteTemplate(templateKey: string): Promise<void>;
     previewTemplate(templateKey: string, variables: Record<string, unknown>): Promise<TemplatePreviewResponse>;
+    createTemplateAttachmentUploadTarget(input: {
+        draftId: string;
+        fileName: string;
+        contentType?: string;
+    }): Promise<TemplateAttachmentUploadTarget>;
+    deleteTemplateAttachmentDraft(draftKey: string): Promise<void>;
     listWorkflows(limit?: number, cursor?: string): Promise<ListResponse<Workflow>>;
     getWorkflow(workflowId: string): Promise<Workflow>;
     createWorkflow(body: Workflow): Promise<Workflow>;

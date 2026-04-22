@@ -45,6 +45,7 @@ export const arDict: Record<string, string> = {
   "Apply filter": "تطبيق الفلتر",
   "Apply routing preset": "تطبيق إعداد توجيه مسبق",
   "archive@example.com": "archive@example.com",
+  "Authentication": "المصادقة",
   "Attach existing": "إرفاق موجود",
   "Auto - model decides if a tool is needed":
     "تلقائي - يقرر النموذج ما إذا كانت الأداة مطلوبة",
@@ -63,6 +64,8 @@ export const arDict: Record<string, string> = {
     "اختر الإعداد المسبق لمزوّد الـ webhook",
   "Choose webhook endpoint": "اختر نقطة نهاية الـ webhook",
   "Choose webhook endpoint (optional)": "اختر نقطة نهاية webhook (اختياري)",
+  "Client identifier sent to the token endpoint":
+    "معرّف العميل المُرسَل إلى نقطة نهاية الرمز المميز",
   Classify: "التصنيف",
   Clear: "مسح",
   Close: "إغلاق",
@@ -187,6 +190,8 @@ export const arDict: Record<string, string> = {
   General: "عام",
   Generic: "عام",
   "Generic Webhook": "Webhook عام",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "يمكن لنقاط نهاية webhook العامة تحديد عنوان URL والطريقة والترويسات وتوقيع HMAC اختياريًا ومصادقة OAuth 2.0 بنمط client-credentials اختياريًا في مكان واحد قابل لإعادة الاستخدام.",
   "Greater Than": "أكبر من",
   "Header name": "اسم العنوان",
   "Header value": "قيمة العنوان",
@@ -202,6 +207,8 @@ export const arDict: Record<string, string> = {
   "How to construct the event payload": "كيفية إنشاء حمولة الحدث",
   "HTML body": "نص HTML",
   "HTTP Method": "طريقة HTTP",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "نقطة نهاية رمز مميز HTTPS تُستخدم لطلبات رمز الوصول بنمط client-credentials",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "تسمية مقروءة للبشر تظهر على اللوحة",
@@ -287,13 +294,30 @@ export const arDict: Record<string, string> = {
   Open: "فتح",
   "Open in new tab": "افتح في علامة تبويب جديدة",
   Operator: "المشغل",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "معلمة audience اختيارية تُرسَل مع طلب الرمز للمزوّدين الذين يطلبونها",
+  "Optional authorization added before the webhook call":
+    "تفويض اختياري يُضاف قبل استدعاء webhook",
   "Optional description of what this webhook is used for":
     "وصف اختياري لاستخدام هذا الـ webhook",
   "Optional description of what this workflow does":
     "وصف اختياري لما يفعله سير العمل هذا",
+  "Optional request signing for receivers that verify signatures":
+    "توقيع طلب اختياري للمستقبِلين الذين يتحققون من التواقيع",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "معلمة resource اختيارية لنقاط نهاية الرمز المميز بنمط Azure AD القديم",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "نطاق اختياري يُرسَل مع طلب الرمز، على سبيل المثال نطاق Dataverse /.default",
   "Optional visible label on the branch": "تسمية مرئية اختيارية على الفرع",
   "Order confirmation email": "رسالة تأكيد الطلب",
   Other: "آخر",
+  "OAuth 2.0 Audience": "جمهور OAuth 2.0",
+  "OAuth 2.0 Client Credentials": "بيانات اعتماد عميل OAuth 2.0",
+  "OAuth 2.0 Client ID": "معرّف عميل OAuth 2.0",
+  "OAuth 2.0 Client Secret Parameter": "معلمة سرّ عميل OAuth 2.0",
+  "OAuth 2.0 Resource": "مورد OAuth 2.0",
+  "OAuth 2.0 Scope": "نطاق OAuth 2.0",
+  "OAuth 2.0 Token Endpoint": "نقطة نهاية الرمز المميز لـ OAuth 2.0",
   "Outcome Types": "أنواع النتائج",
   "Output event schema (JSON Schema, optional)":
     "مخطط حدث الإخراج (JSON Schema، اختياري)",
@@ -373,6 +397,10 @@ export const arDict: Record<string, string> = {
   "Signing Secret Parameter": "معامل سر التوقيع",
   "Site Name": "اسم الموقع",
   "smartcloud.flow": "smartcloud.flow",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "اسم معلمة SSM SecureString التي تحتوي على سر عميل OAuth",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "اسم معلمة SSM المستخدمة لتوقيع HMAC عند التمكين",
   "Source Channel": "قناة المصدر",
   "Source System": "نظام المصدر",
   "Sources used": "المصادر المستخدمة",

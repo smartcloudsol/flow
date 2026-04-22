@@ -509,7 +509,12 @@ export default function Main({ nonce, settings, store }: MainProps) {
         boot={{ settings: settingsFormData }}
       />
     ) : activeOperationsView === "workflows" ? (
-      <WorkflowsEditor client={backendClient} boot={boot} />
+      <WorkflowsEditor
+        client={backendClient}
+        boot={boot}
+        InfoLabel={InfoLabel}
+        openInfo={openInfo}
+      />
     ) : null;
 
   return (

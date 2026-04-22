@@ -9,6 +9,7 @@ import type {
   SubmissionDetail,
   SubmissionEvent,
   SubmissionListQuery,
+  TemplateAttachmentUploadTarget,
   TemplatePreviewResponse,
   WebhookEndpoint,
   Workflow,
@@ -145,6 +146,26 @@ export class FlowBackendClient {
   ): Promise<TemplatePreviewResponse> {
     return this.request(`/templates/${templateKey}/preview`, "POST", {
       variables,
+    });
+  }
+
+  createTemplateAttachmentUploadTarget(input: {
+    draftId: string;
+    fileName: string;
+    contentType?: string;
+  }): Promise<TemplateAttachmentUploadTarget> {
+    return this.request(`/template-attachments/upload-url`, "POST", {
+      accountId: this.boot.accountId,
+      siteId: this.boot.siteId,
+      draftId: input.draftId,
+      fileName: input.fileName,
+      contentType: input.contentType,
+    });
+  }
+
+  deleteTemplateAttachmentDraft(draftKey: string): Promise<void> {
+    return this.request(`/template-attachments/drafts/delete`, "POST", {
+      draftKey,
     });
   }
 

@@ -45,6 +45,7 @@ export const koDict: Record<string, string> = {
   "Apply filter": "필터 적용",
   "Apply routing preset": "라우팅 프리셋 적용",
   "archive@example.com": "archive@example.com",
+  "Authentication": "인증",
   "Attach existing": "기존 항목 연결",
   "Auto - model decides if a tool is needed":
     "자동 - 도구 필요 여부를 모델이 결정",
@@ -63,6 +64,7 @@ export const koDict: Record<string, string> = {
   "Choose webhook endpoint": "webhook 엔드포인트 선택",
   "Choose webhook endpoint (optional)":
     "웹훅 엔드포인트를 선택하세요(선택 사항).",
+  "Client identifier sent to the token endpoint": "토큰 엔드포인트로 전송되는 클라이언트 식별자",
   Classify: "나누다",
   Clear: "지우기",
   Close: "닫기",
@@ -187,6 +189,8 @@ export const koDict: Record<string, string> = {
   General: "일반",
   Generic: "일반",
   "Generic Webhook": "일반 Webhook",
+  "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.":
+    "일반 웹훅 엔드포인트는 URL, 메서드, 헤더, 선택적 HMAC 서명, 선택적 OAuth 2.0 client-credentials 인증을 재사용 가능한 한 곳에서 정의할 수 있습니다.",
   "Greater Than": "보다 큰",
   "Header name": "헤더 이름",
   "Header value": "헤더 값",
@@ -202,6 +206,8 @@ export const koDict: Record<string, string> = {
   "How to construct the event payload": "이벤트 페이로드를 구성하는 방법",
   "HTML body": "HTML 본문",
   "HTTP Method": "HTTP 메서드",
+  "HTTPS token endpoint used for client-credentials access token requests":
+    "client-credentials 액세스 토큰 요청에 사용되는 HTTPS 토큰 엔드포인트",
   "https://example.com/api/webhooks": "https://example.com/api/webhooks",
   "Human-readable label shown on the canvas":
     "캔버스에 표시되는 사람이 읽기 쉬운 라벨",
@@ -286,13 +292,29 @@ export const koDict: Record<string, string> = {
   Open: "열기",
   "Open in new tab": "새 탭에서 열기",
   Operator: "연산자",
+  "Optional audience parameter sent with the token request for providers that require it":
+    "필요로 하는 제공자를 위해 토큰 요청과 함께 전송되는 선택적 audience 매개변수",
+  "Optional authorization added before the webhook call": "웹훅 호출 전에 추가되는 선택적 authorization",
   "Optional description of what this webhook is used for":
     "이 webhook의 용도에 대한 선택 설명",
   "Optional description of what this workflow does":
     "이 워크플로가 하는 일에 대한 선택 설명",
+  "Optional request signing for receivers that verify signatures":
+    "서명을 검증하는 수신자를 위한 선택적 요청 서명",
+  "Optional resource parameter for legacy Azure AD style token endpoints":
+    "레거시 Azure AD 스타일 토큰 엔드포인트용 선택적 resource 매개변수",
+  "Optional scope sent with the token request, for example a Dataverse /.default scope":
+    "토큰 요청과 함께 전송되는 선택적 scope(예: Dataverse /.default scope)",
   "Optional visible label on the branch": "분기에 표시할 선택 라벨",
   "Order confirmation email": "주문 확인 이메일",
   Other: "다른",
+  "OAuth 2.0 Audience": "OAuth 2.0 Audience",
+  "OAuth 2.0 Client Credentials": "OAuth 2.0 Client Credentials",
+  "OAuth 2.0 Client ID": "OAuth 2.0 Client ID",
+  "OAuth 2.0 Client Secret Parameter": "OAuth 2.0 Client Secret 매개변수",
+  "OAuth 2.0 Resource": "OAuth 2.0 Resource",
+  "OAuth 2.0 Scope": "OAuth 2.0 Scope",
+  "OAuth 2.0 Token Endpoint": "OAuth 2.0 Token Endpoint",
   "Outcome Types": "결과 유형",
   "Output event schema (JSON Schema, optional)":
     "출력 이벤트 스키마 (JSON Schema, 선택사항)",
@@ -372,6 +394,10 @@ export const koDict: Record<string, string> = {
   "Signing Secret Parameter": "서명 비밀 파라미터",
   "Site Name": "사이트 이름",
   "smartcloud.flow": "스마트클라우드.플로우",
+  "SSM SecureString parameter name containing the OAuth client secret":
+    "OAuth client secret을 포함하는 SSM SecureString 매개변수 이름",
+  "SSM parameter name used for HMAC signing, when enabled":
+    "활성화된 경우 HMAC 서명에 사용되는 SSM 매개변수 이름",
   "Source Channel": "소스 채널",
   "Source System": "소스 시스템",
   "Sources used": "참고 자료",

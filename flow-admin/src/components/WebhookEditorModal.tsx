@@ -35,6 +35,7 @@ function emptyWebhook(boot: BootConfig): WebhookEndpoint {
     enabled: true,
     method: "POST",
     signingMode: "none",
+    authMode: "none",
     headers: {},
   };
 }
@@ -48,6 +49,12 @@ interface WebhookEditorModalProps {
   mode?: "draft" | "existing";
   zIndex?: number;
   onSaved?: (saved: WebhookEndpoint, isNew: boolean) => void;
+  InfoLabel?: (props: {
+    text: string;
+    scrollToId: string;
+    onOpen: (targetScrollToId: string) => void;
+  }) => JSX.Element;
+  openInfo?: (targetScrollToId: string) => void;
 }
 
 interface WebhookEditorContentProps {
@@ -58,6 +65,8 @@ interface WebhookEditorContentProps {
   onClose: () => void;
   onSaved?: (saved: WebhookEndpoint, isNew: boolean) => void;
   comboboxProps: ReturnType<typeof useOperationsComboboxProps>;
+  InfoLabel?: WebhookEditorModalProps["InfoLabel"];
+  openInfo?: WebhookEditorModalProps["openInfo"];
 }
 
 function WebhookEditorContent({
@@ -68,11 +77,20 @@ function WebhookEditorContent({
   onClose,
   onSaved,
   comboboxProps,
+  InfoLabel,
+  openInfo,
 }: WebhookEditorContentProps) {
   const queryClient = useQueryClient();
   const [editingWebhook, setEditingWebhook] = useState<WebhookEndpoint>(
     () => initialWebhook ?? emptyWebhook(boot),
   );
+
+  const labelWithInfo = (text: string, scrollToId: string) =>
+    InfoLabel && openInfo ? (
+      <InfoLabel text={t(text)} scrollToId={scrollToId} onOpen={openInfo} />
+    ) : (
+      t(text)
+    );
 
   const saveWebhookMutation = useMutation({
     mutationFn: (webhook: WebhookEndpoint) =>
@@ -123,7 +141,7 @@ function WebhookEditorContent({
         />
       </SimpleGrid>
       <TextInput
-        label={t("Target URL")}
+        label={labelWithInfo("Target URL", "webhook-url")}
         description={t(
           "The endpoint where webhook events will be sent. Zapier catch hooks belong here.",
         )}
@@ -136,7 +154,7 @@ function WebhookEditorContent({
           })
         }
       />
-      <SimpleGrid cols={{ base: 1, md: 3 }}>
+      <SimpleGrid cols={{ base: 1, md: 4 }}>
         <Select
           label={t("Provider")}
           description={t("Choose the webhook provider preset")}
@@ -155,12 +173,14 @@ function WebhookEditorContent({
                 value === "zapier"
                   ? "none"
                   : editingWebhook.signingMode ?? "none",
+              authMode:
+                value === "zapier" ? "none" : editingWebhook.authMode ?? "none",
             })
           }
           comboboxProps={comboboxProps}
         />
         <Select
-          label={t("HTTP Method")}
+          label={labelWithInfo("HTTP Method", "webhook-method")}
           description={t("Request method used by this endpoint")}
           data={[
             { value: "POST", label: "POST" },
@@ -177,7 +197,7 @@ function WebhookEditorContent({
           comboboxProps={comboboxProps}
         />
         <Select
-          label={t("Signing Mode")}
+          label={labelWithInfo("Signing Mode", "webhook-signing")}
           description={t(
             "Optional request signing for receivers that verify signatures",
           )}
@@ -190,6 +210,31 @@ function WebhookEditorContent({
             setEditingWebhook({
               ...editingWebhook,
               signingMode: value === "hmac" ? "hmac" : "none",
+            })
+          }
+          disabled={editingWebhook.provider === "zapier"}
+          comboboxProps={comboboxProps}
+        />
+        <Select
+          label={labelWithInfo("Authentication", "webhook-authentication")}
+          description={t(
+            "Optional authorization added before the webhook call",
+          )}
+          data={[
+            { value: "none", label: t("None") },
+            {
+              value: "oauth2-client-credentials",
+              label: t("OAuth 2.0 Client Credentials"),
+            },
+          ]}
+          value={editingWebhook.authMode ?? "none"}
+          onChange={(value) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              authMode:
+                value === "oauth2-client-credentials"
+                  ? "oauth2-client-credentials"
+                  : "none",
             })
           }
           disabled={editingWebhook.provider === "zapier"}
@@ -220,7 +265,10 @@ function WebhookEditorContent({
       />
       <SimpleGrid cols={{ base: 1, md: 2 }}>
         <TextInput
-          label={t("Signing Secret Parameter")}
+          label={labelWithInfo(
+            "Signing Secret Parameter",
+            "webhook-signing-secret-parameter",
+          )}
           description={t(
             "SSM parameter name used for HMAC signing, when enabled",
           )}
@@ -240,9 +288,114 @@ function WebhookEditorContent({
                 "Zapier endpoints use POST and no request signing. Configure the catch hook URL here, then reference this endpoint from workflows.",
               )
             : t(
-                "Generic webhook endpoints can define their URL, method, headers, and optional HMAC signing in one reusable place.",
+                "Generic webhook endpoints can define their URL, method, headers, optional HMAC signing, and optional OAuth 2.0 client-credentials auth in one reusable place.",
               )}
         </Text>
+      </SimpleGrid>
+      <SimpleGrid cols={{ base: 1, md: 2 }}>
+        <TextInput
+          label={labelWithInfo(
+            "OAuth 2.0 Token Endpoint",
+            "webhook-oauth-token-endpoint",
+          )}
+          description={t(
+            "HTTPS token endpoint used for client-credentials access token requests",
+          )}
+          placeholder={t(
+            "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token",
+          )}
+          value={editingWebhook.oauth2TokenEndpoint ?? ""}
+          onChange={(e) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              oauth2TokenEndpoint: e.currentTarget.value,
+            })
+          }
+          disabled={editingWebhook.authMode !== "oauth2-client-credentials"}
+        />
+        <TextInput
+          label={labelWithInfo(
+            "OAuth 2.0 Client ID",
+            "webhook-oauth-client-id",
+          )}
+          description={t("Client identifier sent to the token endpoint")}
+          placeholder={t("00000000-0000-0000-0000-000000000000")}
+          value={editingWebhook.oauth2ClientId ?? ""}
+          onChange={(e) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              oauth2ClientId: e.currentTarget.value,
+            })
+          }
+          disabled={editingWebhook.authMode !== "oauth2-client-credentials"}
+        />
+      </SimpleGrid>
+      <SimpleGrid cols={{ base: 1, md: 2 }}>
+        <TextInput
+          label={labelWithInfo(
+            "OAuth 2.0 Client Secret Parameter",
+            "webhook-oauth-client-secret-parameter",
+          )}
+          description={t(
+            "SSM SecureString parameter name containing the OAuth client secret",
+          )}
+          placeholder={t("/app/env/webhook/oauth-client-secret")}
+          value={editingWebhook.oauth2ClientSecretParameterName ?? ""}
+          onChange={(e) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              oauth2ClientSecretParameterName: e.currentTarget.value,
+            })
+          }
+          disabled={editingWebhook.authMode !== "oauth2-client-credentials"}
+        />
+        <TextInput
+          label={labelWithInfo("OAuth 2.0 Scope", "webhook-oauth-scope")}
+          description={t(
+            "Optional scope sent with the token request, for example a Dataverse /.default scope",
+          )}
+          placeholder={t("https://org.crm4.dynamics.com/.default")}
+          value={editingWebhook.oauth2Scope ?? ""}
+          onChange={(e) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              oauth2Scope: e.currentTarget.value,
+            })
+          }
+          disabled={editingWebhook.authMode !== "oauth2-client-credentials"}
+        />
+      </SimpleGrid>
+      <SimpleGrid cols={{ base: 1, md: 2 }}>
+        <TextInput
+          label={labelWithInfo("OAuth 2.0 Audience", "webhook-oauth-audience")}
+          description={t(
+            "Optional audience parameter sent with the token request for providers that require it",
+          )}
+          placeholder={t("api://00000000-0000-0000-0000-000000000000")}
+          value={editingWebhook.oauth2Audience ?? ""}
+          onChange={(e) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              oauth2Audience: e.currentTarget.value,
+            })
+          }
+          disabled={editingWebhook.authMode !== "oauth2-client-credentials"}
+        />
+        <TextInput
+          label={labelWithInfo("OAuth 2.0 Resource", "webhook-oauth-resource")}
+          description={t(
+            "Optional resource parameter for legacy Azure AD style token endpoints",
+          )}
+          placeholder={t("https://org.crm4.dynamics.com")}
+          value={editingWebhook.oauth2Resource ?? ""}
+          onChange={(e) =>
+            setEditingWebhook({
+              ...editingWebhook,
+              oauth2Resource: e.currentTarget.value,
+            })
+          }
+          disabled={editingWebhook.authMode !== "oauth2-client-credentials"}
+        />
       </SimpleGrid>
       <HeadersBuilder
         headers={editingWebhook.headers ?? {}}
@@ -287,6 +440,8 @@ export default function WebhookEditorModal({
   mode = "existing",
   zIndex = 100000,
   onSaved,
+  InfoLabel,
+  openInfo,
 }: WebhookEditorModalProps) {
   const comboboxProps = useOperationsComboboxProps(zIndex + 1);
   const isNew = mode === "draft" || !initialWebhook?.webhookKey;
@@ -315,6 +470,8 @@ export default function WebhookEditorModal({
         onClose={onClose}
         onSaved={onSaved}
         comboboxProps={comboboxProps}
+        InfoLabel={InfoLabel}
+        openInfo={openInfo}
       />
     </Modal>
   );
