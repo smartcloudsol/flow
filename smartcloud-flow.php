@@ -41,7 +41,28 @@ final class Flow
     /** @var string[] */
     private array $blocks = [
         'form',
+        'content-root',
         'operations',
+        'display-title',
+        'display-blockquote',
+        'display-mark',
+        'display-badge',
+        'display-highlight',
+        'display-code',
+        'display-number-formatter',
+        'display-spoiler',
+        'display-image',
+        'display-text',
+        'list',
+        'list-item',
+        'overflow-list',
+        'overflow-list-item',
+        'table',
+        'table-tr',
+        'table-th',
+        'table-td',
+        'timeline',
+        'timeline-item',
         'group-field',
         'grid-field',
         'stack-field',
@@ -99,8 +120,10 @@ final class Flow
 
         // Shortcode registration
         add_shortcode('smartcloud-flow-form', [$this, 'shortcodeFlowForm']);
+        add_shortcode('smartcloud-flow-content-root', [$this, 'shortcodeContentRoot']);
         add_filter('no_texturize_shortcodes', function ($shortcodes) {
             $shortcodes[] = 'smartcloud-flow-form';
+            $shortcodes[] = 'smartcloud-flow-content-root';
             return $shortcodes;
         });
     }
@@ -109,7 +132,7 @@ final class Flow
      * Shared shortcode parsing/normalization for Flow blocks.
      *
      * - Supports camelCase, kebab-case and snake_case attribute names.
-     * - Merges defaults + (optional) surrounding block attrs + shortcode attrs.
+     * - Merges defaults + caller-provided block/shortcode attrs.
      * - Decodes selected JSON-ish attributes when provided as strings.
      * - Supports "mini-YAML" shortcode body via configB64 + configFormat.
      *
@@ -121,14 +144,7 @@ final class Flow
      */
     private function buildShortcodeBlockAttrs($atts, $content, array $attribute_defaults, array $json_attrs = array()): array
     {
-        global $block;
-
         $provided_atts = array_change_key_case((array) $atts, CASE_LOWER);
-
-        $block_attrs = array();
-        if (is_array($block) && isset($block['attrs']) && is_array($block['attrs'])) {
-            $block_attrs = $block['attrs'];
-        }
 
         $is_preview = is_admin();
         if (!$is_preview && did_action('elementor/loaded') && class_exists('\\Elementor\\Plugin')) {
@@ -150,18 +166,17 @@ final class Flow
                 )
             );
 
-            $has_shortcode_value = false;
-            $shortcode_value = null;
+            $has_provided_value = false;
+            $provided_value = null;
             foreach ($shortcode_keys as $candidate_key) {
                 if (array_key_exists($candidate_key, $provided_atts)) {
-                    $shortcode_value = $provided_atts[$candidate_key];
-                    $has_shortcode_value = true;
+                    $provided_value = $provided_atts[$candidate_key];
+                    $has_provided_value = true;
                     break;
                 }
             }
 
-            $block_value = array_key_exists($attr_name, $block_attrs) ? $block_attrs[$attr_name] : null;
-            $value = $has_shortcode_value ? $shortcode_value : ($block_value ?? $default_value);
+            $value = $has_provided_value ? $provided_value : $default_value;
 
             // Decode JSON-like attributes if provided as a string in the shortcode
             if (is_string($value)) {
@@ -389,6 +404,102 @@ final class Flow
         );
 
         return $this->renderShortcodeBlock('smartcloud-flow/form', $form_block, $attrs, $is_preview);
+    }
+
+    /**
+     * Shortcode handler for [smartcloud-flow-content-root pattern="123" ...]
+     *
+     * @param array $atts
+     * @param string|null $content
+     * @return string
+     */
+    public function shortcodeContentRoot($atts, $content = null): string
+    {
+        $atts = array_change_key_case((array) $atts, CASE_LOWER);
+        $pattern_id = isset($atts['id']) ? intval($atts['id']) : 0;
+
+        if (!$pattern_id) {
+            return '<div class="smartcloud-flow-content-root-error">Missing pattern ID</div>';
+        }
+
+        $pattern_post = get_post($pattern_id);
+        if (!$pattern_post || $pattern_post->post_type !== 'wp_block') {
+            return '<div class="smartcloud-flow-content-root-error">Invalid pattern ID</div>';
+        }
+
+        $blocks = parse_blocks($pattern_post->post_content);
+        $content_root_block = null;
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') === 'smartcloud-flow/content-root') {
+                $content_root_block = $block;
+                break;
+            }
+        }
+
+        if (!$content_root_block) {
+            return '<div class="smartcloud-flow-content-root-error">Pattern does not contain a Flow Content Root block</div>';
+        }
+
+        $block_atts = $content_root_block['attrs'] ?? [];
+
+        $override_attribute_map = array(
+            'language' => 'language',
+            'direction' => 'direction',
+            'colormode' => 'colorMode',
+            'primarycolor' => 'primaryColor',
+            'themeoverrides' => 'themeOverrides',
+        );
+
+        foreach ($override_attribute_map as $shortcode_key => $attribute_key) {
+            if (!array_key_exists($shortcode_key, $atts)) {
+                continue;
+            }
+
+            $value = $atts[$shortcode_key];
+            if ($value === '') {
+                continue;
+            }
+
+            $block_atts[$attribute_key] = $value;
+        }
+
+        if ($content && is_string($content) && trim($content) !== '') {
+            $yaml = [];
+            $lines = explode("\n", $content);
+            foreach ($lines as $line) {
+                if (preg_match('/^([a-zA-Z0-9_]+):\s*(.+)$/', $line, $m)) {
+                    $yaml[$m[1]] = $m[2];
+                }
+            }
+            foreach ($yaml as $key => $value) {
+                $block_atts[$key] = $value;
+            }
+        }
+
+        $attribute_defaults = array(
+            'language' => null,
+            'direction' => null,
+            'colorMode' => null,
+            'primaryColor' => null,
+            'primaryShade' => null,
+            'colors' => null,
+            'themeOverrides' => null,
+            'fieldOverrides' => null,
+        );
+
+        list($attrs, $is_preview) = $this->buildShortcodeBlockAttrs(
+            $block_atts,
+            $content,
+            $attribute_defaults,
+            array('colors', 'primaryShade', 'fieldOverrides')
+        );
+
+        return $this->renderShortcodeBlock(
+            'smartcloud-flow/content-root',
+            $content_root_block,
+            $attrs,
+            $is_preview
+        );
     }
 
     public function createAdminMenu(): void
