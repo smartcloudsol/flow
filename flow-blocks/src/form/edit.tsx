@@ -48,6 +48,7 @@ import { __ } from "@wordpress/i18n";
 import { check, close, plus, seen, settings } from "@wordpress/icons";
 import { DIRECTION_OPTIONS } from "../index";
 import { parseOptions } from "../shared/field-utils";
+import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
 import type {
   FieldConfig,
   FormActionDefinition,
@@ -343,6 +344,26 @@ function createWizardTemplateBlocks(): FlowBlockInstance[] {
 }
 
 const FIELD_BLOCK_MAPPING: Record<string, string> = {
+  "smartcloud-flow/title": "display-title",
+  "smartcloud-flow/blockquote": "display-blockquote",
+  "smartcloud-flow/mark": "display-mark",
+  "smartcloud-flow/badge": "display-badge",
+  "smartcloud-flow/highlight": "display-highlight",
+  "smartcloud-flow/code": "display-code",
+  "smartcloud-flow/number-formatter": "display-number-formatter",
+  "smartcloud-flow/spoiler": "display-spoiler",
+  "smartcloud-flow/image": "display-image",
+  "smartcloud-flow/text": "display-text",
+  "smartcloud-flow/list": "list",
+  "smartcloud-flow/list-item": "list-item",
+  "smartcloud-flow/table": "table",
+  "smartcloud-flow/table-tr": "table-row",
+  "smartcloud-flow/table-th": "table-th",
+  "smartcloud-flow/table-td": "table-td",
+  "smartcloud-flow/timeline": "timeline",
+  "smartcloud-flow/timeline-item": "timeline-item",
+  "smartcloud-flow/overflow-list": "overflow-list",
+  "smartcloud-flow/overflow-list-item": "overflow-list-item",
   "smartcloud-flow/text-field": "text",
   "smartcloud-flow/textarea-field": "textarea",
   "smartcloud-flow/select-field": "select",
@@ -449,6 +470,16 @@ function blockToFieldConfig(block: FlowBlockInstance): FieldConfig | null {
     fieldType === "grid" ||
     fieldType === "fieldset" ||
     fieldType === "collapse" ||
+    fieldType === "list" ||
+    fieldType === "list-item" ||
+    fieldType === "table" ||
+    fieldType === "table-row" ||
+    fieldType === "table-th" ||
+    fieldType === "table-td" ||
+    fieldType === "timeline" ||
+    fieldType === "timeline-item" ||
+    fieldType === "overflow-list" ||
+    fieldType === "overflow-list-item" ||
     fieldType === "visuallyhidden"
   ) {
     const children = (block.innerBlocks || [])
@@ -942,17 +973,20 @@ export default function Edit({
         // Load templates
         try {
           const templatesResponse = await client.listTemplates();
-          const templateOptions = (templatesResponse.items || []).map((t) => ({
-            value: t.templateKey,
-            label: t.name || t.templateKey,
-          }));
+          const templateOptions = (templatesResponse.items || []).map(
+            (t: { templateKey: string; name?: string }) => ({
+              value: t.templateKey,
+              label: t.name || t.templateKey,
+            }),
+          );
           const currentAutoReplyTemplateKey =
             attributes.autoReplyTemplateKey?.trim() ?? "";
 
           if (
             currentAutoReplyTemplateKey &&
             !templateOptions.some(
-              (template) => template.value === currentAutoReplyTemplateKey,
+              (template: { value: string }) =>
+                template.value === currentAutoReplyTemplateKey,
             )
           ) {
             try {
@@ -981,10 +1015,12 @@ export default function Edit({
         try {
           const workflowsResponse = await client.listWorkflows();
           setAvailableWorkflows(
-            (workflowsResponse.items || []).map((w) => ({
-              value: w.workflowId,
-              label: w.name || w.workflowId,
-            })),
+            (workflowsResponse.items || []).map(
+              (w: { workflowId: string; name?: string }) => ({
+                value: w.workflowId,
+                label: w.name || w.workflowId,
+              }),
+            ),
           );
         } catch (error) {
           console.warn("Failed to load workflows:", error);
@@ -2022,35 +2058,7 @@ export default function Edit({
             </p>
             <InnerBlocks
               allowedBlocks={[
-                "smartcloud-flow/text-field",
-                "smartcloud-flow/textarea-field",
-                "smartcloud-flow/select-field",
-                "smartcloud-flow/checkbox-field",
-                "smartcloud-flow/checkbox-group-field",
-                "smartcloud-flow/date-field",
-                "smartcloud-flow/switch-field",
-                "smartcloud-flow/number-field",
-                "smartcloud-flow/radio-field",
-                "smartcloud-flow/password-field",
-                "smartcloud-flow/pin-field",
-                "smartcloud-flow/color-field",
-                "smartcloud-flow/file-field",
-                "smartcloud-flow/slider-field",
-                "smartcloud-flow/range-slider-field",
-                "smartcloud-flow/tags-field",
-                "smartcloud-flow/rating-field",
-                "smartcloud-flow/hidden-field",
-                "smartcloud-flow/save-draft-button",
-                "smartcloud-flow/ai-suggestions",
-                "smartcloud-flow/submit-button",
-                "smartcloud-flow/fieldset",
-                "smartcloud-flow/collapse",
-                "smartcloud-flow/divider",
-                "smartcloud-flow/visually-hidden",
-                "smartcloud-flow/stack",
-                "smartcloud-flow/group",
-                "smartcloud-flow/grid",
-                "smartcloud-flow/wizard",
+                ...(FORM_CHILD_BLOCKS as unknown as string[]),
                 "smartcloud-flow/success-state",
               ]}
               renderAppender={InnerBlocks.ButtonBlockAppender}

@@ -7,7 +7,7 @@ import {
 import { PanelBody, ToggleControl } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
-import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
+import { useNestedFlowChildBlocks } from "../shared/form-child-blocks";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
 
 interface VisuallyHiddenAttributes {
@@ -25,6 +25,7 @@ export default function Edit({
   clientId: string;
 }) {
   const isHidden = Boolean(attributes.hidden);
+  const allowedBlocks = useNestedFlowChildBlocks(clientId);
   const blockProps = useBlockProps(
     isHidden
       ? {}
@@ -78,9 +79,7 @@ export default function Edit({
                 TEXT_DOMAIN,
               )}
             </div>
-            <InnerBlocks
-              allowedBlocks={FORM_CHILD_BLOCKS as unknown as string[]}
-            />
+            <InnerBlocks allowedBlocks={allowedBlocks as unknown as string[]} />
           </>
         )}
       </div>

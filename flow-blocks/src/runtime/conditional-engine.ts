@@ -15,11 +15,34 @@ const containerTypes = new Set([
   "grid",
   "fieldset",
   "collapse",
+  "list",
+  "list-item",
+  "table",
+  "table-row",
+  "table-th",
+  "table-td",
+  "timeline",
+  "timeline-item",
+  "overflow-list",
+  "overflow-list-item",
   "visuallyhidden",
   "wizard",
 ]);
 
-const nonInteractiveTypes = new Set(["submit", "divider"]);
+const nonInteractiveTypes = new Set([
+  "submit",
+  "divider",
+  "display-text",
+  "display-title",
+  "display-blockquote",
+  "display-mark",
+  "display-badge",
+  "display-highlight",
+  "display-code",
+  "display-number-formatter",
+  "display-spoiler",
+  "display-image",
+]);
 
 function normalizeToArray(value: unknown): unknown[] {
   if (Array.isArray(value)) return value;

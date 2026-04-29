@@ -97,6 +97,17 @@ export interface SelectOption {
 }
 
 export type FlowControlSize = "xs" | "sm" | "md" | "lg" | "xl" | (string & {});
+export type FlowBadgeVariant =
+  | "filled"
+  | "light"
+  | "outline"
+  | "dot"
+  | "default"
+  | "white"
+  | "transparent"
+  | "gradient"
+  | (string & {});
+export type FlowRadius = "xs" | "sm" | "md" | "lg" | "xl" | (string & {});
 export type FlowClampBehavior = "none" | "blur" | "strict";
 export type FlowThousandsGroupStyle = "none" | "thousand" | "lakh" | "wan";
 export type FlowInputMode =
@@ -983,6 +994,194 @@ export interface DividerConfig extends ConditionalAttributes {
   size?: string;
 }
 
+export interface DisplayTextConfig extends ConditionalAttributes {
+  type: "display-text";
+  content?: string;
+  size?: string;
+  color?: string;
+  align?: "left" | "center" | "right";
+  weight?: string;
+}
+
+export interface DisplayTitleConfig extends ConditionalAttributes {
+  type: "display-title";
+  content?: string;
+  order?: 1 | 2 | 3 | 4 | 5 | 6;
+  size?: string;
+  color?: string;
+  align?: "left" | "center" | "right";
+}
+
+export interface DisplayBlockquoteConfig extends ConditionalAttributes {
+  type: "display-blockquote";
+  content?: string;
+  cite?: string;
+  color?: string;
+  radius?: string;
+  iconSize?: number;
+}
+
+export interface DisplayMarkConfig extends ConditionalAttributes {
+  type: "display-mark";
+  content?: string;
+  highlight?: string;
+  color?: string;
+}
+
+export interface DisplayBadgeConfig extends ConditionalAttributes {
+  type: "display-badge";
+  content?: string;
+  color?: string;
+  variant?: FlowBadgeVariant;
+  size?: FlowControlSize;
+  radius?: FlowRadius;
+  fullWidth?: boolean;
+  circle?: boolean;
+  autoContrast?: boolean;
+  gradientFrom?: string;
+  gradientTo?: string;
+  gradientDeg?: number;
+}
+
+export interface DisplayHighlightConfig extends ConditionalAttributes {
+  type: "display-highlight";
+  content?: string;
+  highlight?: string;
+  color?: string;
+}
+
+export interface DisplayCodeConfig extends ConditionalAttributes {
+  type: "display-code";
+  content?: string;
+  color?: string;
+  block?: boolean;
+}
+
+export interface DisplayNumberFormatterConfig extends ConditionalAttributes {
+  type: "display-number-formatter";
+  value?: string;
+  prefix?: string;
+  suffix?: string;
+  decimalScale?: number;
+  decimalSeparator?: string;
+  thousandSeparator?: string;
+  thousandsGroupStyle?: FlowThousandsGroupStyle;
+  allowNegative?: boolean;
+  size?: string;
+  color?: string;
+  align?: "left" | "center" | "right";
+}
+
+export interface DisplaySpoilerConfig extends ConditionalAttributes {
+  type: "display-spoiler";
+  content?: string;
+  maxHeight?: number;
+  showLabel?: string;
+  hideLabel?: string;
+}
+
+export interface DisplayImageConfig extends ConditionalAttributes {
+  type: "display-image";
+  src?: string;
+  alt?: string;
+  caption?: string;
+  fit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+  radius?: string;
+  width?: string;
+  height?: string;
+  fallbackSrc?: string;
+}
+
+export interface ListContainerConfig extends ConditionalAttributes {
+  type: "list";
+  ordered?: boolean;
+  listStyleType?: string;
+  spacing?: string;
+  size?: string;
+  withPadding?: boolean;
+  center?: boolean;
+  children: FieldConfig[];
+}
+
+export interface ListItemContainerConfig extends ConditionalAttributes {
+  type: "list-item";
+  children: FieldConfig[];
+}
+
+export interface TableContainerConfig extends ConditionalAttributes {
+  type: "table";
+  caption?: string;
+  striped?: boolean;
+  withTableBorder?: boolean;
+  withColumnBorders?: boolean;
+  horizontalSpacing?: string;
+  verticalSpacing?: string;
+  children: FieldConfig[];
+}
+
+export interface TableRowContainerConfig extends ConditionalAttributes {
+  type: "table-row";
+  children: FieldConfig[];
+}
+
+export interface TableHeaderCellConfig extends ConditionalAttributes {
+  type: "table-th";
+  colSpan?: number;
+  rowSpan?: number;
+  align?: "left" | "center" | "right";
+  width?: string;
+  scope?: "col" | "row";
+  children: FieldConfig[];
+}
+
+export interface TableCellConfig extends ConditionalAttributes {
+  type: "table-td";
+  colSpan?: number;
+  rowSpan?: number;
+  align?: "left" | "center" | "right";
+  width?: string;
+  children: FieldConfig[];
+}
+
+export interface TimelineContainerConfig extends ConditionalAttributes {
+  type: "timeline";
+  gap?: string;
+  bulletSize?: number;
+  lineWidth?: number;
+  color?: string;
+  children: FieldConfig[];
+}
+
+export interface TimelineItemConfig extends ConditionalAttributes {
+  type: "timeline-item";
+  title?: string;
+  bullet?: string;
+  color?: string;
+  children: FieldConfig[];
+}
+
+export interface OverflowListContainerConfig extends ConditionalAttributes {
+  type: "overflow-list";
+  maxVisible?: number;
+  maxVisibleItems?: number;
+  gap?: string;
+  layout?: "horizontal" | "vertical";
+  align?: string;
+  justify?: string;
+  overflowLabel?: string;
+  overflowVariant?: FlowBadgeVariant;
+  overflowColor?: string;
+  overflowSize?: FlowControlSize;
+  overflowRadius?: FlowRadius;
+  overflowAutoContrast?: boolean;
+  children: FieldConfig[];
+}
+
+export interface OverflowListItemConfig extends ConditionalAttributes {
+  type: "overflow-list-item";
+  children: FieldConfig[];
+}
+
 export interface VisuallyHiddenConfig extends ConditionalAttributes {
   type: "visuallyhidden";
   children: FieldConfig[];
@@ -1064,6 +1263,26 @@ export type FieldConfig =
   | FieldsetContainerConfig
   | CollapseContainerConfig
   | DividerConfig
+  | DisplayTextConfig
+  | DisplayTitleConfig
+  | DisplayBlockquoteConfig
+  | DisplayMarkConfig
+  | DisplayBadgeConfig
+  | DisplayHighlightConfig
+  | DisplayCodeConfig
+  | DisplayNumberFormatterConfig
+  | DisplaySpoilerConfig
+  | DisplayImageConfig
+  | ListContainerConfig
+  | ListItemContainerConfig
+  | TableContainerConfig
+  | TableRowContainerConfig
+  | TableHeaderCellConfig
+  | TableCellConfig
+  | TimelineContainerConfig
+  | TimelineItemConfig
+  | OverflowListContainerConfig
+  | OverflowListItemConfig
   | VisuallyHiddenConfig
   | StackContainerConfig
   | GroupContainerConfig

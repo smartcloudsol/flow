@@ -193,6 +193,128 @@ export function parseFormElement(element: HTMLElement): {
   };
 }
 
+const CONTENT_ROOT_ALLOWED_TYPES = new Set<FieldConfig["type"]>([
+  "stack",
+  "group",
+  "grid",
+  "fieldset",
+  "collapse",
+  "list",
+  "list-item",
+  "visuallyhidden",
+  "divider",
+  "display-text",
+  "display-title",
+  "display-blockquote",
+  "display-mark",
+  "display-badge",
+  "display-highlight",
+  "display-code",
+  "display-number-formatter",
+  "display-spoiler",
+  "display-image",
+  "table",
+  "table-row",
+  "table-th",
+  "table-td",
+  "timeline",
+  "timeline-item",
+  "overflow-list",
+  "overflow-list-item",
+]);
+
+function filterContentRootFields(fields: FieldConfig[]): FieldConfig[] {
+  return fields.flatMap((field) => {
+    if (field.type === "wizard") {
+      return [];
+    }
+
+    if (
+      field.type === "stack" ||
+      field.type === "group" ||
+      field.type === "grid" ||
+      field.type === "fieldset" ||
+      field.type === "collapse" ||
+      field.type === "list" ||
+      field.type === "list-item" ||
+      field.type === "table" ||
+      field.type === "table-row" ||
+      field.type === "table-th" ||
+      field.type === "table-td" ||
+      field.type === "timeline" ||
+      field.type === "timeline-item" ||
+      field.type === "overflow-list" ||
+      field.type === "overflow-list-item" ||
+      field.type === "visuallyhidden"
+    ) {
+      return CONTENT_ROOT_ALLOWED_TYPES.has(field.type)
+        ? [
+            {
+              ...field,
+              children: filterContentRootFields(field.children),
+            } as FieldConfig,
+          ]
+        : [];
+    }
+
+    return CONTENT_ROOT_ALLOWED_TYPES.has(field.type) ? [field] : [];
+  });
+}
+
+export function parseContentRootElement(element: HTMLElement): {
+  root: FormAttributes;
+  fields: FieldConfig[];
+} {
+  const rootEncoded = element.dataset.config;
+  if (!rootEncoded) {
+    throw new Error("Missing content root config");
+  }
+
+  let root = decodeData<FormAttributes>(rootEncoded);
+
+  if (root.configB64) {
+    try {
+      const raw = decodeB64Utf8(root.configB64);
+      if ((root.configFormat || "yaml.v1").startsWith("yaml")) {
+        const yamlConfig = YAML.parse(raw);
+        if (
+          yamlConfig &&
+          typeof yamlConfig === "object" &&
+          !Array.isArray(yamlConfig)
+        ) {
+          root = { ...root, ...yamlConfig };
+        }
+      }
+    } catch (error) {
+      console.warn("Invalid content root shortcode YAML config", error);
+    }
+
+    delete root.configB64;
+    delete root.configFormat;
+  }
+
+  root = normalizeFormAttributes(root);
+  const configContainers = element.querySelectorAll<HTMLElement>(
+    ".smartcloud-flow-content-root__config",
+  );
+  const configContainer =
+    configContainers[configContainers.length - 1] || element;
+
+  const fields = filterContentRootFields(
+    applyFieldOverrides(
+      parseFieldsRecursive(configContainer),
+      root.fieldOverrides,
+    ),
+  );
+
+  delete root.fieldOverrides;
+
+  return {
+    root,
+    fields,
+  };
+}
+
 function getScopedFieldNodes(container: HTMLElement): HTMLElement[] {
   return Array.from(
     container.querySelectorAll<HTMLElement>(
@@ -361,6 +483,7 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
     "withCheckIcon",
     "withScrollArea",
     "autoContrast",
+    "overflowAutoContrast",
     "withThumbIndicator",
     "allowLeadingZeros",
     "fixedDecimalScale",
@@ -382,12 +505,15 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
     "grow",
     "wrap",
     "allowNegative",
+    "block",
     "allowDecimal",
     "withPicker",
     "withEyeDropper",
     "mask",
     "visible",
     "defaultVisible",
+    "circle",
+    "fullWidth",
   ];
   for (const fieldName of booleanFields) {
     if (fieldName in mutableField) {
@@ -419,6 +545,7 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
     "max",
     "step",
     "decimalScale",
+    "gradientDeg",
     "startValue",
     "length",
     "gap",
@@ -432,6 +559,11 @@ function normalizeFieldAttributes(field: FieldConfig): FieldConfig {
     "fractions",
     "rows",
     "columns",
+    "maxVisible",
+    "maxVisibleItems",
+    "order",
+    "iconSize",
+    "maxHeight",
   ];
   for (const fieldName of numberFields) {
     if (
@@ -624,6 +756,16 @@ function parseFieldsRecursive(container: HTMLElement): FieldConfig[] {
       normalizedField.type === "grid" ||
       normalizedField.type === "fieldset" ||
       normalizedField.type === "collapse" ||
+      normalizedField.type === "list" ||
+      normalizedField.type === "list-item" ||
+      normalizedField.type === "table" ||
+      normalizedField.type === "table-row" ||
+      normalizedField.type === "table-th" ||
+      normalizedField.type === "table-td" ||
+      normalizedField.type === "timeline" ||
+      normalizedField.type === "timeline-item" ||
+      normalizedField.type === "overflow-list" ||
+      normalizedField.type === "overflow-list-item" ||
       normalizedField.type === "visuallyhidden"
     ) {
       const children = parseFieldsRecursive(node);
@@ -731,6 +873,16 @@ function applyFieldOverrides(
       nextField.type === "grid" ||
       nextField.type === "fieldset" ||
       nextField.type === "collapse" ||
+      nextField.type === "list" ||
+      nextField.type === "list-item" ||
+      nextField.type === "table" ||
+      nextField.type === "table-row" ||
+      nextField.type === "table-th" ||
+      nextField.type === "table-td" ||
+      nextField.type === "timeline" ||
+      nextField.type === "timeline-item" ||
+      nextField.type === "overflow-list" ||
+      nextField.type === "overflow-list-item" ||
       nextField.type === "visuallyhidden"
     ) {
       return {

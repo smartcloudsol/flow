@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/content-root",
+  "version": "1.0.0",
+  "title": "Flow Content Root",
+  "category": "smartcloud-flow",
+  "icon": "screenoptions",
+  "description": "Render Flow display and layout blocks outside forms.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "language": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string"
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "light"
+    },
+    "primaryColor": {
+      "type": "string",
+      "default": ""
+    },
+    "primaryShade": {
+      "type": "object",
+      "default": {}
+    },
+    "colors": {
+      "type": "object",
+      "default": {}
+    },
+    "themeOverrides": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script",
+  "viewScript": "smartcloud-flow-view-script",
+  "render": "file:./render.php"
+}

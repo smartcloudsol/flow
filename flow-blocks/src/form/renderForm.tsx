@@ -24,7 +24,7 @@ import type {
 } from "../shared/types";
 
 // Sanitize custom CSS to prevent XSS
-function sanitizeThemeOverrides(input: string): string {
+export function sanitizeThemeOverrides(input: string): string {
   return input
     .replace(/<\/?(?:style|script)\b[^>]*>/gi, "")
     .replace(/@import\s+['"]?javascript:[^;]+;?/gi, "")
@@ -33,7 +33,7 @@ function sanitizeThemeOverrides(input: string): string {
 }
 
 // Hash function for style tag deduplication
-function hashStringDjb2(str: string): string {
+export function hashStringDjb2(str: string): string {
   let hash = 5381;
   for (let i = 0; i < str.length; i++) {
     hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
@@ -58,7 +58,7 @@ function normalizeClassNames(value: unknown): string[] {
   );
 }
 
-function createFormTheme(form: FormAttributes) {
+export function createFormTheme(form: FormAttributes) {
   let customColors: Record<string, MantineColorsTuple> | undefined;
 
   // Generate 10-shade color tuples from base hex colors using Mantine's generateColors

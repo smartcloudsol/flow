@@ -24,15 +24,13 @@ if ($smartcloud_flow_backend_form_id) {
 // Encode all attributes into a single data-config attribute
 $smartcloud_flow_form_config = base64_encode(wp_json_encode($smartcloud_flow_attributes));
 
-// Build the attribute string
 $smartcloud_flow_div_attrs = [];
-$smartcloud_flow_div_attrs[] = 'id="' . $smartcloud_flow_form_id . '"';
-$smartcloud_flow_div_attrs[] = 'class="smartcloud-flow-form"';
-$smartcloud_flow_div_attrs[] = 'data-is-preview="smartcloud-flow-is-preview"';
-$smartcloud_flow_div_attrs[] = 'data-config="' . $smartcloud_flow_form_config . '"';
-
-// Add block wrapper attributes
-$smartcloud_flow_div_attrs[] = get_block_wrapper_attributes();
+$smartcloud_flow_div_attrs[] = 'id="' . esc_attr($smartcloud_flow_form_id) . '"';
+$smartcloud_flow_div_attrs[] = 'data-is-preview="' . esc_attr('smartcloud-flow-is-preview') . '"';
+$smartcloud_flow_div_attrs[] = 'data-config="' . esc_attr($smartcloud_flow_form_config) . '"';
+$smartcloud_flow_div_attrs[] = get_block_wrapper_attributes([
+    'class' => 'smartcloud-flow-form',
+]);
 ?>
 <div <?php echo wp_kses_data(implode(' ', $smartcloud_flow_div_attrs)); ?>>
     <div class="smartcloud-flow-form__mount"></div>

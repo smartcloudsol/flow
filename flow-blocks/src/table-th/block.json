@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/table-th",
+  "version": "1.0.0",
+  "title": "Table.Th",
+  "category": "smartcloud-flow",
+  "parent": ["smartcloud-flow/table-tr"],
+  "icon": "table-col-before",
+  "description": "A header cell inside a Flow table row.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "colSpan": {
+      "type": "number",
+      "default": 1
+    },
+    "rowSpan": {
+      "type": "number",
+      "default": 1
+    },
+    "align": {
+      "type": "string",
+      "default": "left"
+    },
+    "width": {
+      "type": "string",
+      "default": ""
+    },
+    "scope": {
+      "type": "string",
+      "default": "col"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

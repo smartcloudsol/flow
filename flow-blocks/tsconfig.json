@@ -22,7 +22,13 @@
 
     "types": ["jquery"],
     "paths": {
-      "monaco-editor/esm/*": ["./node_modules/monaco-editor/esm/*"]
+      "monaco-editor/esm/*": ["./node_modules/monaco-editor/esm/*"],
+      "@smart-cloud/flow-admin/editor-runtime": [
+        "../admin/build/types/editor-runtime.d.ts"
+      ],
+      "@smart-cloud/flow-admin/operations-runtime": [
+        "../admin/build/types/operations-runtime.d.ts"
+      ]
     }
   },
   "include": ["src"],

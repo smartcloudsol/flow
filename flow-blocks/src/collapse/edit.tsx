@@ -8,7 +8,7 @@ import { PanelBody, TextControl, ToggleControl } from "@wordpress/components";
 import { useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
-import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
+import { useNestedFlowChildBlocks } from "../shared/form-child-blocks";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
 import type { ConditionalAttributes } from "../shared/types";
 
@@ -30,6 +30,7 @@ export default function Edit({
 }) {
   const [opened, setOpened] = useState(Boolean(attributes.defaultOpened));
   const isHidden = Boolean(attributes.hidden);
+  const allowedBlocks = useNestedFlowChildBlocks(clientId);
   const blockProps = useBlockProps(
     isHidden
       ? {}
@@ -124,7 +125,7 @@ export default function Edit({
             {opened ? (
               <div style={{ paddingLeft: "16px" }}>
                 <InnerBlocks
-                  allowedBlocks={FORM_CHILD_BLOCKS as unknown as string[]}
+                  allowedBlocks={allowedBlocks as unknown as string[]}
                 />
               </div>
             ) : null}

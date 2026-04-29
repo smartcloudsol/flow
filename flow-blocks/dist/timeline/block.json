@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/timeline",
+  "version": "1.0.0",
+  "title": "Timeline",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "marker",
+  "description": "Display a sequential timeline with Flow content items.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "gap": {
+      "type": "string",
+      "default": "md"
+    },
+    "bulletSize": {
+      "type": "number",
+      "default": 20
+    },
+    "lineWidth": {
+      "type": "number",
+      "default": 2
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

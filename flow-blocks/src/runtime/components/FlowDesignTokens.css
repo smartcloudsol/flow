@@ -70,6 +70,106 @@
   --flow-save-draft-color: var(--mantine-color-gray-7);
   --flow-save-draft-border: 1px solid var(--mantine-color-gray-3);
 
+  --flow-display-text-color: inherit;
+  --flow-display-text-weight: 400;
+  --flow-display-text-line-height: 1.6;
+
+  --flow-display-title-color: inherit;
+  --flow-display-title-weight: 700;
+  --flow-display-title-line-height: 1.2;
+  --flow-display-title-letter-spacing: -0.02em;
+
+  --flow-list-color: inherit;
+  --flow-list-marker-color: var(--mantine-primary-color-filled);
+  --flow-list-padding-start: 1.5rem;
+  --flow-list-item-gap: var(--mantine-spacing-xs);
+
+  --flow-table-color: inherit;
+  --flow-table-border-color: rgba(0, 0, 0, 0.14);
+  --flow-table-cell-border-color: rgba(0, 0, 0, 0.1);
+  --flow-table-striped-bg: rgba(0, 0, 0, 0.03);
+  --flow-table-header-bg: transparent;
+  --flow-table-header-color: inherit;
+  --flow-table-header-weight: 600;
+  --flow-table-cell-color: inherit;
+  --flow-table-caption-color: var(--mantine-color-dimmed);
+  --flow-table-caption-padding-bottom: var(--mantine-spacing-xs);
+  --flow-table-cell-padding-inline: 0.75rem;
+  --flow-table-cell-padding-block: 0.5rem;
+
+  --flow-timeline-color: inherit;
+  --flow-timeline-gap: 1rem;
+  --flow-timeline-item-gap: 12px;
+  --flow-timeline-content-gap: var(--mantine-spacing-xs);
+  --flow-timeline-accent: var(--mantine-primary-color-filled);
+  --flow-timeline-line-opacity: 0.28;
+  --flow-timeline-bullet-color: white;
+  --flow-timeline-bullet-weight: 700;
+  --flow-timeline-title-color: inherit;
+  --flow-timeline-title-weight: 600;
+
+  --flow-blockquote-bg: color-mix(
+    in srgb,
+    var(--mantine-primary-color-filled) 6%,
+    var(--mantine-color-body)
+  );
+  --flow-blockquote-accent: var(--mantine-primary-color-filled);
+  --flow-blockquote-color: inherit;
+  --flow-blockquote-radius: var(--mantine-radius-md);
+  --flow-blockquote-padding: 0.875rem 1rem;
+  --flow-blockquote-gap: 0.625rem;
+  --flow-blockquote-border-width: 4px;
+  --flow-blockquote-icon-size: 1.75rem;
+  --flow-blockquote-text-style: italic;
+  --flow-blockquote-cite-color: var(--mantine-color-dimmed);
+  --flow-blockquote-cite-size: 0.875rem;
+
+  --flow-mark-bg: color-mix(in srgb, var(--mantine-color-yellow-4) 82%, white);
+  --flow-mark-color: inherit;
+  --flow-mark-radius: 0.25rem;
+  --flow-mark-padding: 0.1em 0.35em;
+
+  --flow-highlight-bg: var(--flow-mark-bg);
+  --flow-highlight-color: var(--flow-mark-color);
+  --flow-highlight-radius: var(--flow-mark-radius);
+  --flow-highlight-padding: 0.05em 0.2em;
+
+  --flow-badge-padding: 0.35rem 0.7rem;
+  --flow-badge-circle-padding: 0.55rem;
+  --flow-badge-font-weight: 700;
+  --flow-badge-letter-spacing: 0.02em;
+  --flow-badge-text-transform: uppercase;
+
+  --flow-code-inline-bg: var(--mantine-color-gray-0);
+  --flow-code-inline-color: inherit;
+  --flow-code-block-bg: var(--mantine-color-dark-8);
+  --flow-code-block-color: var(--mantine-color-gray-0);
+  --flow-code-radius: var(--mantine-radius-sm);
+  --flow-code-padding: 0.1em 0.35em;
+  --flow-code-block-padding: 0.875rem 1rem;
+
+  --flow-number-color: inherit;
+  --flow-number-weight: 500;
+  --flow-number-font-variant: tabular-nums;
+
+  --flow-spoiler-toggle-color: var(--mantine-primary-color-filled);
+  --flow-spoiler-content-color: inherit;
+
+  --flow-image-radius: var(--mantine-radius-md);
+  --flow-image-caption-color: var(--mantine-color-dimmed);
+  --flow-image-caption-size: var(--mantine-font-size-sm);
+
+  --flow-overflow-item-bg: transparent;
+  --flow-overflow-item-border: none;
+  --flow-overflow-item-color: inherit;
+  --flow-overflow-item-radius: 0;
+  --flow-overflow-item-shadow: none;
+  --flow-overflow-item-padding: 0;
+  --flow-overflow-item-gap: var(--mantine-spacing-xs);
+  --flow-overflow-summary-cursor: pointer;
+  --flow-overflow-summary-font-weight: 700;
+  --flow-overflow-summary-letter-spacing: 0.02em;
+
   --flow-submission-meta-bg: color-mix(
     in srgb,
     var(--mantine-primary-color-filled) 8%,
@@ -106,6 +206,94 @@
 
 .smartcloud-flow-shadow-root .flow-block__group {
   flex-direction: row;
+}
+
+.smartcloud-flow-shadow-root .flow-block__display-text {
+  color: var(--flow-display-text-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block__display-title {
+  color: var(--flow-display-title-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block__list {
+  color: var(--flow-list-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block__list li::marker {
+  color: var(--flow-list-marker-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block__table {
+  color: var(--flow-table-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block__timeline {
+  color: var(--flow-timeline-color);
+}
+
+.smartcloud-flow-shadow-root .flow-block__display-blockquote {
+  color: var(--flow-blockquote-color);
+}
+
+.smartcloud-flow-shadow-root .flow-blockquote__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--flow-blockquote-gap);
+}
+
+.smartcloud-flow-shadow-root .flow-blockquote__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.smartcloud-flow-shadow-root .flow-blockquote__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-style: var(--flow-blockquote-text-style);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.smartcloud-flow-shadow-root .flow-blockquote__cite {
+  color: var(--flow-blockquote-cite-color);
+  font-size: var(--flow-blockquote-cite-size);
+  font-style: normal;
+}
+
+.smartcloud-flow-shadow-root .flow-block__display-badge {
+  --flow-field-gap: 0;
+}
+
+.smartcloud-flow-shadow-root .flow-block__display-mark,
+.smartcloud-flow-shadow-root .flow-block__display-highlight {
+  --flow-field-gap: 0;
+}
+
+.smartcloud-flow-shadow-root .flow-block__overflow-list {
+  --flow-field-gap: 0;
+}
+
+.smartcloud-flow-shadow-root .flow-overflow-list__summary-button {
+  align-self: flex-start;
+  display: inline-flex;
+  cursor: var(--flow-overflow-summary-cursor);
+  border-radius: 999px;
+}
+
+.smartcloud-flow-shadow-root .flow-overflow-list__summary-button:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.smartcloud-flow-shadow-root .flow-overflow-list__summary {
+  font-weight: var(--flow-overflow-summary-font-weight);
+  letter-spacing: var(--flow-overflow-summary-letter-spacing);
+}
+
+.smartcloud-flow-shadow-root .flow-overflow-list__summary,
+.smartcloud-flow-shadow-root .flow-overflow-list__summary * {
+  cursor: inherit;
 }
 
 .smartcloud-flow-shadow-root .flow-block :where(label) {

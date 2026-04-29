@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/overflow-list-item",
+  "version": "1.0.0",
+  "title": "OverflowList.Item",
+  "category": "smartcloud-flow",
+  "parent": ["smartcloud-flow/overflow-list"],
+  "icon": "minus",
+  "description": "A single inline item inside an OverflowList.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

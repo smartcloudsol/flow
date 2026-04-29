@@ -388,6 +388,16 @@ function collectValidatableFields(
       field.type === "submit" ||
       field.type === "save-draft" ||
       field.type === "divider" ||
+      field.type === "display-text" ||
+      field.type === "display-title" ||
+      field.type === "display-blockquote" ||
+      field.type === "display-mark" ||
+      field.type === "display-badge" ||
+      field.type === "display-highlight" ||
+      field.type === "display-code" ||
+      field.type === "display-number-formatter" ||
+      field.type === "display-spoiler" ||
+      field.type === "display-image" ||
       field.type === "hidden"
     ) {
       return [];
@@ -399,6 +409,16 @@ function collectValidatableFields(
       field.type === "grid" ||
       field.type === "fieldset" ||
       field.type === "collapse" ||
+      field.type === "list" ||
+      field.type === "list-item" ||
+      field.type === "table" ||
+      field.type === "table-row" ||
+      field.type === "table-th" ||
+      field.type === "table-td" ||
+      field.type === "timeline" ||
+      field.type === "timeline-item" ||
+      field.type === "overflow-list" ||
+      field.type === "overflow-list-item" ||
       field.type === "visuallyhidden"
     ) {
       return collectValidatableFields(field.children, values, currentPath);
@@ -466,6 +486,16 @@ export function validateField(
       if (
         field.type === "submit" ||
         field.type === "divider" ||
+        field.type === "display-text" ||
+        field.type === "display-title" ||
+        field.type === "display-blockquote" ||
+        field.type === "display-mark" ||
+        field.type === "display-badge" ||
+        field.type === "display-highlight" ||
+        field.type === "display-code" ||
+        field.type === "display-number-formatter" ||
+        field.type === "display-spoiler" ||
+        field.type === "display-image" ||
         field.type === "hidden"
       )
         continue;
@@ -476,6 +506,16 @@ export function validateField(
         field.type === "grid" ||
         field.type === "fieldset" ||
         field.type === "collapse" ||
+        field.type === "list" ||
+        field.type === "list-item" ||
+        field.type === "table" ||
+        field.type === "table-row" ||
+        field.type === "table-th" ||
+        field.type === "table-td" ||
+        field.type === "timeline" ||
+        field.type === "timeline-item" ||
+        field.type === "overflow-list" ||
+        field.type === "overflow-list-item" ||
         field.type === "visuallyhidden"
       ) {
         const found = findField(field.children, currentPath);
@@ -511,8 +551,28 @@ export function validateField(
     field.type === "grid" ||
     field.type === "fieldset" ||
     field.type === "collapse" ||
+    field.type === "list" ||
+    field.type === "list-item" ||
+    field.type === "table" ||
+    field.type === "table-row" ||
+    field.type === "table-th" ||
+    field.type === "table-td" ||
+    field.type === "timeline" ||
+    field.type === "timeline-item" ||
+    field.type === "overflow-list" ||
+    field.type === "overflow-list-item" ||
     field.type === "visuallyhidden" ||
     field.type === "divider" ||
+    field.type === "display-text" ||
+    field.type === "display-title" ||
+    field.type === "display-blockquote" ||
+    field.type === "display-mark" ||
+    field.type === "display-badge" ||
+    field.type === "display-highlight" ||
+    field.type === "display-code" ||
+    field.type === "display-number-formatter" ||
+    field.type === "display-spoiler" ||
+    field.type === "display-image" ||
     field.type === "hidden"
   ) {
     return undefined;

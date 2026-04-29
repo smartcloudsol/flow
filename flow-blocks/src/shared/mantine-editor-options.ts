@@ -9,6 +9,26 @@ export const SIZE_OPTIONS = [
   { label: "XL", value: "xl" },
 ];
 
+export const RADIUS_OPTIONS = [
+  { label: __("Default", TEXT_DOMAIN), value: "" },
+  { label: "XS", value: "xs" },
+  { label: "SM", value: "sm" },
+  { label: "MD", value: "md" },
+  { label: "LG", value: "lg" },
+  { label: "XL", value: "xl" },
+];
+
+export const BADGE_VARIANT_OPTIONS = [
+  { label: __("Filled", TEXT_DOMAIN), value: "filled" },
+  { label: __("Light", TEXT_DOMAIN), value: "light" },
+  { label: __("Outline", TEXT_DOMAIN), value: "outline" },
+  { label: __("Dot", TEXT_DOMAIN), value: "dot" },
+  { label: __("Default", TEXT_DOMAIN), value: "default" },
+  { label: __("White", TEXT_DOMAIN), value: "white" },
+  { label: __("Transparent", TEXT_DOMAIN), value: "transparent" },
+  { label: __("Gradient", TEXT_DOMAIN), value: "gradient" },
+];
+
 export const FLOW_ICON_OPTIONS = [
   { label: __("Default", TEXT_DOMAIN), value: "" },
   { label: __("Check", TEXT_DOMAIN), value: "check" },

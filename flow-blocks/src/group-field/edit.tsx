@@ -7,7 +7,7 @@ import {
 import { PanelBody, SelectControl, ToggleControl } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 import { ConditionalLogicPanel } from "../shared/ConditionalLogicPanel";
-import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
+import { useNestedFlowChildBlocks } from "../shared/form-child-blocks";
 import { HiddenBlockPreview } from "../shared/HiddenBlockPreview";
 import { GROUP_WRAP_OPTIONS } from "../shared/mantine-editor-options";
 import { ToggleSettingsSection } from "../shared/ToggleSettingsSection";
@@ -55,6 +55,7 @@ export default function Edit({
   clientId: string;
 }) {
   const isHidden = Boolean(attributes.hidden);
+  const allowedBlocks = useNestedFlowChildBlocks(clientId);
   const blockProps = useBlockProps(
     isHidden
       ? {}
@@ -157,9 +158,7 @@ export default function Edit({
               {__("Group (horizontal)", TEXT_DOMAIN)} - {__("Gap", TEXT_DOMAIN)}
               : {attributes.gap}
             </div>
-            <InnerBlocks
-              allowedBlocks={FORM_CHILD_BLOCKS as unknown as string[]}
-            />
+            <InnerBlocks allowedBlocks={allowedBlocks as unknown as string[]} />
           </>
         )}
       </div>
