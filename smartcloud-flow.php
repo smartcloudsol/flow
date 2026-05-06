@@ -540,7 +540,7 @@ final class Flow
         $constants = array(
             'mantineCssHref' => add_query_arg(
                 'ver',
-                \SmartCloud\WPSuite\Hub\SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION,
+                \SmartCloud\WPSuite\Hub\VERSION_MANTINE,
                 SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css'
             ),
             'operationsRuntimeCssHref' => add_query_arg(
