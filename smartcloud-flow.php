@@ -537,6 +537,18 @@ final class Flow
             'baseUrl' => SMARTCLOUD_FLOW_URL,
             'nonce' => wp_create_nonce('wp_rest'),
         );
+        $constants = array(
+            'mantineCssHref' => add_query_arg(
+                'ver',
+                \SmartCloud\WPSuite\Hub\SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION,
+                SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css'
+            ),
+            'operationsRuntimeCssHref' => add_query_arg(
+                'ver',
+                SMARTCLOUD_FLOW_VERSION,
+                SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.css'
+            ),
+        );
         $js = 'const __flowGlobal = (typeof globalThis !== "undefined") ? globalThis : window;
     __flowGlobal.WpSuite = __flowGlobal.WpSuite ?? {};
     __flowGlobal.WpSuite.plugins = __flowGlobal.WpSuite.plugins ?? {};
@@ -547,10 +559,7 @@ final class Flow
     __flowGlobal.WpSuite.plugins.flow = __flowGlobal.WpSuite.plugins.flow ?? {};
 Object.assign(__flowGlobal.WpSuite.plugins.flow, ' . wp_json_encode($data) . ');
 __flowGlobal.WpSuite.constants = __flowGlobal.WpSuite.constants ?? {};
-__flowGlobal.WpSuite.constants.flow = {
-    mantineCssHref: "' . esc_url(SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css') . '",
-    operationsRuntimeCssHref: "' . esc_url(SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.css') . '",
-};
+__flowGlobal.WpSuite.constants.flow = ' . wp_json_encode($constants) . ';
     var WpSuite = __flowGlobal.WpSuite;
 ';
         wp_add_inline_script('smartcloud-flow-main-script', $js, 'before');

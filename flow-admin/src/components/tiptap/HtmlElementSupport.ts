@@ -18,6 +18,17 @@ const htmlAttributeSpec = {
   default: null,
 };
 
+function createHtmlAttribute(name: string) {
+  return {
+    ...htmlAttributeSpec,
+    parseHTML: (element: Element) => element.getAttribute(name),
+    renderHTML: (attributes: Record<string, unknown>) =>
+      typeof attributes[name] === "string" && attributes[name].trim()
+        ? { [name]: attributes[name] }
+        : {},
+  };
+}
+
 export const HtmlAttributeSupport = Extension.create({
   name: "htmlAttributeSupport",
 
@@ -33,24 +44,27 @@ export const HtmlAttributeSupport = Extension.create({
           "blockquote",
           "div",
           "textStyle",
+          "table",
+          "tableRow",
+          "tableCell",
+          "tableHeader",
         ],
         attributes: {
-          class: {
-            ...htmlAttributeSpec,
-            parseHTML: (element) => element.getAttribute("class"),
-            renderHTML: (attributes) =>
-              typeof attributes.class === "string" && attributes.class.trim()
-                ? { class: attributes.class }
-                : {},
-          },
-          style: {
-            ...htmlAttributeSpec,
-            parseHTML: (element) => element.getAttribute("style"),
-            renderHTML: (attributes) =>
-              typeof attributes.style === "string" && attributes.style.trim()
-                ? { style: attributes.style }
-                : {},
-          },
+          class: createHtmlAttribute("class"),
+          style: createHtmlAttribute("style"),
+          align: createHtmlAttribute("align"),
+          valign: createHtmlAttribute("valign"),
+          width: createHtmlAttribute("width"),
+          height: createHtmlAttribute("height"),
+          bgcolor: createHtmlAttribute("bgcolor"),
+        },
+      },
+      {
+        types: ["table"],
+        attributes: {
+          border: createHtmlAttribute("border"),
+          cellpadding: createHtmlAttribute("cellpadding"),
+          cellspacing: createHtmlAttribute("cellspacing"),
         },
       },
     ];

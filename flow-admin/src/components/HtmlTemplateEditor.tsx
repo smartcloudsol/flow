@@ -15,6 +15,13 @@ import type { FormDefinition } from "../api/types";
 import MonacoEditor from "./MonacoEditor";
 import { HtmlAttributeSupport, HtmlDiv } from "./tiptap/HtmlElementSupport";
 import {
+  HtmlTable,
+  HtmlTableCell,
+  HtmlTableHeader,
+  HtmlTableRow,
+  normalizeTableSectionsHtml,
+} from "./tiptap/HtmlTableSupport";
+import {
   TemplateVariable,
   convertTemplateVariablesToSpans,
 } from "./tiptap/TemplateVariable";
@@ -40,22 +47,34 @@ export default function HtmlTemplateEditor({
 }: HtmlTemplateEditorProps) {
   const [mode, setMode] = useState<"visual" | "code" | "preview">("visual");
   const resolvedHeight = typeof height === "number" ? `${height}px` : height;
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const codeSelectionRef = useRef<Selection | null>(null);
-  const modeRef = useRef<"visual" | "code" | "preview">(mode);
-  const lastEmittedVisualValue = useRef<string>("");
-  const styleBlocksRef = useRef<string[]>([]);
-
-  const extractStyleBlocks = useCallback(
+  const extractEditableEnvelope = useCallback(
     (
       html: string,
     ): {
-      styles: string[];
+      prefix: string;
       bodyHtml: string;
+      suffix: string;
     } => {
-      const styles: string[] = [];
+      const sourceHtml = html || "";
+      const bodyOpenMatch = /<body\b[^>]*>/i.exec(sourceHtml);
 
-      const bodyHtml = html.replace(
+      if (bodyOpenMatch) {
+        const bodyStart = bodyOpenMatch.index + bodyOpenMatch[0].length;
+        const bodyCloseMatch = /<\/body\s*>/i.exec(sourceHtml.slice(bodyStart));
+
+        if (bodyCloseMatch) {
+          const bodyEnd = bodyStart + bodyCloseMatch.index;
+
+          return {
+            prefix: sourceHtml.slice(0, bodyStart),
+            bodyHtml: sourceHtml.slice(bodyStart, bodyEnd).trim(),
+            suffix: sourceHtml.slice(bodyEnd),
+          };
+        }
+      }
+
+      const styles: string[] = [];
+      const bodyHtml = sourceHtml.replace(
         /<style\b[^>]*>[\s\S]*?<\/style>/gi,
         (match) => {
           styles.push(match);
@@ -64,20 +83,40 @@ export default function HtmlTemplateEditor({
       );
 
       return {
-        styles,
+        prefix: styles.length > 0 ? `${styles.join("\n")}\n` : "",
         bodyHtml: bodyHtml.trim(),
+        suffix: "",
       };
     },
     [],
   );
 
-  const initialExtracted = extractStyleBlocks(value || "");
+  const initialExtracted = extractEditableEnvelope(value || "");
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const codeSelectionRef = useRef<Selection | null>(null);
+  const modeRef = useRef<"visual" | "code" | "preview">(mode);
+  const lastEmittedVisualValue = useRef<string>("");
+  const htmlEnvelopeRef = useRef({
+    prefix: initialExtracted.prefix,
+    suffix: initialExtracted.suffix,
+  });
 
   const normalizeHtml = (html: string) => html.replace(/\s+/g, " ").trim();
+  const recomposeHtml = useCallback(
+    (
+      bodyHtml: string,
+      envelope: { prefix: string; suffix: string } = htmlEnvelopeRef.current,
+    ) => `${envelope.prefix}${bodyHtml}${envelope.suffix}`.trim(),
+    [],
+  );
 
   useEffect(() => {
-    styleBlocksRef.current = extractStyleBlocks(value || "").styles;
-  }, [extractStyleBlocks, value]);
+    const extracted = extractEditableEnvelope(value || "");
+    htmlEnvelopeRef.current = {
+      prefix: extracted.prefix,
+      suffix: extracted.suffix,
+    };
+  }, [extractEditableEnvelope, value]);
 
   // Tiptap editor for visual mode
   const tiptapEditor = useEditor({
@@ -85,6 +124,10 @@ export default function HtmlTemplateEditor({
       StarterKit,
       HtmlAttributeSupport,
       HtmlDiv,
+      HtmlTable,
+      HtmlTableRow,
+      HtmlTableCell,
+      HtmlTableHeader,
       Underline,
       TiptapLink.configure({
         openOnClick: false,
@@ -104,10 +147,8 @@ export default function HtmlTemplateEditor({
     content: convertTemplateVariablesToSpans(initialExtracted.bodyHtml || ""),
     onUpdate: ({ editor }) => {
       if (modeRef.current === "visual") {
-        const nextBodyHtml = editor.getHTML();
-        const nextHtml = `${styleBlocksRef.current.join(
-          "\n",
-        )}\n${nextBodyHtml}`.trim();
+        const nextBodyHtml = normalizeTableSectionsHtml(editor.getHTML());
+        const nextHtml = recomposeHtml(nextBodyHtml);
         lastEmittedVisualValue.current = normalizeHtml(nextHtml);
         onChange?.(nextHtml);
       }
@@ -123,15 +164,18 @@ export default function HtmlTemplateEditor({
     if (!tiptapEditor) return;
 
     if (mode === "visual") {
-      const extracted = extractStyleBlocks(value || "");
-      styleBlocksRef.current = extracted.styles;
+      const extracted = extractEditableEnvelope(value || "");
+      htmlEnvelopeRef.current = {
+        prefix: extracted.prefix,
+        suffix: extracted.suffix,
+      };
 
       // Always convert {{...}} patterns to spans for visual mode
       const convertedValue = convertTemplateVariablesToSpans(
         extracted.bodyHtml || "",
       );
       const normalizedConverted = normalizeHtml(
-        `${styleBlocksRef.current.join("\n")}\n${convertedValue}`,
+        recomposeHtml(convertedValue, extracted),
       );
       // Skip self-originated updates to preserve the caret position.
       if (normalizedConverted === lastEmittedVisualValue.current) {
@@ -146,7 +190,7 @@ export default function HtmlTemplateEditor({
         });
       }
     }
-  }, [value, tiptapEditor, mode, extractStyleBlocks]);
+  }, [value, tiptapEditor, mode, extractEditableEnvelope, recomposeHtml]);
 
   const insertText = (text: string, offsetBefore = 0, offsetAfter = 0) => {
     const editor = editorRef.current;

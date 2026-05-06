@@ -714,6 +714,240 @@ class Flow_Form_Widget extends Flow_Base_Widget
     }
 }
 
+class Flow_Content_Root_Widget extends Flow_Base_Widget
+{
+    public function get_name()
+    {
+        return 'smartcloud_flow_content_root';
+    }
+
+    public function get_title()
+    {
+        return __('Flow Content Root', 'smartcloud-flow');
+    }
+
+    public function get_icon()
+    {
+        return 'eicon-post-content';
+    }
+
+    protected function register_controls()
+    {
+        $this->start_controls_section('pattern-block', ['label' => __('Pattern', 'smartcloud-flow')]);
+        $options = [];
+        $patterns = get_posts([
+            'post_type' => 'wp_block',
+            's' => 'smartcloud-flow',
+            'posts_per_page' => 200,
+            'orderby' => 'title',
+            'order' => 'ASC',
+        ]);
+        foreach ($patterns as $p) {
+            $options[$p->ID] = $p->post_title ?: $p->ID;
+        }
+        $this->add_control('pattern', [
+            'label' => __('Pattern ID', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT2,
+            'options' => $options,
+            'label_block' => true,
+            'multiple' => false,
+        ]);
+        $this->end_controls_section();
+
+        $this->start_controls_section('overrides-block', ['label' => __('Overrides', 'smartcloud-flow')]);
+        $this->add_control('language', [
+            'label' => __('Language', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$LANGUAGES,
+            'default' => '',
+            'description' => __('Leave empty to inherit the pattern language.', 'smartcloud-flow'),
+        ]);
+        $this->add_control('direction', [
+            'label' => __('Direction', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$DIRECTIONS,
+            'default' => '',
+            'description' => __('Leave empty to inherit the pattern direction.', 'smartcloud-flow'),
+        ]);
+        $this->add_control('colorMode', [
+            'label' => __('Color Mode', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => self::$COLOR_MODES,
+            'default' => '',
+        ]);
+        $this->add_control('primaryColor', [
+            'label' => __('Primary Color', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                '' => __('Default', 'smartcloud-flow'),
+                'cyan' => __('Cyan', 'smartcloud-flow'),
+                'blue' => __('Blue', 'smartcloud-flow'),
+                'indigo' => __('Indigo', 'smartcloud-flow'),
+                'violet' => __('Violet', 'smartcloud-flow'),
+                'grape' => __('Grape', 'smartcloud-flow'),
+                'pink' => __('Pink', 'smartcloud-flow'),
+                'red' => __('Red', 'smartcloud-flow'),
+                'orange' => __('Orange', 'smartcloud-flow'),
+                'yellow' => __('Yellow', 'smartcloud-flow'),
+                'lime' => __('Lime', 'smartcloud-flow'),
+                'green' => __('Green', 'smartcloud-flow'),
+                'teal' => __('Teal', 'smartcloud-flow'),
+                'gray' => __('Gray', 'smartcloud-flow'),
+                'dark' => __('Dark', 'smartcloud-flow'),
+                'custom' => __('Custom', 'smartcloud-flow'),
+            ],
+            'description' => __('Mantine theme color name', 'smartcloud-flow'),
+            'default' => '',
+        ]);
+        $this->add_control('customColor', [
+            'label' => __('Custom Color', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::COLOR,
+            'description' => __('Custom color hex value (used when Primary Color is set to Custom)', 'smartcloud-flow'),
+            'condition' => [
+                'primaryColor' => 'custom',
+            ],
+        ]);
+        $this->add_control('primaryShade_light', [
+            'label' => __('Primary Shade (Light)', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                '' => __('Default', 'smartcloud-flow'),
+                '0' => '0',
+                '1' => '1',
+                '2' => '2',
+                '3' => '3',
+                '4' => '4',
+                '5' => '5',
+                '6' => '6',
+                '7' => '7',
+                '8' => '8',
+                '9' => '9',
+            ],
+            'description' => __('Primary shade for light mode (0-9)', 'smartcloud-flow'),
+        ]);
+        $this->add_control('primaryShade_dark', [
+            'label' => __('Primary Shade (Dark)', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                '' => __('Default', 'smartcloud-flow'),
+                '0' => '0',
+                '1' => '1',
+                '2' => '2',
+                '3' => '3',
+                '4' => '4',
+                '5' => '5',
+                '6' => '6',
+                '7' => '7',
+                '8' => '8',
+                '9' => '9',
+            ],
+            'description' => __('Primary shade for dark mode (0-9)', 'smartcloud-flow'),
+        ]);
+        $this->add_control('themeOverrides', [
+            'label' => __('Theme Overrides (CSS)', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXTAREA,
+            'description' => __('Custom CSS for theming', 'smartcloud-flow'),
+        ]);
+        $this->add_control('configYaml', [
+            'label' => __('Advanced Config (YAML)', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXTAREA,
+            'description' => __('Extra Flow content-root config merged through the shortcode YAML body.', 'smartcloud-flow'),
+            'rows' => 10,
+        ]);
+        $this->end_controls_section();
+    }
+
+    protected function render()
+    {
+        $all = $this->get_settings_for_display();
+
+        $simple_attrs = [
+            'language',
+            'direction',
+            'colorMode',
+            'primaryColor',
+        ];
+
+        $atts = array_intersect_key($all, array_flip($simple_attrs));
+        $atts['id'] = $all['pattern'];
+        $atts = array_filter(
+            $atts,
+            fn($v, $k) => !is_array($v) && !is_object($v) && $v !== '',
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        $yaml_parts = [];
+        $colors = [];
+
+        if (!empty($all['customColor']) && !empty($all['primaryColor']) && $all['primaryColor'] === 'custom') {
+            $custom_color = $all['customColor'];
+            if (preg_match('/^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/', $custom_color)) {
+                $colors['custom'] = (strpos($custom_color, '#') === 0) ? $custom_color : '#' . $custom_color;
+            }
+        }
+
+        if (!empty($all['colors']) && is_array($all['colors'])) {
+            $colors = array_merge($colors, $all['colors']);
+        }
+
+        if (!empty($colors)) {
+            $yaml_parts[] = 'colors:';
+            foreach ($colors as $key => $value) {
+                $yaml_parts[] = "  $key: " . $this->yaml_encode_value($value);
+            }
+        }
+
+        if (!empty($all['primaryShade_light']) || !empty($all['primaryShade_dark'])) {
+            $yaml_parts[] = 'primaryShade:';
+            if (!empty($all['primaryShade_light'])) {
+                $yaml_parts[] = '  light: ' . intval($all['primaryShade_light']);
+            }
+            if (!empty($all['primaryShade_dark'])) {
+                $yaml_parts[] = '  dark: ' . intval($all['primaryShade_dark']);
+            }
+        }
+
+        if (!empty($all['themeOverrides'])) {
+            $theme_overrides = trim($all['themeOverrides']);
+            $yaml_parts[] = 'themeOverrides: |';
+            foreach (explode("\n", $theme_overrides) as $line) {
+                $yaml_parts[] = '  ' . $line;
+            }
+        }
+
+        if (!empty($all['configYaml'])) {
+            $config_yaml = trim($all['configYaml']);
+            if ($config_yaml !== '') {
+                if (!empty($yaml_parts)) {
+                    $yaml_parts[] = '';
+                }
+                foreach (explode("\n", $config_yaml) as $line) {
+                    $yaml_parts[] = rtrim($line, "\r");
+                }
+            }
+        }
+
+        $body = !empty($yaml_parts) ? implode("\n", $yaml_parts) : '';
+
+        smartcloud_flow_do_shortcode('smartcloud-flow-content-root', $atts, $body);
+    }
+
+    private function yaml_encode_value($value)
+    {
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+        if (is_numeric($value)) {
+            return $value;
+        }
+        if (strpos($value, ':') !== false || strpos($value, '#') !== false || strpos($value, '"') !== false) {
+            return '"' . str_replace('"', '\\"', $value) . '"';
+        }
+        return $value;
+    }
+}
+
 add_action('elementor/widgets/register', static function ($m) {
     $m->register(new \SmartCloud\WPSuite\Flow\Flow_Form_Widget());
+    $m->register(new \SmartCloud\WPSuite\Flow\Flow_Content_Root_Widget());
 });

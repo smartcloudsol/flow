@@ -7,10 +7,18 @@ export const observe = () => {
     jQuery(document).trigger("smartcloud-flow-form-block", el.id);
   };
 
+  const mountContentRoot = (el: HTMLElement) => {
+    if (!el?.id || jQuery(el).data("rendered")) return;
+    jQuery(document).trigger("smartcloud-flow-content-root-block", el.id);
+  };
+
   // Initial mount on DOM ready
   jQuery(() => {
     jQuery(".smartcloud-flow-form").each((_idx, n) => {
       mountForm(n);
+    });
+    jQuery(".smartcloud-flow-content-root").each((_idx, n) => {
+      mountContentRoot(n);
     });
   });
 
@@ -23,6 +31,9 @@ export const observe = () => {
           jQuery(".smartcloud-flow-form").each((_idx, n) => {
             mountForm(n);
           });
+          jQuery(".smartcloud-flow-content-root").each((_idx, n) => {
+            mountContentRoot(n);
+          });
         },
       );
       elementorFrontend.hooks.addAction(
@@ -30,6 +41,14 @@ export const observe = () => {
         () => {
           jQuery(".smartcloud-flow-form").each((_idx, n) => {
             mountForm(n);
+          });
+        },
+      );
+      elementorFrontend.hooks.addAction(
+        "frontend/element_ready/smartcloud_flow_content_root.default",
+        () => {
+          jQuery(".smartcloud-flow-content-root").each((_idx, n) => {
+            mountContentRoot(n);
           });
         },
       );

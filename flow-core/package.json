@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -31,27 +31,27 @@
     "scope": "@smart-cloud/flow-core"
   },
   "dependencies": {
-    "@smart-cloud/gatey-core": "^2.2.9",
-    "@smart-cloud/wpsuite-core": "^2.2.11",
-    "aws-amplify": "^6.16.4"
+    "@smart-cloud/gatey-core": "^2.2.10",
+    "@smart-cloud/wpsuite-core": "^2.2.12",
+    "aws-amplify": "^6.17.0"
   },
   "peerDependencies": {
-    "@wordpress/data": "^10.44.0",
-    "@wordpress/i18n": "^6.17.0",
+    "@wordpress/data": "^10.45.0",
+    "@wordpress/i18n": "^6.18.0",
     "react": "^18.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.58.2",
-    "@typescript-eslint/parser": "^8.58.2",
-    "@wordpress/data": "^10.44.0",
-    "@wordpress/i18n": "^6.17.0",
-    "eslint": "^10.2.1",
-    "globals": "^17.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "@wordpress/data": "^10.45.0",
+    "@wordpress/i18n": "^6.18.0",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0",
     "react": "^18.3.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.58.2"
+    "typescript-eslint": "^8.59.2"
   }
 }

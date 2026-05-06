@@ -327,9 +327,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
             "X-WP-Nonce": nonce,
           },
           body: JSON.stringify({
-            accountId,
-            siteId,
-            siteKey,
+            ...wpSuiteSiteSettings,
             lastUpdate: new Date().getTime(),
             subscriber,
           }),

@@ -172,6 +172,13 @@ export interface WebhookEndpoint {
     method?: "POST" | "PUT";
     signingMode?: "none" | "hmac";
     signingSecretParameterName?: string;
+    authMode?: "none" | "oauth2-client-credentials";
+    oauth2TokenEndpoint?: string;
+    oauth2ClientId?: string;
+    oauth2ClientSecretParameterName?: string;
+    oauth2Scope?: string;
+    oauth2Audience?: string;
+    oauth2Resource?: string;
     headers?: Record<string, string>;
     createdAt?: string;
     updatedAt?: string;

@@ -46,7 +46,9 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 
 * **Gutenberg form builder** — Build forms with a dedicated Form block, layout/container blocks, and rich field blocks.
 * **Single React runtime per form** — Front-end forms run as one mounted React tree.
+* **Rich display & content blocks** — Use styled content primitives such as blockquotes, marks, badges, code blocks, spoilers, lists, tables, timelines, and overflow lists alongside inputs.
 * **Conditional logic & validation** — Show/hide, enable/disable, require/optional, and other rule-based field behavior.
+* **Theme overrides & design tokens** — Theme both interactive controls and display/content blocks inside the Shadow DOM with Mantine variables and stable `--flow-*` CSS tokens.
 * **Shortcodes & Elementor support** — Reuse forms via shortcode and Elementor integrations.
 * **Flexible submission target model** — Submit directly from the browser to a per-form endpoint URL.
 * **Pro: backend-aware operation** — Connect Flow to the AWS-hosted Flow backend for durable submissions, admin tooling, templates, workflows, and webhook-driven automation.

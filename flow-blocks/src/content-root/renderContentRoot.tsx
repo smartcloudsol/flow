@@ -104,8 +104,8 @@ export async function renderContentRoot(
     shadowRoot.appendChild(rootElement);
   }
 
-  rootElement.className = shadowRootClassName;
-  rootElement.setAttribute("data-mantine-color-scheme", resolvedColorScheme);
+  rootElement!.className = shadowRootClassName;
+  rootElement!.setAttribute("data-mantine-color-scheme", resolvedColorScheme);
 
   const existingThemeStyle = shadowRoot.querySelector<HTMLStyleElement>(
     "#smartcloud-flow-content-root-theme-overrides",
@@ -133,7 +133,7 @@ export async function renderContentRoot(
 
   let root = reactRoots.get(target);
   if (!root) {
-    root = createRoot(rootElement);
+    root = createRoot(rootElement!);
     reactRoots.set(target, root);
   }
 

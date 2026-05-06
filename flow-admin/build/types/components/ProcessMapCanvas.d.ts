@@ -10,6 +10,12 @@ export interface ProcessMapCanvasProps {
     client: FlowBackendClient;
     isSaving?: boolean;
     onWorkflowSaved?: (workflow: Workflow, isNew: boolean) => void;
+    InfoLabel?: (props: {
+        text: string;
+        scrollToId: string;
+        onOpen: (targetScrollToId: string) => void;
+    }) => JSX.Element;
+    openInfo?: (targetScrollToId: string) => void;
 }
 export default function ProcessMapCanvas(props: ProcessMapCanvasProps): import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=ProcessMapCanvas.d.ts.map
