@@ -131,12 +131,9 @@ Yes. Use the `[smartcloud-flow-form]` shortcode or the Elementor widget. Develop
 2. Front-end form rendered with Mantine styling
 3. Conditional logic editor for a field
 4. Flow Settings → API Settings
-5. Pro: Submissions listing and submission details
-6. Pro: Email templates editor with preview
-7. Pro: Workflow builder (trigger, steps, webhook)
-8. Pro: Form sync status and backend metadata
-9. Shortcode usage in Classic Editor
-10. Elementor Flow widget with preview
+5. Pro: Email templates editor with preview
+6. Pro: Workflow builder (trigger, steps, webhook)
+7. Elementor Flow widget with preview
 
 == External Services ==
 

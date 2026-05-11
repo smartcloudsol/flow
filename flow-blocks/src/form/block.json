@@ -10,6 +10,7 @@
   "supports": {
     "html": false
   },
+  "usesContext": ["postId", "postType"],
   "attributes": {
     "formId": {
       "type": "string"

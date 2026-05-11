@@ -5,7 +5,9 @@ import type {
   FormStatus,
   FormValues,
   RuntimeFieldStateMap,
+  WordPressRuntimeContext,
 } from "../shared/types";
+import { resolveRuntimeContextValue } from "../shared/runtime-context";
 
 export interface FormRuntimeState {
   status: FormStatus;
@@ -53,6 +55,7 @@ export type FormAction =
 function collectInitialValues(
   fields: FieldConfig[],
   acc: FormValues,
+  wpContext?: WordPressRuntimeContext,
 ): FormValues {
   fields.forEach((field) => {
     if (field.type === "submit" || field.type === "save-draft") {
@@ -67,19 +70,22 @@ function collectInitialValues(
       field.type === "collapse" ||
       field.type === "visuallyhidden"
     ) {
-      collectInitialValues(field.children, acc);
+      collectInitialValues(field.children, acc, wpContext);
       return;
     }
 
     if (field.type === "wizard") {
       field.steps.forEach((step) => {
-        collectInitialValues(step.children, acc);
+        collectInitialValues(step.children, acc, wpContext);
       });
       return;
     }
 
     if ("defaultValue" in field && field.defaultValue !== undefined) {
-      acc[field.name] = field.defaultValue;
+      acc[field.name] = resolveRuntimeContextValue(
+        field.defaultValue,
+        wpContext,
+      );
       return;
     }
 
@@ -116,8 +122,11 @@ function collectInitialValues(
   return acc;
 }
 
-export function getInitialValues(fields: FieldConfig[]): FormValues {
-  return collectInitialValues(fields, {});
+export function getInitialValues(
+  fields: FieldConfig[],
+  wpContext?: WordPressRuntimeContext,
+): FormValues {
+  return collectInitialValues(fields, {}, wpContext);
 }
 
 export function formReducer(

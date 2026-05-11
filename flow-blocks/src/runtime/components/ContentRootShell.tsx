@@ -62,7 +62,7 @@ export function ContentRootShell({
   }, [rootAttributes.direction, currentLanguage, directionInStore]);
 
   const state = useMemo<FormRuntimeState>(() => {
-    const values = getInitialValues(fields);
+    const values = getInitialValues(fields, rootAttributes.wpContext);
 
     return {
       status: "idle",
@@ -78,7 +78,7 @@ export function ContentRootShell({
         suggestions: [],
       },
     };
-  }, [fields]);
+  }, [fields, rootAttributes.wpContext]);
 
   const actions = useMemo<ContentRootActions>(
     () => ({

@@ -33,7 +33,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "@mantine/tiptap": "^8.3.18",
     "@monaco-editor/react": "^4.7.0",
-    "@smart-cloud/flow-core": "^1.0.9",
+    "@smart-cloud/flow-core": "^1.0.10",
     "@smart-cloud/gatey-core": "^2.2.10",
     "@smart-cloud/wpsuite-core": "^2.2.12",
     "@tabler/icons-react": "^3.42.0",

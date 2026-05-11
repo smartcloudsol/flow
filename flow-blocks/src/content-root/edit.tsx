@@ -532,6 +532,7 @@ export default function Edit({
               </p>
               <InnerBlocks
                 allowedBlocks={CONTENT_ROOT_CHILD_BLOCKS as unknown as string[]}
+                templateLock={false}
                 renderAppender={InnerBlocks.ButtonBlockAppender}
               />
             </div>

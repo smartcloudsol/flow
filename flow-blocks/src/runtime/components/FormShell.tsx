@@ -621,12 +621,12 @@ export function FormShell({
   const effectiveResumeMode = isEditorPreview ? false : resumeMode;
 
   const initialValues = useMemo(() => {
-    const baseValues = getInitialValues(fields);
+    const baseValues = getInitialValues(fields, form.wpContext);
     return {
       ...baseValues,
       ...fieldDefaultValuesFromStore,
     };
-  }, [fields, fieldDefaultValuesFromStore]);
+  }, [fields, fieldDefaultValuesFromStore, form.wpContext]);
 
   const [reducerState, dispatch] = useReducer(formReducer, {
     status: "idle",

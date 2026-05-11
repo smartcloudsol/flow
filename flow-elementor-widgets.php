@@ -120,6 +120,23 @@ abstract class Flow_Base_Widget extends \Elementor\Widget_Base
     {
         return ['smartcloud-flow'];
     }
+
+    protected function get_flow_pattern_options(): array
+    {
+        $options = [];
+        $patterns = get_posts([
+            'post_type' => 'wp_block',
+            's' => 'smartcloud-flow',
+            'posts_per_page' => 200,
+            'orderby' => 'title',
+            'order' => 'ASC',
+        ]);
+        foreach ($patterns as $pattern) {
+            $options[$pattern->ID] = $pattern->post_title ?: $pattern->ID;
+        }
+
+        return $options;
+    }
 }
 
 class Flow_Form_Widget extends Flow_Base_Widget

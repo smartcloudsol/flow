@@ -16,7 +16,7 @@
     "check-licenses": "wp-scripts check-licenses --prod"
   },
   "dependencies": {
-    "@smart-cloud/flow-core": "^1.0.9",
+    "@smart-cloud/flow-core": "^1.0.10",
     "@smart-cloud/wpsuite-core": "^2.2.12"
   },
   "peerDependencies": {

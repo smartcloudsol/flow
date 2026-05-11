@@ -19,6 +19,14 @@ export interface FormActionDefinition {
   enabled?: boolean;
 }
 
+export interface WordPressRuntimeContext {
+  postId?: number;
+  postSlug?: string;
+  postType?: string;
+  postTitle?: string;
+  postUrl?: string;
+}
+
 export interface FormAttributes {
   formId?: string;
   allowDrafts?: boolean;
@@ -47,6 +55,7 @@ export interface FormAttributes {
   themeOverrides?: string;
   classNames?: string[];
   fieldOverrides?: Record<string, Record<string, unknown>>;
+  wpContext?: WordPressRuntimeContext;
   configB64?: string;
   configFormat?: string;
 }
