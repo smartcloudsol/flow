@@ -10,12 +10,14 @@ import { FormAttributesProvider } from "../context/FormAttributesContext";
 import { FormPreviewProvider } from "../context/FormPreviewContext";
 import { FormStateProvider } from "../context/FormStateContext";
 import { getInitialValues, type FormRuntimeState } from "../reducer";
+import { FlowPoweredBy } from "./FlowPoweredBy";
 import { FieldRenderer } from "./field-renderers";
 
 interface ContentRootShellProps {
   rootAttributes: FormAttributes;
   fields: FieldConfig[];
   store: Store;
+  isEditorPreview?: boolean;
 }
 
 type ContentRootActions = ComponentProps<typeof FormActionsProvider>["value"];
@@ -24,6 +26,7 @@ export function ContentRootShell({
   rootAttributes,
   fields,
   store,
+  isEditorPreview = false,
 }: ContentRootShellProps) {
   const languageInStore = useSelect(
     () => getStoreSelect(store).getLanguage(),
@@ -122,6 +125,7 @@ export function ContentRootShell({
                     path={[index]}
                   />
                 ))}
+                {!isEditorPreview ? <FlowPoweredBy /> : null}
               </Stack>
             </FormActionsProvider>
           </FormStateProvider>

@@ -42,6 +42,7 @@ export interface RenderContentRootArgs {
   target: HTMLElement;
   rootAttributes: FormAttributes;
   fields: FieldConfig[];
+  isEditorPreview?: boolean;
 }
 
 const reactRoots = new WeakMap<HTMLElement, Root>();
@@ -49,7 +50,7 @@ const reactRoots = new WeakMap<HTMLElement, Root>();
 export async function renderContentRoot(
   args: RenderContentRootArgs,
 ): Promise<RenderContentRootHandle> {
-  const { target, rootAttributes, fields } = args;
+  const { target, rootAttributes, fields, isEditorPreview } = args;
   const customClassNames = normalizeClassNames(rootAttributes.classNames);
   const shadowRootClassName = [
     "smartcloud-flow-shadow-root",
@@ -148,6 +149,7 @@ export async function renderContentRoot(
           rootAttributes={rootAttributes}
           fields={fields}
           store={store}
+          isEditorPreview={isEditorPreview}
         />
       </ModalsProvider>
     </MantineProvider>,

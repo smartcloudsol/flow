@@ -215,6 +215,7 @@ export default function Edit({
           target: previewTarget,
           rootAttributes: attributes as FormAttributes,
           fields,
+          isEditorPreview: true,
         });
 
         if (!cancelled) {

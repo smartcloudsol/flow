@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -202,6 +202,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.0.1 =
+* Fix: The optional "Powered by" attribution now renders correctly below the Flow content root / form when `enablePoweredBy` is enabled in the admin settings.
+
 = 1.0.0 =
 * Initial release.
 * Gutenberg form builder with React/Mantine runtime.
@@ -210,6 +213,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Fixes the optional "Powered by" attribution so it appears below rendered Flow content/forms when enabled.
 
 = 1.0.0 =
 Initial release.

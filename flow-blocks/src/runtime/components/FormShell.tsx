@@ -75,6 +75,7 @@ import {
 import { FormStateProvider } from "../context/FormStateContext";
 import { formReducer, getInitialValues } from "../reducer";
 import { validateField, validateValues } from "../validation";
+import { FlowPoweredBy } from "./FlowPoweredBy";
 import { FieldRenderer } from "./field-renderers";
 
 interface SubmissionMetaRuntime {
@@ -1809,6 +1810,7 @@ export function FormShell({
                         {I18n.get("New form")}
                       </Button>
                     </Group>
+                    {!isEditorPreview ? <FlowPoweredBy /> : null}
                   </Stack>
                 </Paper>
               ) : shouldShowStandaloneState ? (
@@ -1822,6 +1824,7 @@ export function FormShell({
                       __html: activeStandaloneHtml,
                     }}
                   />
+                  {!isEditorPreview ? <FlowPoweredBy /> : null}
                 </div>
               ) : (
                 <Paper
@@ -1947,6 +1950,7 @@ export function FormShell({
                           path={[idx]}
                         />
                       ))}
+                    {!isEditorPreview ? <FlowPoweredBy /> : null}
                   </Stack>
                 </Paper>
               )}
