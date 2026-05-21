@@ -3,9 +3,9 @@
 Contributors: smartcloud
 Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -202,6 +202,12 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.0 =
+* Maintenance: Updated the admin UI dependency stack, including the shared UI React packages used by WPSuite admin screens.
+* Maintenance: Updated shared Gatey Core and WPSuite Core dependencies used by Flow integrations.
+* Compatibility: Updated the "Tested up to" value for WordPress 7.0.
+* Internal cleanup: Refreshed related frontend and shared runtime dependencies for better alignment across WPSuite plugins.
+
 = 1.0.1 =
 * Fix: The optional "Powered by" attribution now renders correctly below the Flow content root / form when `enablePoweredBy` is enabled in the admin settings.
 
@@ -213,6 +219,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Recommended update. Refreshes Flow’s shared admin UI and WPSuite runtime dependencies, and marks compatibility with WordPress 7.0. No configuration changes are required.
 
 = 1.0.1 =
 Fixes the optional "Powered by" attribution so it appears below rendered Flow content/forms when enabled.

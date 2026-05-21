@@ -4,9 +4,9 @@
  * Plugin URI:        https://wpsuite.io/flow/
  * Description:       Mantine-based Gutenberg form blocks with AWS-native workflows, submissions, templates, and admin automation tools.
  * Requires at least: 6.2
- * Tested up to:      6.9
+ * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.0.1';
+const VERSION = '1.1.0';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
 if (version_compare(PHP_VERSION, '8.1', '<')) {
     deactivate_plugins(plugin_basename(__FILE__));
     wp_die(
-        esc_html__('WP Suite Forms requires PHP 8.1 or higher.', 'smartcloud-flow'),
+        esc_html__('WP Suite Flow requires PHP 8.1 or higher.', 'smartcloud-flow'),
         esc_html__('Plugin dependency check', 'smartcloud-flow'),
         ['back_link' => true]
     );

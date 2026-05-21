@@ -1,8 +1,8 @@
 *.zip
-/flow*/node_modules
-/flow-admin/public
-/**/paid-features/
-/**/protected/
-/**/scripts/
+/admin/public
+/**/node_modules
+/**/paid-features
+/**/protected
+/**/scripts
 /**/publish
 /**/index.html

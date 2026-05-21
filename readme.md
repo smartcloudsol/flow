@@ -83,26 +83,36 @@ This keeps WordPress as the editing and presentation layer while AWS handles dur
 	Published package: `@smart-cloud/flow-core`
 
 - `main/`  
-	Base runtime JavaScript and CSS features loaded where needed on the site.
+	Base runtime JavaScript and CSS features loaded where needed on the site; build here and copy the generated assets from `main/dist/` into the final plugin layout.
 
 - `admin/`  
-	WordPress admin interface for Flow settings and backend-aware admin tooling.
+	WordPress admin interface for Flow settings and backend-aware admin tooling; build here and copy the generated assets from `admin/dist/` and `admin/php/` into the final plugin layout.
 
 - `blocks/`  
-	Gutenberg form builder blocks, field blocks, conditional logic UI, and front-end rendering support.
+	Gutenberg form builder blocks, field blocks, conditional logic UI, and front-end rendering support; build here and copy the generated assets from `blocks/dist/` into the final plugin layout.
 
-- `wpsuite-admin/`  
-	Shared WP Suite admin interface used across WP Suite plugins.  
-	Source repo: https://github.com/smartcloudsol/hub-for-wpsuiteio
+- `wpsuite-main/` (in the Hub repository)  
+	Shared frontend bundle copied into `hub-for-wpsuiteio/`; its `dist/` output provides the script loaded on every page to initialize WPSuite reCAPTCHA v3 when needed.
 
-- `dist/` folders  
+- `wpsuite-admin/` (in the Hub repository)  
+	Shared WP Suite admin interface used across WP Suite plugins.
+
+- `wpsuite-*-vendor/` (in the Hub repository)  
+	Shared vendor bundles whose `dist/` outputs are copied into `hub-for-wpsuiteio/assets/js/` and `hub-for-wpsuiteio/assets/css/`.
+
+- `dist/` folders under `main/`, `admin/`, and `blocks/`  
 	Compiled and minified frontend output used by the WordPress plugin.
 
 - Plugin PHP code and metadata (for example `smartcloud-flow.php`, `readme.txt`, `composer.json`) are located in the **project root**.
 
 ⚠️ **Note:**  
 The `wpsuite-core` package is not developed in this repository.  
-It lives in the separate Hub repository and is published on npm as `@smart-cloud/wpsuite-core`.
+It lives in the separate Hub repository and is published on npm as `@smart-cloud/wpsuite-core`. Shared Hub assets such as `wpsuite-admin/`, `wpsuite-main/`, and `wpsuite-*-vendor/` also live in that repository.
+
+### Source of Shared WPSuite Hub Code
+
+The shared WordPress Hub code lives in the `wpsuite-admin/`, `wpsuite-main/`, and `wpsuite-*-vendor/` directories of the [Hub for WPSuite.io](https://github.com/smartcloudsol/hub-for-wpsuiteio) repository.  
+That repository hosts the shared administrative interface, global frontend assets, and vendor bundles used across WPSuite plugins, including Flow.
 
 ---
 
@@ -117,7 +127,7 @@ It lives in the separate Hub repository and is published on npm as `@smart-cloud
 
 ### 1) Clone the repositories
 
-You typically want Flow and the Hub repository side-by-side so local linking works cleanly:
+You typically want Flow and the Hub repository side-by-side so local linking and shared Hub asset packaging work cleanly:
 
 ```bash
 git clone https://github.com/smartcloudsol/hub-for-wpsuiteio.git
@@ -131,6 +141,10 @@ Suggested structure:
 	hub-for-wpsuiteio/
 		wpsuite-core/
 		wpsuite-admin/
+		wpsuite-main/
+		wpsuite-amplify-vendor/
+		wpsuite-mantine-vendor/
+		wpsuite-webcrypto-vendor/
 	flow/
 		core/
 		main/
@@ -146,6 +160,18 @@ cd hub-for-wpsuiteio/wpsuite-core
 yarn install
 
 cd ../wpsuite-admin
+yarn install
+
+cd ../wpsuite-main
+yarn install
+
+cd ../wpsuite-amplify-vendor
+yarn install
+
+cd ../wpsuite-mantine-vendor
+yarn install
+
+cd ../wpsuite-webcrypto-vendor
 yarn install
 
 # Flow repo
@@ -167,7 +193,7 @@ yarn install
 First, build and link `wpsuite-core` from the Hub repo:
 
 ```bash
-cd ../hub-for-wpsuiteio/wpsuite-core
+cd ../../hub-for-wpsuiteio/wpsuite-core
 yarn run build
 npm link
 ```
@@ -193,7 +219,7 @@ npm link @smart-cloud/flow-core
 npm link @smart-cloud/wpsuite-core
 ```
 
-If you build `wpsuite-admin` locally, follow the same linking workflow used in the Hub repository.
+If you build shared Hub assets locally, follow the same linking workflow used in the Hub repository.
 
 ### 5) Build frontend modules for WordPress
 
@@ -210,6 +236,10 @@ cd ../blocks
 yarn run build-wp dist
 ```
 
+After building `main/`, `admin/`, and `blocks/`, copy the generated assets from each module's `dist/` directory into the matching plugin directory. For `admin/`, copy the PHP files from `admin/php/` as well.
+
+If you build shared Hub assets locally, run `yarn run build-wp dist` in `hub-for-wpsuiteio/wpsuite-main` and `hub-for-wpsuiteio/wpsuite-admin`, and run `yarn run build` in any touched `hub-for-wpsuiteio/wpsuite-*-vendor` workspace before packaging.
+
 ### 6) Install PHP dependencies
 
 From the **root directory** of Flow:
@@ -220,8 +250,9 @@ composer install --no-dev --no-scripts --optimize-autoloader --classmap-authorit
 
 ### 7) Development workflow
 
-- Rebuild the module you changed (`yarn run build` or `yarn run build-wp dist`).
+- Rebuild `core/` after shared package changes (`yarn run build`), and rebuild `main/`, `admin/`, or `blocks/` with `yarn run build-wp dist` after WordPress bundle changes.
 - If you changed `wpsuite-core` or `flow-core`, rebuild and re-link as needed.
+- If you changed `wpsuite-main`, `wpsuite-admin`, or any `wpsuite-*-vendor` workspace in the Hub repo, rebuild those outputs before local testing or packaging.
 - PHP changes are loaded by WordPress immediately.
 - Use a local WordPress install for end-to-end testing of blocks, shortcode rendering, and admin flows.
 
@@ -234,7 +265,15 @@ Ensure the built assets are copied into the simplified plugin layout:
 - `main/dist/*` → `main/`
 - `blocks/dist/*` → `blocks/`
 - `admin/php/*` and `admin/dist/*` → `admin/`
+
+If you rebuild the shared Hub assets in the separate Hub repository, copy the following outputs into the plugin's `hub-for-wpsuiteio/` directory according to that repository's instructions:
+
+- `wpsuite-main/dist/*` → `hub-for-wpsuiteio/`
 - `wpsuite-admin/php/*` and `wpsuite-admin/dist/*` → `hub-for-wpsuiteio/`
+- `wpsuite-*-vendor/dist/*.js` → `hub-for-wpsuiteio/assets/js/`
+- `wpsuite-*-vendor/dist/*.css` → `hub-for-wpsuiteio/assets/css/`
+
+The `wpsuite-main/dist/` bundle provides the script that loads on every page and initializes the reCAPTCHA v3 flow used by WPSuite plugins whenever it is needed.
 
 Once the structure matches the layout above, create the distributable ZIP:
 
