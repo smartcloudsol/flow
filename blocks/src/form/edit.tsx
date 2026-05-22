@@ -82,6 +82,38 @@ const EMPTY_FORM_ACTION: EditableFormAction = {
   enabled: true,
 };
 
+type EditorPostRecord = {
+  id?: unknown;
+  wp_id?: unknown;
+  status?: unknown;
+  type?: unknown;
+};
+
+type EditorPostContext = {
+  postId?: number;
+  postType?: string;
+  postStatus?: string;
+};
+
+function resolveNumericEditorEntityId(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (/^\d+$/.test(trimmed)) {
+      return Number(trimmed);
+    }
+  }
+
+  return undefined;
+}
+
+function resolveEditorString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
 type FlowBlockInstance = ReturnType<typeof createBlock>;
 
 function normalizeActionKey(value: string): string {
@@ -677,13 +709,31 @@ export default function Edit({
     ...EMPTY_FORM_ACTION,
   });
 
-  // Get current post ID
-  const postId = useSelect((select) => {
+  // Resolve the current edited entity metadata in a way that also works in the
+  // Site Editor, where getCurrentPostId() may be a template slug and the
+  // numeric entity ID lives on currentPost.wp_id.
+  const editorPostContext = useSelect((select) => {
     const editorSelect = select(editorStore) as unknown as {
-      getCurrentPostId: () => string | number;
+      getCurrentPostId: () => string | number | null;
+      getCurrentPost: () => EditorPostRecord | undefined;
+      getCurrentPostType: () => string | undefined;
+      getEditedPostAttribute: (attributeName: string) => unknown;
     };
-    const id = editorSelect.getCurrentPostId();
-    return typeof id === "number" ? id : parseInt(String(id), 10);
+    const currentPost = editorSelect.getCurrentPost?.();
+    const postId =
+      resolveNumericEditorEntityId(editorSelect.getCurrentPostId()) ||
+      resolveNumericEditorEntityId(currentPost?.id) ||
+      resolveNumericEditorEntityId(currentPost?.wp_id);
+
+    return {
+      postId,
+      postType:
+        resolveEditorString(editorSelect.getCurrentPostType?.()) ||
+        resolveEditorString(currentPost?.type),
+      postStatus:
+        resolveEditorString(editorSelect.getEditedPostAttribute?.("status")) ||
+        resolveEditorString(currentPost?.status),
+    } satisfies EditorPostContext;
   }, []);
 
   // Get backend sync settings
@@ -1035,7 +1085,9 @@ export default function Edit({
 
   // Use backend sync hook
   const { syncStatus, performSync } = useFormSync({
-    postId,
+    postId: editorPostContext.postId,
+    postType: editorPostContext.postType,
+    postStatus: editorPostContext.postStatus,
     enabled: backendSyncEnabled,
     formAttributes: attributes,
     fields,
@@ -1392,10 +1444,23 @@ export default function Edit({
               </Notice>
             )}
 
+            {backendSyncEnabled && !editorPostContext.postId && (
+              <Notice status="warning" isDismissible={false}>
+                <p style={{ margin: 0, fontSize: "13px" }}>
+                  {__(
+                    "Backend sync is waiting for the current post or template part to expose a numeric entity ID.",
+                    TEXT_DOMAIN,
+                  )}
+                </p>
+              </Notice>
+            )}
+
             <Button
               variant="secondary"
               onClick={performSync}
-              disabled={syncStatus.status === "syncing"}
+              disabled={
+                syncStatus.status === "syncing" || !editorPostContext.postId
+              }
             >
               {syncStatus.status === "syncing"
                 ? __("Syncing...", TEXT_DOMAIN)

@@ -13,11 +13,22 @@ export interface FormSyncMetadata {
   sourceKind: "post" | "pattern" | "reusable_block";
 }
 
+function assertValidPostId(postId: number): number {
+  if (!Number.isFinite(postId)) {
+    throw new Error(
+      "Cannot manage form sync metadata without a numeric post ID.",
+    );
+  }
+
+  return postId;
+}
+
 export async function getFormSyncMeta(
   postId: number,
 ): Promise<FormSyncMetadata> {
+  const resolvedPostId = assertValidPostId(postId);
   const response = await fetch(
-    `/wp-json/smartcloud-flow/v1/forms/${postId}/sync-meta`,
+    `/wp-json/smartcloud-flow/v1/forms/${resolvedPostId}/sync-meta`,
     {
       method: "GET",
       headers: {
@@ -40,8 +51,9 @@ export async function updateFormSyncMeta(
   postId: number,
   updates: Partial<FormSyncMetadata>,
 ): Promise<FormSyncMetadata> {
+  const resolvedPostId = assertValidPostId(postId);
   const response = await fetch(
-    `/wp-json/smartcloud-flow/v1/forms/${postId}/sync-meta`,
+    `/wp-json/smartcloud-flow/v1/forms/${resolvedPostId}/sync-meta`,
     {
       method: "POST",
       headers: {

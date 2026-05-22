@@ -94,7 +94,9 @@ interface SyncStatus {
 }
 
 interface FormSyncOptions {
-  postId: number;
+  postId?: number;
+  postType?: string;
+  postStatus?: string;
   enabled?: boolean;
   formAttributes: FormAttributes; // Form block attributes
   fields: FieldConfig[]; // Extracted from innerBlocks
@@ -110,11 +112,14 @@ interface FormSyncOptions {
 export function useFormSync(options: FormSyncOptions) {
   const {
     postId,
+    postType,
+    postStatus,
     enabled = true,
     formAttributes,
     fields,
     setAttributes,
   } = options;
+  const hasValidPostId = typeof postId === "number" && Number.isFinite(postId);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     status: "idle",
     formId: null,
@@ -141,22 +146,24 @@ export function useFormSync(options: FormSyncOptions) {
    * Perform backend sync
    */
   const performSync = useCallback(async () => {
-    if (!enabled || syncInProgressRef.current) {
+    if (!enabled || !hasValidPostId || syncInProgressRef.current) {
       return;
     }
+
+    const resolvedPostId = postId;
 
     syncInProgressRef.current = true;
     setSyncStatus((prev) => ({ ...prev, status: "syncing", lastError: null }));
 
     try {
       // Get current sync metadata from post meta
-      const currentMeta = await getFormSyncMeta(postId);
+      const currentMeta = await getFormSyncMeta(resolvedPostId);
 
       // Extract form configuration from block attributes and fields
       const formSource = {
-        postId,
-        postType: "smartcloud_flow_form", // or get from WP
-        postStatus: "publish", // or get from WP
+        postId: resolvedPostId,
+        postType,
+        postStatus,
         attributes: formAttributes as Record<string, unknown>,
         fields: fields.map(normalizeFieldForSync),
         sourceKind: "post" as const,
@@ -198,7 +205,7 @@ export function useFormSync(options: FormSyncOptions) {
 
         // Update sync metadata (non-critical, so we catch errors)
         try {
-          await updateFormSyncMeta(postId, {
+          await updateFormSyncMeta(resolvedPostId, {
             formId: result.formId || currentMeta.formId || null,
             syncHash: result.syncHash || null,
             syncStatus: "synced",
@@ -228,7 +235,7 @@ export function useFormSync(options: FormSyncOptions) {
       } else {
         // Update error metadata (non-critical)
         try {
-          await updateFormSyncMeta(postId, {
+          await updateFormSyncMeta(resolvedPostId, {
             syncStatus: "error",
             lastError: result.error || "Unknown sync error",
           });
@@ -248,7 +255,7 @@ export function useFormSync(options: FormSyncOptions) {
         error instanceof Error ? error.message : "Sync failed";
 
       try {
-        await updateFormSyncMeta(postId, {
+        await updateFormSyncMeta(resolvedPostId, {
           syncStatus: "error",
           lastError: errorMessage,
         });
@@ -264,7 +271,16 @@ export function useFormSync(options: FormSyncOptions) {
     } finally {
       syncInProgressRef.current = false;
     }
-  }, [enabled, postId, formAttributes, fields, setAttributes]);
+  }, [
+    enabled,
+    hasValidPostId,
+    postId,
+    postType,
+    postStatus,
+    formAttributes,
+    fields,
+    setAttributes,
+  ]);
 
   /**
    * Trigger sync when post is saved (but not autosaved)
@@ -280,7 +296,7 @@ export function useFormSync(options: FormSyncOptions) {
    */
   useEffect(() => {
     // Only load metadata if sync is enabled
-    if (!enabled) {
+    if (!enabled || !hasValidPostId) {
       setSyncStatus({
         status: "idle",
         formId: null,
@@ -320,7 +336,7 @@ export function useFormSync(options: FormSyncOptions) {
     };
 
     loadSyncStatus();
-  }, [postId, enabled, setAttributes, formAttributes.formId]);
+  }, [postId, enabled, hasValidPostId, setAttributes, formAttributes.formId]);
 
   return {
     syncStatus,

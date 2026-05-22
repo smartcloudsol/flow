@@ -353,59 +353,59 @@
   opacity: var(--flow-control-disabled-opacity);
 }
 
-.smartcloud-flow-shadow-root .flow-control--checkbox input,
-.smartcloud-flow-shadow-root .flow-control--radio input,
-.smartcloud-flow-shadow-root .flow-control--switch input {
+.smartcloud-flow-shadow-root .flow-control__checkbox input,
+.smartcloud-flow-shadow-root .flow-control__radio input,
+.smartcloud-flow-shadow-root .flow-control__switch input {
   accent-color: var(--flow-choice-color);
 }
 
-.smartcloud-flow-shadow-root .flow-control--checkbox :where(label),
-.smartcloud-flow-shadow-root .flow-control--radio :where(label),
-.smartcloud-flow-shadow-root .flow-control--switch :where(label) {
+.smartcloud-flow-shadow-root .flow-control__checkbox :where(label),
+.smartcloud-flow-shadow-root .flow-control__radio :where(label),
+.smartcloud-flow-shadow-root .flow-control__switch :where(label) {
   color: var(--flow-choice-label-color);
 }
 
-.smartcloud-flow-shadow-root .flow-control--pin {
+.smartcloud-flow-shadow-root .flow-control__pin {
   gap: var(--flow-pin-gap);
 }
 
-.smartcloud-flow-shadow-root .flow-control--pin input {
+.smartcloud-flow-shadow-root .flow-control__pin input {
   width: var(--flow-pin-input-size);
   height: var(--flow-pin-input-size);
   text-align: center;
 }
 
-.smartcloud-flow-shadow-root .flow-control--slider [role="slider"],
-.smartcloud-flow-shadow-root .flow-control--rangeslider [role="slider"] {
+.smartcloud-flow-shadow-root .flow-control__slider [role="slider"],
+.smartcloud-flow-shadow-root .flow-control__rangeslider [role="slider"] {
   width: var(--flow-slider-thumb-size);
   height: var(--flow-slider-thumb-size);
   border: var(--flow-slider-thumb-border);
   background: var(--flow-slider-thumb-bg);
 }
 
-.smartcloud-flow-shadow-root .flow-control--slider [data-filled],
-.smartcloud-flow-shadow-root .flow-control--rangeslider [data-filled] {
+.smartcloud-flow-shadow-root .flow-control__slider [data-filled],
+.smartcloud-flow-shadow-root .flow-control__rangeslider [data-filled] {
   background: var(--flow-slider-bar-color);
 }
 
-.smartcloud-flow-shadow-root .flow-control--slider [data-track],
-.smartcloud-flow-shadow-root .flow-control--rangeslider [data-track] {
+.smartcloud-flow-shadow-root .flow-control__slider [data-track],
+.smartcloud-flow-shadow-root .flow-control__rangeslider [data-track] {
   height: var(--flow-slider-track-size);
   background: var(--flow-slider-track-bg);
 }
 
-.smartcloud-flow-shadow-root .flow-control--rating svg {
+.smartcloud-flow-shadow-root .flow-control__rating svg {
   width: var(--flow-rating-size);
   height: var(--flow-rating-size);
 }
 
-.smartcloud-flow-shadow-root .flow-control--rating button[data-active] svg {
+.smartcloud-flow-shadow-root .flow-control__rating button[data-active] svg {
   fill: var(--flow-rating-active-color);
   color: var(--flow-rating-active-color);
 }
 
 .smartcloud-flow-shadow-root
-  .flow-control--rating
+  .flow-control__rating
   button:not([data-active])
   svg {
   color: var(--flow-rating-inactive-color);
@@ -434,13 +434,13 @@
   padding: var(--flow-action-button-padding);
 }
 
-.smartcloud-flow-shadow-root .flow-action-button--submit {
+.smartcloud-flow-shadow-root .flow-action-button__submit {
   background: var(--flow-submit-bg);
   color: var(--flow-submit-color);
   border: var(--flow-submit-border);
 }
 
-.smartcloud-flow-shadow-root .flow-action-button--save-draft {
+.smartcloud-flow-shadow-root .flow-action-button__save-draft {
   background: var(--flow-save-draft-bg);
   color: var(--flow-save-draft-color);
   border: var(--flow-save-draft-border);
@@ -636,12 +636,12 @@
   word-break: break-word;
 }
 
-.smartcloud-flow-shadow-root .flow-block-message--error {
+.smartcloud-flow-shadow-root .flow-block-message__error {
   color: var(--flow-field-error-color);
   font-size: var(--flow-field-error-size);
 }
 
-.smartcloud-flow-shadow-root .flow-block-message--required,
+.smartcloud-flow-shadow-root .flow-block-message__required,
 .smartcloud-flow-shadow-root .flow-block-caption {
   color: var(--flow-field-caption-color);
   font-size: var(--flow-field-caption-size);
