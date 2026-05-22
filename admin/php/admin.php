@@ -51,6 +51,39 @@ final class Admin
         return $this->settings;
     }
 
+    private function isSupportedFormSyncPostType(string $post_type): bool
+    {
+        if ($post_type === '') {
+            return false;
+        }
+
+        $explicit_types = array(
+            'wp_block',
+            'wp_template',
+            'wp_template_part',
+            'smartcloud_flow_form',
+        );
+
+        return in_array($post_type, $explicit_types, true)
+            || post_type_supports($post_type, 'editor');
+    }
+
+    private function getFormSyncSourcePost(int $post_id): ?\WP_Post
+    {
+        if ($post_id <= 0 || wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
+            return null;
+        }
+
+        $post = get_post($post_id);
+        if (!$post instanceof \WP_Post) {
+            return null;
+        }
+
+        return $this->isSupportedFormSyncPostType((string) $post->post_type)
+            ? $post
+            : null;
+    }
+
     public function addMenu(): void
     {
         $page = add_submenu_page(
@@ -333,11 +366,9 @@ final class Admin
     {
         $post_id = (int) $request->get_param('post_id');
 
-        // Verify post exists and is valid type (post, page, wp_block, or smartcloud_flow_form)
-        $post = get_post($post_id);
-        $allowed_types = array('post', 'page', 'wp_block', 'smartcloud_flow_form');
+        $post = $this->getFormSyncSourcePost($post_id);
 
-        if (!$post || !in_array($post->post_type, $allowed_types, true)) {
+        if (!$post) {
             return new WP_REST_Response(
                 array('error' => 'Invalid post ID or unsupported post type'),
                 404
@@ -353,11 +384,9 @@ final class Admin
     {
         $post_id = (int) $request->get_param('post_id');
 
-        // Verify post exists and is valid type (post, page, wp_block, or smartcloud_flow_form)
-        $post = get_post($post_id);
-        $allowed_types = array('post', 'page', 'wp_block', 'smartcloud_flow_form');
+        $post = $this->getFormSyncSourcePost($post_id);
 
-        if (!$post || !in_array($post->post_type, $allowed_types, true)) {
+        if (!$post) {
             return new WP_REST_Response(
                 array('error' => 'Invalid post ID or unsupported post type'),
                 404

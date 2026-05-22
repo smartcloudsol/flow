@@ -65,6 +65,7 @@ import {
   AI_SUGGESTION_WATCHER_KEYS,
   stripConditionalSystemValues,
 } from "../../shared/conditional-system-watchers";
+import { resolveRuntimeContextString } from "../../shared/runtime-context";
 import { FormActionsProvider } from "../context/FormActionsContext";
 import type { FormReturnIntent } from "../context/FormActionsContext";
 import { FormAttributesProvider } from "../context/FormAttributesContext";
@@ -92,6 +93,10 @@ interface SubmissionMetaRuntime {
   aiSuggestionCount?: number;
   aiSuggestionAccepted?: boolean;
   aiSourcesUsed?: boolean;
+}
+
+function isAbsoluteHttpUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
 }
 
 function hasNamedValueField(
@@ -795,6 +800,17 @@ export function FormShell({
   }, [fieldDefaultValuesFromStore, initialValues, reducerState.values]);
 
   const frontendApiBaseUrl = getFrontendApiBaseUrl();
+  const resolvedEndpointPath = useMemo(() => {
+    const rawValue = form.endpointPath?.trim();
+    if (!rawValue) {
+      return undefined;
+    }
+
+    const resolvedValue = resolveRuntimeContextString(rawValue, form.wpContext)
+      .trim();
+
+    return resolvedValue || undefined;
+  }, [form.endpointPath, form.wpContext]);
   const fileFields = useMemo(() => collectFileFields(fields), [fields]);
 
   const emitFormEvent = useCallback(
@@ -863,6 +879,28 @@ export function FormShell({
 
   const dispatchFrontendRequest = useCallback(
     async <TResponse,>(path: string, body: unknown): Promise<TResponse> => {
+      const normalizedPath = path.trim();
+
+      if (isAbsoluteHttpUrl(normalizedPath)) {
+        const recaptchaHeaders = await getRecaptchaHeaders();
+        const response = await fetch(normalizedPath, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...recaptchaHeaders,
+          },
+          body: JSON.stringify(body ?? {}),
+          credentials: "omit",
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || `Request failed (${response.status})`);
+        }
+
+        return (await response.json()) as TResponse;
+      }
+
       const backend = await resolveBackend();
 
       if (backend.available) {
@@ -875,7 +913,7 @@ export function FormShell({
             reason: "Form submission",
           },
           "frontend",
-          path,
+          normalizedPath,
           "POST",
           body,
           {},
@@ -891,7 +929,7 @@ export function FormShell({
 
       const recaptchaHeaders = await getRecaptchaHeaders();
 
-      const response = await fetch(`${frontendApiBaseUrl}${path}`, {
+      const response = await fetch(`${frontendApiBaseUrl}${normalizedPath}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1411,9 +1449,9 @@ export function FormShell({
 
           let response: FormSubmitResponse;
 
-          if (form.endpointPath) {
+          if (resolvedEndpointPath) {
             response = await dispatchFrontendRequest<FormSubmitResponse>(
-              form.endpointPath,
+              resolvedEndpointPath,
               submitRequest,
             );
           } else {
@@ -1497,6 +1535,7 @@ export function FormShell({
       currentLanguage,
       prepareSerializableValues,
       requestViewScrollReset,
+      resolvedEndpointPath,
       resumeDraftIdInput,
       resumePasswordInput,
       state.aiSuggestions,

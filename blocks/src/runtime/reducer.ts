@@ -149,19 +149,23 @@ export function formReducer(
           suggestions: [],
         },
       };
-    case "SET_VALUE":
+    case "SET_VALUE": {
+      const nextValues = {
+        ...state.values,
+        [action.name]: action.value,
+      };
+
       return {
         ...state,
-        values: {
-          ...state.values,
-          [action.name]: action.value,
-        },
+        values: nextValues,
+        evaluationValues: nextValues,
         errors: {
           ...state.errors,
           [action.name]: undefined,
         },
         touched: new Set([...state.touched, action.name]),
       };
+    }
     case "SET_ERRORS":
       return {
         ...state,
@@ -250,6 +254,10 @@ export function formReducer(
           ...state.values,
           ...action.values,
         },
+        evaluationValues: {
+          ...state.evaluationValues,
+          ...action.values,
+        },
         errors,
         touched,
       };
@@ -259,6 +267,7 @@ export function formReducer(
         ...state,
         status: "idle",
         values: action.values,
+        evaluationValues: action.values,
         errors: {},
         touched: new Set(),
         message: action.message,
@@ -277,6 +286,7 @@ export function formReducer(
         ...state,
         status: "idle",
         values: action.values,
+        evaluationValues: action.values,
         errors: {},
         touched: new Set(),
         fieldStates: state.fieldStates,

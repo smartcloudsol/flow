@@ -245,10 +245,10 @@ function validateFieldValue(
   value: unknown,
   runtimeState?: RuntimeFieldStateMap[string],
 ): string | undefined {
-  if (!("label" in field)) return undefined;
+  const fieldRecord = field as unknown as Record<string, unknown>;
   const fieldLabel =
-    typeof field.label === "string" && field.label.trim().length > 0
-      ? field.label
+    typeof fieldRecord.label === "string" && fieldRecord.label.trim().length > 0
+      ? fieldRecord.label
       : I18n.get("Field") || "Field";
 
   const isRequired = Boolean(
@@ -579,7 +579,7 @@ export function validateField(
   }
 
   // Additional type guard to ensure field has required properties
-  if (!("name" in field) || !("label" in field)) {
+  if (!("name" in field)) {
     return undefined;
   }
 

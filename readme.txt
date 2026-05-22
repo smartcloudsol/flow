@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -202,6 +202,12 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.2 =
+* Fix: Admin-side form sync now resolves the correct source entity in WordPress 7.0 Site Editor, including template and template-part contexts.
+* Fix: Validation now uses the current field values on submit, including minimal or unlabeled text/email fields.
+* Fix: Custom submit endpoints now handle absolute URLs correctly and support runtime interpolation tokens from WordPress, location, query string and host-page globals.
+* Fix: Flow design token selectors now align with the emitted runtime class names, so theme overrides apply more reliably to submit buttons and field controls.
+
 = 1.1.1 =
 * Fix: Backend form sync now resolves the correct numeric source ID in WordPress 7.0 Site Editor and template part contexts.
 * Fix: Sync metadata requests now guard against invalid source IDs and use the current editor entity metadata more reliably.
@@ -224,6 +230,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+Recommended update if you use Flow in the WordPress 7.0 Site Editor, rely on custom submit endpoints, or use theme overrides; this release fixes admin form sync, submit validation, endpoint handling and design token parity.
 
 = 1.1.1 =
 Fixes backend form sync for WordPress 7.0 Site Editor and template part editing, and improves Flow design token overrides so runtime control styling applies more reliably.
