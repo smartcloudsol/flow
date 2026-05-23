@@ -1,12 +1,13 @@
 import { type SubscriptionType } from "@smart-cloud/wpsuite-core";
 import { type StoreDescriptor } from "@wordpress/data";
-import { type BackendTransport } from "./types";
+import { type BackendTransport, type FormFieldDefaults } from "./types";
 export interface FlowConfig {
     backendTransport?: BackendTransport;
     backendApiName?: string;
     backendBaseUrl?: string;
     subscriptionType?: SubscriptionType;
 }
+export type FormFieldDefaultsByFormId = Record<string, FormFieldDefaults>;
 /**
  * Ensures we only keep runtime keys that are part of FlowConfig.
  */
@@ -24,17 +25,20 @@ declare const actions: {
         type: "SET_CONFIG";
         config: FlowConfig;
     };
-    setFieldDefaultValue(fieldName: string, value: unknown): {
-        type: "SET_FIELD_DEFAULT_VALUE";
+    setFormFieldDefaultValue(formId: string, fieldName: string, value: unknown): {
+        type: "SET_FORM_FIELD_DEFAULT_VALUE";
+        formId: string;
         fieldName: string;
         value: unknown;
     };
-    setFieldDefaultValues(values: Record<string, unknown>): {
-        type: "SET_FIELD_DEFAULT_VALUES";
-        values: Record<string, unknown>;
+    setFormFieldDefaultValues(formId: string, values: FormFieldDefaults): {
+        type: "SET_FORM_FIELD_DEFAULT_VALUES";
+        formId: string;
+        values: FormFieldDefaults;
     };
-    clearFieldDefaultValues(): {
-        type: "CLEAR_FIELD_DEFAULT_VALUES";
+    clearFormFieldDefaultValues(formId: string): {
+        type: "CLEAR_FORM_FIELD_DEFAULT_VALUES";
+        formId: string;
     };
 };
 export interface CustomTranslations {
@@ -45,7 +49,7 @@ export interface State {
     language: string | undefined | null;
     direction: "ltr" | "rtl" | "auto" | undefined | null;
     customTranslations: CustomTranslations | null;
-    fieldDefaultValues: Record<string, unknown>;
+    fieldDefaultValues: FormFieldDefaultsByFormId;
 }
 export type Store = StoreDescriptor;
 export type StoreSelectors = {
@@ -54,14 +58,15 @@ export type StoreSelectors = {
     getLanguage(): string | undefined | null;
     getDirection(): "ltr" | "rtl" | "auto" | undefined | null;
     getState(): State;
-    getFieldDefaultValues(): Record<string, unknown>;
-    getFieldDefaultValue(fieldName: string): unknown;
+    getFormFieldDefaultValues(formId: string): FormFieldDefaults;
+    getFormFieldDefaultValue(formId: string, fieldName: string): unknown;
+    getAllFormFieldDefaultValues(): FormFieldDefaultsByFormId;
 };
 export type StoreActions = Omit<typeof actions, "setConfig"> & {
     setConfig?: typeof actions.setConfig;
-    setFieldDefaultValue: typeof actions.setFieldDefaultValue;
-    setFieldDefaultValues: typeof actions.setFieldDefaultValues;
-    clearFieldDefaultValues: typeof actions.clearFieldDefaultValues;
+    setFormFieldDefaultValue: typeof actions.setFormFieldDefaultValue;
+    setFormFieldDefaultValues: typeof actions.setFormFieldDefaultValues;
+    clearFormFieldDefaultValues: typeof actions.clearFormFieldDefaultValues;
 };
 export declare const getStoreDispatch: (store: Store) => Omit<StoreActions, "setConfig">;
 export declare const getStoreSelect: (store: Store) => StoreSelectors;

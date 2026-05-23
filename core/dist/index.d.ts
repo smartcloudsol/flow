@@ -1,8 +1,8 @@
 import { TEXT_DOMAIN } from "./constants";
 import { getFlowPlugin, getStore, waitForFlowReady, type FlowErrorEvent, type FlowPlugin, type FlowReadyEvent } from "./runtime";
-import { type Backend, type Capabilities, type FlowLanguageCode } from "./types";
+import { type Backend, type Capabilities, type FlowLanguageCode, type FormFieldDefaults } from "./types";
 export { getFlowPlugin, getStore, TEXT_DOMAIN, waitForFlowReady, type FlowErrorEvent, type FlowPlugin, type FlowReadyEvent, };
-export { getStoreDispatch, getStoreSelect, observeStore, reloadConfig, sanitizeFlowConfig, type CustomTranslations, type FlowConfig, type State, type Store, } from "./store";
+export { getStoreDispatch, getStoreSelect, observeStore, reloadConfig, sanitizeFlowConfig, type CustomTranslations, type FlowConfig, type FormFieldDefaultsByFormId, type State, type Store, type StoreActions, type StoreSelectors, } from "./store";
 export * from "./types";
 export declare const LANGUAGE_OPTIONS: {
     label: string;
@@ -17,4 +17,9 @@ export declare const resolveBackend: (...args: Parameters<Capabilities["resolveB
     reason?: string;
 }>;
 export declare const dispatchBackend: (...args: Parameters<Backend<unknown>["dispatchBackend"]>) => Promise<unknown>;
+export declare const setFormFieldDefaultValue: (formId: string, fieldName: string, value: unknown) => Promise<void>;
+export declare const setFormFieldDefaultValues: (formId: string, values: FormFieldDefaults) => Promise<void>;
+export declare const clearFormFieldDefaultValues: (formId: string) => Promise<void>;
+export declare const getFormFieldDefaultValue: (formId: string, fieldName: string) => Promise<unknown>;
+export declare const getFormFieldDefaultValues: (formId: string) => Promise<FormFieldDefaults>;
 export declare const initializeFlow: () => FlowPlugin;

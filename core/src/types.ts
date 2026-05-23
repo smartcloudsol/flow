@@ -4,6 +4,8 @@ export type ContextKind = "admin" | "frontend";
 
 export type BackendTransport = "gatey" | "fetch";
 
+export type FormFieldDefaults = Record<string, unknown>;
+
 export type FlowHighlightedSubmissionAction = "seen" | "resolved" | "completed";
 
 /* -----------------------------
@@ -62,11 +64,33 @@ export interface FlowFeatures {
   readonly store: Promise<Store>;
 }
 
+export interface FlowFormFieldDefaultsApi {
+  setFormFieldDefaultValue(
+    formId: string,
+    fieldName: string,
+    value: unknown,
+  ): Promise<void>;
+
+  setFormFieldDefaultValues(
+    formId: string,
+    values: FormFieldDefaults,
+  ): Promise<void>;
+
+  clearFormFieldDefaultValues(formId: string): Promise<void>;
+
+  getFormFieldDefaultValue(
+    formId: string,
+    fieldName: string,
+  ): Promise<unknown>;
+
+  getFormFieldDefaultValues(formId: string): Promise<FormFieldDefaults>;
+}
+
 /**
  * FlowPlugin - the main plugin object exposed at WpSuite.plugins.flow.
  * Note: accountId, siteId, siteKey are in WpSuite.siteSettings, not here.
  */
-export interface Flow {
+export interface Flow extends FlowFormFieldDefaultsApi {
   features: FlowFeatures;
   settings: FlowSettings;
   nonce: string;

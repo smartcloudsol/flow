@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -202,6 +202,11 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.3 =
+* Fix: JavaScript-set field defaults are now scoped by `formId`, so prefilled values no longer bleed across multiple forms on the same page.
+* Fix: Flow now publishes browser helper methods on `WpSuite.plugins.flow` for setting, clearing, and reading per-form field defaults.
+* Maintenance: Updated the Flow JavaScript API and field-default documentation for the new form-scoped default-value model.
+
 = 1.1.2 =
 * Fix: Admin-side form sync now resolves the correct source entity in WordPress 7.0 Site Editor, including template and template-part contexts.
 * Fix: Validation now uses the current field values on submit, including minimal or unlabeled text/email fields.
@@ -230,6 +235,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.3 =
+Recommended update if you prefill Flow forms from JavaScript or render multiple forms on the same page; this release adds form-scoped default-value helpers and applies store defaults by `formId`.
 
 = 1.1.2 =
 Recommended update if you use Flow in the WordPress 7.0 Site Editor, rely on custom submit endpoints, or use theme overrides; this release fixes admin form sync, submit validation, endpoint handling and design token parity.

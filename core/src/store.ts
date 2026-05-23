@@ -14,7 +14,7 @@ import {
 } from "@wordpress/data";
 import { I18n } from "aws-amplify/utils";
 import { getFlowPlugin } from "./runtime";
-import { type BackendTransport } from "./types";
+import { type BackendTransport, type FormFieldDefaults } from "./types";
 
 export interface FlowConfig {
   backendTransport?: BackendTransport;
@@ -22,6 +22,8 @@ export interface FlowConfig {
   backendBaseUrl?: string;
   subscriptionType?: SubscriptionType;
 }
+
+export type FormFieldDefaultsByFormId = Record<string, FormFieldDefaults>;
 
 let siteSettings: SiteSettings;
 if (typeof WpSuite !== "undefined") {
@@ -92,6 +94,21 @@ const getDefaultState = async (): Promise<State> => {
   };
 };
 
+function normalizeOptionalIdentifier(value: string): string | undefined {
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function requireIdentifier(name: string, value: string): string {
+  const normalized = normalizeOptionalIdentifier(value);
+
+  if (!normalized) {
+    throw new Error(`${name} must be a non-empty string`);
+  }
+
+  return normalized;
+}
+
 const actions = {
   setLanguage(language: string | undefined | null) {
     if (!language || language === "system") {
@@ -117,24 +134,27 @@ const actions = {
     config,
   }),
 
-  setFieldDefaultValue(fieldName: string, value: unknown) {
+  setFormFieldDefaultValue(formId: string, fieldName: string, value: unknown) {
     return {
-      type: "SET_FIELD_DEFAULT_VALUE" as const,
-      fieldName,
+      type: "SET_FORM_FIELD_DEFAULT_VALUE" as const,
+      formId: requireIdentifier("formId", formId),
+      fieldName: requireIdentifier("fieldName", fieldName),
       value,
     };
   },
 
-  setFieldDefaultValues(values: Record<string, unknown>) {
+  setFormFieldDefaultValues(formId: string, values: FormFieldDefaults) {
     return {
-      type: "SET_FIELD_DEFAULT_VALUES" as const,
+      type: "SET_FORM_FIELD_DEFAULT_VALUES" as const,
+      formId: requireIdentifier("formId", formId),
       values,
     };
   },
 
-  clearFieldDefaultValues() {
+  clearFormFieldDefaultValues(formId: string) {
     return {
-      type: "CLEAR_FIELD_DEFAULT_VALUES" as const,
+      type: "CLEAR_FORM_FIELD_DEFAULT_VALUES" as const,
+      formId: requireIdentifier("formId", formId),
     };
   },
 };
@@ -155,11 +175,30 @@ const selectors = {
   getState(state: State) {
     return state;
   },
-  getFieldDefaultValues(state: State) {
-    return state.fieldDefaultValues;
+  getFormFieldDefaultValues(state: State, formId: string): FormFieldDefaults {
+    const normalizedFormId = normalizeOptionalIdentifier(formId);
+    if (!normalizedFormId) {
+      return {};
+    }
+
+    return state.fieldDefaultValues[normalizedFormId] ?? {};
   },
-  getFieldDefaultValue(state: State, fieldName: string) {
-    return state.fieldDefaultValues[fieldName];
+  getFormFieldDefaultValue(
+    state: State,
+    formId: string,
+    fieldName: string,
+  ) {
+    const normalizedFormId = normalizeOptionalIdentifier(formId);
+    const normalizedFieldName = normalizeOptionalIdentifier(fieldName);
+
+    if (!normalizedFormId || !normalizedFieldName) {
+      return undefined;
+    }
+
+    return state.fieldDefaultValues[normalizedFormId]?.[normalizedFieldName];
+  },
+  getAllFormFieldDefaultValues(state: State): FormFieldDefaultsByFormId {
+    return state.fieldDefaultValues;
   },
 };
 
@@ -174,7 +213,7 @@ export interface State {
   language: string | undefined | null;
   direction: "ltr" | "rtl" | "auto" | undefined | null;
   customTranslations: CustomTranslations | null;
-  fieldDefaultValues: Record<string, unknown>;
+  fieldDefaultValues: FormFieldDefaultsByFormId;
 }
 
 export type Store = StoreDescriptor;
@@ -185,14 +224,15 @@ export type StoreSelectors = {
   getLanguage(): string | undefined | null;
   getDirection(): "ltr" | "rtl" | "auto" | undefined | null;
   getState(): State;
-  getFieldDefaultValues(): Record<string, unknown>;
-  getFieldDefaultValue(fieldName: string): unknown;
+  getFormFieldDefaultValues(formId: string): FormFieldDefaults;
+  getFormFieldDefaultValue(formId: string, fieldName: string): unknown;
+  getAllFormFieldDefaultValues(): FormFieldDefaultsByFormId;
 };
 export type StoreActions = Omit<typeof actions, "setConfig"> & {
   setConfig?: typeof actions.setConfig;
-  setFieldDefaultValue: typeof actions.setFieldDefaultValue;
-  setFieldDefaultValues: typeof actions.setFieldDefaultValues;
-  clearFieldDefaultValues: typeof actions.clearFieldDefaultValues;
+  setFormFieldDefaultValue: typeof actions.setFormFieldDefaultValue;
+  setFormFieldDefaultValues: typeof actions.setFormFieldDefaultValues;
+  clearFormFieldDefaultValues: typeof actions.clearFormFieldDefaultValues;
 };
 
 export const getStoreDispatch = (
@@ -236,29 +276,45 @@ export const createStore = async (): Promise<Store> => {
             config: action.config,
           };
 
-        case "SET_FIELD_DEFAULT_VALUE":
+        case "SET_FORM_FIELD_DEFAULT_VALUE":
           return {
             ...state,
             fieldDefaultValues: {
               ...state.fieldDefaultValues,
-              [action.fieldName]: action.value,
+              [action.formId]: {
+                ...(state.fieldDefaultValues[action.formId] ?? {}),
+                [action.fieldName]: action.value,
+              },
             },
           };
 
-        case "SET_FIELD_DEFAULT_VALUES":
+        case "SET_FORM_FIELD_DEFAULT_VALUES":
           return {
             ...state,
             fieldDefaultValues: {
               ...state.fieldDefaultValues,
-              ...action.values,
+              [action.formId]: {
+                ...(state.fieldDefaultValues[action.formId] ?? {}),
+                ...action.values,
+              },
             },
           };
 
-        case "CLEAR_FIELD_DEFAULT_VALUES":
+        case "CLEAR_FORM_FIELD_DEFAULT_VALUES": {
+          if (!(action.formId in state.fieldDefaultValues)) {
+            return state;
+          }
+
+          const nextFieldDefaultValues = {
+            ...state.fieldDefaultValues,
+          };
+          delete nextFieldDefaultValues[action.formId];
+
           return {
             ...state,
-            fieldDefaultValues: {},
+            fieldDefaultValues: nextFieldDefaultValues,
           };
+        }
       }
       return state;
     },

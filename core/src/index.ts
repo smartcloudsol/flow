@@ -9,11 +9,12 @@ import {
   type FlowPlugin,
   type FlowReadyEvent,
 } from "./runtime";
-import { createStore } from "./store";
+import { createStore, getStoreDispatch, getStoreSelect } from "./store";
 import {
   type Backend,
   type Capabilities,
   type FlowLanguageCode,
+  type FormFieldDefaults,
 } from "./types";
 
 export {
@@ -34,8 +35,11 @@ export {
   sanitizeFlowConfig,
   type CustomTranslations,
   type FlowConfig,
+  type FormFieldDefaultsByFormId,
   type State,
   type Store,
+  type StoreActions,
+  type StoreSelectors,
 } from "./store";
 
 export * from "./types";
@@ -94,6 +98,84 @@ export const dispatchBackend = async (
   return module.dispatchBackend(...args);
 };
 
+function requireNonEmptyString(name: string, value: string): string {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    throw new Error(`${name} must be a non-empty string`);
+  }
+
+  return normalized;
+}
+
+function normalizeFormFieldDefaults(values: FormFieldDefaults): FormFieldDefaults {
+  if (!values || typeof values !== "object" || Array.isArray(values)) {
+    throw new Error("values must be a plain object");
+  }
+
+  return { ...values };
+}
+
+export const setFormFieldDefaultValue = async (
+  formId: string,
+  fieldName: string,
+  value: unknown,
+): Promise<void> => {
+  const store = await getStore();
+
+  getStoreDispatch(store).setFormFieldDefaultValue(
+    requireNonEmptyString("formId", formId),
+    requireNonEmptyString("fieldName", fieldName),
+    value,
+  );
+};
+
+export const setFormFieldDefaultValues = async (
+  formId: string,
+  values: FormFieldDefaults,
+): Promise<void> => {
+  const store = await getStore();
+
+  getStoreDispatch(store).setFormFieldDefaultValues(
+    requireNonEmptyString("formId", formId),
+    normalizeFormFieldDefaults(values),
+  );
+};
+
+export const clearFormFieldDefaultValues = async (
+  formId: string,
+): Promise<void> => {
+  const store = await getStore();
+
+  getStoreDispatch(store).clearFormFieldDefaultValues(
+    requireNonEmptyString("formId", formId),
+  );
+};
+
+export const getFormFieldDefaultValue = async (
+  formId: string,
+  fieldName: string,
+): Promise<unknown> => {
+  const store = await getStore();
+
+  return getStoreSelect(store).getFormFieldDefaultValue(
+    requireNonEmptyString("formId", formId),
+    requireNonEmptyString("fieldName", fieldName),
+  );
+};
+
+export const getFormFieldDefaultValues = async (
+  formId: string,
+): Promise<FormFieldDefaults> => {
+  const store = await getStore();
+
+  return {
+    ...getStoreSelect(store).getFormFieldDefaultValues(
+      requireNonEmptyString("formId", formId),
+    ),
+  };
+};
+
 export const initializeFlow = (): FlowPlugin => {
   const wp = globalThis.WpSuite;
   const flow = getFlowPlugin();
@@ -107,6 +189,11 @@ export const initializeFlow = (): FlowPlugin => {
   flow.features = {
     store,
   };
+  flow.setFormFieldDefaultValue = setFormFieldDefaultValue;
+  flow.setFormFieldDefaultValues = setFormFieldDefaultValues;
+  flow.clearFormFieldDefaultValues = clearFormFieldDefaultValues;
+  flow.getFormFieldDefaultValue = getFormFieldDefaultValue;
+  flow.getFormFieldDefaultValues = getFormFieldDefaultValues;
 
   store
     .then(() => {
