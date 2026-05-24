@@ -6,7 +6,7 @@
  * Requires at least: 6.2
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.3
+ * Version:           1.1.4
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.3';
+const VERSION = '1.1.4';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -243,7 +243,7 @@ final class Flow
     }
 
     /**
-     * Shortcode handler for [smartcloud-flow-form pattern="123" ...]
+     * Shortcode handler for [smartcloud-flow-form id="123" ...]
      *
      * @param array $atts
      * @param string|null $content
@@ -407,7 +407,7 @@ final class Flow
     }
 
     /**
-     * Shortcode handler for [smartcloud-flow-content-root pattern="123" ...]
+     * Shortcode handler for [smartcloud-flow-content-root id="123" ...]
      *
      * @param array $atts
      * @param string|null $content

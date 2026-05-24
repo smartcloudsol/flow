@@ -37,8 +37,8 @@ Free mode supports:
 - **Gutenberg form builder** with dedicated layout and field blocks
 - **Front-end form rendering** with Mantine-based UI
 - **Conditional logic and validation**
-- **Shortcode support** via `[smartcloud-flow-form]`
-- **Elementor widget support** for embedding forms outside Gutenberg
+- **Shortcode support** via `[smartcloud-flow-form]` and `[smartcloud-flow-content-root]`
+- **Elementor widget support** for embedding forms or content roots outside Gutenberg
 - **Direct browser submission** to the endpoint URL configured for each form
 
 In free mode, WordPress/PHP does **not** have to proxy the request. Forms can post directly from the browser to your own endpoint.

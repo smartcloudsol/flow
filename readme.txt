@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -49,7 +49,7 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 * **Rich display & content blocks** — Use styled content primitives such as blockquotes, marks, badges, code blocks, spoilers, lists, tables, timelines, and overflow lists alongside inputs.
 * **Conditional logic & validation** — Show/hide, enable/disable, require/optional, and other rule-based field behavior.
 * **Theme overrides & design tokens** — Theme both interactive controls and display/content blocks inside the Shadow DOM with Mantine variables and stable `--flow-*` CSS tokens.
-* **Shortcodes & Elementor support** — Reuse forms via shortcode and Elementor integrations.
+* **Shortcodes & Elementor support** — Reuse forms or content roots via shortcode and Elementor integrations.
 * **Flexible submission target model** — Submit directly from the browser to a per-form endpoint URL.
 * **Pro: backend-aware operation** — Connect Flow to the AWS-hosted Flow backend for durable submissions, admin tooling, templates, workflows, and webhook-driven automation.
 * **Pro: backend form sync** — Optionally sync Gutenberg-defined forms into canonical backend form definitions stored in AWS.
@@ -123,7 +123,10 @@ Forms can still work as long as they submit to another valid configured endpoint
 Yes. Flow runs in the browser and can submit directly to the configured endpoint, so WordPress/PHP does not need to proxy the request.
 
 = Does this work outside Gutenberg? =
-Yes. Use the `[smartcloud-flow-form]` shortcode or the Elementor widget. Developers can also integrate the JavaScript APIs directly.
+Yes. Use the `[smartcloud-flow-form]` or `[smartcloud-flow-content-root]` shortcode, or the Elementor Flow Form / Flow Content Root widgets. Developers can also integrate the JavaScript APIs directly.
+
+= Can I reuse a Flow Content Root outside Gutenberg? =
+Yes. Use `[smartcloud-flow-content-root id="123"]` with a reusable block / pattern that contains a Flow Content Root block.
 
 == Screenshots ==
 
@@ -202,6 +205,11 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.4 =
+* Fix: Flow Patterns now includes reusable blocks that contain either a Flow Form or a Flow Content Root block.
+* Fix: The shortcode column now shows the matching copy-ready shortcode for each Flow pattern, including content-root entries.
+* Docs: Expanded the readme shortcode guidance to cover Flow Content Root reuse outside Gutenberg.
+
 = 1.1.3 =
 * Fix: JavaScript-set field defaults are now scoped by `formId`, so prefilled values no longer bleed across multiple forms on the same page.
 * Fix: Flow now publishes browser helper methods on `WpSuite.plugins.flow` for setting, clearing, and reading per-form field defaults.
@@ -235,6 +243,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.4 =
+Recommended update if you reuse Flow patterns outside Gutenberg; this release adds content-root patterns to the admin list and exposes the matching copy-ready shortcode targets.
 
 = 1.1.3 =
 Recommended update if you prefill Flow forms from JavaScript or render multiple forms on the same page; this release adds form-scoped default-value helpers and applies store defaults by `formId`.

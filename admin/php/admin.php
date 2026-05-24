@@ -44,6 +44,7 @@ final class Admin
 
         $this->settings = FlowAdminSettings::fromMixed($merged);
         $this->registerRestRoutes();
+        add_action('pre_get_posts', array($this, 'filterPatternListQuery'));
     }
 
     public function getSettings(): FlowAdminSettings
@@ -145,10 +146,98 @@ final class Admin
         add_filter('parent_file', array($this, 'highlightMenu'));
         add_filter('submenu_file', array($this, 'highlightSubmenu'));
 
-        add_filter('manage_edit-wp_block_columns', array($this, 'addShortcodeColumn'), 20);
-        add_action('manage_wp_block_posts_custom_column', array($this, 'renderShortcodeColumn'), 10, 2);
-        add_action('admin_enqueue_scripts', array($this, 'copyShortcode'));
+        $post_type = filter_input(INPUT_GET, 'post_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $search = filter_input(INPUT_GET, 's', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
+        if ($this->isFlowPatternsRequest($post_type, $search)) {
+            add_filter('manage_edit-wp_block_columns', array($this, 'addShortcodeColumn'), 20);
+            add_action('manage_wp_block_posts_custom_column', array($this, 'renderShortcodeColumn'), 10, 2);
+            add_action('admin_enqueue_scripts', array($this, 'copyShortcode'));
+        }
+
+    }
+
+    private function isFlowPatternsRequest(?string $post_type = null, ?string $search = null): bool
+    {
+        $resolved_post_type = $post_type;
+        if ($resolved_post_type === null) {
+            $resolved_post_type = filter_input(INPUT_GET, 'post_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        }
+
+        $resolved_search = $search;
+        if ($resolved_search === null) {
+            $resolved_search = filter_input(INPUT_GET, 's', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        }
+
+        return 'wp_block' === $resolved_post_type && 'smartcloud-flow' === $resolved_search;
+    }
+
+    public function filterPatternListQuery($query): void
+    {
+        if (
+            !is_admin()
+            || !($query instanceof \WP_Query)
+            || !$query->is_main_query()
+            || $query->get('flow_pattern_lookup')
+            || !$this->isFlowPatternsRequest((string) $query->get('post_type'), (string) $query->get('s'))
+        ) {
+            return;
+        }
+
+        $pattern_ids = $this->getFlowPatternIds();
+
+        $query->set('post__in', !empty($pattern_ids) ? $pattern_ids : array(0));
+    }
+
+    private function getFlowPatternIds(): array
+    {
+        $candidate_ids = get_posts(array(
+            'post_type' => 'wp_block',
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'orderby' => 'ID',
+            'order' => 'ASC',
+            'no_found_rows' => true,
+            'flow_pattern_lookup' => true,
+        ));
+
+        return array_values(array_filter(
+            array_map('intval', $candidate_ids),
+            array($this, 'isFlowPatternPost')
+        ));
+    }
+
+    private function getFlowPatternShortcodes(int $post_id): array
+    {
+        $post = get_post($post_id);
+
+        if (!($post instanceof \WP_Post) || 'wp_block' !== $post->post_type) {
+            return array();
+        }
+
+        $blocks = parse_blocks((string) $post->post_content);
+        $shortcodes = array();
+
+        foreach ($blocks as $block) {
+            $block_name = is_array($block) ? ($block['blockName'] ?? '') : '';
+
+            if ('smartcloud-flow/form' === $block_name) {
+                $shortcodes['form'] = sprintf('[smartcloud-flow-form id="%d"]', $post_id);
+                continue;
+            }
+
+            if ('smartcloud-flow/content-root' === $block_name) {
+                $shortcodes['content-root'] = sprintf('[smartcloud-flow-content-root id="%d"]', $post_id);
+            }
+        }
+
+        return array_values($shortcodes);
+    }
+
+    private function isFlowPatternPost(int $post_id): bool
+    {
+        return !empty($this->getFlowPatternShortcodes($post_id));
     }
 
     public function addShortcodeColumn($columns)
@@ -159,23 +248,30 @@ final class Admin
 
     public function renderShortcodeColumn($column, $post_id)
     {
-        if ('wpc_shortcode' !== $column || get_query_var('s') !== 'smartcloud-flow') {
+        if ('wpc_shortcode' !== $column) {
             return;
         }
 
-        $shortcode = sprintf('[smartcloud-flow-form pattern="%d"]', $post_id);
+        $shortcodes = $this->getFlowPatternShortcodes((int) $post_id);
+        if (empty($shortcodes)) {
+            return;
+        }
 
-        printf(
-            '<span class="wpc-shortcode" id="wpc-sc-%1$d"><code>%2$s</code></span>
-            <div class="row-actions">
-                <span class="copy">
-                    <a href="#" class="wpc-copy" data-target="wpc-sc-%1$d">Copy</a>
-                </span>
-            </div>',
-            (int) $post_id,
-            esc_html($shortcode),
-            esc_html__('Copy', 'smartcloud-flow')
-        );
+        $copy_label = esc_html__('Copy', 'smartcloud-flow');
+        $rows = array();
+
+        foreach ($shortcodes as $index => $shortcode) {
+            $target_id = sprintf('wpc-sc-%1$d-%2$d', (int) $post_id, (int) $index);
+
+            $rows[] = sprintf(
+                '<div class="wpc-shortcode-row"><span class="wpc-shortcode" id="%1$s"><code>%2$s</code></span><div class="row-actions"><span class="copy"><a href="#" class="wpc-copy" data-target="%1$s">%3$s</a></span></div></div>',
+                esc_attr($target_id),
+                esc_html($shortcode),
+                $copy_label
+            );
+        }
+
+        echo implode('', $rows);
     }
 
     public function copyShortcode($hook)
@@ -245,7 +341,7 @@ final class Admin
     }
     public function highlightMenu($parent_file)
     {
-        if (get_query_var('post_type') === 'wp_block' && get_query_var('s') === 'smartcloud-flow') {
+        if ($this->isFlowPatternsRequest((string) get_query_var('post_type'), (string) get_query_var('s'))) {
             return SMARTCLOUD_WPSUITE_SLUG;
         }
         return $parent_file;
@@ -253,7 +349,7 @@ final class Admin
 
     public function highlightSubmenu($submenu_file)
     {
-        if (get_query_var('post_type') === 'wp_block' && get_query_var('s') === 'smartcloud-flow') {
+        if ($this->isFlowPatternsRequest((string) get_query_var('post_type'), (string) get_query_var('s'))) {
             return admin_url("edit.php?post_type=wp_block&s=smartcloud-flow");
         }
         return $submenu_file;
