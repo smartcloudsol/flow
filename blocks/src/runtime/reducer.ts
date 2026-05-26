@@ -1,0 +1,298 @@
+import type {
+  AiSuggestionCard,
+  FieldConfig,
+  FormErrors,
+  FormStatus,
+  FormValues,
+  RuntimeFieldStateMap,
+  WordPressRuntimeContext,
+} from "../shared/types";
+import { resolveRuntimeContextValue } from "../shared/runtime-context";
+
+export interface FormRuntimeState {
+  status: FormStatus;
+  values: FormValues;
+  evaluationValues: FormValues;
+  errors: FormErrors;
+  fields: FieldConfig[];
+  submitCount: number;
+  message?: string;
+  touched: Set<string>;
+  fieldStates: RuntimeFieldStateMap;
+  aiSuggestions: {
+    status: "idle" | "loading" | "done" | "accepted" | "rejected";
+    suggestions: AiSuggestionCard[];
+    selectedSuggestionId?: string;
+    rawText?: string;
+    citations?: unknown;
+    metadata?: Record<string, unknown>;
+    lastRunSignature?: string;
+  };
+}
+
+export type FormAction =
+  | { type: "INIT"; fields: FieldConfig[]; values: FormValues }
+  | { type: "SET_VALUE"; name: string; value: unknown }
+  | { type: "SET_ERRORS"; errors: FormErrors }
+  | { type: "SET_FIELD_ERROR"; name: string; error: string | undefined }
+  | { type: "SET_STATUS"; status: FormStatus; message?: string }
+  | { type: "AI_SUGGESTIONS_LOADING"; signature?: string }
+  | {
+      type: "AI_SUGGESTIONS_DONE";
+      suggestions: AiSuggestionCard[];
+      rawText?: string;
+      citations?: unknown;
+      metadata?: Record<string, unknown>;
+    }
+  | { type: "AI_SUGGESTIONS_ACCEPT"; suggestionId?: string }
+  | { type: "AI_SUGGESTIONS_REJECT" }
+  | { type: "AI_SUGGESTIONS_RESET" }
+  | { type: "RESET_FIELDS"; values: FormValues; names: string[] }
+  | { type: "DRAFT_LOADED"; values: FormValues; message?: string }
+  | { type: "SUBMIT_SUCCESS"; message?: string }
+  | { type: "RESET"; values: FormValues };
+
+function collectInitialValues(
+  fields: FieldConfig[],
+  acc: FormValues,
+  wpContext?: WordPressRuntimeContext,
+): FormValues {
+  fields.forEach((field) => {
+    if (field.type === "submit" || field.type === "save-draft") {
+      return;
+    }
+
+    if (
+      field.type === "stack" ||
+      field.type === "group" ||
+      field.type === "grid" ||
+      field.type === "fieldset" ||
+      field.type === "collapse" ||
+      field.type === "visuallyhidden"
+    ) {
+      collectInitialValues(field.children, acc, wpContext);
+      return;
+    }
+
+    if (field.type === "wizard") {
+      field.steps.forEach((step) => {
+        collectInitialValues(step.children, acc, wpContext);
+      });
+      return;
+    }
+
+    if ("defaultValue" in field && field.defaultValue !== undefined) {
+      acc[field.name] = resolveRuntimeContextValue(
+        field.defaultValue,
+        wpContext,
+      );
+      return;
+    }
+
+    if (field.type === "checkbox") {
+      acc[field.name] = false;
+      return;
+    }
+
+    if (field.type === "number" && field.startValue !== undefined) {
+      acc[field.name] = field.startValue;
+      return;
+    }
+
+    if (field.type === "checkbox-group") {
+      acc[field.name] = [];
+      return;
+    }
+
+    if (field.type === "tags") {
+      acc[field.name] = [];
+      return;
+    }
+
+    if (field.type === "select" && field.multiple) {
+      acc[field.name] = [];
+      return;
+    }
+
+    if ("name" in field && typeof field.name === "string") {
+      acc[field.name] = "";
+    }
+  });
+
+  return acc;
+}
+
+export function getInitialValues(
+  fields: FieldConfig[],
+  wpContext?: WordPressRuntimeContext,
+): FormValues {
+  return collectInitialValues(fields, {}, wpContext);
+}
+
+export function formReducer(
+  state: FormRuntimeState,
+  action: FormAction,
+): FormRuntimeState {
+  switch (action.type) {
+    case "INIT":
+      return {
+        status: "idle",
+        values: action.values,
+        evaluationValues: action.values,
+        errors: {},
+        fields: action.fields,
+        submitCount: 0,
+        touched: new Set(),
+        fieldStates: state.fieldStates,
+        aiSuggestions: state.aiSuggestions ?? {
+          status: "idle",
+          suggestions: [],
+        },
+      };
+    case "SET_VALUE": {
+      const nextValues = {
+        ...state.values,
+        [action.name]: action.value,
+      };
+
+      return {
+        ...state,
+        values: nextValues,
+        evaluationValues: nextValues,
+        errors: {
+          ...state.errors,
+          [action.name]: undefined,
+        },
+        touched: new Set([...state.touched, action.name]),
+      };
+    }
+    case "SET_ERRORS":
+      return {
+        ...state,
+        errors: action.errors,
+        status: "error",
+        touched: new Set([...state.touched, ...Object.keys(action.errors)]),
+      };
+    case "SET_FIELD_ERROR":
+      return {
+        ...state,
+        errors: {
+          ...state.errors,
+          [action.name]: action.error,
+        },
+      };
+    case "SET_STATUS":
+      return {
+        ...state,
+        status: action.status,
+        message: action.message,
+      };
+
+    case "AI_SUGGESTIONS_LOADING":
+      return {
+        ...state,
+        aiSuggestions: {
+          ...state.aiSuggestions,
+          status: "loading",
+          suggestions: [],
+          selectedSuggestionId: undefined,
+          rawText: undefined,
+          citations: undefined,
+          metadata: undefined,
+          lastRunSignature:
+            action.signature ?? state.aiSuggestions.lastRunSignature,
+        },
+      };
+    case "AI_SUGGESTIONS_DONE":
+      return {
+        ...state,
+        aiSuggestions: {
+          status: "done",
+          suggestions: action.suggestions,
+          selectedSuggestionId: undefined,
+          rawText: action.rawText,
+          citations: action.citations,
+          metadata: action.metadata,
+          lastRunSignature: state.aiSuggestions.lastRunSignature,
+        },
+      };
+    case "AI_SUGGESTIONS_ACCEPT":
+      return {
+        ...state,
+        aiSuggestions: {
+          ...state.aiSuggestions,
+          status: "accepted",
+          selectedSuggestionId: action.suggestionId,
+        },
+      };
+    case "AI_SUGGESTIONS_REJECT":
+      return {
+        ...state,
+        aiSuggestions: {
+          ...state.aiSuggestions,
+          status: "rejected",
+          selectedSuggestionId: undefined,
+        },
+      };
+    case "AI_SUGGESTIONS_RESET":
+      return {
+        ...state,
+        aiSuggestions: { status: "idle", suggestions: [] },
+      };
+    case "RESET_FIELDS": {
+      const touched = new Set(state.touched);
+      const errors = { ...state.errors };
+
+      action.names.forEach((name) => {
+        touched.delete(name);
+        errors[name] = undefined;
+      });
+
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          ...action.values,
+        },
+        evaluationValues: {
+          ...state.evaluationValues,
+          ...action.values,
+        },
+        errors,
+        touched,
+      };
+    }
+    case "DRAFT_LOADED":
+      return {
+        ...state,
+        status: "idle",
+        values: action.values,
+        evaluationValues: action.values,
+        errors: {},
+        touched: new Set(),
+        message: action.message,
+        aiSuggestions: { status: "idle", suggestions: [] },
+      };
+    case "SUBMIT_SUCCESS":
+      return {
+        ...state,
+        status: "success",
+        submitCount: state.submitCount + 1,
+        errors: {},
+        message: action.message,
+      };
+    case "RESET":
+      return {
+        ...state,
+        status: "idle",
+        values: action.values,
+        evaluationValues: action.values,
+        errors: {},
+        touched: new Set(),
+        fieldStates: state.fieldStates,
+        aiSuggestions: { status: "idle", suggestions: [] },
+      };
+    default:
+      return state;
+  }
+}

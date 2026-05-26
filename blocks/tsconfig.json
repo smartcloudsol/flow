@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "esnext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "types": ["jquery"],
+    "paths": {
+      "monaco-editor/esm/*": ["./node_modules/monaco-editor/esm/*"],
+      "@smart-cloud/flow-admin/editor-runtime": [
+        "../admin/build/types/editor-runtime.d.ts"
+      ],
+      "@smart-cloud/flow-admin/operations-runtime": [
+        "../admin/build/types/operations-runtime.d.ts"
+      ]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "build", "node_modules"],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import { __ } from "@wordpress/i18n";
 import { attachDefaultPluginRuntime } from "@smart-cloud/wpsuite-core";
 import { TEXT_DOMAIN } from "./constants";
+import { createFlowModalApiStub } from "./modals";
 import {
   getFlowPlugin,
   getStore,
@@ -22,6 +23,7 @@ export {
   getStore,
   TEXT_DOMAIN,
   waitForFlowReady,
+  createFlowModalApiStub,
   type FlowErrorEvent,
   type FlowPlugin,
   type FlowReadyEvent,
@@ -108,7 +110,9 @@ function requireNonEmptyString(name: string, value: string): string {
   return normalized;
 }
 
-function normalizeFormFieldDefaults(values: FormFieldDefaults): FormFieldDefaults {
+function normalizeFormFieldDefaults(
+  values: FormFieldDefaults,
+): FormFieldDefaults {
   if (!values || typeof values !== "object" || Array.isArray(values)) {
     throw new Error("values must be a plain object");
   }
@@ -189,6 +193,7 @@ export const initializeFlow = (): FlowPlugin => {
   flow.features = {
     store,
   };
+  flow.modals = flow.modals ?? createFlowModalApiStub();
   flow.setFormFieldDefaultValue = setFormFieldDefaultValue;
   flow.setFormFieldDefaultValues = setFormFieldDefaultValues;
   flow.clearFormFieldDefaultValues = clearFormFieldDefaultValues;

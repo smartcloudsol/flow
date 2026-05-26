@@ -190,6 +190,24 @@ class Flow_Form_Widget extends Flow_Base_Widget
         $this->add_control('successMessage', ['label' => __('Success Message', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
         $this->add_control('errorMessage', ['label' => __('Error Message', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
         $this->add_control('endpointPath', ['label' => __('Endpoint Path', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('endpointMethod', [
+            'label' => __('Endpoint Method', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                '' => __('Inherit', 'smartcloud-flow'),
+                'GET' => 'GET',
+                'POST' => 'POST',
+                'PUT' => 'PUT',
+                'PATCH' => 'PATCH',
+            ],
+            'default' => '',
+        ]);
+        $this->add_control('endpointHeaders', [
+            'label' => __('Endpoint Headers', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::TEXTAREA,
+            'default' => '',
+            'description' => __('JSON object string of additional request headers for custom endpoint submissions.', 'smartcloud-flow'),
+        ]);
         $this->add_control('language', [
             'label' => __('Language', 'smartcloud-flow'),
             'type' => \Elementor\Controls_Manager::SELECT,
@@ -456,6 +474,8 @@ class Flow_Form_Widget extends Flow_Base_Widget
             'successMessage',
             'errorMessage',
             'endpointPath',
+            'endpointMethod',
+            'endpointHeaders',
             'language',
             'direction',
             'hideFormOnSuccess',

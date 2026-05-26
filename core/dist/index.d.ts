@@ -1,7 +1,8 @@
 import { TEXT_DOMAIN } from "./constants";
+import { createFlowModalApiStub } from "./modals";
 import { getFlowPlugin, getStore, waitForFlowReady, type FlowErrorEvent, type FlowPlugin, type FlowReadyEvent } from "./runtime";
 import { type Backend, type Capabilities, type FlowLanguageCode, type FormFieldDefaults } from "./types";
-export { getFlowPlugin, getStore, TEXT_DOMAIN, waitForFlowReady, type FlowErrorEvent, type FlowPlugin, type FlowReadyEvent, };
+export { getFlowPlugin, getStore, TEXT_DOMAIN, waitForFlowReady, createFlowModalApiStub, type FlowErrorEvent, type FlowPlugin, type FlowReadyEvent, };
 export { getStoreDispatch, getStoreSelect, observeStore, reloadConfig, sanitizeFlowConfig, type CustomTranslations, type FlowConfig, type FormFieldDefaultsByFormId, type State, type Store, type StoreActions, type StoreSelectors, } from "./store";
 export * from "./types";
 export declare const LANGUAGE_OPTIONS: {

@@ -183,11 +183,7 @@ const selectors = {
 
     return state.fieldDefaultValues[normalizedFormId] ?? {};
   },
-  getFormFieldDefaultValue(
-    state: State,
-    formId: string,
-    fieldName: string,
-  ) {
+  getFormFieldDefaultValue(state: State, formId: string, fieldName: string) {
     const normalizedFormId = normalizeOptionalIdentifier(formId);
     const normalizedFieldName = normalizeOptionalIdentifier(fieldName);
 

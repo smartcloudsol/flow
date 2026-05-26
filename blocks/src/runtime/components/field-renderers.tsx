@@ -1,0 +1,3994 @@
+import {
+  Alert,
+  Anchor,
+  Badge,
+  Button,
+  Checkbox,
+  Collapse,
+  Code,
+  ColorInput,
+  Divider,
+  Fieldset,
+  FileInput,
+  Group,
+  Image,
+  List as MantineList,
+  Loader,
+  NumberInput,
+  NumberFormatter,
+  PasswordInput,
+  PinInput,
+  Radio,
+  RangeSlider,
+  Rating,
+  MultiSelect,
+  Select,
+  SimpleGrid,
+  Slider,
+  Stack,
+  Switch,
+  TagsInput,
+  Progress,
+  Paper,
+  Spoiler,
+  Text,
+  Title as MantineTitle,
+  TextInput,
+  Textarea,
+  UnstyledButton,
+  VisuallyHidden,
+  RadioIconProps,
+} from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+import { I18n } from "aws-amplify/utils";
+import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type {
+  FieldConfig,
+  FlowIconName,
+  FlowRatingSymbolName,
+  RuntimeFieldState,
+  SelectOption,
+} from "../../shared/types";
+import { getAiSuggestionsInputScope } from "../ai/input-scope";
+import { buildAiSuggestionsInputSignature } from "../ai/prompt-builder";
+import { evaluateRule, getRuntimeKey } from "../conditional-engine";
+import { useFormState } from "../context/FormStateContext";
+import { useFormField } from "../hooks/useFormField";
+import { useFormRuntime } from "../hooks/useFormRuntime";
+import { useOptionsData } from "../hooks/useOptionsData";
+import { validateField } from "../validation";
+import { WizardContainer } from "./WizardContainer";
+
+function joinClassNames(
+  ...classNames: Array<string | false | null | undefined>
+) {
+  return classNames.filter(Boolean).join(" ");
+}
+
+function getBlockClassName(type: FieldConfig["type"], extraClassName?: string) {
+  return joinClassNames("flow-block", `flow-block__${type}`, extraClassName);
+}
+
+function getControlClassName(type: string, extraClassName?: string) {
+  return joinClassNames(
+    "flow-control",
+    `flow-control__${type}`,
+    extraClassName,
+  );
+}
+
+function getFieldExtraClassName(field: FieldConfig): string | undefined {
+  const candidate = field as unknown as {
+    classNames?: unknown;
+    className?: unknown;
+  };
+
+  const tokens = [
+    ...(Array.isArray(candidate.classNames)
+      ? candidate.classNames.flatMap((value) =>
+          typeof value === "string" ? value.split(/\s+/) : [],
+        )
+      : []),
+    ...(typeof candidate.className === "string"
+      ? candidate.className.split(/\s+/)
+      : []),
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    return undefined;
+  }
+
+  return Array.from(new Set(tokens)).join(" ");
+}
+
+function getFieldRenderKey(field: FieldConfig, path: number[]) {
+  return getRuntimeKey(field, path);
+}
+
+function resolveInputSize(field: { size?: string; inputSize?: string }) {
+  return field.inputSize || field.size;
+}
+
+function resolveMantineSize(size?: string) {
+  return size === "xs" ||
+    size === "sm" ||
+    size === "md" ||
+    size === "lg" ||
+    size === "xl"
+    ? size
+    : undefined;
+}
+
+type ApiSelectableField = Extract<
+  FieldConfig,
+  { type: "select" | "radio" | "checkbox-group" | "tags" }
+>;
+
+function normalizeSelectedArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function areSelectionValuesEqual(left: unknown, right: unknown): boolean {
+  if (Array.isArray(left) || Array.isArray(right)) {
+    const leftValues = normalizeSelectedArray(left);
+    const rightValues = normalizeSelectedArray(right);
+
+    if (leftValues.length !== rightValues.length) {
+      return false;
+    }
+
+    return leftValues.every((value, index) => value === rightValues[index]);
+  }
+
+  return String(left ?? "") === String(right ?? "");
+}
+
+function isSelectionValueEmpty(
+  field: ApiSelectableField,
+  value: unknown,
+): boolean {
+  if (
+    field.type === "checkbox-group" ||
+    field.type === "tags" ||
+    (field.type === "select" && field.multiple)
+  ) {
+    return normalizeSelectedArray(value).length === 0;
+  }
+
+  return String(value ?? "") === "";
+}
+
+function areStringArraysEqual(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return left.every((value, index) => value === right[index]);
+}
+
+function normalizeCheckboxValues(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(value.filter((item): item is string => typeof item === "string")),
+  );
+}
+
+function applyExclusiveCheckboxSelection(
+  currentValues: string[],
+  nextValues: string[],
+  exclusiveValues: Set<string>,
+): string[] {
+  if (exclusiveValues.size === 0) {
+    return nextValues;
+  }
+
+  const addedValues = nextValues.filter(
+    (value) => !currentValues.includes(value),
+  );
+  const addedExclusiveValue = addedValues.find((value) =>
+    exclusiveValues.has(value),
+  );
+
+  if (addedExclusiveValue) {
+    return [addedExclusiveValue];
+  }
+
+  const nextNonExclusiveValues = nextValues.filter(
+    (value) => !exclusiveValues.has(value),
+  );
+
+  if (addedValues.length > 0) {
+    return nextNonExclusiveValues;
+  }
+
+  const nextExclusiveValues = nextValues.filter((value) =>
+    exclusiveValues.has(value),
+  );
+
+  if (nextExclusiveValues.length > 0) {
+    return [nextExclusiveValues[nextExclusiveValues.length - 1]];
+  }
+
+  return nextNonExclusiveValues;
+}
+
+type ClearAllCapableField = Extract<
+  FieldConfig,
+  { type: "checkbox-group" | "select" | "tags" }
+>;
+
+function getClearAllOption(
+  field: ClearAllCapableField,
+  runtime: RuntimeFieldState | undefined,
+  options: SelectOption[],
+  isLoading: boolean,
+): SelectOption | undefined {
+  const optionsSource = runtime?.optionsSource || field.optionsSource;
+
+  if (optionsSource !== "api" || isLoading || options.length === 0) {
+    return undefined;
+  }
+
+  if (field.type === "select" && !field.multiple) {
+    return undefined;
+  }
+
+  if (field.clearAllEnabled !== true) {
+    return undefined;
+  }
+
+  const label = field.clearAllLabel?.trim();
+  const value = field.clearAllValue?.trim();
+
+  if (!label || !value) {
+    return undefined;
+  }
+
+  if (options.some((option) => option.value === value)) {
+    return undefined;
+  }
+
+  return { label, value };
+}
+
+function normalizeClearAllValues(
+  values: string[],
+  clearAllOption: SelectOption | undefined,
+): string[] {
+  if (!clearAllOption) {
+    return values;
+  }
+
+  return values.filter((value) => value !== clearAllOption.value);
+}
+
+function useApplyApiInitialSelection({
+  field,
+  runtime,
+  value,
+  hasSelectionMetadata,
+  initialSelectionValue,
+  setInitialValue,
+}: {
+  field: ApiSelectableField;
+  runtime?: RuntimeFieldState;
+  value: unknown;
+  hasSelectionMetadata: boolean;
+  initialSelectionValue?: string | string[];
+  setInitialValue: (value: unknown) => void;
+}) {
+  const state = useFormState();
+  const lastAppliedSelectionRef = useRef<unknown>(undefined);
+  const optionsSource = runtime?.optionsSource || field.optionsSource;
+
+  useEffect(() => {
+    if (optionsSource !== "api" || !hasSelectionMetadata) {
+      return;
+    }
+
+    if (initialSelectionValue === undefined) {
+      return;
+    }
+
+    if (state.touched.has(field.name)) {
+      lastAppliedSelectionRef.current = undefined;
+      return;
+    }
+
+    const currentValue = value;
+    const isEmpty = isSelectionValueEmpty(field, currentValue);
+    const wasAutoApplied = areSelectionValuesEqual(
+      currentValue,
+      lastAppliedSelectionRef.current,
+    );
+
+    if (!isEmpty && !wasAutoApplied) {
+      return;
+    }
+
+    if (areSelectionValuesEqual(currentValue, initialSelectionValue)) {
+      lastAppliedSelectionRef.current = initialSelectionValue;
+      return;
+    }
+
+    setInitialValue(initialSelectionValue);
+    lastAppliedSelectionRef.current = initialSelectionValue;
+  }, [
+    field,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    optionsSource,
+    setInitialValue,
+    state.touched,
+    value,
+  ]);
+}
+
+function resolveSpacingVar(spacing?: string) {
+  return spacing === "xs" ||
+    spacing === "sm" ||
+    spacing === "md" ||
+    spacing === "lg" ||
+    spacing === "xl"
+    ? `var(--mantine-spacing-${spacing})`
+    : spacing;
+}
+
+function resolveRadiusVar(radius?: string) {
+  return radius === "xs" ||
+    radius === "sm" ||
+    radius === "md" ||
+    radius === "lg" ||
+    radius === "xl"
+    ? `var(--mantine-radius-${radius})`
+    : radius;
+}
+
+function resolveFileCapture(capture?: string) {
+  if (capture === "user" || capture === "environment") {
+    return capture;
+  }
+
+  if (capture === "true") {
+    return true;
+  }
+
+  if (capture === "false") {
+    return false;
+  }
+
+  return undefined;
+}
+
+function parseDelimitedText(value?: string) {
+  return (value || "")
+    .split(/\r?\n|,/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function getInlineMarkStyle(color?: string): CSSProperties {
+  return {
+    backgroundColor: color || "var(--flow-mark-bg)",
+    borderRadius: "var(--flow-mark-radius)",
+    color: "var(--flow-mark-color)",
+    padding: "var(--flow-mark-padding)",
+  };
+}
+
+function getInlineHighlightStyle(color?: string): CSSProperties {
+  return {
+    backgroundColor: color || "var(--flow-highlight-bg, var(--flow-mark-bg))",
+    borderRadius: "var(--flow-highlight-radius, var(--flow-mark-radius))",
+    color: "var(--flow-highlight-color, var(--flow-mark-color))",
+    padding: "var(--flow-highlight-padding, var(--flow-mark-padding))",
+  };
+}
+
+function renderHighlightedSegments({
+  content,
+  terms,
+  markStyle,
+  keyPrefix,
+  highlightWholeWhenEmpty = false,
+}: {
+  content: string;
+  terms: string[];
+  markStyle: CSSProperties;
+  keyPrefix: string;
+  highlightWholeWhenEmpty?: boolean;
+}) {
+  if (terms.length === 0) {
+    return highlightWholeWhenEmpty
+      ? [
+          <mark key={`${keyPrefix}-full`} style={markStyle}>
+            {content}
+          </mark>,
+        ]
+      : [content];
+  }
+
+  const escaped = terms.map((term) =>
+    term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  );
+  const pattern = new RegExp(`(${escaped.join("|")})`, "gi");
+  let hasMatch = false;
+
+  const rendered = content
+    .split(pattern)
+    .filter(Boolean)
+    .map((part, index) => {
+      const isMatch = terms.some(
+        (term) => term.toLowerCase() === part.toLowerCase(),
+      );
+
+      if (!isMatch) {
+        return part;
+      }
+
+      hasMatch = true;
+
+      return (
+        <mark key={`${keyPrefix}-${index}`} style={markStyle}>
+          {part}
+        </mark>
+      );
+    });
+
+  return hasMatch ? rendered : [content];
+}
+
+function FlowQuoteIcon({ size = 24 }: { size?: number | string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      width={size}
+      height={size}
+      aria-hidden="true"
+    >
+      <path
+        d="M8.4 11.5H5.7c.13-2.63 1.16-4.33 3.19-5.36l.92 1.55c-1.08.68-1.7 1.56-1.95 2.73H10v6.08H4V10.5h4.4v1Zm8.4 0h-2.7c.13-2.63 1.16-4.33 3.19-5.36l.92 1.55c-1.08.68-1.7 1.56-1.95 2.73h2.17v6.08h-6V10.5h4.4v1Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function FlowCheckIcon(props: RadioIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      {...props}
+    >
+      <path d="M5 12.5 9.5 17 19 7.5" />
+    </svg>
+  );
+}
+
+function FlowCrossIcon(props: RadioIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      {...props}
+    >
+      <path d="M7 7 17 17" />
+      <path d="M17 7 7 17" />
+    </svg>
+  );
+}
+
+function FlowMinusIcon(props: RadioIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      {...props}
+    >
+      <path d="M6 12h12" />
+    </svg>
+  );
+}
+
+function FlowDotIcon(props: RadioIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <circle cx="12" cy="12" r="5" />
+    </svg>
+  );
+}
+
+function getIndicatorIcon(icon?: FlowIconName) {
+  switch (icon) {
+    case "check":
+      return FlowCheckIcon;
+    case "x":
+      return FlowCrossIcon;
+    case "minus":
+      return FlowMinusIcon;
+    case "dot":
+      return FlowDotIcon;
+    default:
+      return undefined;
+  }
+}
+
+function getThumbIcon(icon?: FlowIconName) {
+  switch (icon) {
+    case "check":
+      return <span aria-hidden="true">✓</span>;
+    case "x":
+      return <span aria-hidden="true">✕</span>;
+    case "star":
+      return <span aria-hidden="true">★</span>;
+    case "heart":
+      return <span aria-hidden="true">♥</span>;
+    case "thumb-up":
+      return <span aria-hidden="true">👍</span>;
+    case "sun":
+      return <span aria-hidden="true">☀</span>;
+    case "moon":
+      return <span aria-hidden="true">☾</span>;
+    default:
+      return undefined;
+  }
+}
+
+function getRatingSymbol(symbol?: FlowRatingSymbolName, filled = true) {
+  switch (symbol) {
+    case "heart":
+      return <span aria-hidden="true">{filled ? "♥" : "♡"}</span>;
+    case "check":
+      return <span aria-hidden="true">✓</span>;
+    case "dot":
+      return <span aria-hidden="true">•</span>;
+    case "star":
+      return <span aria-hidden="true">{filled ? "★" : "☆"}</span>;
+    default:
+      return undefined;
+  }
+}
+
+function getLoaderSections(position: "left" | "right" = "right") {
+  const loader = <Loader size="xs" />;
+
+  return position === "left"
+    ? { leftSection: loader }
+    : { rightSection: loader };
+}
+
+function getRequiredLabel(label: string | undefined, required?: boolean) {
+  if (!label || !required) {
+    return label;
+  }
+
+  return label.endsWith("*") ? label : `${label} *`;
+}
+
+function FieldBlock({
+  type,
+  children,
+  className,
+}: {
+  type: FieldConfig["type"];
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={getBlockClassName(type, className)}>{children}</div>;
+}
+
+function FieldMessage({
+  variant,
+  children,
+}: {
+  variant: "error" | "required" | "caption";
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={joinClassNames(
+        "flow-block-message",
+        `flow-block-message__${variant}`,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function OptionsLoadingIndicator() {
+  return (
+    <Group gap="xs" align="center">
+      <Loader size="xs" />
+      <Text size="sm" c="dimmed">
+        {I18n.get("Loading options...") || "Loading options..."}
+      </Text>
+    </Group>
+  );
+}
+
+function useRuntimeByKey(runtimeKey: string): RuntimeFieldState | undefined {
+  return useFormRuntime().fieldStates[runtimeKey];
+}
+
+function isHidden(runtime?: RuntimeFieldState) {
+  return runtime?.visible === false;
+}
+
+function hasVisibleAiSuggestionsField(
+  fields: FieldConfig[],
+  fieldStates: Record<string, RuntimeFieldState>,
+) {
+  return fields.some((candidate, index) => {
+    if (candidate.type !== "ai-suggestions") {
+      return false;
+    }
+
+    const runtimeState = fieldStates[getRuntimeKey(candidate, [index])];
+    return !isHidden(runtimeState);
+  });
+}
+
+function isBrowserFile(value: unknown): value is File {
+  return typeof File !== "undefined" && value instanceof File;
+}
+
+type UploadedFileReference = {
+  fileName?: string;
+  bucket?: string;
+  key?: string;
+  contentType?: string;
+  size?: number;
+};
+
+function isUploadedFileReference(
+  value: unknown,
+): value is UploadedFileReference {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      ("fileName" in (value as Record<string, unknown>) ||
+        "key" in (value as Record<string, unknown>)),
+  );
+}
+
+function getFileInputValue(value: unknown): File | File[] | null {
+  if (isBrowserFile(value)) return value;
+  if (Array.isArray(value) && value.every(isBrowserFile)) return value;
+  return null;
+}
+
+function getUploadedFileReferences(value: unknown): UploadedFileReference[] {
+  if (isUploadedFileReference(value)) return [value];
+  if (Array.isArray(value)) {
+    return value.filter(isUploadedFileReference);
+  }
+  return [];
+}
+
+type AiCitationSource = {
+  id: string;
+  title: string;
+  sourceUrl?: string;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
+}
+
+function getStringProperty(
+  value: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const candidate = value[key];
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+  return undefined;
+}
+
+function normalizeSourceUrl(sourceUrl?: string): string | undefined {
+  if (!sourceUrl) return undefined;
+
+  const trimmed = sourceUrl.trim();
+  if (!trimmed) return undefined;
+
+  try {
+    const parsed = new URL(trimmed);
+    const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    return `${parsed.origin}${pathname}${parsed.search}`;
+  } catch {
+    return trimmed.replace(/#.*$/, "").replace(/\/+$/, "") || trimmed;
+  }
+}
+
+function getAiCitationSources(citations: unknown): AiCitationSource[] {
+  const docs = Array.isArray(citations)
+    ? citations
+    : isRecord(citations) && Array.isArray(citations.docs)
+    ? citations.docs
+    : [];
+  const seenEntries = new Set<string>();
+  const seenSourceUrls = new Set<string>();
+
+  return docs
+    .filter(isRecord)
+    .map((item, index) => {
+      const id =
+        getStringProperty(item, ["docId", "documentId", "id"]) ||
+        `source-${index + 1}`;
+      const sourceUrl = getStringProperty(item, ["sourceUrl", "url", "href"]);
+      const title =
+        getStringProperty(item, ["title", "name", "sourceTitle"]) ||
+        sourceUrl ||
+        `${I18n.get("Source") || "Source"} ${index + 1}`;
+      return { id, title, sourceUrl };
+    })
+    .filter((item) => {
+      const normalizedSourceUrl = normalizeSourceUrl(item.sourceUrl);
+      if (normalizedSourceUrl && seenSourceUrls.has(normalizedSourceUrl)) {
+        return false;
+      }
+
+      const key = `${item.id}:${normalizedSourceUrl || item.title}`;
+      if (seenEntries.has(key)) return false;
+
+      seenEntries.add(key);
+      if (normalizedSourceUrl) {
+        seenSourceUrls.add(normalizedSourceUrl);
+      }
+      return true;
+    });
+}
+
+const SourcesCard = ({ sources }: { sources: AiCitationSource[] }) => {
+  if (!sources.length) return null;
+
+  return (
+    <Paper
+      withBorder
+      p="md"
+      radius="md"
+      bg="var(--mantine-color-gray-0)"
+      className="flow-ai-suggestions-sources"
+    >
+      <Stack gap="sm">
+        <Text fw={600} className="flow-ai-suggestions-sources__title">
+          {I18n.get("Used sources") || I18n.get("Sources") || "Used sources"}
+        </Text>
+        <Stack gap="xs">
+          {sources.map((source, index) => (
+            <Group
+              key={`${source.id}-${index}`}
+              wrap="nowrap"
+              align="flex-start"
+              className="flow-ai-suggestions-sources__item"
+            >
+              <Badge
+                variant="light"
+                radius="xl"
+                className="flow-ai-suggestions-sources__index"
+              >
+                {index + 1}
+              </Badge>
+              <div className="flow-ai-suggestions-sources__body">
+                {source.sourceUrl ? (
+                  <Anchor
+                    href={source.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    size="sm"
+                    underline="hover"
+                    className="flow-ai-suggestions-sources__link"
+                  >
+                    {source.title}
+                  </Anchor>
+                ) : (
+                  <Text size="sm" className="flow-ai-suggestions-sources__text">
+                    {source.title}
+                  </Text>
+                )}
+              </div>
+            </Group>
+          ))}
+        </Stack>
+      </Stack>
+    </Paper>
+  );
+};
+
+function hasChildren(
+  field: FieldConfig,
+): field is FieldConfig & { children: FieldConfig[] } {
+  return (
+    "children" in field &&
+    Array.isArray((field as { children?: FieldConfig[] }).children)
+  );
+}
+
+function hasSteps(
+  field: FieldConfig,
+): field is Extract<FieldConfig, { type: "wizard" }> {
+  return field.type === "wizard";
+}
+
+function isWizardStepVisible(
+  step: Extract<FieldConfig, { type: "wizard" }>["steps"][number],
+  values: Record<string, unknown>,
+) {
+  let visible = !step.hidden;
+  const logic = step.conditionalLogic;
+
+  if (!logic?.enabled || !logic.rules?.length) {
+    return visible;
+  }
+
+  for (const rule of logic.rules) {
+    if (!evaluateRule(rule, values)) continue;
+
+    if (rule.then.action === "show") visible = true;
+    if (rule.then.action === "hide") visible = false;
+  }
+
+  return visible;
+}
+
+function isNamedInteractiveField(
+  field: FieldConfig,
+): field is Extract<FieldConfig, { name: string }> {
+  return (
+    "name" in field && typeof field.name === "string" && field.name.length > 0
+  );
+}
+
+function collectFieldsBeforeTarget(
+  fields: FieldConfig[],
+  targetRuntimeKey: string,
+  values: Record<string, unknown>,
+  acc: Array<{
+    field: Extract<FieldConfig, { name: string }>;
+    runtimeKey: string;
+  }>,
+  path: number[] = [],
+): boolean {
+  for (const [index, field] of fields.entries()) {
+    const currentPath = [...path, index];
+    const runtimeKey = getRuntimeKey(field, currentPath);
+
+    if (runtimeKey === targetRuntimeKey) {
+      return true;
+    }
+
+    if (hasChildren(field)) {
+      if (
+        collectFieldsBeforeTarget(
+          field.children,
+          targetRuntimeKey,
+          values,
+          acc,
+          currentPath,
+        )
+      ) {
+        return true;
+      }
+      continue;
+    }
+
+    if (hasSteps(field)) {
+      for (const [stepIndex, step] of field.steps.entries()) {
+        if (!isWizardStepVisible(step, values)) continue;
+        if (
+          collectFieldsBeforeTarget(
+            step.children,
+            targetRuntimeKey,
+            values,
+            acc,
+            [...currentPath, stepIndex],
+          )
+        ) {
+          return true;
+        }
+      }
+      continue;
+    }
+
+    if (isNamedInteractiveField(field)) {
+      acc.push({ field, runtimeKey });
+    }
+  }
+
+  return false;
+}
+
+function isMissingValue(
+  field: Extract<FieldConfig, { name: string }>,
+  value: unknown,
+) {
+  if (field.type === "checkbox") return value !== true;
+  if (field.type === "checkbox-group") {
+    return !Array.isArray(value) || value.length === 0;
+  }
+  if (field.type === "file") {
+    return value === undefined || value === null || value === "";
+  }
+  if (Array.isArray(value)) return value.length === 0;
+  return typeof value !== "string" || value.trim().length === 0;
+}
+
+function getFieldLabel(field: Extract<FieldConfig, { name: string }>) {
+  return ("label" in field && field.label) || field.name;
+}
+
+function summarizeLabels(labels: string[]) {
+  if (labels.length <= 3) return labels.join(", ");
+  return `${labels.slice(0, 3).join(", ")} +${labels.length - 3}`;
+}
+
+function getAiSuggestionPrerequisites(
+  fields: FieldConfig[],
+  targetRuntimeKey: string,
+  values: Record<string, unknown>,
+  fieldStates: Record<string, RuntimeFieldState>,
+) {
+  const precedingFields: Array<{
+    field: Extract<FieldConfig, { name: string }>;
+    runtimeKey: string;
+  }> = [];
+  collectFieldsBeforeTarget(fields, targetRuntimeKey, values, precedingFields);
+
+  const visibleFields = precedingFields.filter(({ runtimeKey }) => {
+    const runtime = fieldStates[runtimeKey];
+    return runtime?.visible !== false && runtime?.enabled !== false;
+  });
+
+  const requiredFields = visibleFields.filter(({ field, runtimeKey }) => {
+    const runtime = fieldStates[runtimeKey];
+    return Boolean(
+      runtime?.required ?? ("required" in field && field.required),
+    );
+  });
+
+  const requiredFieldLabels = requiredFields
+    .filter(({ field, runtimeKey }) =>
+      Boolean(
+        validateField(field.name, fields, values, fieldStates, runtimeKey),
+      ),
+    )
+    .map(({ field }) => getFieldLabel(field));
+  const descriptiveField =
+    [...visibleFields]
+      .reverse()
+      .find(
+        ({ field, runtimeKey }) =>
+          field.type === "textarea" &&
+          Boolean(
+            fieldStates[runtimeKey]?.required ??
+              ("required" in field && field.required),
+          ),
+      ) ||
+    [...visibleFields].reverse().find(({ field }) => field.type === "textarea");
+  const descriptiveFieldLabel = descriptiveField
+    ? getFieldLabel(descriptiveField.field)
+    : undefined;
+  const isDescriptiveReady = descriptiveField
+    ? !isMissingValue(
+        descriptiveField.field,
+        values[descriptiveField.field.name],
+      )
+    : true;
+
+  const missingRequiredLabels = requiredFieldLabels.filter(
+    (label) => label !== descriptiveFieldLabel || isDescriptiveReady,
+  );
+
+  return {
+    canRun: missingRequiredLabels.length === 0 && isDescriptiveReady,
+    missingRequiredLabels,
+    missingDescriptiveFieldLabel: isDescriptiveReady
+      ? undefined
+      : descriptiveFieldLabel,
+  };
+}
+
+function isLikelyUrl(value: string) {
+  return /^https?:\/\//i.test(value);
+}
+
+function SuggestionSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <Stack gap={4} className="flow-ai-suggestions__section">
+      <Text
+        size="xs"
+        fw={700}
+        c="dimmed"
+        tt="uppercase"
+        className="flow-ai-suggestions__section-label"
+      >
+        {label}
+      </Text>
+      {children}
+    </Stack>
+  );
+}
+
+export function FieldRenderer({
+  field,
+  path = [],
+}: {
+  field: FieldConfig;
+  path?: number[];
+}) {
+  const runtimeKey = getRuntimeKey(field, path);
+  switch (field.type) {
+    case "text":
+      return <TextField field={field} runtimeKey={runtimeKey} />;
+    case "textarea":
+      return <TextareaField field={field} runtimeKey={runtimeKey} />;
+    case "select":
+      return <SelectField field={field} runtimeKey={runtimeKey} />;
+    case "checkbox":
+      return <CheckboxField field={field} runtimeKey={runtimeKey} />;
+    case "checkbox-group":
+      return <CheckboxGroupField field={field} runtimeKey={runtimeKey} />;
+    case "date":
+      return <DateField field={field} runtimeKey={runtimeKey} />;
+    case "switch":
+      return <SwitchField field={field} runtimeKey={runtimeKey} />;
+    case "number":
+      return <NumberField field={field} runtimeKey={runtimeKey} />;
+    case "radio":
+      return <RadioField field={field} runtimeKey={runtimeKey} />;
+    case "password":
+      return <PasswordField field={field} runtimeKey={runtimeKey} />;
+    case "pin":
+      return <PinField field={field} runtimeKey={runtimeKey} />;
+    case "color":
+      return <ColorField field={field} runtimeKey={runtimeKey} />;
+    case "file":
+      return <FileField field={field} runtimeKey={runtimeKey} />;
+    case "slider":
+      return <SliderField field={field} runtimeKey={runtimeKey} />;
+    case "rangeslider":
+      return <RangeSliderField field={field} runtimeKey={runtimeKey} />;
+    case "tags":
+      return <TagsField field={field} runtimeKey={runtimeKey} />;
+    case "rating":
+      return <RatingField field={field} runtimeKey={runtimeKey} />;
+    case "hidden":
+      return <HiddenField field={field} runtimeKey={runtimeKey} />;
+    case "submit":
+      return <SubmitField field={field} runtimeKey={runtimeKey} />;
+    case "save-draft":
+      return <SaveDraftField field={field} runtimeKey={runtimeKey} />;
+    case "ai-suggestions":
+      return <AiSuggestionsField field={field} runtimeKey={runtimeKey} />;
+    case "fieldset":
+      return (
+        <FieldsetContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "collapse":
+      return (
+        <CollapseContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "divider":
+      return <DividerElement field={field} runtimeKey={runtimeKey} />;
+    case "display-title":
+      return <DisplayTitleElement field={field} runtimeKey={runtimeKey} />;
+    case "display-blockquote":
+      return <DisplayBlockquoteElement field={field} runtimeKey={runtimeKey} />;
+    case "display-mark":
+      return <DisplayMarkElement field={field} runtimeKey={runtimeKey} />;
+    case "display-badge":
+      return <DisplayBadgeElement field={field} runtimeKey={runtimeKey} />;
+    case "display-highlight":
+      return <DisplayHighlightElement field={field} runtimeKey={runtimeKey} />;
+    case "display-code":
+      return <DisplayCodeElement field={field} runtimeKey={runtimeKey} />;
+    case "display-number-formatter":
+      return (
+        <DisplayNumberFormatterElement field={field} runtimeKey={runtimeKey} />
+      );
+    case "display-spoiler":
+      return <DisplaySpoilerElement field={field} runtimeKey={runtimeKey} />;
+    case "display-image":
+      return <DisplayImageElement field={field} runtimeKey={runtimeKey} />;
+    case "display-text":
+      return <DisplayTextElement field={field} runtimeKey={runtimeKey} />;
+    case "list":
+      return (
+        <ListContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "list-item":
+      return (
+        <ListItemContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "table":
+      return (
+        <TableContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "table-row":
+      return (
+        <TableRowContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "table-th":
+      return (
+        <TableHeaderCell field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "table-td":
+      return <TableCell field={field} runtimeKey={runtimeKey} path={path} />;
+    case "timeline":
+      return (
+        <TimelineContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "timeline-item":
+      return (
+        <TimelineItemContainer
+          field={field}
+          runtimeKey={runtimeKey}
+          path={path}
+        />
+      );
+    case "overflow-list":
+      return (
+        <OverflowListContainer
+          field={field}
+          runtimeKey={runtimeKey}
+          path={path}
+        />
+      );
+    case "overflow-list-item":
+      return (
+        <OverflowListItemContainer
+          field={field}
+          runtimeKey={runtimeKey}
+          path={path}
+        />
+      );
+    case "visuallyhidden":
+      return (
+        <VisuallyHiddenContainer
+          field={field}
+          runtimeKey={runtimeKey}
+          path={path}
+        />
+      );
+    case "stack":
+      return (
+        <StackContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "group":
+      return (
+        <GroupContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "grid":
+      return (
+        <GridContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    case "wizard":
+      return (
+        <WizardContainer field={field} runtimeKey={runtimeKey} path={path} />
+      );
+    default:
+      return null;
+  }
+}
+
+function TextField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "text" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  const { validateField } = useFormRuntime();
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="text" className={getFieldExtraClassName(field)}>
+      <TextInput
+        className={getControlClassName("text")}
+        label={field.label}
+        description={field.description}
+        placeholder={field.placeholder}
+        pointer={field.pointer}
+        required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        size={resolveInputSize(field)}
+        value={String(value ?? "")}
+        error={error}
+        disabled={isPending || enabled === false}
+        onChange={(event) => setValue(event.currentTarget.value)}
+        onBlur={() => validateField(field.name, runtimeKey)}
+      />
+    </FieldBlock>
+  );
+}
+
+function TextareaField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "textarea" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  const { validateField } = useFormRuntime();
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="textarea" className={getFieldExtraClassName(field)}>
+      <Textarea
+        className={getControlClassName("textarea")}
+        label={field.label}
+        description={field.description}
+        placeholder={field.placeholder}
+        required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        minRows={field.minRows ?? 3}
+        maxRows={field.maxRows}
+        autosize={field.autosize ?? true}
+        pointer={field.pointer}
+        resize={field.resize}
+        size={resolveInputSize(field)}
+        value={String(value ?? "")}
+        error={error}
+        disabled={isPending || enabled === false}
+        onChange={(event) => setValue(event.currentTarget.value)}
+        onBlur={() => validateField(field.name, runtimeKey)}
+      />
+    </FieldBlock>
+  );
+}
+
+function SelectField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "select" }>;
+  runtimeKey: string;
+}) {
+  const {
+    value,
+    error,
+    isPending,
+    setValue,
+    setInitialValue,
+    enabled,
+    required,
+    runtime,
+  } = useFormField(field.name, runtimeKey);
+  const { validateField } = useFormRuntime();
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    search,
+  } = useOptionsData(field, runtime);
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
+  useApplyApiInitialSelection({
+    field,
+    runtime,
+    value,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    setInitialValue,
+  });
+  const isFieldHidden = isHidden(runtime);
+  const rawSelectedValues = useMemo(
+    () =>
+      Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === "string")
+        : [],
+    [value],
+  );
+  const clearAllOption = field.multiple
+    ? getClearAllOption(field, runtime, options, isLoading)
+    : undefined;
+  const selectedValues = useMemo(
+    () => normalizeClearAllValues(rawSelectedValues, clearAllOption),
+    [clearAllOption, rawSelectedValues],
+  );
+
+  useEffect(() => {
+    if (!field.multiple) {
+      return;
+    }
+
+    if (areStringArraysEqual(selectedValues, rawSelectedValues)) {
+      return;
+    }
+
+    setInitialValue(selectedValues);
+  }, [field.multiple, rawSelectedValues, selectedValues, setInitialValue]);
+
+  if (isFieldHidden) return null;
+
+  if (field.multiple) {
+    const renderedOptions = clearAllOption
+      ? [...options, clearAllOption]
+      : options;
+
+    return (
+      <FieldBlock type="select" className={getFieldExtraClassName(field)}>
+        <MultiSelect
+          className={getControlClassName("select")}
+          clearable={field.clearable}
+          label={field.label}
+          description={field.description}
+          placeholder={field.placeholder}
+          searchable={field.searchable || isAutocompleteSource}
+          limit={field.limit}
+          size={resolveInputSize(field)}
+          withCheckIcon={field.withCheckIcon}
+          withScrollArea={field.withScrollArea}
+          data={renderedOptions}
+          value={selectedValues}
+          error={error || apiError}
+          required={required ?? field.required}
+          withAsterisk={required ?? field.required}
+          rightSection={isLoading ? <Loader size="xs" /> : undefined}
+          disabled={isPending || isLoading || enabled === false}
+          onChange={(nextValue) => {
+            if (clearAllOption && nextValue.includes(clearAllOption.value)) {
+              setValue([]);
+              return;
+            }
+
+            setValue(normalizeClearAllValues(nextValue, clearAllOption));
+          }}
+          onSearchChange={search}
+          onBlur={() => validateField(field.name, runtimeKey)}
+          nothingFoundMessage={
+            isAutocompleteSource ? "Type to search..." : "No options"
+          }
+        />
+      </FieldBlock>
+    );
+  }
+
+  return (
+    <FieldBlock type="select" className={getFieldExtraClassName(field)}>
+      <Select
+        className={getControlClassName("select")}
+        allowDeselect={field.allowDeselect}
+        autoSelectOnBlur={field.autoSelectOnBlur}
+        chevronColor={field.chevronColor || undefined}
+        clearable={field.clearable}
+        defaultDropdownOpened={field.defaultDropdownOpened}
+        limit={field.limit}
+        label={field.label}
+        description={field.description}
+        placeholder={field.placeholder}
+        pointer={field.pointer}
+        required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        searchable={field.searchable || isAutocompleteSource}
+        size={resolveInputSize(field)}
+        withCheckIcon={field.withCheckIcon}
+        withScrollArea={field.withScrollArea}
+        data={options}
+        value={String(value ?? "")}
+        error={error || apiError}
+        rightSection={isLoading ? <Loader size="xs" /> : undefined}
+        disabled={isPending || isLoading || enabled === false}
+        onChange={(nextValue) => setValue(nextValue ?? "")}
+        onSearchChange={search}
+        onBlur={() => validateField(field.name, runtimeKey)}
+        nothingFoundMessage={
+          isAutocompleteSource ? "Type to search..." : "No options"
+        }
+      />
+    </FieldBlock>
+  );
+}
+
+function CheckboxField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "checkbox" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="checkbox" className={getFieldExtraClassName(field)}>
+      <Checkbox
+        className={getControlClassName("checkbox")}
+        autoContrast={field.autoContrast}
+        label={getRequiredLabel(field.label, required ?? field.required)}
+        description={field.description}
+        checked={Boolean(value)}
+        color={field.color || undefined}
+        error={error}
+        disabled={isPending || enabled === false}
+        icon={getIndicatorIcon(field.icon)}
+        iconColor={field.iconColor || undefined}
+        onChange={(event) => setValue(event.currentTarget.checked)}
+        required={required ?? field.required}
+        size={field.size}
+      />
+    </FieldBlock>
+  );
+}
+
+function CheckboxGroupField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "checkbox-group" }>;
+  runtimeKey: string;
+}) {
+  const {
+    value,
+    error,
+    isPending,
+    setValue,
+    setInitialValue,
+    enabled,
+    required,
+    runtime,
+  } = useFormField(field.name, runtimeKey);
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    search,
+  } = useOptionsData(field, runtime);
+  const [searchValue, setSearchValue] = useState("");
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
+  useApplyApiInitialSelection({
+    field,
+    runtime,
+    value,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    setInitialValue,
+  });
+  const isFieldHidden = isHidden(runtime);
+
+  const selectedValues = useMemo(
+    () =>
+      Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === "string")
+        : [],
+    [value],
+  );
+
+  const availableOptions = options.length
+    ? options
+    : Array.isArray(field.options)
+    ? field.options
+    : [];
+  const clearAllOption = getClearAllOption(
+    field,
+    runtime,
+    availableOptions,
+    isLoading,
+  );
+  const exclusiveValues = useMemo(
+    () => new Set((field.exclusiveValues || []).map((value) => value.trim())),
+    [field.exclusiveValues],
+  );
+  const normalizedSelectedValues = useMemo(
+    () =>
+      applyExclusiveCheckboxSelection(
+        [],
+        normalizeClearAllValues(
+          normalizeCheckboxValues(selectedValues),
+          clearAllOption,
+        ),
+        exclusiveValues,
+      ),
+    [clearAllOption, exclusiveValues, selectedValues],
+  );
+  const renderedOptions = clearAllOption
+    ? [...availableOptions, clearAllOption]
+    : availableOptions;
+
+  useEffect(() => {
+    if (areStringArraysEqual(normalizedSelectedValues, selectedValues)) {
+      return;
+    }
+
+    setInitialValue(normalizedSelectedValues);
+  }, [normalizedSelectedValues, selectedValues, setInitialValue]);
+
+  if (isFieldHidden) return null;
+
+  const handleSearchChange = (nextValue: string) => {
+    setSearchValue(nextValue);
+    search(nextValue);
+  };
+
+  const handleSelectionChange = (nextValues: string[]) => {
+    if (clearAllOption && nextValues.includes(clearAllOption.value)) {
+      setValue([]);
+      return;
+    }
+
+    setValue(
+      applyExclusiveCheckboxSelection(
+        normalizedSelectedValues,
+        normalizeClearAllValues(
+          normalizeCheckboxValues(nextValues),
+          clearAllOption,
+        ),
+        exclusiveValues,
+      ),
+    );
+  };
+
+  return (
+    <FieldBlock type="checkbox-group" className={getFieldExtraClassName(field)}>
+      {isAutocompleteSource ? (
+        <TextInput
+          className={getControlClassName("checkbox-group-search")}
+          placeholder={I18n.get("Type to search...") || "Type to search..."}
+          value={searchValue}
+          disabled={isPending || isLoading || enabled === false}
+          onChange={(event) => handleSearchChange(event.currentTarget.value)}
+          mb="sm"
+        />
+      ) : null}
+      <Checkbox.Group
+        label={field.label}
+        description={field.description}
+        withAsterisk={required ?? field.required}
+        value={normalizedSelectedValues}
+        error={error || apiError}
+        onChange={handleSelectionChange}
+      >
+        <Stack gap="xs">
+          {isLoading ? <OptionsLoadingIndicator /> : null}
+          {renderedOptions.map((option) => (
+            <Checkbox
+              key={option.value}
+              className={getControlClassName("checkbox-item")}
+              value={option.value}
+              label={option.label}
+              disabled={isPending || isLoading || enabled === false}
+              required={required ?? field.required}
+              size={field.size}
+            />
+          ))}
+        </Stack>
+      </Checkbox.Group>
+    </FieldBlock>
+  );
+}
+
+function DateField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "date" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  const { validateField } = useFormRuntime();
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="date" className={getFieldExtraClassName(field)}>
+      <DateInput
+        className={getControlClassName("date")}
+        label={field.label}
+        description={field.description}
+        placeholder={field.placeholder}
+        size={resolveMantineSize(field.size)}
+        value={typeof value === "string" && value ? new Date(value) : null}
+        error={error}
+        required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        disabled={isPending || enabled === false}
+        onChange={(nextValue) => setValue(nextValue ?? "")}
+        onBlur={() => validateField(field.name, runtimeKey)}
+      />
+    </FieldBlock>
+  );
+}
+
+function SaveDraftField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "save-draft" }>;
+  runtimeKey: string;
+}) {
+  const { allowDrafts, saveDraft, isPending } = useFormRuntime();
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime) || !allowDrafts) return null;
+  const label = field.label || I18n.get("Save draft") || "Save draft";
+  const showTitle = field.showTitle ?? true;
+  return (
+    <FieldBlock type="save-draft" className={getFieldExtraClassName(field)}>
+      <Button
+        className={joinClassNames(
+          getControlClassName("save-draft"),
+          "flow-action-button",
+          "flow-action-button__save-draft",
+        )}
+        variant="outline"
+        loading={isPending}
+        onClick={() => void saveDraft()}
+      >
+        {showTitle && label}
+      </Button>
+    </FieldBlock>
+  );
+}
+
+function AiSuggestionsField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "ai-suggestions" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  const {
+    aiSuggestions,
+    fieldStates,
+    fields,
+    isPending,
+    values,
+    runAiSuggestions,
+    resetAiSuggestions,
+    acceptAiSuggestion,
+    rejectAiSuggestions,
+  } = useFormRuntime();
+
+  const aiInputScope = useMemo(
+    () => getAiSuggestionsInputScope(fields, runtimeKey, values, fieldStates),
+    [fieldStates, fields, runtimeKey, values],
+  );
+
+  const inputSignature = useMemo(
+    () => buildAiSuggestionsInputSignature(aiInputScope.values),
+    [aiInputScope],
+  );
+
+  useEffect(() => {
+    if (
+      field.mode !== "auto" ||
+      runtime?.visible === false ||
+      aiSuggestions.status === "idle" ||
+      aiSuggestions.status === "loading"
+    ) {
+      return;
+    }
+
+    if (aiSuggestions.lastRunSignature !== inputSignature) {
+      resetAiSuggestions();
+    }
+  }, [
+    aiSuggestions.lastRunSignature,
+    aiSuggestions.status,
+    field.mode,
+    inputSignature,
+    resetAiSuggestions,
+    runtime?.visible,
+  ]);
+
+  const prerequisites = useMemo(
+    () => getAiSuggestionPrerequisites(fields, runtimeKey, values, fieldStates),
+    [fieldStates, fields, runtimeKey, values],
+  );
+
+  useEffect(() => {
+    if (
+      field.mode !== "auto" ||
+      aiSuggestions.status !== "idle" ||
+      runtime?.visible === false ||
+      !prerequisites.canRun
+    ) {
+      return;
+    }
+    void runAiSuggestions(field, runtimeKey);
+  }, [
+    aiSuggestions.status,
+    field,
+    prerequisites.canRun,
+    runAiSuggestions,
+    runtimeKey,
+    runtime?.visible,
+  ]);
+
+  if (isHidden(runtime)) return null;
+
+  const label =
+    field.buttonLabel ||
+    I18n.get("Generate suggestions") ||
+    "Generate suggestions";
+  const acceptLabel =
+    field.acceptLabel ||
+    I18n.get("Accept this answer?") ||
+    I18n.get("Accept") ||
+    "Accept this answer?";
+  const continueLabel =
+    field.continueLabel || I18n.get("Continue") || "Continue";
+  const skipLabel = I18n.get("Skip suggestions") || "Skip suggestions";
+  const continueDescription =
+    field.continueDescription ||
+    I18n.get(
+      "If none of these suggestions fit, continue without accepting one.",
+    ) ||
+    "If none of these suggestions fit, continue without accepting one.";
+  const noSuggestionsDescription =
+    I18n.get("No suggestions were found for the current form values.") ||
+    "No suggestions were found for the current form values.";
+  const continueWhenEmptyDescription =
+    I18n.get("You can continue without selecting a suggestion.") ||
+    "You can continue without selecting a suggestion.";
+  const citationSources = getAiCitationSources(aiSuggestions.citations);
+  const showSuggestions = aiSuggestions.status === "done";
+  const showContinueAction = aiSuggestions.status === "done";
+  const showSources =
+    aiSuggestions.status === "done" && citationSources.length > 0;
+  const hasSuggestions = aiSuggestions.suggestions.length > 0;
+  const emptyStateMessage =
+    field.emptyStateText ||
+    I18n.get("No suggestions available") ||
+    "No suggestions available";
+  const continueMessage = hasSuggestions
+    ? continueDescription
+    : continueWhenEmptyDescription;
+  const isGenerating = aiSuggestions.status === "loading";
+  const loadingLabel =
+    I18n.get("Generating possible solutions...") ||
+    "Generating possible solutions...";
+  const requirementsMessage = [
+    prerequisites.missingRequiredLabels.length
+      ? `${
+          I18n.get("Complete these required fields first") ||
+          "Complete these required fields first"
+        }: ${summarizeLabels(prerequisites.missingRequiredLabels)}.`
+      : undefined,
+    prerequisites.missingDescriptiveFieldLabel
+      ? `${
+          I18n.get("Add details before generating suggestions") ||
+          "Add details before generating suggestions"
+        }: ${prerequisites.missingDescriptiveFieldLabel}.`
+      : undefined,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <FieldBlock
+      type="ai-suggestions"
+      className={joinClassNames(
+        "flow-ai-suggestions",
+        getFieldExtraClassName(field),
+      )}
+    >
+      <div
+        className="flow-ai-suggestions-border"
+        data-flow-active={isGenerating ? "true" : "false"}
+        data-flow-state={aiSuggestions.status}
+      >
+        <div aria-hidden="true" className="flow-ai-suggestions-border__ring" />
+        <div className="flow-ai-suggestions-border__content">
+          <Stack gap="sm">
+            {field.title ? (
+              <Text fw={600} className="flow-ai-suggestions__title">
+                {field.title}
+              </Text>
+            ) : null}
+            {field.description ? (
+              <Text
+                size="sm"
+                c="dimmed"
+                className="flow-ai-suggestions__description"
+              >
+                {field.description}
+              </Text>
+            ) : null}
+            {field.mode !== "auto" ? (
+              <Stack gap="xs">
+                <Button
+                  variant="default"
+                  className={joinClassNames(
+                    getControlClassName("button"),
+                    "flow-action-button",
+                    "flow-ai-suggestions__trigger",
+                  )}
+                  onClick={() => void runAiSuggestions(field, runtimeKey)}
+                  loading={isGenerating || isPending}
+                  disabled={!prerequisites.canRun}
+                >
+                  {label}
+                </Button>
+                {!prerequisites.canRun && requirementsMessage ? (
+                  <Text
+                    size="sm"
+                    c="dimmed"
+                    className="flow-ai-suggestions__requirements"
+                  >
+                    {requirementsMessage}
+                  </Text>
+                ) : null}
+              </Stack>
+            ) : null}
+            {isGenerating ? (
+              <Stack gap="xs">
+                <Group gap="xs" className="flow-ai-suggestions__loading">
+                  <Loader size="sm" />
+                  <Text size="sm" fw={500}>
+                    {loadingLabel}
+                  </Text>
+                </Group>
+                <Group>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className={joinClassNames(
+                      getControlClassName("button"),
+                      "flow-action-button",
+                      "flow-ai-suggestions__skip-button",
+                    )}
+                    onClick={() => rejectAiSuggestions()}
+                    disabled={aiSuggestions.status === "rejected"}
+                  >
+                    {skipLabel}
+                  </Button>
+                </Group>
+              </Stack>
+            ) : null}
+            {aiSuggestions.rawText ? (
+              <Alert color="blue">{aiSuggestions.rawText}</Alert>
+            ) : null}
+            {aiSuggestions.status === "accepted" ? (
+              <Alert color="green">
+                {I18n.get("Suggestion accepted") || "Suggestion accepted"}
+              </Alert>
+            ) : null}
+            {aiSuggestions.status === "rejected" ? (
+              <Alert color="gray">
+                {I18n.get("Suggestions skipped") || "Suggestions skipped"}
+              </Alert>
+            ) : null}
+            {showSuggestions
+              ? aiSuggestions.suggestions.map((suggestion) => (
+                  <Paper
+                    key={suggestion.id}
+                    withBorder
+                    p="md"
+                    radius="md"
+                    className="flow-ai-suggestions__card"
+                  >
+                    <Stack gap="sm">
+                      <Group justify="space-between" align="center">
+                        <Text
+                          fw={600}
+                          className="flow-ai-suggestions__card-title"
+                        >
+                          {suggestion.title}
+                        </Text>
+                        {typeof suggestion.confidence === "number" ? (
+                          <Badge
+                            variant="light"
+                            radius="xl"
+                            className="flow-ai-suggestions__confidence"
+                          >
+                            {Math.round(suggestion.confidence * 100)}%
+                          </Badge>
+                        ) : null}
+                      </Group>
+                      {suggestion.description ? (
+                        suggestion.possibleAnswer !== suggestion.description ? (
+                          <Text
+                            size="sm"
+                            c="dimmed"
+                            className="flow-ai-suggestions__card-description"
+                          >
+                            {suggestion.description}
+                          </Text>
+                        ) : null
+                      ) : null}
+                      {suggestion.possibleAnswer || suggestion.description ? (
+                        <SuggestionSection
+                          label={
+                            I18n.get("Possible answer") || "Possible answer"
+                          }
+                        >
+                          <Text size="sm">
+                            {suggestion.possibleAnswer ||
+                              suggestion.description}
+                          </Text>
+                        </SuggestionSection>
+                      ) : null}
+                      {suggestion.whyThisMayHelp ? (
+                        <SuggestionSection
+                          label={
+                            I18n.get("Why this may help") || "Why this may help"
+                          }
+                        >
+                          <Text size="sm">{suggestion.whyThisMayHelp}</Text>
+                        </SuggestionSection>
+                      ) : null}
+                      {suggestion.relatedDocumentation?.length ? (
+                        <SuggestionSection
+                          label={
+                            I18n.get("Related documentation") ||
+                            "Related documentation"
+                          }
+                        >
+                          <Stack gap={4}>
+                            {suggestion.relatedDocumentation.map(
+                              (reference, index) =>
+                                reference.url && isLikelyUrl(reference.url) ? (
+                                  <Anchor
+                                    key={`${suggestion.id}-doc-${index}`}
+                                    href={reference.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    size="sm"
+                                    underline="hover"
+                                  >
+                                    {reference.title}
+                                  </Anchor>
+                                ) : (
+                                  <Text
+                                    key={`${suggestion.id}-doc-${index}`}
+                                    size="sm"
+                                  >
+                                    {reference.title}
+                                  </Text>
+                                ),
+                            )}
+                          </Stack>
+                        </SuggestionSection>
+                      ) : null}
+                      {suggestion.nextBestAction ? (
+                        <SuggestionSection
+                          label={
+                            I18n.get("Next best action") || "Next best action"
+                          }
+                        >
+                          <Text size="sm">{suggestion.nextBestAction}</Text>
+                        </SuggestionSection>
+                      ) : null}
+                      {typeof suggestion.confidence === "number" ? (
+                        <Progress
+                          className="flow-ai-suggestions__confidence-bar"
+                          value={Math.max(
+                            0,
+                            Math.min(100, suggestion.confidence * 100),
+                          )}
+                        />
+                      ) : null}
+                      <Group>
+                        <Button
+                          size="sm"
+                          className={joinClassNames(
+                            getControlClassName("button"),
+                            "flow-action-button",
+                            "flow-ai-suggestions__accept-button",
+                          )}
+                          onClick={() => acceptAiSuggestion(suggestion.id)}
+                          disabled={aiSuggestions.status === "accepted"}
+                        >
+                          {acceptLabel}
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Paper>
+                ))
+              : null}
+            {showSuggestions &&
+            !aiSuggestions.suggestions.length &&
+            aiSuggestions.status === "done" &&
+            !aiSuggestions.rawText ? (
+              <Alert
+                color="gray"
+                variant="light"
+                className="flow-ai-suggestions__empty-state"
+              >
+                <Stack gap={4}>
+                  <Text fw={600}>{emptyStateMessage}</Text>
+                  <Text size="sm" c="dimmed">
+                    {noSuggestionsDescription}
+                  </Text>
+                </Stack>
+              </Alert>
+            ) : null}
+            {showSources ? <SourcesCard sources={citationSources} /> : null}
+            {showContinueAction ? (
+              <Stack gap="xs" className="flow-ai-suggestions__continue">
+                <Divider
+                  label={
+                    hasSuggestions
+                      ? I18n.get("Or continue") || "Or continue"
+                      : I18n.get("Continue") || "Continue"
+                  }
+                  className="flow-ai-suggestions__continue-divider"
+                />
+                <Text
+                  size="sm"
+                  c="dimmed"
+                  className="flow-ai-suggestions__continue-description"
+                >
+                  {continueMessage}
+                </Text>
+                <Group>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className={joinClassNames(
+                      getControlClassName("button"),
+                      "flow-action-button",
+                      "flow-ai-suggestions__continue-button",
+                    )}
+                    onClick={() => rejectAiSuggestions()}
+                    disabled={aiSuggestions.status === "rejected"}
+                  >
+                    {continueLabel}
+                  </Button>
+                </Group>
+              </Stack>
+            ) : null}
+          </Stack>
+        </div>
+      </div>
+    </FieldBlock>
+  );
+}
+
+function SubmitField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "submit" }>;
+  runtimeKey: string;
+}) {
+  const { submitLabel, submit, isPending, fields, aiSuggestions, fieldStates } =
+    useFormRuntime();
+  const runtime = useRuntimeByKey(runtimeKey);
+  const deferUntilAiHandled =
+    hasVisibleAiSuggestionsField(fields, fieldStates) &&
+    aiSuggestions.status !== "accepted" &&
+    aiSuggestions.status !== "rejected";
+
+  if (isHidden(runtime) || deferUntilAiHandled) return null;
+  const label = field.label || submitLabel || I18n.get("Submit") || "Submit";
+  const showTitle = field.showTitle ?? true;
+  const showIcon = field.showIcon ?? false;
+  const iconPosition = field.iconPosition ?? "left";
+  const customIcon = field.customIcon ?? "";
+
+  const renderIcon = () => {
+    if (!showIcon) return null;
+    if (customIcon) {
+      return (
+        <img
+          src={customIcon}
+          alt=""
+          style={{ width: 16, height: 16, display: "block" }}
+        />
+      );
+    }
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M10 14l11 -11" />
+        <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+      </svg>
+    );
+  };
+
+  const icon = renderIcon();
+  return (
+    <FieldBlock type="submit" className={getFieldExtraClassName(field)}>
+      <Button
+        className={joinClassNames(
+          getControlClassName("submit"),
+          "flow-action-button",
+          "flow-action-button__submit",
+        )}
+        variant="filled"
+        loading={isPending}
+        onClick={() => void submit()}
+        leftSection={iconPosition === "left" ? icon : undefined}
+        rightSection={iconPosition === "right" ? icon : undefined}
+      >
+        {showTitle && label}
+      </Button>
+    </FieldBlock>
+  );
+}
+
+function StackContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "stack" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <Stack
+      className={getBlockClassName("stack", getFieldExtraClassName(field))}
+      gap={field.gap}
+      align={field.align as React.CSSProperties["alignItems"]}
+      justify={field.justify as React.CSSProperties["justifyContent"]}
+    >
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
+    </Stack>
+  );
+}
+
+function GroupContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "group" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <Group
+      className={getBlockClassName("group", getFieldExtraClassName(field))}
+      gap={field.gap}
+      align={field.align as React.CSSProperties["alignItems"]}
+      justify={field.justify as React.CSSProperties["justifyContent"]}
+      grow={field.grow}
+      preventGrowOverflow={field.preventGrowOverflow}
+      wrap={field.wrap}
+    >
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
+    </Group>
+  );
+}
+
+function GridContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "grid" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <SimpleGrid
+      className={getBlockClassName("grid", getFieldExtraClassName(field))}
+      cols={field.columns}
+      spacing={field.gutter ?? field.spacing}
+      verticalSpacing={field.verticalSpacing}
+      style={{
+        gridTemplateRows: field.rows
+          ? `repeat(${field.rows}, minmax(0, 1fr))`
+          : undefined,
+        justifyContent: field.justify,
+        overflow: field.overflow,
+      }}
+    >
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
+    </SimpleGrid>
+  );
+}
+
+function SwitchField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "switch" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="switch" className={getFieldExtraClassName(field)}>
+      <Switch
+        className={getControlClassName("switch")}
+        color={field.color || undefined}
+        label={getRequiredLabel(field.label, required ?? field.required)}
+        labelPosition={field.labelPosition}
+        description={field.description}
+        checked={Boolean(value)}
+        error={error}
+        disabled={isPending || enabled === false}
+        onChange={(event) => setValue(event.currentTarget.checked)}
+        onLabel={field.onLabel}
+        offLabel={field.offLabel}
+        required={required ?? field.required}
+        size={field.size}
+        thumbIcon={getThumbIcon(field.thumbIcon)}
+        withThumbIndicator={field.withThumbIndicator}
+      />
+    </FieldBlock>
+  );
+}
+
+function NumberField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "number" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  const { validateField } = useFormRuntime();
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="number" className={getFieldExtraClassName(field)}>
+      <NumberInput
+        className={getControlClassName("number")}
+        allowDecimal={field.allowDecimal}
+        allowLeadingZeros={field.allowLeadingZeros}
+        allowedDecimalSeparators={field.allowedDecimalSeparators}
+        clampBehavior={field.clampBehavior}
+        decimalScale={field.decimalScale}
+        decimalSeparator={field.decimalSeparator}
+        label={field.label}
+        description={field.description}
+        fixedDecimalScale={field.fixedDecimalScale}
+        hideControls={field.hideControls}
+        placeholder={field.placeholder}
+        min={field.min}
+        max={field.max}
+        prefix={field.prefix}
+        step={field.step}
+        suffix={field.suffix}
+        thousandSeparator={field.thousandSeparator}
+        thousandsGroupStyle={field.thousandsGroupStyle}
+        value={typeof value === "number" ? value : undefined}
+        error={error}
+        required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        disabled={isPending || enabled === false}
+        size={resolveInputSize(field)}
+        onChange={setValue}
+        onBlur={() => validateField(field.name, runtimeKey)}
+      />
+    </FieldBlock>
+  );
+}
+
+function RadioField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "radio" }>;
+  runtimeKey: string;
+}) {
+  const {
+    value,
+    error,
+    isPending,
+    setValue,
+    setInitialValue,
+    enabled,
+    required,
+    runtime,
+  } = useFormField(field.name, runtimeKey);
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    search,
+  } = useOptionsData(field, runtime);
+  const [searchValue, setSearchValue] = useState("");
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
+  useApplyApiInitialSelection({
+    field,
+    runtime,
+    value,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    setInitialValue,
+  });
+  if (isHidden(runtime)) return null;
+
+  const availableOptions = options.length
+    ? options
+    : Array.isArray(field.options)
+    ? field.options
+    : [];
+
+  const handleSearchChange = (nextValue: string) => {
+    setSearchValue(nextValue);
+    search(nextValue);
+  };
+
+  return (
+    <FieldBlock type="radio" className={getFieldExtraClassName(field)}>
+      {isAutocompleteSource ? (
+        <TextInput
+          className={getControlClassName("radio-search")}
+          placeholder={I18n.get("Type to search...") || "Type to search..."}
+          value={searchValue}
+          disabled={isPending || isLoading || enabled === false}
+          onChange={(event) => handleSearchChange(event.currentTarget.value)}
+          mb="sm"
+        />
+      ) : null}
+      <Radio.Group
+        className={getControlClassName("radio")}
+        label={field.label}
+        description={field.description}
+        withAsterisk={required ?? field.required}
+        value={String(value ?? "")}
+        error={error || apiError}
+        required={required ?? field.required}
+        onChange={setValue}
+      >
+        <Stack gap="xs">
+          {isLoading ? <OptionsLoadingIndicator /> : null}
+          {availableOptions.map((option) => (
+            <Radio
+              key={option.value}
+              autoContrast={field.autoContrast}
+              className={getControlClassName("radio-item")}
+              color={field.color || undefined}
+              icon={getIndicatorIcon(field.icon)}
+              iconColor={field.iconColor || undefined}
+              size={field.size}
+              value={option.value}
+              label={option.label}
+              disabled={isPending || isLoading || enabled === false}
+            />
+          ))}
+        </Stack>
+      </Radio.Group>
+    </FieldBlock>
+  );
+}
+
+function PasswordField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "password" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  const { validateField } = useFormRuntime();
+  const [uncontrolledVisible, setUncontrolledVisible] = useState(
+    field.defaultVisible ?? false,
+  );
+  if (isHidden(runtime)) return null;
+
+  const loaderSections = field.loading
+    ? getLoaderSections(field.loadingPosition)
+    : {};
+
+  return (
+    <FieldBlock type="password" className={getFieldExtraClassName(field)}>
+      <PasswordInput
+        className={getControlClassName("password")}
+        label={field.label}
+        description={field.description}
+        placeholder={field.placeholder}
+        size={resolveInputSize(field)}
+        value={String(value ?? "")}
+        error={error}
+        required={required ?? field.required}
+        withAsterisk={required ?? field.required}
+        disabled={isPending || enabled === false}
+        visible={field.visible ?? uncontrolledVisible}
+        onVisibilityChange={
+          field.visible === undefined ? setUncontrolledVisible : undefined
+        }
+        onChange={(event) => setValue(event.currentTarget.value)}
+        onBlur={() => validateField(field.name, runtimeKey)}
+        {...loaderSections}
+      />
+    </FieldBlock>
+  );
+}
+
+function PinField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "pin" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="pin" className={getFieldExtraClassName(field)}>
+      <PinInput
+        className={getControlClassName("pin")}
+        gap={field.gap}
+        inputMode={field.inputMode}
+        length={field.length}
+        mask={field.mask}
+        placeholder={field.placeholder}
+        size={resolveMantineSize(field.size)}
+        type={field.inputType === "number" ? "number" : "alphanumeric"}
+        value={String(value ?? "")}
+        disabled={isPending || enabled === false}
+        onChange={setValue}
+      />
+      {required ?? field.required ? (
+        <FieldMessage variant="required">*</FieldMessage>
+      ) : null}
+      {error ? <FieldMessage variant="error">{error}</FieldMessage> : null}
+    </FieldBlock>
+  );
+}
+
+function ColorField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "color" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, runtime } = useFormField(
+    field.name,
+    runtimeKey,
+  );
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="color" className={getFieldExtraClassName(field)}>
+      <ColorInput
+        className={getControlClassName("color")}
+        closeOnColorSwatchClick={field.closeOnColorSwatchClick}
+        disallowInput={field.disallowInput}
+        label={field.label}
+        description={field.description}
+        withAsterisk={field.required}
+        pointer={field.pointer}
+        size={field.size}
+        swatches={field.swatches}
+        swatchesPerRow={field.swatchesPerRow}
+        value={String(value ?? "")}
+        error={error}
+        disabled={isPending || enabled === false}
+        format={field.format}
+        withPicker={field.withPicker}
+        withEyeDropper={field.withEyeDropper}
+        withPreview={field.withPreview}
+        onChange={setValue}
+      />
+    </FieldBlock>
+  );
+}
+
+function FileField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "file" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, required, runtime } =
+    useFormField(field.name, runtimeKey);
+  const uploadedFiles = getUploadedFileReferences(value);
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="file" className={getFieldExtraClassName(field)}>
+      <FileInput
+        className={getControlClassName("file")}
+        label={field.label}
+        description={field.description}
+        withAsterisk={required ?? field.required}
+        value={getFileInputValue(value)}
+        error={error}
+        required={required ?? field.required}
+        disabled={isPending || enabled === false}
+        accept={field.accept}
+        capture={resolveFileCapture(field.capture)}
+        clearable={field.clearable}
+        multiple={field.multiple}
+        size={resolveInputSize(field)}
+        onChange={setValue}
+      />
+      {uploadedFiles.length > 0 ? (
+        <FieldMessage variant="caption">
+          {I18n.get("Uploaded files") || "Uploaded files"}:{" "}
+          {uploadedFiles
+            .map((item) => item.fileName || item.key || "file")
+            .join(", ")}
+        </FieldMessage>
+      ) : null}
+    </FieldBlock>
+  );
+}
+
+function SliderField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "slider" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, runtime } = useFormField(
+    field.name,
+    runtimeKey,
+  );
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="slider" className={getFieldExtraClassName(field)}>
+      <Slider
+        className={getControlClassName("slider")}
+        color={field.color || undefined}
+        domain={field.domain}
+        inverted={field.inverted}
+        labelAlwaysOn={field.labelAlwaysOn}
+        marks={field.marks}
+        min={field.domain?.[0] ?? field.min}
+        max={field.domain?.[1] ?? field.max}
+        precision={field.precision}
+        restrictToMarks={field.restrictToMarks}
+        showLabelOnHover={field.showLabelOnHover}
+        step={field.step}
+        size={field.size}
+        thumbSize={field.thumbSize}
+        value={typeof value === "number" ? value : field.min || 0}
+        disabled={isPending || enabled === false}
+        onChange={setValue as (value: number) => void}
+      />
+      {error ? <FieldMessage variant="error">{error}</FieldMessage> : null}
+    </FieldBlock>
+  );
+}
+
+function RangeSliderField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "rangeslider" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, runtime } = useFormField(
+    field.name,
+    runtimeKey,
+  );
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="rangeslider" className={getFieldExtraClassName(field)}>
+      <RangeSlider
+        className={getControlClassName("rangeslider")}
+        color={field.color || undefined}
+        domain={field.domain}
+        inverted={field.inverted}
+        labelAlwaysOn={field.labelAlwaysOn}
+        marks={field.marks}
+        min={field.domain?.[0] ?? field.min}
+        max={field.domain?.[1] ?? field.max}
+        maxRange={field.maxRange}
+        minRange={field.minRange}
+        precision={field.precision}
+        pushOnOverlap={field.pushOnOverlap}
+        restrictToMarks={field.restrictToMarks}
+        showLabelOnHover={field.showLabelOnHover}
+        step={field.step}
+        size={field.size}
+        thumbSize={field.thumbSize}
+        value={
+          Array.isArray(value)
+            ? (value as [number, number])
+            : [field.min || 0, field.max || 100]
+        }
+        disabled={isPending || enabled === false}
+        onChange={setValue as (value: [number, number]) => void}
+      />
+      {error ? <FieldMessage variant="error">{error}</FieldMessage> : null}
+    </FieldBlock>
+  );
+}
+
+function TagsField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "tags" }>;
+  runtimeKey: string;
+}) {
+  const {
+    value,
+    error,
+    isPending,
+    setValue,
+    setInitialValue,
+    enabled,
+    required,
+    runtime,
+  } = useFormField(field.name, runtimeKey);
+  const {
+    options,
+    isLoading,
+    error: apiError,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    search,
+  } = useOptionsData(field, runtime);
+  const isAutocompleteSource =
+    (runtime?.optionsSource || field.optionsSource) === "autocomplete";
+  useApplyApiInitialSelection({
+    field,
+    runtime,
+    value,
+    hasSelectionMetadata,
+    initialSelectionValue,
+    setInitialValue,
+  });
+  const isFieldHidden = isHidden(runtime);
+  const rawSelectedValues = useMemo(
+    () =>
+      Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === "string")
+        : [],
+    [value],
+  );
+  const clearAllOption = getClearAllOption(field, runtime, options, isLoading);
+  const selectedValues = useMemo(
+    () => normalizeClearAllValues(rawSelectedValues, clearAllOption),
+    [clearAllOption, rawSelectedValues],
+  );
+  const renderedOptions = clearAllOption
+    ? [...options, clearAllOption]
+    : options;
+
+  useEffect(() => {
+    if (areStringArraysEqual(selectedValues, rawSelectedValues)) {
+      return;
+    }
+
+    setInitialValue(selectedValues);
+  }, [rawSelectedValues, selectedValues, setInitialValue]);
+
+  if (isFieldHidden) return null;
+
+  return (
+    <FieldBlock type="tags" className={getFieldExtraClassName(field)}>
+      {(field.loading && field.loadingPosition === "left") || isLoading ? (
+        <Loader size="xs" />
+      ) : null}
+      <TagsInput
+        className={getControlClassName("tags")}
+        acceptValueOnBlur={field.acceptValueOnBlur}
+        allowDuplicates={field.allowDuplicates}
+        label={field.label}
+        description={field.description}
+        withAsterisk={required ?? field.required}
+        limit={field.limit}
+        maxDropdownHeight={field.maxDropdownHeight}
+        placeholder={field.placeholder}
+        pointer={field.pointer}
+        size={resolveInputSize(field)}
+        splitChars={field.splitChars ? field.splitChars.split("") : undefined}
+        data={renderedOptions}
+        value={selectedValues}
+        error={error || apiError}
+        required={required ?? field.required}
+        disabled={isPending || isLoading || enabled === false}
+        withScrollArea={field.withScrollArea}
+        onSearchChange={isAutocompleteSource ? search : undefined}
+        onChange={(nextValue) => {
+          if (clearAllOption && nextValue.includes(clearAllOption.value)) {
+            setValue([]);
+            return;
+          }
+
+          setValue(normalizeClearAllValues(nextValue, clearAllOption));
+        }}
+      />
+      {(field.loading && field.loadingPosition !== "left") || isLoading ? (
+        <Loader size="xs" />
+      ) : null}
+    </FieldBlock>
+  );
+}
+
+function RatingField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "rating" }>;
+  runtimeKey: string;
+}) {
+  const { value, error, isPending, setValue, enabled, runtime } = useFormField(
+    field.name,
+    runtimeKey,
+  );
+  if (isHidden(runtime)) return null;
+  return (
+    <FieldBlock type="rating" className={getFieldExtraClassName(field)}>
+      <Rating
+        className={getControlClassName("rating")}
+        color={field.color || undefined}
+        count={field.count}
+        emptySymbol={getRatingSymbol(field.emptySymbol, false)}
+        fractions={field.fractions}
+        fullSymbol={getRatingSymbol(field.fullSymbol, true)}
+        highlightSelectedOnly={field.highlightSelectedOnly}
+        size={field.size}
+        value={typeof value === "number" ? value : 0}
+        readOnly={isPending || enabled === false}
+        onChange={setValue as (value: number) => void}
+      />
+      {error ? <FieldMessage variant="error">{error}</FieldMessage> : null}
+    </FieldBlock>
+  );
+}
+
+function HiddenField({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "hidden" }>;
+  runtimeKey: string;
+}) {
+  const { value } = useFormField(field.name, runtimeKey);
+
+  return (
+    <FieldBlock type="hidden" className={getFieldExtraClassName(field)}>
+      <input type="hidden" name={field.name} value={String(value ?? "")} />
+    </FieldBlock>
+  );
+}
+
+function FieldsetContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "fieldset" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <Fieldset
+      className={getBlockClassName("fieldset", getFieldExtraClassName(field))}
+      legend={field.legend}
+    >
+      <Stack>
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
+      </Stack>
+    </Fieldset>
+  );
+}
+
+function CollapseContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "collapse" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  const [opened, setOpened] = useState(field.defaultOpened ?? false);
+  const isExpanded =
+    typeof field.expanded === "boolean" ? field.expanded : opened;
+  if (isHidden(runtime)) return null;
+  return (
+    <Stack
+      gap="xs"
+      className={getBlockClassName("collapse", getFieldExtraClassName(field))}
+    >
+      <UnstyledButton
+        className="flow-collapse-toggle"
+        type="button"
+        onClick={() => {
+          if (typeof field.expanded !== "boolean") {
+            setOpened((current) => !current);
+          }
+        }}
+        aria-expanded={isExpanded}
+      >
+        <Group justify="space-between" wrap="nowrap">
+          <Text fw={500} className="flow-collapse-title">
+            {field.title || I18n.get("Show more") || "Show more"}
+          </Text>
+          <Text size="sm" className="flow-collapse-icon">
+            {isExpanded ? "-" : "+"}
+          </Text>
+        </Group>
+      </UnstyledButton>
+      <Collapse animateOpacity={field.animateOpacity} in={isExpanded}>
+        <Stack>
+          {field.children.map((child, index) => {
+            const childPath = [...path, index];
+            return (
+              <FieldRenderer
+                key={getFieldRenderKey(child, childPath)}
+                field={child}
+                path={childPath}
+              />
+            );
+          })}
+        </Stack>
+      </Collapse>
+    </Stack>
+  );
+}
+
+function DividerElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "divider" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <Divider
+      className={getBlockClassName("divider", getFieldExtraClassName(field))}
+      label={field.label}
+      labelPosition={field.labelPosition}
+      orientation={field.orientation}
+      size={field.size}
+    />
+  );
+}
+
+function DisplayTextElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-text" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <Text
+      className={getBlockClassName(
+        "display-text",
+        getFieldExtraClassName(field),
+      )}
+      size={field.size}
+      c={field.color}
+      ta={field.align}
+      fw={field.weight}
+      style={{
+        color: field.color ? undefined : "var(--flow-display-text-color)",
+        fontWeight: field.weight || "var(--flow-display-text-weight)",
+        lineHeight: "var(--flow-display-text-line-height)",
+        whiteSpace: "pre-wrap",
+      }}
+    >
+      {field.content}
+    </Text>
+  );
+}
+
+function DisplayTitleElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-title" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <MantineTitle
+      className={getBlockClassName(
+        "display-title",
+        getFieldExtraClassName(field),
+      )}
+      order={field.order}
+      size={field.size}
+      c={field.color}
+      ta={field.align}
+      style={{
+        color: field.color ? undefined : "var(--flow-display-title-color)",
+        fontWeight: "var(--flow-display-title-weight)",
+        letterSpacing: "var(--flow-display-title-letter-spacing)",
+        lineHeight: "var(--flow-display-title-line-height)",
+      }}
+    >
+      {field.content}
+    </MantineTitle>
+  );
+}
+
+function DisplayBlockquoteElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-blockquote" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const accentColor = field.color || "var(--flow-blockquote-accent)";
+  const iconSize = field.iconSize
+    ? `${field.iconSize}px`
+    : "var(--flow-blockquote-icon-size)";
+
+  return (
+    <blockquote
+      className={joinClassNames(
+        getBlockClassName("display-blockquote", getFieldExtraClassName(field)),
+        "flow-blockquote",
+      )}
+      style={{
+        background: "var(--flow-blockquote-bg)",
+        borderInlineStart: `var(--flow-blockquote-border-width) solid ${accentColor}`,
+        borderRadius:
+          resolveRadiusVar(field.radius) || "var(--flow-blockquote-radius)",
+        color: "var(--flow-blockquote-color)",
+        gap: "var(--flow-blockquote-gap)",
+        margin: 0,
+        padding: "var(--flow-blockquote-padding)",
+      }}
+    >
+      <div className="flow-blockquote__header">
+        <span
+          className="flow-blockquote__icon"
+          style={{ color: accentColor, height: iconSize, width: iconSize }}
+        >
+          <FlowQuoteIcon size={iconSize} />
+        </span>
+        <div className="flow-blockquote__content">{field.content}</div>
+      </div>
+      {field.cite ? (
+        <cite className="flow-blockquote__cite">{field.cite}</cite>
+      ) : null}
+    </blockquote>
+  );
+}
+
+function DisplayMarkElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-mark" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const content = field.content || "";
+  if (!content) return null;
+  const highlights = parseDelimitedText(field.highlight);
+
+  return (
+    <div
+      className={getBlockClassName(
+        "display-mark",
+        getFieldExtraClassName(field),
+      )}
+    >
+      <Text style={{ whiteSpace: "pre-wrap" }}>
+        {renderHighlightedSegments({
+          content,
+          terms: highlights,
+          markStyle: getInlineMarkStyle(field.color),
+          keyPrefix: "mark",
+          highlightWholeWhenEmpty: true,
+        })}
+      </Text>
+    </div>
+  );
+}
+
+function DisplayBadgeElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-badge" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const badgeColor = field.color || "blue";
+
+  const gradient =
+    field.variant === "gradient"
+      ? {
+          from: field.gradientFrom || badgeColor,
+          to: field.gradientTo || badgeColor || "cyan",
+          deg: field.gradientDeg ?? 90,
+        }
+      : undefined;
+
+  return (
+    <div
+      className={getBlockClassName(
+        "display-badge",
+        getFieldExtraClassName(field),
+      )}
+      style={{ width: field.fullWidth ? "100%" : undefined }}
+    >
+      <Badge
+        color={badgeColor}
+        variant={field.variant}
+        size={field.size}
+        radius={field.radius}
+        fullWidth={field.fullWidth}
+        circle={field.circle}
+        autoContrast={field.autoContrast}
+        gradient={gradient}
+        style={{
+          fontSize: "var(--flow-badge-font-size, var(--badge-fz))",
+          fontWeight: "var(--flow-badge-font-weight)",
+          letterSpacing: "var(--flow-badge-letter-spacing)",
+          minHeight: "var(--flow-badge-height, var(--badge-height))",
+          padding: field.circle
+            ? "var(--flow-badge-circle-padding)"
+            : "var(--flow-badge-padding)",
+          textTransform: "var(--flow-badge-text-transform)",
+        }}
+      >
+        {field.content || "Badge"}
+      </Badge>
+    </div>
+  );
+}
+
+function DisplayHighlightElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-highlight" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const highlights = parseDelimitedText(field.highlight);
+
+  return highlights.length > 0 ? (
+    <div
+      className={getBlockClassName(
+        "display-highlight",
+        getFieldExtraClassName(field),
+      )}
+    >
+      <Text style={{ whiteSpace: "pre-wrap" }}>
+        {renderHighlightedSegments({
+          content: field.content || "",
+          terms: highlights,
+          markStyle: getInlineHighlightStyle(field.color),
+          keyPrefix: "highlight",
+        })}
+      </Text>
+    </div>
+  ) : (
+    <div
+      className={getBlockClassName(
+        "display-highlight",
+        getFieldExtraClassName(field),
+      )}
+    >
+      <Text style={{ whiteSpace: "pre-wrap" }}>{field.content}</Text>
+    </div>
+  );
+}
+
+function DisplayCodeElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-code" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <Code
+      className={getBlockClassName(
+        "display-code",
+        getFieldExtraClassName(field),
+      )}
+      color={field.color}
+      block={field.block}
+      style={{
+        backgroundColor: field.block
+          ? "var(--flow-code-block-bg)"
+          : "var(--flow-code-inline-bg)",
+        borderRadius: "var(--flow-code-radius)",
+        color:
+          field.color ||
+          (field.block
+            ? "var(--flow-code-block-color)"
+            : "var(--flow-code-inline-color)"),
+        padding: field.block
+          ? "var(--flow-code-block-padding)"
+          : "var(--flow-code-padding)",
+      }}
+    >
+      {field.content}
+    </Code>
+  );
+}
+
+function DisplayNumberFormatterElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-number-formatter" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <Text
+      className={getBlockClassName(
+        "display-number-formatter",
+        getFieldExtraClassName(field),
+      )}
+      size={field.size}
+      c={field.color}
+      ta={field.align}
+      style={{
+        color: field.color || "var(--flow-number-color)",
+        fontVariantNumeric: "var(--flow-number-font-variant)",
+        fontWeight: "var(--flow-number-weight)",
+      }}
+    >
+      <NumberFormatter
+        value={field.value}
+        prefix={field.prefix}
+        suffix={field.suffix}
+        decimalScale={field.decimalScale}
+        decimalSeparator={field.decimalSeparator}
+        thousandSeparator={field.thousandSeparator || undefined}
+        thousandsGroupStyle={field.thousandsGroupStyle}
+        allowNegative={field.allowNegative}
+      />
+    </Text>
+  );
+}
+
+function DisplaySpoilerElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-spoiler" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <Spoiler
+      className={getBlockClassName(
+        "display-spoiler",
+        getFieldExtraClassName(field),
+      )}
+      maxHeight={field.maxHeight}
+      showLabel={field.showLabel || "Show more"}
+      hideLabel={field.hideLabel || "Hide"}
+      styles={{
+        control: {
+          color: "var(--flow-spoiler-toggle-color)",
+          fontWeight: 600,
+        },
+      }}
+    >
+      <Text
+        style={{
+          color: "var(--flow-spoiler-content-color)",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {field.content}
+      </Text>
+    </Spoiler>
+  );
+}
+
+function DisplayImageElement({
+  field,
+  runtimeKey,
+}: {
+  field: Extract<FieldConfig, { type: "display-image" }>;
+  runtimeKey: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  if (!field.src && !field.fallbackSrc) return null;
+
+  return (
+    <Stack
+      className={getBlockClassName(
+        "display-image",
+        getFieldExtraClassName(field),
+      )}
+      gap="xs"
+    >
+      <Image
+        src={field.src}
+        alt={field.alt}
+        fit={field.fit}
+        radius={field.radius}
+        fallbackSrc={field.fallbackSrc}
+        style={{
+          borderRadius:
+            resolveRadiusVar(field.radius) || "var(--flow-image-radius)",
+          width: field.width || undefined,
+          height: field.height || undefined,
+        }}
+      />
+      {field.caption ? (
+        <Text
+          size="sm"
+          c="dimmed"
+          style={{
+            color: "var(--flow-image-caption-color)",
+            fontSize: "var(--flow-image-caption-size)",
+          }}
+        >
+          {field.caption}
+        </Text>
+      ) : null}
+    </Stack>
+  );
+}
+
+function ListContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "list" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <MantineList
+      className={getBlockClassName("list", getFieldExtraClassName(field))}
+      type={field.ordered ? "ordered" : "unordered"}
+      spacing={field.spacing}
+      size={resolveMantineSize(field.size)}
+      center={field.center}
+      withPadding={field.withPadding ?? true}
+      style={{
+        color: "var(--flow-list-color)",
+        listStyleType: field.listStyleType || undefined,
+        paddingInlineStart:
+          field.withPadding === false
+            ? undefined
+            : "var(--flow-list-padding-start)",
+      }}
+    >
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
+    </MantineList>
+  );
+}
+
+function ListItemContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "list-item" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <MantineList.Item
+      className={getBlockClassName("list-item", getFieldExtraClassName(field))}
+    >
+      <Stack gap="xs" style={{ gap: "var(--flow-list-item-gap)" }}>
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
+      </Stack>
+    </MantineList.Item>
+  );
+}
+
+function TableContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "table" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const horizontalPadding =
+    resolveSpacingVar(field.horizontalSpacing) ||
+    "var(--flow-table-cell-padding-inline)";
+  const verticalPadding =
+    resolveSpacingVar(field.verticalSpacing) ||
+    "var(--flow-table-cell-padding-block)";
+  const tableBorder = field.withTableBorder
+    ? "1px solid var(--flow-table-border-color)"
+    : undefined;
+
+  return (
+    <div
+      className={getBlockClassName("table", getFieldExtraClassName(field))}
+      style={{ color: "var(--flow-table-color)", overflowX: "auto" }}
+    >
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          border: tableBorder,
+        }}
+      >
+        {field.caption ? (
+          <caption
+            style={{
+              captionSide: "top",
+              color: "var(--flow-table-caption-color)",
+              paddingBottom: "var(--flow-table-caption-padding-bottom)",
+              textAlign: "left",
+            }}
+          >
+            {field.caption}
+          </caption>
+        ) : null}
+        <tbody>
+          {field.children.map((child, index) => {
+            if (child.type !== "table-row") {
+              return null;
+            }
+
+            const childPath = [...path, index];
+            return (
+              <TableRowContainer
+                key={getFieldRenderKey(child, childPath)}
+                field={child}
+                runtimeKey={getRuntimeKey(child, childPath)}
+                path={childPath}
+                rowIndex={index}
+                tableField={field}
+                horizontalPadding={horizontalPadding}
+                verticalPadding={verticalPadding}
+              />
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function TableRowContainer({
+  field,
+  runtimeKey,
+  path,
+  rowIndex,
+  tableField,
+  horizontalPadding,
+  verticalPadding,
+}: {
+  field: Extract<FieldConfig, { type: "table-row" }>;
+  runtimeKey: string;
+  path: number[];
+  rowIndex?: number;
+  tableField?: Extract<FieldConfig, { type: "table" }>;
+  horizontalPadding?: string;
+  verticalPadding?: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <tr
+      className={getBlockClassName("table-row", getFieldExtraClassName(field))}
+      style={{
+        backgroundColor:
+          tableField?.striped &&
+          typeof rowIndex === "number" &&
+          rowIndex % 2 === 1
+            ? "var(--flow-table-striped-bg)"
+            : undefined,
+      }}
+    >
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        if (child.type === "table-th") {
+          return (
+            <TableHeaderCell
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              runtimeKey={getRuntimeKey(child, childPath)}
+              path={childPath}
+              tableField={tableField}
+              horizontalPadding={horizontalPadding}
+              verticalPadding={verticalPadding}
+              isLast={index === field.children.length - 1}
+            />
+          );
+        }
+
+        if (child.type === "table-td") {
+          return (
+            <TableCell
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              runtimeKey={getRuntimeKey(child, childPath)}
+              path={childPath}
+              tableField={tableField}
+              horizontalPadding={horizontalPadding}
+              verticalPadding={verticalPadding}
+              isLast={index === field.children.length - 1}
+            />
+          );
+        }
+
+        return null;
+      })}
+    </tr>
+  );
+}
+
+function TableHeaderCell({
+  field,
+  runtimeKey,
+  path,
+  tableField,
+  horizontalPadding,
+  verticalPadding,
+  isLast,
+}: {
+  field: Extract<FieldConfig, { type: "table-th" }>;
+  runtimeKey: string;
+  path: number[];
+  tableField?: Extract<FieldConfig, { type: "table" }>;
+  horizontalPadding?: string;
+  verticalPadding?: string;
+  isLast?: boolean;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <th
+      colSpan={field.colSpan}
+      rowSpan={field.rowSpan}
+      scope={field.scope || "col"}
+      className={getBlockClassName("table-th", getFieldExtraClassName(field))}
+      style={{
+        background: "var(--flow-table-header-bg)",
+        borderBottom: "1px solid var(--flow-table-border-color)",
+        borderRight:
+          tableField?.withColumnBorders && !isLast
+            ? "1px solid var(--flow-table-border-color)"
+            : undefined,
+        color: "var(--flow-table-header-color)",
+        fontWeight: "var(--flow-table-header-weight)",
+        padding: `${verticalPadding || "0.5rem"} ${
+          horizontalPadding || "0.75rem"
+        }`,
+        textAlign: field.align ?? "left",
+        verticalAlign: "top",
+        width: field.width || undefined,
+      }}
+    >
+      <Stack gap="xs">
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
+      </Stack>
+    </th>
+  );
+}
+
+function TableCell({
+  field,
+  runtimeKey,
+  path,
+  tableField,
+  horizontalPadding,
+  verticalPadding,
+  isLast,
+}: {
+  field: Extract<FieldConfig, { type: "table-td" }>;
+  runtimeKey: string;
+  path: number[];
+  tableField?: Extract<FieldConfig, { type: "table" }>;
+  horizontalPadding?: string;
+  verticalPadding?: string;
+  isLast?: boolean;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <td
+      colSpan={field.colSpan}
+      rowSpan={field.rowSpan}
+      className={getBlockClassName("table-td", getFieldExtraClassName(field))}
+      style={{
+        borderBottom: "1px solid var(--flow-table-cell-border-color)",
+        borderRight:
+          tableField?.withColumnBorders && !isLast
+            ? "1px solid var(--flow-table-border-color)"
+            : undefined,
+        color: "var(--flow-table-cell-color)",
+        padding: `${verticalPadding || "0.5rem"} ${
+          horizontalPadding || "0.75rem"
+        }`,
+        textAlign: field.align ?? "left",
+        verticalAlign: "top",
+        width: field.width || undefined,
+      }}
+    >
+      <Stack gap="xs">
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
+      </Stack>
+    </td>
+  );
+}
+
+function TimelineContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "timeline" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  return (
+    <div
+      className={getBlockClassName("timeline", getFieldExtraClassName(field))}
+      style={{
+        color: "var(--flow-timeline-color)",
+        display: "grid",
+        gap: resolveSpacingVar(field.gap) || "var(--flow-timeline-gap)",
+      }}
+    >
+      {field.children.map((child, index) => {
+        if (child.type !== "timeline-item") {
+          return null;
+        }
+
+        const childPath = [...path, index];
+        return (
+          <TimelineItemContainer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            runtimeKey={getRuntimeKey(child, childPath)}
+            path={childPath}
+            timelineField={field}
+            isLast={index === field.children.length - 1}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function TimelineItemContainer({
+  field,
+  runtimeKey,
+  path,
+  timelineField,
+  isLast,
+}: {
+  field: Extract<FieldConfig, { type: "timeline-item" }>;
+  runtimeKey: string;
+  path: number[];
+  timelineField?: Extract<FieldConfig, { type: "timeline" }>;
+  isLast?: boolean;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const bulletSize = field.bullet
+    ? timelineField?.bulletSize ?? 28
+    : timelineField?.bulletSize ?? 20;
+  const lineWidth = timelineField?.lineWidth ?? 2;
+  const accentColor =
+    field.color || timelineField?.color || "var(--flow-timeline-accent)";
+
+  return (
+    <div
+      className={getBlockClassName(
+        "timeline-item",
+        getFieldExtraClassName(field),
+      )}
+      style={{
+        display: "grid",
+        gap: "var(--flow-timeline-item-gap)",
+        gridTemplateColumns: `${bulletSize}px minmax(0, 1fr)`,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
+        {!isLast ? (
+          <span
+            aria-hidden="true"
+            style={{
+              backgroundColor: accentColor,
+              left: `calc(50% - ${lineWidth / 2}px)`,
+              opacity: "var(--flow-timeline-line-opacity)",
+              position: "absolute",
+              top: `${bulletSize}px`,
+              bottom: `calc(${
+                resolveSpacingVar(timelineField?.gap) ||
+                "var(--flow-timeline-gap)"
+              } * -1)`,
+              width: `${lineWidth}px`,
+            }}
+          />
+        ) : null}
+        <span
+          aria-hidden="true"
+          style={{
+            alignItems: "center",
+            backgroundColor: accentColor,
+            borderRadius: "999px",
+            color: "var(--flow-timeline-bullet-color)",
+            display: "inline-flex",
+            fontSize: field.bullet ? "0.75rem" : "0.875rem",
+            fontWeight: "var(--flow-timeline-bullet-weight)",
+            height: `${bulletSize}px`,
+            justifyContent: "center",
+            width: `${bulletSize}px`,
+          }}
+        >
+          {field.bullet || ""}
+        </span>
+      </div>
+      <Stack gap="xs" style={{ gap: "var(--flow-timeline-content-gap)" }}>
+        {field.title ? (
+          <Text
+            fw={600}
+            style={{
+              color: "var(--flow-timeline-title-color)",
+              fontWeight: "var(--flow-timeline-title-weight)",
+            }}
+          >
+            {field.title}
+          </Text>
+        ) : null}
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
+      </Stack>
+    </div>
+  );
+}
+
+function OverflowListContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "overflow-list" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  const [expanded, setExpanded] = useState(false);
+  if (isHidden(runtime)) return null;
+
+  const items = field.children.flatMap((child, index) =>
+    child.type === "overflow-list-item" ? [{ child, index }] : [],
+  );
+  const layout = field.layout === "vertical" ? "vertical" : "horizontal";
+  const maxVisible = Math.max(
+    0,
+    field.maxVisibleItems ?? field.maxVisible ?? 3,
+  );
+  const renderedItems = expanded ? items : items.slice(0, maxVisible);
+  const overflowCount = Math.max(0, items.length - renderedItems.length);
+  const canCollapse = expanded && items.length > maxVisible;
+  const overflowLabel = field.overflowLabel || I18n.get("more") || "more";
+  const overflowAlign =
+    field.align ?? (layout === "vertical" ? "stretch" : "flex-start");
+  const overflowSummaryColor = field.overflowColor || "blue";
+
+  return (
+    <div
+      className={getBlockClassName(
+        "overflow-list",
+        getFieldExtraClassName(field),
+      )}
+      style={{
+        alignItems: overflowAlign as React.CSSProperties["alignItems"],
+        display: "flex",
+        flexDirection: layout === "vertical" ? "column" : "row",
+        flexWrap: layout === "vertical" ? "nowrap" : "wrap",
+        gap: resolveSpacingVar(field.gap ?? "sm") || "0.75rem",
+        justifyContent: field.justify as React.CSSProperties["justifyContent"],
+      }}
+    >
+      {renderedItems.map(({ child, index: childIndex }) => {
+        const childPath = [...path, childIndex];
+        return (
+          <OverflowListItemContainer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            runtimeKey={getRuntimeKey(child, childPath)}
+            path={childPath}
+            layout={layout}
+            containerAlign={overflowAlign}
+          />
+        );
+      })}
+      {overflowCount > 0 ? (
+        <UnstyledButton
+          type="button"
+          className="flow-overflow-list__summary-button"
+          onClick={() => setExpanded(true)}
+          aria-expanded={expanded}
+          aria-label={I18n.get("Show all items") || "Show all items"}
+        >
+          <Badge
+            className="flow-overflow-list__summary"
+            variant={field.overflowVariant ?? "light"}
+            color={overflowSummaryColor}
+            size={field.overflowSize}
+            radius={field.overflowRadius ?? "xl"}
+            autoContrast={field.overflowAutoContrast}
+            style={{ cursor: "inherit" }}
+          >
+            +{overflowCount} {overflowLabel}
+          </Badge>
+        </UnstyledButton>
+      ) : null}
+      {canCollapse ? (
+        <UnstyledButton
+          type="button"
+          className="flow-overflow-list__summary-button"
+          onClick={() => setExpanded(false)}
+          aria-expanded={expanded}
+          aria-label={I18n.get("Show fewer items") || "Show fewer items"}
+        >
+          <Badge
+            className="flow-overflow-list__summary"
+            variant={field.overflowVariant ?? "light"}
+            color={overflowSummaryColor}
+            size={field.overflowSize}
+            radius={field.overflowRadius ?? "xl"}
+            autoContrast={field.overflowAutoContrast}
+            style={{ cursor: "inherit" }}
+          >
+            {I18n.get("Show less") || "Show less"}
+          </Badge>
+        </UnstyledButton>
+      ) : null}
+    </div>
+  );
+}
+
+function OverflowListItemContainer({
+  field,
+  runtimeKey,
+  path,
+  layout,
+  containerAlign,
+}: {
+  field: Extract<FieldConfig, { type: "overflow-list-item" }>;
+  runtimeKey: string;
+  path: number[];
+  layout?: "horizontal" | "vertical";
+  containerAlign?: string;
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+
+  const stretchItem = layout === "vertical" && containerAlign === "stretch";
+
+  return (
+    <div
+      className={joinClassNames(
+        getBlockClassName("overflow-list-item", getFieldExtraClassName(field)),
+        "flow-overflow-list__item",
+      )}
+      style={{
+        alignSelf: layout === "horizontal" ? "flex-start" : undefined,
+        backgroundColor: "var(--flow-overflow-item-bg)",
+        border: "var(--flow-overflow-item-border)",
+        borderRadius: "var(--flow-overflow-item-radius)",
+        boxShadow: "var(--flow-overflow-item-shadow)",
+        color: "var(--flow-overflow-item-color)",
+        display: "flex",
+        maxWidth: "100%",
+        padding: "var(--flow-overflow-item-padding)",
+        width: stretchItem ? "100%" : undefined,
+      }}
+    >
+      <div
+        className="flow-overflow-list__item-content"
+        style={{
+          alignItems: "center",
+          display: "flex",
+          flexWrap: layout === "vertical" ? "wrap" : "nowrap",
+          gap: "var(--flow-overflow-item-gap)",
+          minWidth: 0,
+          width: stretchItem ? "100%" : undefined,
+        }}
+      >
+        {field.children.map((child, index) => {
+          const childPath = [...path, index];
+          return (
+            <FieldRenderer
+              key={getFieldRenderKey(child, childPath)}
+              field={child}
+              path={childPath}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function VisuallyHiddenContainer({
+  field,
+  runtimeKey,
+  path,
+}: {
+  field: Extract<FieldConfig, { type: "visuallyhidden" }>;
+  runtimeKey: string;
+  path: number[];
+}) {
+  const runtime = useRuntimeByKey(runtimeKey);
+  if (isHidden(runtime)) return null;
+  return (
+    <VisuallyHidden>
+      {field.children.map((child, index) => {
+        const childPath = [...path, index];
+        return (
+          <FieldRenderer
+            key={getFieldRenderKey(child, childPath)}
+            field={child}
+            path={childPath}
+          />
+        );
+      })}
+    </VisuallyHidden>
+  );
+}

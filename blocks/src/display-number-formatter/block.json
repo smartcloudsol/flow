@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/number-formatter",
+  "version": "1.0.0",
+  "title": "Number Formatter",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "money-alt",
+  "description": "Display formatted numbers inside Flow forms.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "value": {
+      "type": "string",
+      "default": "123456.789"
+    },
+    "prefix": {
+      "type": "string",
+      "default": ""
+    },
+    "suffix": {
+      "type": "string",
+      "default": ""
+    },
+    "decimalScale": {
+      "type": "number",
+      "default": 2
+    },
+    "decimalSeparator": {
+      "type": "string",
+      "default": "."
+    },
+    "thousandSeparator": {
+      "type": "string",
+      "default": " "
+    },
+    "thousandsGroupStyle": {
+      "type": "string",
+      "default": "thousand"
+    },
+    "allowNegative": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string",
+      "default": ""
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "align": {
+      "type": "string",
+      "default": "left"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

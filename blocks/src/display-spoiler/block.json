@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/spoiler",
+  "version": "1.0.0",
+  "title": "Spoiler",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "excerpt-view",
+  "description": "Display collapsible text inside Flow forms.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "content": {
+      "type": "string",
+      "default": "Add expandable content here."
+    },
+    "maxHeight": {
+      "type": "number",
+      "default": 96
+    },
+    "showLabel": {
+      "type": "string",
+      "default": "Show more"
+    },
+    "hideLabel": {
+      "type": "string",
+      "default": "Hide"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

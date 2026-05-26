@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/hidden-field",
+  "version": "0.1.0",
+  "title": "Hidden field",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "hidden",
+  "description": "Hidden value field for metadata, tracking, or CRM source values.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": "source"
+    },
+    "defaultValue": {
+      "type": "string",
+      "default": ""
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

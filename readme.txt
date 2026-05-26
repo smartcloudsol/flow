@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -16,7 +16,7 @@ Design forms in Gutenberg and run durable, event‑driven workflows in your own 
 
 **SmartCloud Flow** is a block-based forms and workflow plugin for WordPress.
 
-It combines a modern Gutenberg editor experience with a React/Mantine runtime and an optional AWS backend, so site owners can design forms in WordPress while choosing where submissions should be posted and, in Pro, running submissions, templates, workflows, and integrations in their own AWS account.
+It combines a modern Gutenberg editor experience with a React/Mantine runtime for forms, a native `<dialog>`-based light-DOM modal block, and an optional AWS backend, so site owners can design forms and supporting UI in WordPress while choosing where submissions should be posted and, in Pro, running submissions, templates, workflows, and integrations in their own AWS account.
 
 Flow is part of the WPSuite family of plugins by Smart Cloud Solutions, Inc.
 
@@ -46,11 +46,14 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 
 * **Gutenberg form builder** — Build forms with a dedicated Form block, layout/container blocks, and rich field blocks.
 * **Single React runtime per form** — Front-end forms run as one mounted React tree.
+* **Light-DOM modal block** — Wrap any Gutenberg content in a native dialog with class triggers, data-attribute triggers, hash opening, and a stable browser API on `WpSuite.plugins.flow.modals`.
 * **Rich display & content blocks** — Use styled content primitives such as blockquotes, marks, badges, code blocks, spoilers, lists, tables, timelines, and overflow lists alongside inputs.
+* **API-backed options & request controls** — Load select, radio, checkbox-group, and tags options from API/autocomplete endpoints with configurable methods, headers, parameters, selected-value mapping, and runtime interpolation.
 * **Conditional logic & validation** — Show/hide, enable/disable, require/optional, and other rule-based field behavior.
 * **Theme overrides & design tokens** — Theme both interactive controls and display/content blocks inside the Shadow DOM with Mantine variables and stable `--flow-*` CSS tokens.
 * **Shortcodes & Elementor support** — Reuse forms or content roots via shortcode and Elementor integrations.
-* **Flexible submission target model** — Submit directly from the browser to a per-form endpoint URL.
+* **Flexible submission target model** — Submit directly from the browser to a per-form endpoint URL with configurable HTTP methods, optional request headers, and runtime interpolation.
+* **Runtime events & host-page integration** — Listen for submit, draft, wizard, modal, and API-loading error events from outer-page JavaScript.
 * **Pro: backend-aware operation** — Connect Flow to the AWS-hosted Flow backend for durable submissions, admin tooling, templates, workflows, and webhook-driven automation.
 * **Pro: backend form sync** — Optionally sync Gutenberg-defined forms into canonical backend form definitions stored in AWS.
 * **Pro: admin application** — Manage submissions, templates, workflows, and backend/API settings from WordPress admin.
@@ -125,8 +128,17 @@ Yes. Flow runs in the browser and can submit directly to the configured endpoint
 = Does this work outside Gutenberg? =
 Yes. Use the `[smartcloud-flow-form]` or `[smartcloud-flow-content-root]` shortcode, or the Elementor Flow Form / Flow Content Root widgets. Developers can also integrate the JavaScript APIs directly.
 
+= Can Flow load field options from my API? =
+Yes. Select, radio, checkbox-group, and tags fields can fetch options from API or autocomplete endpoints. You can configure request methods, headers, parameters, response mapping, selected-value mapping, and runtime interpolation tokens.
+
+= Can host-page JavaScript react to Flow runtime errors? =
+Yes. Flow emits browser events such as `smartcloud-flow:submit-success`, `smartcloud-flow:error`, `smartcloud-flow:options-request-error`, and modal lifecycle events so host pages can show custom UI, analytics, or recovery flows.
+
 = Can I reuse a Flow Content Root outside Gutenberg? =
 Yes. Use `[smartcloud-flow-content-root id="123"]` with a reusable block / pattern that contains a Flow Content Root block.
+
+= Can Flow open Gutenberg content in a modal? =
+Yes. Flow now includes a dedicated Modal top-level block that renders in the light DOM with the native `<dialog>` element. You can open it from class-based triggers, `data-wps-flow-*` attributes, URL hashes, or the browser API on `WpSuite.plugins.flow.modals`.
 
 == Screenshots ==
 
@@ -205,6 +217,15 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.5 =
+* Feature: Added the new light-DOM Modal top-level block with native `<dialog>` runtime, class/data/hash triggers, and browser helpers on `WpSuite.plugins.flow.modals`.
+* Fix: Custom submit endpoints now support configurable `GET`/`POST`/`PUT`/`PATCH` methods, optional browser-side request headers, and runtime interpolation for endpoint paths and header values.
+* Fix: API/autocomplete-backed select, radio, checkbox-group, and tags fields now interpolate endpoint URLs, headers, and parameters from runtime values and avoid repeated option-endpoint refetch loops.
+* Fix: Flow now emits `smartcloud-flow:options-request-error` for API-backed option failures, and field-level errors show a user-facing message instead of raw JSON responses.
+* Fix: Multi-select option UIs now support clear-all behavior for API-backed checkbox groups, improve checkbox pointer affordance, and stop hidden-field wrappers from affecting runtime layout gaps.
+* Fix: Added legacy Gutenberg save deprecations for older serialized Flow block payloads so previously saved blocks no longer require recovery after serializer changes.
+* Docs: Expanded plugin, shortcode, JavaScript API, and knowledge-base documentation for the modal runtime, custom endpoint request settings, interpolation, and runtime error handling.
+
 = 1.1.4 =
 * Fix: Flow Patterns now includes reusable blocks that contain either a Flow Form or a Flow Content Root block.
 * Fix: The shortcode column now shows the matching copy-ready shortcode for each Flow pattern, including content-root entries.
@@ -243,6 +264,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.5 =
+Recommended update if you use modal presentations, custom submit or API-backed option endpoints, or older saved Flow blocks; this release adds the modal block/runtime, expands endpoint interpolation and request options, improves API error handling, and restores Gutenberg compatibility for legacy serialized content.
 
 = 1.1.4 =
 Recommended update if you reuse Flow patterns outside Gutenberg; this release adds content-root patterns to the admin list and exposes the matching copy-ready shortcode targets.

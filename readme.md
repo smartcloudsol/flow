@@ -30,12 +30,13 @@ https://wpsuite.io/docs/
 ## What Flow does
 
 ### Free
-Flow lets you build forms in Gutenberg and render them on the front end with a single React runtime per form.
+Flow lets you build forms, reusable content surfaces, and light-DOM modal shells in Gutenberg. Forms render on the front end with a single React runtime per form, while the modal block uses a native `<dialog>` shell for host-page interactions.
 
 Free mode supports:
 
 - **Gutenberg form builder** with dedicated layout and field blocks
 - **Front-end form rendering** with Mantine-based UI
+- **Light-DOM modal block** with native `<dialog>`, class/data/hash triggers, and a browser API on `WpSuite.plugins.flow.modals`
 - **Conditional logic and validation**
 - **Shortcode support** via `[smartcloud-flow-form]` and `[smartcloud-flow-content-root]`
 - **Elementor widget support** for embedding forms or content roots outside Gutenberg

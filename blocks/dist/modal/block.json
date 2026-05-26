@@ -1,0 +1,158 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/modal",
+  "version": "1.0.0",
+  "title": "Flow Modal",
+  "category": "smartcloud-flow",
+  "icon": "feedback",
+  "description": "Display any Gutenberg content in a frontend modal dialog.",
+  "supports": {
+    "html": false,
+    "anchor": true,
+    "className": true,
+    "customClassName": true,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "spacing": {
+      "margin": true,
+      "padding": false
+    },
+    "color": {
+      "text": false,
+      "background": false
+    }
+  },
+  "attributes": {
+    "modalId": {
+      "type": "string",
+      "default": ""
+    },
+    "ariaLabel": {
+      "type": "string",
+      "default": ""
+    },
+    "labelledById": {
+      "type": "string",
+      "default": ""
+    },
+    "openOnHash": {
+      "type": "boolean",
+      "default": true
+    },
+    "hashValue": {
+      "type": "string",
+      "default": ""
+    },
+    "closeOnEsc": {
+      "type": "boolean",
+      "default": true
+    },
+    "closeOnBackdrop": {
+      "type": "boolean",
+      "default": true
+    },
+    "closeOnCancel": {
+      "type": "boolean",
+      "default": true
+    },
+    "closeOnOk": {
+      "type": "boolean",
+      "default": true
+    },
+    "closeOnFlowSubmitSuccess": {
+      "type": "boolean",
+      "default": false
+    },
+    "restoreFocusOnClose": {
+      "type": "boolean",
+      "default": true
+    },
+    "preventBackgroundScrollFallback": {
+      "type": "boolean",
+      "default": true
+    },
+    "dispatchLifecycleEvents": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCloseButton": {
+      "type": "boolean",
+      "default": true
+    },
+    "closeButtonLabel": {
+      "type": "string",
+      "default": "Close dialog"
+    },
+    "size": {
+      "type": "string",
+      "default": "md"
+    },
+    "position": {
+      "type": "string",
+      "default": "center"
+    },
+    "mobileBehavior": {
+      "type": "string",
+      "default": "normal"
+    },
+    "width": {
+      "type": "string",
+      "default": ""
+    },
+    "maxWidth": {
+      "type": "string",
+      "default": ""
+    },
+    "height": {
+      "type": "string",
+      "default": ""
+    },
+    "maxHeight": {
+      "type": "string",
+      "default": ""
+    },
+    "panelPadding": {
+      "type": "string",
+      "default": ""
+    },
+    "panelRadius": {
+      "type": "string",
+      "default": ""
+    },
+    "panelShadow": {
+      "type": "string",
+      "default": ""
+    },
+    "backdropStyle": {
+      "type": "string",
+      "default": "default"
+    },
+    "animation": {
+      "type": "string",
+      "default": "fade"
+    },
+    "defaultOkAction": {
+      "type": "string",
+      "default": ""
+    },
+    "defaultCancelAction": {
+      "type": "string",
+      "default": ""
+    },
+    "busyText": {
+      "type": "string",
+      "default": ""
+    },
+    "errorText": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script",
+  "style": "smartcloud-flow-modal-view-style",
+  "viewScript": "smartcloud-flow-modal-view-script",
+  "render": "file:./render.php"
+}

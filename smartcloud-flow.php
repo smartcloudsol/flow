@@ -6,7 +6,7 @@
  * Requires at least: 6.2
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.4
+ * Version:           1.1.5
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.4';
+const VERSION = '1.1.5';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -42,6 +42,7 @@ final class Flow
     private array $blocks = [
         'form',
         'content-root',
+        'modal',
         'operations',
         'display-title',
         'display-blockquote',
@@ -287,6 +288,8 @@ final class Flow
             'successmessage' => 'successMessage',
             'errormessage' => 'errorMessage',
             'endpointpath' => 'endpointPath',
+            'endpointmethod' => 'endpointMethod',
+            'endpointheaders' => 'endpointHeaders',
             'language' => 'language',
             'direction' => 'direction',
             'hideformonsuccess' => 'hideFormOnSuccess',
@@ -374,6 +377,8 @@ final class Flow
             'successMessage' => null,
             'errorMessage' => null,
             'endpointPath' => null,
+            'endpointMethod' => 'POST',
+            'endpointHeaders' => null,
             'language' => null,
             'direction' => null,
             'hideFormOnSuccess' => true,
@@ -568,6 +573,7 @@ __flowGlobal.WpSuite.constants.flow = ' . wp_json_encode($constants) . ';
     private function enqueueFormViewAssets(): void
     {
         $this->registerOperationsRuntimeAssets();
+        $this->registerModalViewAssets();
 
         $view_script_asset = array();
         if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'blocks/view.asset.php')) {
@@ -582,6 +588,38 @@ __flowGlobal.WpSuite.constants.flow = ' . wp_json_encode($constants) . ';
         }
         $view_script_asset['dependencies'] = array_values(array_unique($view_script_dependencies));
         wp_enqueue_script('smartcloud-flow-view-script', SMARTCLOUD_FLOW_URL . 'blocks/view.js', $view_script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('strategy' => 'defer'));
+    }
+
+    private function registerModalViewAssets(): void
+    {
+        $modal_view_asset = array();
+        if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'blocks/modal-view.asset.php')) {
+            $modal_view_asset = require(SMARTCLOUD_FLOW_PATH . 'blocks/modal-view.asset.php');
+        }
+
+        $modal_view_dependencies = array_merge(
+            $modal_view_asset['dependencies'] ?? array(),
+            array('smartcloud-flow-main-script')
+        );
+
+        if (!wp_script_is('smartcloud-flow-modal-view-script', 'registered') && file_exists(SMARTCLOUD_FLOW_PATH . 'blocks/modal-view.js')) {
+            wp_register_script(
+                'smartcloud-flow-modal-view-script',
+                SMARTCLOUD_FLOW_URL . 'blocks/modal-view.js',
+                array_values(array_unique($modal_view_dependencies)),
+                $modal_view_asset['version'] ?? SMARTCLOUD_FLOW_VERSION,
+                array('strategy' => 'defer')
+            );
+        }
+
+        if (!wp_style_is('smartcloud-flow-modal-view-style', 'registered') && file_exists(SMARTCLOUD_FLOW_PATH . 'blocks/modal-view.css')) {
+            wp_register_style(
+                'smartcloud-flow-modal-view-style',
+                SMARTCLOUD_FLOW_URL . 'blocks/modal-view.css',
+                array(),
+                $modal_view_asset['version'] ?? SMARTCLOUD_FLOW_VERSION
+            );
+        }
     }
 
     public function enqueueFrontendAssets(): void

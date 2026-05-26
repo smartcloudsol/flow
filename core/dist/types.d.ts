@@ -25,6 +25,45 @@ export interface FlowSettings {
 export interface FlowFeatures {
     readonly store: Promise<Store>;
 }
+export interface FlowModalOptions {
+    closeOnEsc?: boolean;
+    closeOnBackdrop?: boolean;
+    closeOnCancel?: boolean;
+    closeOnOk?: boolean;
+    closeOnFlowSubmitSuccess?: boolean;
+    restoreFocusOnClose?: boolean;
+    preventBackgroundScrollFallback?: boolean;
+    dispatchLifecycleEvents?: boolean;
+    defaultOkAction?: string;
+    defaultCancelAction?: string;
+    busyText?: string;
+    errorText?: string;
+}
+export interface FlowModalOpenOptions {
+    triggerElement?: HTMLElement;
+}
+export interface FlowModalActionContext {
+    modalId: string;
+    modalElement: HTMLDialogElement;
+    triggerElement?: HTMLElement;
+    actionName: string;
+    originalEvent?: Event;
+    close: (returnValue?: string) => void;
+    open: () => void;
+}
+export type FlowModalActionHandler = (context: FlowModalActionContext) => void | boolean | Promise<void | boolean>;
+export interface FlowModalApi {
+    register(modal: HTMLDialogElement, options?: Partial<FlowModalOptions>): void;
+    unregister(modalOrId: HTMLDialogElement | string): void;
+    open(modalId: string, options?: FlowModalOpenOptions): boolean;
+    close(modalId: string, returnValue?: string): boolean;
+    toggle(modalId: string, options?: FlowModalOpenOptions): boolean;
+    closeAll(returnValue?: string): number;
+    isOpen(modalId: string): boolean;
+    get(modalId: string): HTMLDialogElement | null;
+    registerAction(actionName: string, handler: FlowModalActionHandler): void;
+    unregisterAction(actionName: string): void;
+}
 export interface FlowFormFieldDefaultsApi {
     setFormFieldDefaultValue(formId: string, fieldName: string, value: unknown): Promise<void>;
     setFormFieldDefaultValues(formId: string, values: FormFieldDefaults): Promise<void>;
@@ -38,6 +77,7 @@ export interface FlowFormFieldDefaultsApi {
  */
 export interface Flow extends FlowFormFieldDefaultsApi {
     features: FlowFeatures;
+    modals: FlowModalApi;
     settings: FlowSettings;
     nonce: string;
     baseUrl: string;

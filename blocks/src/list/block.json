@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/list",
+  "version": "1.0.0",
+  "title": "List",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "editor-ul",
+  "description": "Display a structured list with Flow content items.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "ordered": {
+      "type": "boolean",
+      "default": false
+    },
+    "listStyleType": {
+      "type": "string",
+      "default": ""
+    },
+    "spacing": {
+      "type": "string",
+      "default": "sm"
+    },
+    "size": {
+      "type": "string",
+      "default": ""
+    },
+    "withPadding": {
+      "type": "boolean",
+      "default": true
+    },
+    "center": {
+      "type": "boolean",
+      "default": false
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}
