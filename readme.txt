@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -46,7 +46,7 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 
 * **Gutenberg form builder** — Build forms with a dedicated Form block, layout/container blocks, and rich field blocks.
 * **Single React runtime per form** — Front-end forms run as one mounted React tree.
-* **Light-DOM modal block** — Wrap any Gutenberg content in a native dialog with class triggers, data-attribute triggers, hash opening, and a stable browser API on `WpSuite.plugins.flow.modals`.
+* **Light-DOM modal block** — Wrap any Gutenberg content in a native dialog with class and data-attribute triggers, hash opening, default header/body/actions slots, action-role aware buttons, and a stable browser API on `WpSuite.plugins.flow.modals`.
 * **Rich display & content blocks** — Use styled content primitives such as blockquotes, marks, badges, code blocks, spoilers, lists, tables, timelines, and overflow lists alongside inputs.
 * **API-backed options & request controls** — Load select, radio, checkbox-group, and tags options from API/autocomplete endpoints with configurable methods, headers, parameters, selected-value mapping, and runtime interpolation.
 * **Conditional logic & validation** — Show/hide, enable/disable, require/optional, and other rule-based field behavior.
@@ -138,7 +138,7 @@ Yes. Flow emits browser events such as `smartcloud-flow:submit-success`, `smartc
 Yes. Use `[smartcloud-flow-content-root id="123"]` with a reusable block / pattern that contains a Flow Content Root block.
 
 = Can Flow open Gutenberg content in a modal? =
-Yes. Flow now includes a dedicated Modal top-level block that renders in the light DOM with the native `<dialog>` element. You can open it from class-based triggers, `data-wps-flow-*` attributes, URL hashes, or the browser API on `WpSuite.plugins.flow.modals`.
+Yes. Flow includes a dedicated Modal top-level block that renders in the light DOM with the native `<dialog>` element. You can open it from class-based triggers, `data-wps-flow-*` attributes, URL hashes, or the browser API on `WpSuite.plugins.flow.modals`. The editor can seed header, body, and actions sections, and action buttons inside the modal actions area can be assigned primary, secondary, or dismiss behavior from the core/button toolbar.
 
 == Screenshots ==
 
@@ -217,6 +217,13 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.6 =
+* Fix: Modal triggers now detect class-based hooks on Gutenberg button wrapper elements more reliably.
+* Fix: Modal dismiss and default actions now run more consistently for overlay clicks, Escape, close buttons, and other close paths.
+* Fix: Modal sizing and scroll behavior are more stable for full-height dialogs, sticky header/actions slots, background scroll locking, and slot wrappers converted between Group/Stack layouts.
+* Fix: The modal editor now seeds safer default header/body/actions sections and adds toolbar actions to insert or replace those sections.
+* UX: Modal action behavior is now edited on the selected core/button toolbar, with clearer current-state feedback for primary, secondary, and dismiss roles.
+
 = 1.1.5 =
 * Feature: Added the new light-DOM Modal top-level block with native `<dialog>` runtime, class/data/hash triggers, and browser helpers on `WpSuite.plugins.flow.modals`.
 * Fix: Custom submit endpoints now support configurable `GET`/`POST`/`PUT`/`PATCH` methods, optional browser-side request headers, and runtime interpolation for endpoint paths and header values.
@@ -264,6 +271,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.6 =
+Recommended update if you use Flow modals; this release improves Gutenberg button triggers, dismiss/default action handling, full-height layout stability, background scroll locking, and the modal editor toolbar for header, body, and actions sections.
 
 = 1.1.5 =
 Recommended update if you use modal presentations, custom submit or API-backed option endpoints, or older saved Flow blocks; this release adds the modal block/runtime, expands endpoint interpolation and request options, improves API error handling, and restores Gutenberg compatibility for legacy serialized content.

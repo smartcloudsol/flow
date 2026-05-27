@@ -6,7 +6,7 @@
  * Requires at least: 6.2
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.5
+ * Version:           1.1.6
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.5';
+const VERSION = '1.1.6';
 
 if (!defined('ABSPATH')) {
     exit;

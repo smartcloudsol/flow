@@ -71,10 +71,11 @@ export interface FlowModalOptions {
   closeOnOk?: boolean;
   closeOnFlowSubmitSuccess?: boolean;
   restoreFocusOnClose?: boolean;
-  preventBackgroundScrollFallback?: boolean;
+  preventBackgroundScroll?: boolean;
   dispatchLifecycleEvents?: boolean;
-  defaultOkAction?: string;
-  defaultCancelAction?: string;
+  defaultPrimaryAction?: string;
+  defaultSecondaryAction?: string;
+  defaultDismissAction?: string;
   busyText?: string;
   errorText?: string;
 }

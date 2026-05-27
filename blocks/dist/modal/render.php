@@ -21,6 +21,7 @@ $smartcloud_flow_validate_action_name = static function ($value): string {
 };
 
 $smartcloud_flow_hash_value = ltrim(trim((string) ($smartcloud_flow_attributes['hashValue'] ?? '')), '#');
+$smartcloud_flow_prevent_background_scroll = !isset($smartcloud_flow_attributes['preventBackgroundScroll']) || (bool) $smartcloud_flow_attributes['preventBackgroundScroll'];
 
 $smartcloud_flow_options = [
     'openOnHash' => !isset($smartcloud_flow_attributes['openOnHash']) || (bool) $smartcloud_flow_attributes['openOnHash'],
@@ -31,10 +32,11 @@ $smartcloud_flow_options = [
     'closeOnOk' => !isset($smartcloud_flow_attributes['closeOnOk']) || (bool) $smartcloud_flow_attributes['closeOnOk'],
     'closeOnFlowSubmitSuccess' => !empty($smartcloud_flow_attributes['closeOnFlowSubmitSuccess']),
     'restoreFocusOnClose' => !isset($smartcloud_flow_attributes['restoreFocusOnClose']) || (bool) $smartcloud_flow_attributes['restoreFocusOnClose'],
-    'preventBackgroundScrollFallback' => !isset($smartcloud_flow_attributes['preventBackgroundScrollFallback']) || (bool) $smartcloud_flow_attributes['preventBackgroundScrollFallback'],
+    'preventBackgroundScroll' => $smartcloud_flow_prevent_background_scroll,
     'dispatchLifecycleEvents' => !isset($smartcloud_flow_attributes['dispatchLifecycleEvents']) || (bool) $smartcloud_flow_attributes['dispatchLifecycleEvents'],
-    'defaultOkAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultOkAction'] ?? ''),
-    'defaultCancelAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultCancelAction'] ?? ''),
+    'defaultPrimaryAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultPrimaryAction'] ?? ($smartcloud_flow_attributes['defaultOkAction'] ?? '')),
+    'defaultSecondaryAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultSecondaryAction'] ?? ($smartcloud_flow_attributes['defaultCancelAction'] ?? '')),
+    'defaultDismissAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultDismissAction'] ?? ''),
     'busyText' => trim((string) ($smartcloud_flow_attributes['busyText'] ?? '')),
     'errorText' => trim((string) ($smartcloud_flow_attributes['errorText'] ?? '')),
 ];
@@ -87,7 +89,8 @@ if ($smartcloud_flow_close_button_label === '') {
     <?php endif; ?>>
     <div class="wps-flow-modal__panel" tabindex="-1">
         <?php if (!isset($smartcloud_flow_attributes['showCloseButton']) || $smartcloud_flow_attributes['showCloseButton']): ?>
-            <button class="wps-flow-modal__close wps-flow-modal-close" type="button" data-wps-flow-modal-close
+            <button class="wps-flow-modal__close wps-flow-modal-close wps-flow-modal-role--dismiss" type="button"
+                data-wps-flow-modal-close data-wps-flow-modal-role="dismiss"
                 aria-label="<?php echo esc_attr($smartcloud_flow_close_button_label); ?>">
                 <span aria-hidden="true">×</span>
             </button>

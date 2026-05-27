@@ -1,6 +1,7 @@
 import { type BlockAttribute, registerBlockType } from "@wordpress/blocks";
 import { TEXT_DOMAIN } from "..";
 import metadata from "./block.json";
+import "./button-behavior";
 import Edit from "./edit";
 import Save from "./save";
 

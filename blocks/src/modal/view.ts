@@ -19,6 +19,7 @@ type ModalLifecycleName =
   | "close"
   | "ok"
   | "cancel"
+  | "dismiss"
   | "error";
 
 type ModalEventDetail = {
@@ -31,15 +32,35 @@ type ModalEventDetail = {
   error?: unknown;
 };
 
+type FlowModalRuntimeOptions = FlowModalOptions & {
+  preventBackgroundScroll?: boolean;
+  defaultPrimaryAction?: string;
+  defaultSecondaryAction?: string;
+  defaultDismissAction?: string;
+  defaultOkAction?: string;
+  defaultCancelAction?: string;
+};
+
+type ModalActionTriggerKind = "ok" | "cancel" | "close";
+type ModalActionRole = "primary" | "secondary" | "dismiss";
+
+type ModalCloseContext = {
+  triggerElement?: HTMLElement;
+  originalEvent?: Event;
+  dismissActionName?: string;
+  dismissHandled?: boolean;
+};
+
 type ModalRecord = {
   id: string;
   element: HTMLDialogElement;
-  options: Required<FlowModalOptions> & {
+  options: Required<FlowModalRuntimeOptions> & {
     openOnHash: boolean;
     hashValue: string;
   };
   cleanupController: AbortController;
   lastTrigger?: HTMLElement;
+  pendingCloseContext?: ModalCloseContext;
 };
 
 type ModalRuntimeState = {
@@ -57,7 +78,7 @@ declare global {
   }
 }
 
-const DEFAULT_OPTIONS: Required<FlowModalOptions> & {
+const DEFAULT_OPTIONS: Required<FlowModalRuntimeOptions> & {
   openOnHash: boolean;
   hashValue: string;
 } = {
@@ -69,8 +90,11 @@ const DEFAULT_OPTIONS: Required<FlowModalOptions> & {
   closeOnOk: true,
   closeOnFlowSubmitSuccess: false,
   restoreFocusOnClose: true,
-  preventBackgroundScrollFallback: true,
+  preventBackgroundScroll: true,
   dispatchLifecycleEvents: true,
+  defaultPrimaryAction: "",
+  defaultSecondaryAction: "",
+  defaultDismissAction: "",
   defaultOkAction: "",
   defaultCancelAction: "",
   busyText: "",
@@ -106,11 +130,14 @@ function normalizeHash(value: string | null | undefined): string {
 
 function parseModalOptions(
   element: HTMLDialogElement,
-  overrides?: Partial<FlowModalOptions> & {
+  overrides?: Partial<FlowModalRuntimeOptions> & {
     openOnHash?: boolean;
     hashValue?: string;
   },
-): Required<FlowModalOptions> & { openOnHash: boolean; hashValue: string } {
+): Required<FlowModalRuntimeOptions> & {
+  openOnHash: boolean;
+  hashValue: string;
+} {
   let parsed: Record<string, unknown> = {};
   const rawOptions = element.dataset.wpsFlowModalOptions;
 
@@ -128,6 +155,13 @@ function parseModalOptions(
     }
   }
 
+  const preventBackgroundScroll =
+    typeof overrides?.preventBackgroundScroll === "boolean"
+      ? overrides.preventBackgroundScroll
+      : typeof parsed.preventBackgroundScroll === "boolean"
+      ? parsed.preventBackgroundScroll
+      : DEFAULT_OPTIONS.preventBackgroundScroll;
+
   return {
     ...DEFAULT_OPTIONS,
     ...parsed,
@@ -142,6 +176,7 @@ function parseModalOptions(
         overrides?.hashValue ?? parsed.hashValue ?? DEFAULT_OPTIONS.hashValue,
       ),
     ),
+    preventBackgroundScroll,
   };
 }
 
@@ -197,7 +232,14 @@ function setBusyState(record: ModalRecord, busy: boolean): void {
 
   record.element
     .querySelectorAll<HTMLElement>(
-      "[data-wps-flow-modal-ok], .wps-flow-modal-ok",
+      [
+        "[data-wps-flow-modal-ok]",
+        ".wps-flow-modal-ok",
+        "[data-wps-flow-modal-cancel]",
+        ".wps-flow-modal-cancel",
+        "[data-wps-flow-modal-close]",
+        ".wps-flow-modal-close",
+      ].join(", "),
     )
     .forEach((element) => {
       element.setAttribute("aria-disabled", busy ? "true" : "false");
@@ -219,6 +261,25 @@ function updateFallbackBodyScroll(): void {
   document.body.classList.toggle(
     "wps-flow-modal-fallback-has-open",
     hasFallbackOpen,
+  );
+}
+
+function shouldLockDocumentScroll(record: ModalRecord): boolean {
+  return record.options.preventBackgroundScroll;
+}
+
+function updateDocumentScrollLock(): void {
+  const hasScrollLockedModal = Array.from(runtimeState.records.values()).some(
+    (record) => isRecordOpen(record) && shouldLockDocumentScroll(record),
+  );
+
+  document.documentElement.classList.toggle(
+    "wps-flow-modal-has-open",
+    hasScrollLockedModal,
+  );
+  document.body.classList.toggle(
+    "wps-flow-modal-has-open",
+    hasScrollLockedModal,
   );
 }
 
@@ -281,6 +342,48 @@ function getActionName(
   const candidate = dataValue || classValue || fallbackActionName;
 
   return ACTION_NAME_PATTERN.test(candidate) ? candidate : "";
+}
+
+function getActionRole(
+  triggerElement: HTMLElement,
+  fallbackRole: ModalActionRole,
+): ModalActionRole {
+  const dataValue = (triggerElement.dataset.wpsFlowModalRole || "").trim();
+  const classValue = getClassTokenValue(
+    triggerElement,
+    "wps-flow-modal-role--",
+  );
+  const candidate = dataValue || classValue || fallbackRole;
+
+  switch (candidate) {
+    case "primary":
+    case "secondary":
+    case "dismiss":
+      return candidate;
+    default:
+      return fallbackRole;
+  }
+}
+
+function getDefaultActionName(
+  record: ModalRecord,
+  role: ModalActionRole,
+): string {
+  switch (role) {
+    case "primary":
+      return (
+        record.options.defaultPrimaryAction || record.options.defaultOkAction
+      );
+    case "secondary":
+      return (
+        record.options.defaultSecondaryAction ||
+        record.options.defaultCancelAction
+      );
+    case "dismiss":
+      return record.options.defaultDismissAction;
+    default:
+      return "";
+  }
 }
 
 function getHashTarget(record: ModalRecord): string {
@@ -366,6 +469,177 @@ function closeFallback(record: ModalRecord): void {
   record.element.removeAttribute("open");
 }
 
+function getTopmostOpenRecord(): ModalRecord | undefined {
+  const openRecords = Array.from(runtimeState.records.values()).filter(
+    (record) => isRecordOpen(record),
+  );
+
+  return openRecords.length ? openRecords[openRecords.length - 1] : undefined;
+}
+
+function createActionContext(
+  record: ModalRecord,
+  triggerElement: HTMLElement,
+  originalEvent: Event,
+  actionName: string,
+  closeContext?: ModalCloseContext,
+): FlowModalActionContext {
+  return {
+    modalId: record.id,
+    modalElement: record.element,
+    triggerElement,
+    actionName,
+    originalEvent,
+    close: (returnValue) => {
+      record.pendingCloseContext = closeContext;
+      modalApi.close(record.id, returnValue);
+    },
+    open: () => {
+      modalApi.open(record.id, { triggerElement });
+    },
+  };
+}
+
+function consumePendingCloseContext(
+  record: ModalRecord,
+): ModalCloseContext | undefined {
+  const closeContext = record.pendingCloseContext;
+  record.pendingCloseContext = undefined;
+  return closeContext;
+}
+
+async function runDismissActionOnClose(
+  record: ModalRecord,
+  returnValue: string,
+  closeContext?: ModalCloseContext,
+): Promise<void> {
+  if (closeContext?.dismissHandled) {
+    return;
+  }
+
+  const triggerElement = closeContext?.triggerElement;
+  const originalEvent = closeContext?.originalEvent;
+  const actionName =
+    closeContext?.dismissActionName || record.options.defaultDismissAction;
+
+  emitModalEvent(
+    record,
+    "dismiss",
+    { actionName, triggerElement, originalEvent, returnValue },
+    false,
+  );
+
+  const handler = actionName ? runtimeState.actions.get(actionName) : undefined;
+  if (!handler) {
+    return;
+  }
+
+  try {
+    await handler(
+      createActionContext(
+        record,
+        triggerElement || record.element,
+        originalEvent || new Event("close"),
+        actionName,
+      ),
+    );
+  } catch (error) {
+    emitModalEvent(
+      record,
+      "error",
+      { actionName, triggerElement, originalEvent, error },
+      false,
+    );
+  }
+}
+
+async function runModalAction(
+  record: ModalRecord,
+  triggerElement: HTMLElement,
+  originalEvent: Event,
+  kind: ModalActionTriggerKind,
+): Promise<void> {
+  const fallbackRole =
+    kind === "ok" ? "primary" : kind === "cancel" ? "secondary" : "dismiss";
+  const actionRole = getActionRole(triggerElement, fallbackRole);
+  const lifecycleName = kind === "close" ? "dismiss" : kind;
+  const actionName = getActionName(
+    triggerElement,
+    getDefaultActionName(record, actionRole),
+  );
+  const closeContext: ModalCloseContext =
+    kind === "close"
+      ? {
+          triggerElement,
+          originalEvent,
+          dismissHandled: true,
+        }
+      : {
+          triggerElement,
+          originalEvent,
+        };
+
+  if (
+    !emitModalEvent(
+      record,
+      lifecycleName,
+      { actionName, triggerElement, originalEvent },
+      true,
+    )
+  ) {
+    return;
+  }
+
+  const handler = actionName ? runtimeState.actions.get(actionName) : undefined;
+  const shouldClose =
+    kind === "ok"
+      ? record.options.closeOnOk
+      : kind === "cancel"
+      ? record.options.closeOnCancel
+      : true;
+  const returnValue = kind === "close" ? "close" : kind;
+
+  if (!handler) {
+    if (shouldClose) {
+      record.pendingCloseContext = closeContext;
+      modalApi.close(record.id, returnValue);
+    }
+    return;
+  }
+
+  setBusyState(record, true);
+
+  try {
+    const result = await handler(
+      createActionContext(
+        record,
+        triggerElement,
+        originalEvent,
+        actionName,
+        closeContext,
+      ),
+    );
+    setBusyState(record, false);
+
+    if (result === false) {
+      return;
+    }
+
+    if (shouldClose && modalApi.isOpen(record.id)) {
+      record.pendingCloseContext = closeContext;
+      modalApi.close(record.id, returnValue);
+    }
+  } catch (error) {
+    setBusyState(record, false);
+    emitModalEvent(
+      record,
+      "error",
+      { actionName, triggerElement, originalEvent, error },
+      false,
+    );
+  }
+}
+
 function createModalApi(): FlowModalApi {
   const api: FlowModalApi = {
     register(modal, options) {
@@ -377,6 +651,7 @@ function createModalApi(): FlowModalApi {
       const existingRecord = runtimeState.records.get(modalId);
       if (existingRecord?.element === modal) {
         existingRecord.options = parseModalOptions(modal, options);
+        updateDocumentScrollLock();
         return;
       }
 
@@ -400,6 +675,7 @@ function createModalApi(): FlowModalApi {
             return;
           }
 
+          record.pendingCloseContext = { originalEvent: event };
           api.close(record.id, "cancel");
         },
         { signal: cleanupController.signal },
@@ -408,9 +684,17 @@ function createModalApi(): FlowModalApi {
       modal.addEventListener(
         "close",
         () => {
+          const closeContext = consumePendingCloseContext(record);
+
           setBusyState(record, false);
-          emitModalEvent(record, "close", { returnValue: modal.returnValue });
+          updateDocumentScrollLock();
+          emitModalEvent(record, "close", {
+            returnValue: modal.returnValue,
+            triggerElement: closeContext?.triggerElement,
+            originalEvent: closeContext?.originalEvent,
+          });
           restoreFocus(record);
+          void runDismissActionOnClose(record, modal.returnValue, closeContext);
         },
         { signal: cleanupController.signal },
       );
@@ -422,6 +706,7 @@ function createModalApi(): FlowModalApi {
             return;
           }
 
+          record.pendingCloseContext = { originalEvent: event };
           api.close(record.id, "backdrop");
         },
         { signal: cleanupController.signal },
@@ -446,6 +731,7 @@ function createModalApi(): FlowModalApi {
 
       record.cleanupController.abort();
       runtimeState.records.delete(modalId);
+      updateDocumentScrollLock();
     },
 
     open(modalId, options) {
@@ -492,6 +778,7 @@ function createModalApi(): FlowModalApi {
         openFallback(record);
       }
 
+      updateDocumentScrollLock();
       focusPanel(record);
       emitModalEvent(record, "open", {
         triggerElement: options?.triggerElement,
@@ -512,14 +799,23 @@ function createModalApi(): FlowModalApi {
       }
 
       if (!emitModalEvent(record, "before-close", { returnValue }, true)) {
+        record.pendingCloseContext = undefined;
         return false;
       }
 
       if (record.element.classList.contains("wps-flow-modal--fallback-open")) {
+        const closeContext = consumePendingCloseContext(record);
+
         closeFallback(record);
         setBusyState(record, false);
-        emitModalEvent(record, "close", { returnValue });
+        updateDocumentScrollLock();
+        emitModalEvent(record, "close", {
+          returnValue,
+          triggerElement: closeContext?.triggerElement,
+          originalEvent: closeContext?.originalEvent,
+        });
         restoreFocus(record);
+        void runDismissActionOnClose(record, returnValue, closeContext);
         return true;
       }
 
@@ -602,67 +898,7 @@ async function runOkAction(
   triggerElement: HTMLElement,
   originalEvent: Event,
 ): Promise<void> {
-  const actionName = getActionName(
-    triggerElement,
-    record.options.defaultOkAction,
-  );
-
-  if (
-    !emitModalEvent(
-      record,
-      "ok",
-      { actionName, triggerElement, originalEvent },
-      true,
-    )
-  ) {
-    return;
-  }
-
-  const handler = actionName ? runtimeState.actions.get(actionName) : undefined;
-
-  if (!handler) {
-    if (record.options.closeOnOk) {
-      modalApi.close(record.id, "ok");
-    }
-    return;
-  }
-
-  const context: FlowModalActionContext = {
-    modalId: record.id,
-    modalElement: record.element,
-    triggerElement,
-    actionName,
-    originalEvent,
-    close: (returnValue) => {
-      modalApi.close(record.id, returnValue);
-    },
-    open: () => {
-      modalApi.open(record.id, { triggerElement });
-    },
-  };
-
-  setBusyState(record, true);
-
-  try {
-    const result = await handler(context);
-    setBusyState(record, false);
-
-    if (result === false) {
-      return;
-    }
-
-    if (record.options.closeOnOk && modalApi.isOpen(record.id)) {
-      modalApi.close(record.id, "ok");
-    }
-  } catch (error) {
-    setBusyState(record, false);
-    emitModalEvent(
-      record,
-      "error",
-      { actionName, triggerElement, originalEvent, error },
-      false,
-    );
-  }
+  await runModalAction(record, triggerElement, originalEvent, "ok");
 }
 
 function handleCancelAction(
@@ -674,27 +910,7 @@ function handleCancelAction(
     return;
   }
 
-  if (
-    !emitModalEvent(
-      record,
-      "cancel",
-      {
-        actionName: getActionName(
-          triggerElement,
-          record.options.defaultCancelAction,
-        ),
-        triggerElement,
-        originalEvent,
-      },
-      true,
-    )
-  ) {
-    return;
-  }
-
-  if (record.options.closeOnCancel) {
-    modalApi.close(record.id, "cancel");
-  }
+  void runModalAction(record, triggerElement, originalEvent, "cancel");
 }
 
 function getTriggerTargetId(
@@ -727,6 +943,45 @@ function resolveHashTrigger(triggerElement: HTMLElement): string {
   return normalizeHash(href);
 }
 
+function isDelegatedTriggerElement(element: Element): element is HTMLElement {
+  if (!(element instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (
+    element.hasAttribute("data-wps-flow-modal-open") ||
+    element.hasAttribute("data-wps-flow-modal-toggle") ||
+    element.hasAttribute("data-wps-flow-modal-close") ||
+    element.hasAttribute("data-wps-flow-modal-cancel") ||
+    element.hasAttribute("data-wps-flow-modal-ok") ||
+    element.classList.contains("wps-flow-modal-close") ||
+    element.classList.contains("wps-flow-modal-cancel") ||
+    element.classList.contains("wps-flow-modal-ok")
+  ) {
+    return true;
+  }
+
+  return Boolean(
+    getClassTokenValue(element, "wps-flow-modal-open--") ||
+      getClassTokenValue(element, "wps-flow-modal-toggle--") ||
+      resolveHashTrigger(element),
+  );
+}
+
+function findTriggerElement(target: Element): HTMLElement | null {
+  let current: Element | null = target;
+
+  while (current) {
+    if (isDelegatedTriggerElement(current)) {
+      return current;
+    }
+
+    current = current.parentElement;
+  }
+
+  return null;
+}
+
 function scanElementTree(root: ParentNode): void {
   if (root instanceof HTMLDialogElement && root.matches(MODAL_SELECTOR)) {
     modalApi.register(root);
@@ -744,19 +999,7 @@ function handleDelegatedClick(event: Event): void {
     return;
   }
 
-  const triggerElement = event.target.closest<HTMLElement>(
-    [
-      "[data-wps-flow-modal-open]",
-      "[data-wps-flow-modal-toggle]",
-      "[data-wps-flow-modal-close]",
-      "[data-wps-flow-modal-cancel]",
-      "[data-wps-flow-modal-ok]",
-      ".wps-flow-modal-close",
-      ".wps-flow-modal-cancel",
-      ".wps-flow-modal-ok",
-      "a[href^='#']",
-    ].join(","),
-  );
+  const triggerElement = findTriggerElement(event.target);
 
   if (!triggerElement) {
     return;
@@ -801,7 +1044,7 @@ function handleDelegatedClick(event: Event): void {
   if (isCloseTrigger) {
     const record = getNearestModalRecord(triggerElement);
     if (record) {
-      modalApi.close(record.id, "close");
+      void runModalAction(record, triggerElement, event, "close");
     }
     return;
   }
@@ -836,24 +1079,19 @@ function handleHashChange(): void {
   modalApi.open(record.id);
 }
 
-function handleKeydownFallback(event: KeyboardEvent): void {
+function handleEscapeKeydown(event: KeyboardEvent): void {
   if (event.key !== "Escape") {
     return;
   }
 
-  const openRecords = Array.from(runtimeState.records.values()).filter(
-    (record) =>
-      record.element.classList.contains("wps-flow-modal--fallback-open"),
-  );
-  const record = openRecords.length
-    ? openRecords[openRecords.length - 1]
-    : undefined;
+  const record = getTopmostOpenRecord();
 
   if (!record || !record.options.closeOnEsc) {
     return;
   }
 
   event.preventDefault();
+  record.pendingCloseContext = { originalEvent: event };
   modalApi.close(record.id, "cancel");
 }
 
@@ -872,6 +1110,7 @@ function handleFlowSubmitSuccess(event: Event): void {
     return;
   }
 
+  record.pendingCloseContext = { originalEvent: event };
   modalApi.close(record.id, "flow-submit-success");
 }
 
@@ -922,7 +1161,7 @@ function initModalRuntime(): void {
   scanElementTree(document);
 
   document.addEventListener("click", handleDelegatedClick);
-  document.addEventListener("keydown", handleKeydownFallback);
+  document.addEventListener("keydown", handleEscapeKeydown);
   document.addEventListener(
     "smartcloud-flow:submit-success",
     handleFlowSubmitSuccess,

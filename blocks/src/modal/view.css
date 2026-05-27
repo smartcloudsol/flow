@@ -1,8 +1,10 @@
 .wps-flow-modal {
-  --wps-flow-modal-width: auto;
+  --wps-flow-modal-inline-limit: calc(100vw - 32px);
+  --wps-flow-modal-block-limit: calc(100dvh - 32px);
+  --wps-flow-modal-width: 720px;
   --wps-flow-modal-max-width: 720px;
   --wps-flow-modal-height: auto;
-  --wps-flow-modal-max-height: calc(100dvh - 32px);
+  --wps-flow-modal-max-height: var(--wps-flow-modal-block-limit);
   --wps-flow-modal-panel-padding: 28px;
   --wps-flow-modal-panel-radius: 20px;
   --wps-flow-modal-panel-background: var(--wp--preset--color--base, #ffffff);
@@ -40,12 +42,24 @@
 
 .wps-flow-modal__panel {
   box-sizing: border-box;
-  inline-size: min(100%, var(--wps-flow-modal-width));
-  max-inline-size: var(--wps-flow-modal-max-width);
+  inline-size: min(
+    var(--wps-flow-modal-width),
+    var(--wps-flow-modal-inline-limit)
+  );
+  max-inline-size: min(
+    var(--wps-flow-modal-max-width),
+    var(--wps-flow-modal-inline-limit)
+  );
   block-size: var(--wps-flow-modal-height);
-  max-block-size: var(--wps-flow-modal-max-height);
-  overflow: auto;
+  max-block-size: min(
+    var(--wps-flow-modal-max-height),
+    var(--wps-flow-modal-block-limit)
+  );
+  overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
   padding: var(--wps-flow-modal-panel-padding);
   border-radius: var(--wps-flow-modal-panel-radius);
   background: var(--wps-flow-modal-panel-background);
@@ -57,7 +71,48 @@
 }
 
 .wps-flow-modal__content {
-  display: block;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.wps-flow-modal__content > .wps-flow-modal-slot {
+  block-size: auto !important;
+  height: auto !important;
+  max-block-size: none !important;
+  max-height: none !important;
+}
+
+.wps-flow-modal__content > .wps-flow-modal-slot--header {
+  order: 0;
+  flex: 0 0 auto;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  padding-inline-end: 56px;
+  padding-block-end: 12px;
+  background: var(--wps-flow-modal-panel-background);
+}
+
+.wps-flow-modal__content > .wps-flow-modal-slot--body {
+  order: 1;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.wps-flow-modal__content > .wps-flow-modal-slot--actions {
+  order: 2;
+  flex: 0 0 auto;
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 2;
+  margin-block-start: auto;
+  padding-block-start: 12px;
+  background: var(--wps-flow-modal-panel-background);
 }
 
 .wps-flow-modal__close {
@@ -136,27 +191,33 @@
 }
 
 .wps-flow-modal.is-size-xs {
+  --wps-flow-modal-width: 360px;
   --wps-flow-modal-max-width: 360px;
 }
 
 .wps-flow-modal.is-size-sm {
+  --wps-flow-modal-width: 520px;
   --wps-flow-modal-max-width: 520px;
 }
 
 .wps-flow-modal.is-size-md {
+  --wps-flow-modal-width: 720px;
   --wps-flow-modal-max-width: 720px;
 }
 
 .wps-flow-modal.is-size-lg {
+  --wps-flow-modal-width: 920px;
   --wps-flow-modal-max-width: 920px;
 }
 
 .wps-flow-modal.is-size-xl {
+  --wps-flow-modal-width: 1120px;
   --wps-flow-modal-max-width: 1120px;
 }
 
 .wps-flow-modal.is-size-wide {
-  --wps-flow-modal-max-width: min(1280px, calc(100vw - 32px));
+  --wps-flow-modal-width: 1280px;
+  --wps-flow-modal-max-width: 1280px;
 }
 
 .wps-flow-modal.is-size-fullscreen {
@@ -220,6 +281,8 @@
   z-index: 100000;
 }
 
+html.wps-flow-modal-has-open,
+body.wps-flow-modal-has-open,
 html.wps-flow-modal-fallback-has-open,
 body.wps-flow-modal-fallback-has-open {
   overflow: hidden;
@@ -227,6 +290,8 @@ body.wps-flow-modal-fallback-has-open {
 
 @media (max-width: 767px) {
   .wps-flow-modal.is-mobile-fullscreen {
+    --wps-flow-modal-inline-limit: 100vw;
+    --wps-flow-modal-block-limit: 100dvh;
     --wps-flow-modal-width: 100vw;
     --wps-flow-modal-max-width: 100vw;
     --wps-flow-modal-height: 100dvh;

@@ -3260,10 +3260,10 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@smart-cloud/flow-core@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.2.tgz#09fb3abdcb6f11948c7aeda042c93bc42d22e64c"
-  integrity sha512-SAWPB87HDvJ0Rc80zJupR6rbeNk2sex7B6RHpnKl9XW5OL5sVj4AnzjTmvtzcuGj56McMhj9X22MxmrL3n04Jg==
+"@smart-cloud/flow-core@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.4.tgz#2b947e69e2433069fb2278ce2cffa7060cf0eac8"
+  integrity sha512-dDETJGWOtQUY/phu1dtXxz5fas9VlFYSOPgAeKN8C2UnfE++MPJPbrXvuFOttKgVwf5NltWrwEdjU8ni6pAGQA==
   dependencies:
     "@smart-cloud/gatey-core" "^2.3.0"
     "@smart-cloud/wpsuite-core" "^2.3.0"

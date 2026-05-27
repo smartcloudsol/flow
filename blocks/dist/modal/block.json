@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "smartcloud-flow/modal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Flow Modal",
   "category": "smartcloud-flow",
   "icon": "feedback",
@@ -70,7 +70,7 @@
       "type": "boolean",
       "default": true
     },
-    "preventBackgroundScrollFallback": {
+    "preventBackgroundScroll": {
       "type": "boolean",
       "default": true
     },
@@ -133,6 +133,18 @@
     "animation": {
       "type": "string",
       "default": "fade"
+    },
+    "defaultPrimaryAction": {
+      "type": "string",
+      "default": ""
+    },
+    "defaultSecondaryAction": {
+      "type": "string",
+      "default": ""
+    },
+    "defaultDismissAction": {
+      "type": "string",
+      "default": ""
     },
     "defaultOkAction": {
       "type": "string",
