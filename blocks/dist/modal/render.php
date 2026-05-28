@@ -102,7 +102,7 @@ if ($smartcloud_flow_has_close_button) {
             </button>
         <?php endif; ?>
         <div class="wps-flow-modal__content">
-            <?php echo $content; ?>
+            <?php echo wp_kses_post($content); ?>
         </div>
     </div>
 </dialog>

@@ -259,6 +259,21 @@ final class Admin
 
         $copy_label = esc_html__('Copy', 'smartcloud-flow');
         $rows = array();
+        $allowed_html = array(
+            'div' => array(
+                'class' => true,
+            ),
+            'span' => array(
+                'class' => true,
+                'id' => true,
+            ),
+            'code' => array(),
+            'a' => array(
+                'href' => true,
+                'class' => true,
+                'data-target' => true,
+            ),
+        );
 
         foreach ($shortcodes as $index => $shortcode) {
             $target_id = sprintf('wpc-sc-%1$d-%2$d', (int) $post_id, (int) $index);
@@ -271,7 +286,7 @@ final class Admin
             );
         }
 
-        echo implode('', $rows);
+        echo wp_kses(implode('', $rows), $allowed_html);
     }
 
     public function copyShortcode($hook)

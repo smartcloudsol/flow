@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -217,6 +217,10 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.8 =
+* Fix: Added explicit escaped output handling for the modal block rendered content template to satisfy WordPress plugin security checks.
+* Fix: Added explicit escaped output handling for the Flow Patterns shortcode column markup in wp-admin to satisfy WordPress plugin security checks.
+
 = 1.1.7 =
 * Fix: Async modal actions now expose a generic pending state on the active trigger while awaited handlers are running.
 * Fix: Modal header spacing now only reserves room for the built-in close button when that button is actually rendered.
@@ -277,6 +281,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Upgrade Notice ==
 
+= 1.1.8 =
+Recommended maintenance update if you run WordPress plugin checks or package Flow for release; this version adds explicit escaped output handling in the modal render template and Flow Patterns shortcode admin column.
+
 = 1.1.7 =
 Recommended update if you use Flow modals with async actions or custom modal headers; this release adds generic pending-state hooks for running action triggers, removes unnecessary header spacing when the built-in close button is hidden, and expands the modal API docs.
 
@@ -284,7 +291,7 @@ Recommended update if you use Flow modals with async actions or custom modal hea
 Recommended update if you use Flow modals; this release improves Gutenberg button triggers, dismiss/default action handling, full-height layout stability, background scroll locking, and the modal editor toolbar for header, body, and actions sections.
 
 = 1.1.5 =
-Recommended update if you use modal presentations, custom submit or API-backed option endpoints, or older saved Flow blocks; this release adds the modal block/runtime, expands endpoint interpolation and request options, improves API error handling, and restores Gutenberg compatibility for legacy serialized content.
+Recommended update if you use modal presentations, custom submit or API-backed option endpoints; this release adds the modal block/runtime, expands endpoint interpolation and request options, improves API error handling, and restores Gutenberg compatibility for legacy serialized content.
 
 = 1.1.4 =
 Recommended update if you reuse Flow patterns outside Gutenberg; this release adds content-root patterns to the admin list and exposes the matching copy-ready shortcode targets.
