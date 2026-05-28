@@ -61,6 +61,8 @@ type ModalRecord = {
   cleanupController: AbortController;
   lastTrigger?: HTMLElement;
   pendingCloseContext?: ModalCloseContext;
+  pendingActionTrigger?: HTMLElement;
+  pendingActionTriggerAriaBusy?: string | null;
 };
 
 type ModalRuntimeState = {
@@ -227,6 +229,25 @@ function restoreFocus(record: ModalRecord): void {
 }
 
 function setBusyState(record: ModalRecord, busy: boolean): void {
+  const pendingTrigger = record.pendingActionTrigger;
+  const previousPendingTriggerAriaBusy = record.pendingActionTriggerAriaBusy;
+
+  if (!busy && pendingTrigger) {
+    pendingTrigger.removeAttribute("data-wps-flow-pending");
+
+    if (
+      previousPendingTriggerAriaBusy === null ||
+      typeof previousPendingTriggerAriaBusy === "undefined"
+    ) {
+      pendingTrigger.removeAttribute("aria-busy");
+    } else {
+      pendingTrigger.setAttribute("aria-busy", previousPendingTriggerAriaBusy);
+    }
+
+    record.pendingActionTrigger = undefined;
+    record.pendingActionTriggerAriaBusy = undefined;
+  }
+
   record.element.classList.toggle("is-busy", busy);
   record.element.setAttribute("aria-busy", busy ? "true" : "false");
 
@@ -250,6 +271,11 @@ function setBusyState(record: ModalRecord, busy: boolean): void {
         element.disabled = busy;
       }
     });
+
+  if (busy && pendingTrigger) {
+    pendingTrigger.setAttribute("data-wps-flow-pending", "true");
+    pendingTrigger.setAttribute("aria-busy", "true");
+  }
 }
 
 function updateFallbackBodyScroll(): void {
@@ -607,6 +633,9 @@ async function runModalAction(
     return;
   }
 
+  record.pendingActionTrigger = triggerElement;
+  record.pendingActionTriggerAriaBusy =
+    triggerElement.getAttribute("aria-busy");
   setBusyState(record, true);
 
   try {

@@ -76,9 +76,15 @@ $smartcloud_flow_wrapper_attributes = get_block_wrapper_attributes([
 
 $smartcloud_flow_aria_label = trim((string) ($smartcloud_flow_attributes['ariaLabel'] ?? ''));
 $smartcloud_flow_labelled_by = trim((string) ($smartcloud_flow_attributes['labelledById'] ?? ''));
+$smartcloud_flow_has_close_button = !isset($smartcloud_flow_attributes['showCloseButton']) || $smartcloud_flow_attributes['showCloseButton'];
 $smartcloud_flow_close_button_label = trim((string) ($smartcloud_flow_attributes['closeButtonLabel'] ?? ''));
 if ($smartcloud_flow_close_button_label === '') {
     $smartcloud_flow_close_button_label = __('Close dialog', 'smartcloud-flow');
+}
+
+$smartcloud_flow_panel_class = 'wps-flow-modal__panel';
+if ($smartcloud_flow_has_close_button) {
+    $smartcloud_flow_panel_class .= ' wps-flow-modal__panel--has-close-button';
 }
 ?>
 <dialog <?php echo wp_kses_data($smartcloud_flow_wrapper_attributes); ?>
@@ -87,8 +93,8 @@ if ($smartcloud_flow_close_button_label === '') {
     <?php else: ?>
         aria-label="<?php echo esc_attr($smartcloud_flow_aria_label !== '' ? $smartcloud_flow_aria_label : __('Flow modal dialog', 'smartcloud-flow')); ?>"
     <?php endif; ?>>
-    <div class="wps-flow-modal__panel" tabindex="-1">
-        <?php if (!isset($smartcloud_flow_attributes['showCloseButton']) || $smartcloud_flow_attributes['showCloseButton']): ?>
+    <div class="<?php echo esc_attr($smartcloud_flow_panel_class); ?>" tabindex="-1">
+        <?php if ($smartcloud_flow_has_close_button): ?>
             <button class="wps-flow-modal__close wps-flow-modal-close wps-flow-modal-role--dismiss" type="button"
                 data-wps-flow-modal-close data-wps-flow-modal-role="dismiss"
                 aria-label="<?php echo esc_attr($smartcloud_flow_close_button_label); ?>">

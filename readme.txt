@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -217,6 +217,11 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.7 =
+* Fix: Async modal actions now expose a generic pending state on the active trigger while awaited handlers are running.
+* Fix: Modal header spacing now only reserves room for the built-in close button when that button is actually rendered.
+* Docs: Expanded the modal API documentation for dismiss lifecycle handling, role-based actions, and async action behavior.
+
 = 1.1.6 =
 * Fix: Modal triggers now detect class-based hooks on Gutenberg button wrapper elements more reliably.
 * Fix: Modal dismiss and default actions now run more consistently for overlay clicks, Escape, close buttons, and other close paths.
@@ -271,6 +276,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.7 =
+Recommended update if you use Flow modals with async actions or custom modal headers; this release adds generic pending-state hooks for running action triggers, removes unnecessary header spacing when the built-in close button is hidden, and expands the modal API docs.
 
 = 1.1.6 =
 Recommended update if you use Flow modals; this release improves Gutenberg button triggers, dismiss/default action handling, full-height layout stability, background scroll locking, and the modal editor toolbar for header, body, and actions sections.
