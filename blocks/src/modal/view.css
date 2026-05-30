@@ -8,6 +8,7 @@
   --wps-flow-modal-panel-padding: 28px;
   --wps-flow-modal-panel-radius: 20px;
   --wps-flow-modal-panel-background: var(--wp--preset--color--base, #ffffff);
+  --wps-flow-modal-content-background: var(--wps-flow-modal-panel-background);
   --wps-flow-modal-panel-color: var(--wp--preset--color--contrast, #111827);
   --wps-flow-modal-panel-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
   --wps-flow-modal-backdrop-background: rgba(3, 8, 23, 0.72);
@@ -78,6 +79,7 @@
   min-block-size: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  background: var(--wps-flow-modal-content-background);
 }
 
 .wps-flow-modal__content > .wps-flow-modal-slot {
@@ -85,6 +87,7 @@
   height: auto !important;
   max-block-size: none !important;
   max-height: none !important;
+  background: transparent;
 }
 
 .wps-flow-modal__content > .wps-flow-modal-slot--header {
@@ -94,7 +97,6 @@
   inset-block-start: 0;
   z-index: 2;
   padding-block-end: 12px;
-  background: var(--wps-flow-modal-panel-background);
 }
 
 .wps-flow-modal__panel--has-close-button
@@ -117,7 +119,6 @@
   z-index: 2;
   margin-block-start: auto;
   padding-block-start: 12px;
-  background: var(--wps-flow-modal-panel-background);
 }
 
 .wps-flow-modal__close {
@@ -125,6 +126,7 @@
   position: absolute;
   inset-block-start: 12px;
   inset-inline-end: 12px;
+  z-index: 3;
   inline-size: 36px;
   block-size: 36px;
   border: 0;

@@ -2091,6 +2091,7 @@ function SubmitField({
   const showIcon = field.showIcon ?? false;
   const iconPosition = field.iconPosition ?? "left";
   const customIcon = field.customIcon ?? "";
+  const submitButtonAccessibleLabel = label.trim() || I18n.get("Submit");
 
   const renderIcon = () => {
     if (!showIcon) return null;
@@ -2135,6 +2136,7 @@ function SubmitField({
         onClick={() => void submit()}
         leftSection={iconPosition === "left" ? icon : undefined}
         rightSection={iconPosition === "right" ? icon : undefined}
+        aria-label={submitButtonAccessibleLabel}
       >
         {showTitle && label}
       </Button>

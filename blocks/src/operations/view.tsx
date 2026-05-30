@@ -1,7 +1,18 @@
 import { waitForFlowReady } from "@smart-cloud/flow-core";
-import flowOperationsRuntime from "@smart-cloud/flow-admin/operations-runtime";
 
 import "jquery";
+
+type FlowOperationsRuntimeApi = {
+  mountById?: (id: string) => Promise<void> | void;
+};
+
+function getOperationsRuntime(): FlowOperationsRuntimeApi | undefined {
+  return (
+    globalThis as typeof globalThis & {
+      WpSuiteFlowOperationsRuntime?: FlowOperationsRuntimeApi;
+    }
+  ).WpSuiteFlowOperationsRuntime;
+}
 
 function ensureOperationsId(element: HTMLElement): string {
   if (!element.id) {
@@ -15,7 +26,7 @@ function ensureOperationsId(element: HTMLElement): string {
 
 async function mountOperations(id: string) {
   await waitForFlowReady();
-  await flowOperationsRuntime?.mountById(id);
+  await getOperationsRuntime()?.mountById?.(id);
 }
 
 function getOperationsElements(): NodeListOf<HTMLElement> {

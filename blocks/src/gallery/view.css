@@ -1,0 +1,210 @@
+.wps-flow-gallery {
+  --wps-flow-gallery-stage-background: color-mix(
+    in srgb,
+    var(--wps-flow-modal-content-background, #ffffff) 92%,
+    black 8%
+  );
+  --wps-flow-gallery-nav-background: rgba(15, 23, 42, 0.72);
+  --wps-flow-gallery-nav-color: #ffffff;
+  --wps-flow-gallery-meta-color: inherit;
+  display: grid;
+  gap: 14px;
+  min-inline-size: 0;
+}
+
+.wps-flow-gallery__stage {
+  position: relative;
+  display: grid;
+  min-block-size: min(56dvh, 640px);
+  align-items: center;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--wps-flow-gallery-stage-background);
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+}
+
+.wps-flow-gallery__slides {
+  min-inline-size: 0;
+  min-block-size: 0;
+  transform: translate3d(var(--wps-flow-gallery-drag-offset, 0px), 0, 0);
+  transition: transform 160ms ease;
+}
+
+.wps-flow-gallery__stage.is-dragging {
+  cursor: grabbing;
+}
+
+.wps-flow-gallery__stage.is-dragging .wps-flow-gallery__slides {
+  transition: none;
+}
+
+.wps-flow-gallery__slide {
+  margin: 0;
+  inline-size: 100%;
+}
+
+.wps-flow-gallery__slide[hidden] {
+  display: none;
+}
+
+.wps-flow-gallery__slide img {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: auto;
+  max-block-size: min(72dvh, 760px);
+  object-fit: contain;
+  margin-inline: auto;
+  -webkit-user-drag: none;
+}
+
+.wps-flow-gallery__slide figcaption {
+  display: none;
+}
+
+.wps-flow-gallery__nav {
+  appearance: none;
+  position: absolute;
+  inset-block-start: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  inline-size: 44px;
+  block-size: 44px;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wps-flow-gallery-nav-background);
+  color: var(--wps-flow-gallery-nav-color);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease,
+    background-color 120ms ease;
+}
+
+.wps-flow-gallery__nav:hover,
+.wps-flow-gallery__nav:focus-visible {
+  background: rgba(15, 23, 42, 0.84);
+}
+
+.wps-flow-gallery__nav:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.wps-flow-gallery__nav:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.wps-flow-gallery__nav--prev {
+  inset-inline-start: 16px;
+}
+
+.wps-flow-gallery__nav--next {
+  inset-inline-end: 16px;
+}
+
+.wps-flow-gallery__nav-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.wps-flow-gallery__meta {
+  display: grid;
+  gap: 6px;
+  color: var(--wps-flow-gallery-meta-color);
+}
+
+.wps-flow-gallery__thumbnails {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-block: 2px;
+  scrollbar-width: thin;
+}
+
+.wps-flow-gallery__thumbnail {
+  appearance: none;
+  flex: 0 0 auto;
+  inline-size: 88px;
+  block-size: 64px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  opacity: 0.82;
+  transition:
+    border-color 120ms ease,
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.wps-flow-gallery__thumbnail:hover,
+.wps-flow-gallery__thumbnail:focus-visible {
+  opacity: 1;
+}
+
+.wps-flow-gallery__thumbnail:active {
+  transform: scale(0.98);
+}
+
+.wps-flow-gallery__thumbnail.is-active {
+  border-color: currentColor;
+  opacity: 1;
+}
+
+.wps-flow-gallery__thumbnail-image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.wps-flow-gallery__counter {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+}
+
+.wps-flow-gallery__caption {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.wps-flow-gallery__caption[hidden],
+.wps-flow-gallery__counter[hidden],
+.wps-flow-gallery.has-single-slide .wps-flow-gallery__nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .wps-flow-gallery__stage {
+    min-block-size: min(48dvh, 420px);
+    border-radius: 12px;
+  }
+
+  .wps-flow-gallery__nav {
+    inline-size: 40px;
+    block-size: 40px;
+  }
+
+  .wps-flow-gallery__nav--prev {
+    inset-inline-start: 10px;
+  }
+
+  .wps-flow-gallery__nav--next {
+    inset-inline-end: 10px;
+  }
+
+  .wps-flow-gallery__thumbnail {
+    inline-size: 72px;
+    block-size: 54px;
+    border-radius: 10px;
+  }
+}

@@ -6,6 +6,7 @@ import "./display-badge/index";
 import "./display-code/index";
 import "./display-highlight/index";
 import "./display-image/index";
+import "./gallery/index";
 import "./display-mark/index";
 import "./display-number-formatter/index";
 import "./display-spoiler/index";

@@ -4,6 +4,7 @@ import type {
   FlowModalApi,
   FlowModalOptions,
 } from "@smart-cloud/flow-core";
+import { initFlowGalleryRuntime } from "../gallery/view";
 import "./view.css";
 
 type FlowWindowRoot = {
@@ -1204,10 +1205,15 @@ function initModalRuntime(): void {
   handleHashChange();
 }
 
+function bootFrontEndLightDomRuntime(): void {
+  initFlowGalleryRuntime();
+  initModalRuntime();
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initModalRuntime, {
+  document.addEventListener("DOMContentLoaded", bootFrontEndLightDomRuntime, {
     once: true,
   });
 } else {
-  initModalRuntime();
+  bootFrontEndLightDomRuntime();
 }

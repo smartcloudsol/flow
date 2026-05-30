@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -47,6 +47,7 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 * **Gutenberg form builder** — Build forms with a dedicated Form block, layout/container blocks, and rich field blocks.
 * **Single React runtime per form** — Front-end forms run as one mounted React tree.
 * **Light-DOM modal block** — Wrap any Gutenberg content in a native dialog with class and data-attribute triggers, hash opening, default header/body/actions slots, action-role aware buttons, and a stable browser API on `WpSuite.plugins.flow.modals`.
+* **Light-DOM gallery block** — Build a Mantine-free gallery/lightbox from core Image blocks with previous/next controls, optional thumbnails, optional captions/counter, and modal-aware start positions driven by outer trigger classes.
 * **Rich display & content blocks** — Use styled content primitives such as blockquotes, marks, badges, code blocks, spoilers, lists, tables, timelines, and overflow lists alongside inputs.
 * **API-backed options & request controls** — Load select, radio, checkbox-group, and tags options from API/autocomplete endpoints with configurable methods, headers, parameters, selected-value mapping, and runtime interpolation.
 * **Conditional logic & validation** — Show/hide, enable/disable, require/optional, and other rule-based field behavior.
@@ -140,6 +141,9 @@ Yes. Use `[smartcloud-flow-content-root id="123"]` with a reusable block / patte
 = Can Flow open Gutenberg content in a modal? =
 Yes. Flow includes a dedicated Modal top-level block that renders in the light DOM with the native `<dialog>` element. You can open it from class-based triggers, `data-wps-flow-*` attributes, URL hashes, or the browser API on `WpSuite.plugins.flow.modals`. The editor can seed header, body, and actions sections, and action buttons inside the modal actions area can be assigned primary, secondary, or dismiss behavior from the core/button toolbar.
 
+= Can Flow open a shared gallery at a specific image? =
+Yes. Put a Gallery block inside a Flow Modal, give the gallery a `galleryId`, and open the modal from a neighboring core Image or core Button block whose wrapper includes `wps-flow-modal-open--{modalId}`, `wps-flow-gallery-target--{galleryId}`, and `wps-flow-gallery-index--N`. The gallery starts on the requested 1-based image and visitors can keep browsing with previous/next controls and optional thumbnail navigation.
+
 == Screenshots ==
 
 1. Form builder in Gutenberg (container and field blocks)
@@ -217,6 +221,10 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.9 =
+* Performance: Moved frontend runtime scripts and shared vendor assets to the footer and enabled deferred loading where safe, reducing render-blocking work during initial page load.
+* Internal: Improved script loading order so lightweight bootstrap data can be available early without forcing heavier frontend dependencies into the page head.
+
 = 1.1.8 =
 * Fix: Added explicit escaped output handling for the modal block rendered content template to satisfy WordPress plugin security checks.
 * Fix: Added explicit escaped output handling for the Flow Patterns shortcode column markup in wp-admin to satisfy WordPress plugin security checks.
@@ -280,6 +288,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.9 =
+Recommended performance update. Frontend scripts now load later and defer where safe, reducing render-blocking work while preserving existing plugin behavior.
 
 = 1.1.8 =
 Recommended maintenance update if you run WordPress plugin checks or package Flow for release; this version adds explicit escaped output handling in the modal render template and Flow Patterns shortcode admin column.

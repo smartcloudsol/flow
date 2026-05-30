@@ -123,7 +123,7 @@ final class Admin
                     'smartcloud-wpsuite-mantine-vendor'
                 )
             );
-            wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('strategy' => 'defer'));
+            wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('in_footer' => true, 'strategy' => 'defer'));
 
             if (function_exists('wp_set_script_translations')) {
                 wp_set_script_translations('smartcloud-flow-admin-script', 'smartcloud-flow', SMARTCLOUD_FLOW_PATH . 'languages');
