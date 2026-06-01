@@ -34,6 +34,7 @@ $smartcloud_flow_options = [
     'restoreFocusOnClose' => !isset($smartcloud_flow_attributes['restoreFocusOnClose']) || (bool) $smartcloud_flow_attributes['restoreFocusOnClose'],
     'preventBackgroundScroll' => $smartcloud_flow_prevent_background_scroll,
     'dispatchLifecycleEvents' => !isset($smartcloud_flow_attributes['dispatchLifecycleEvents']) || (bool) $smartcloud_flow_attributes['dispatchLifecycleEvents'],
+    'allowBodyFullscreen' => !empty($smartcloud_flow_attributes['allowBodyFullscreen']),
     'defaultPrimaryAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultPrimaryAction'] ?? ($smartcloud_flow_attributes['defaultOkAction'] ?? '')),
     'defaultSecondaryAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultSecondaryAction'] ?? ($smartcloud_flow_attributes['defaultCancelAction'] ?? '')),
     'defaultDismissAction' => $smartcloud_flow_validate_action_name($smartcloud_flow_attributes['defaultDismissAction'] ?? ''),
@@ -77,12 +78,17 @@ $smartcloud_flow_wrapper_attributes = get_block_wrapper_attributes([
 $smartcloud_flow_aria_label = trim((string) ($smartcloud_flow_attributes['ariaLabel'] ?? ''));
 $smartcloud_flow_labelled_by = trim((string) ($smartcloud_flow_attributes['labelledById'] ?? ''));
 $smartcloud_flow_has_close_button = !isset($smartcloud_flow_attributes['showCloseButton']) || $smartcloud_flow_attributes['showCloseButton'];
+$smartcloud_flow_allow_body_fullscreen = !empty($smartcloud_flow_attributes['allowBodyFullscreen']);
 $smartcloud_flow_close_button_label = trim((string) ($smartcloud_flow_attributes['closeButtonLabel'] ?? ''));
 if ($smartcloud_flow_close_button_label === '') {
     $smartcloud_flow_close_button_label = __('Close dialog', 'smartcloud-flow');
 }
 
 $smartcloud_flow_panel_class = 'wps-flow-modal__panel';
+if ($smartcloud_flow_has_close_button || $smartcloud_flow_allow_body_fullscreen) {
+    $smartcloud_flow_panel_class .= ' wps-flow-modal__panel--has-chrome';
+}
+
 if ($smartcloud_flow_has_close_button) {
     $smartcloud_flow_panel_class .= ' wps-flow-modal__panel--has-close-button';
 }
@@ -94,12 +100,34 @@ if ($smartcloud_flow_has_close_button) {
         aria-label="<?php echo esc_attr($smartcloud_flow_aria_label !== '' ? $smartcloud_flow_aria_label : __('Flow modal dialog', 'smartcloud-flow')); ?>"
     <?php endif; ?>>
     <div class="<?php echo esc_attr($smartcloud_flow_panel_class); ?>" tabindex="-1">
-        <?php if ($smartcloud_flow_has_close_button): ?>
-            <button class="wps-flow-modal__close wps-flow-modal-close wps-flow-modal-role--dismiss" type="button"
-                data-wps-flow-modal-close data-wps-flow-modal-role="dismiss"
-                aria-label="<?php echo esc_attr($smartcloud_flow_close_button_label); ?>">
-                <span aria-hidden="true">×</span>
-            </button>
+        <?php if ($smartcloud_flow_has_close_button || $smartcloud_flow_allow_body_fullscreen): ?>
+            <div class="wps-flow-modal__chrome">
+                <?php if ($smartcloud_flow_allow_body_fullscreen): ?>
+                    <button
+                        class="wps-flow-modal__chrome-button wps-flow-modal__fullscreen-toggle wps-flow-modal-fullscreen-toggle"
+                        type="button" data-wps-flow-modal-fullscreen-toggle
+                        aria-label="<?php echo esc_attr(__('Enter fullscreen', 'smartcloud-flow')); ?>" aria-pressed="false">
+                        <span class="wps-flow-modal__fullscreen-icon wps-flow-modal__fullscreen-icon--enter" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4" />
+                            </svg>
+                        </span>
+                        <span class="wps-flow-modal__fullscreen-icon wps-flow-modal__fullscreen-icon--exit" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5M10 8H8v2M16 8h-2v2M10 16H8v-2M16 16h-2v-2" />
+                            </svg>
+                        </span>
+                    </button>
+                <?php endif; ?>
+                <?php if ($smartcloud_flow_has_close_button): ?>
+                    <button
+                        class="wps-flow-modal__chrome-button wps-flow-modal__close wps-flow-modal-close wps-flow-modal-role--dismiss"
+                        type="button" data-wps-flow-modal-close data-wps-flow-modal-role="dismiss"
+                        aria-label="<?php echo esc_attr($smartcloud_flow_close_button_label); ?>">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
         <div class="wps-flow-modal__content">
             <?php echo wp_kses_post($content); ?>

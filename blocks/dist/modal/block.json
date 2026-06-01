@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "smartcloud-flow/modal",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "title": "Flow Modal",
   "category": "smartcloud-flow",
   "icon": "feedback",
@@ -85,6 +85,10 @@
     "closeButtonLabel": {
       "type": "string",
       "default": "Close dialog"
+    },
+    "allowBodyFullscreen": {
+      "type": "boolean",
+      "default": false
     },
     "size": {
       "type": "string",

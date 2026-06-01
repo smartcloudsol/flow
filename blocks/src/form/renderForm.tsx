@@ -23,6 +23,10 @@ import type {
   FormStateContents,
 } from "../shared/types";
 
+type FlowRuntimeConstants = {
+  wpsuiteThemeCssHref?: string | null;
+};
+
 // Sanitize custom CSS to prevent XSS
 export function sanitizeThemeOverrides(input: string): string {
   return input
@@ -54,6 +58,55 @@ function normalizeClassNames(value: unknown): string[] {
         )
         .map((entry) => entry.trim())
         .filter(Boolean),
+    ),
+  );
+}
+
+function getFlowRuntimeConstants(): FlowRuntimeConstants {
+  return (
+    (
+      globalThis as typeof globalThis & {
+        WpSuite?: {
+          constants?: {
+            flow?: FlowRuntimeConstants;
+          };
+        };
+      }
+    ).WpSuite?.constants?.flow ?? {}
+  );
+}
+
+export function getFlowRuntimeStylesheetHrefs(pluginUrl: string): string[] {
+  return [
+    `${pluginUrl}blocks/view.css`,
+    getFlowRuntimeConstants().wpsuiteThemeCssHref,
+  ].filter(
+    (href): href is string => typeof href === "string" && href.length > 0,
+  );
+}
+
+export async function ensureShadowStylesheets(
+  shadowRoot: ShadowRoot,
+  hrefs: string[],
+): Promise<void> {
+  await Promise.all(
+    hrefs.map(
+      (href) =>
+        new Promise<void>((resolve) => {
+          const id = `smartcloud-flow-style-${btoa(href).replace(/=+$/g, "")}`;
+          if (shadowRoot.getElementById(id)) {
+            resolve();
+            return;
+          }
+
+          const link = document.createElement("link");
+          link.id = id;
+          link.rel = "stylesheet";
+          link.href = href;
+          link.onload = () => resolve();
+          link.onerror = () => resolve();
+          shadowRoot.appendChild(link);
+        }),
     ),
   );
 }
@@ -245,20 +298,11 @@ export async function renderForm(
     // Initial render: clear and set up DOM structure
     shadow.innerHTML = "";
 
-    // Load styles into shadow DOM
     const pluginUrl = getFlowPlugin()!.baseUrl;
-    const cssUrl = `${pluginUrl}blocks/view.css`;
-
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = cssUrl;
-
-    // Wait for CSS to load before rendering React
-    await new Promise<void>((resolve) => {
-      link.onload = () => resolve();
-      link.onerror = () => resolve(); // Continue even if CSS fails
-      shadow.appendChild(link);
-    });
+    await ensureShadowStylesheets(
+      shadow,
+      getFlowRuntimeStylesheetHrefs(pluginUrl),
+    );
 
     // Inject custom CSS (themeOverrides) if provided
     if (form.themeOverrides) {

@@ -229,6 +229,11 @@ final class Admin
 
             if ('smartcloud-flow/content-root' === $block_name) {
                 $shortcodes['content-root'] = sprintf('[smartcloud-flow-content-root id="%d"]', $post_id);
+                continue;
+            }
+
+            if ('smartcloud-flow/modal' === $block_name) {
+                $shortcodes['modal'] = sprintf('[smartcloud-flow-modal id="%d"]', $post_id);
             }
         }
 

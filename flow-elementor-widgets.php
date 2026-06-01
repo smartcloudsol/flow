@@ -984,7 +984,275 @@ class Flow_Content_Root_Widget extends Flow_Base_Widget
     }
 }
 
+class Flow_Modal_Widget extends Flow_Base_Widget
+{
+    public function get_name()
+    {
+        return 'smartcloud_flow_modal';
+    }
+
+    public function get_title()
+    {
+        return __('Flow Modal', 'smartcloud-flow');
+    }
+
+    public function get_icon()
+    {
+        return 'eicon-lightbox';
+    }
+
+    private function get_modal_size_options(): array
+    {
+        return [
+            '' => __('Inherit', 'smartcloud-flow'),
+            'xs' => __('Extra small', 'smartcloud-flow'),
+            'sm' => __('Small', 'smartcloud-flow'),
+            'md' => __('Medium', 'smartcloud-flow'),
+            'lg' => __('Large', 'smartcloud-flow'),
+            'xl' => __('Extra large', 'smartcloud-flow'),
+            'wide' => __('Wide', 'smartcloud-flow'),
+            'fullscreen' => __('Fullscreen', 'smartcloud-flow'),
+            'custom' => __('Custom', 'smartcloud-flow'),
+        ];
+    }
+
+    private function get_modal_position_options(): array
+    {
+        return [
+            '' => __('Inherit', 'smartcloud-flow'),
+            'center' => __('Center', 'smartcloud-flow'),
+            'top' => __('Top', 'smartcloud-flow'),
+            'bottom' => __('Bottom', 'smartcloud-flow'),
+            'left' => __('Left', 'smartcloud-flow'),
+            'right' => __('Right', 'smartcloud-flow'),
+            'top-left' => __('Top left', 'smartcloud-flow'),
+            'top-right' => __('Top right', 'smartcloud-flow'),
+            'bottom-left' => __('Bottom left', 'smartcloud-flow'),
+            'bottom-right' => __('Bottom right', 'smartcloud-flow'),
+        ];
+    }
+
+    private function get_modal_mobile_behavior_options(): array
+    {
+        return [
+            '' => __('Inherit', 'smartcloud-flow'),
+            'normal' => __('Normal', 'smartcloud-flow'),
+            'fullscreen' => __('Fullscreen', 'smartcloud-flow'),
+            'bottom-sheet' => __('Bottom sheet', 'smartcloud-flow'),
+        ];
+    }
+
+    private function get_modal_backdrop_options(): array
+    {
+        return [
+            '' => __('Inherit', 'smartcloud-flow'),
+            'default' => __('Default', 'smartcloud-flow'),
+            'blurred' => __('Blurred', 'smartcloud-flow'),
+            'dark' => __('Dark', 'smartcloud-flow'),
+            'light' => __('Light', 'smartcloud-flow'),
+            'transparent' => __('Transparent', 'smartcloud-flow'),
+            'none' => __('None', 'smartcloud-flow'),
+            'custom' => __('Custom', 'smartcloud-flow'),
+        ];
+    }
+
+    private function get_modal_animation_options(): array
+    {
+        return [
+            '' => __('Inherit', 'smartcloud-flow'),
+            'fade' => __('Fade', 'smartcloud-flow'),
+            'scale' => __('Scale', 'smartcloud-flow'),
+            'slide-up' => __('Slide up', 'smartcloud-flow'),
+            'slide-down' => __('Slide down', 'smartcloud-flow'),
+            'none' => __('None', 'smartcloud-flow'),
+        ];
+    }
+
+    private function add_boolean_override_control(string $name, string $label, string $description = ''): void
+    {
+        $this->add_control($name, [
+            'label' => $label,
+            'type' => \Elementor\Controls_Manager::CHOOSE,
+            'options' => [
+                'true' => [
+                    'title' => __('Yes', 'smartcloud-flow'),
+                    'icon' => 'eicon-check-circle-o',
+                ],
+                'false' => [
+                    'title' => __('No', 'smartcloud-flow'),
+                    'icon' => 'eicon-ban',
+                ],
+            ],
+            'default' => '',
+            'toggle' => true,
+            'description' => $description !== ''
+                ? $description
+                : __('Leave unselected to inherit the pattern value.', 'smartcloud-flow'),
+        ]);
+    }
+
+    protected function register_controls()
+    {
+        $this->start_controls_section('pattern-block', ['label' => __('Pattern', 'smartcloud-flow')]);
+        $this->add_control('pattern', [
+            'label' => __('Pattern ID', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT2,
+            'options' => $this->get_flow_pattern_options(),
+            'label_block' => true,
+            'multiple' => false,
+        ]);
+        $this->end_controls_section();
+
+        $this->start_controls_section('identity-block', ['label' => __('Identity & Accessibility', 'smartcloud-flow')]);
+        $this->add_control('modalId', ['label' => __('Modal ID', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('ariaLabel', ['label' => __('ARIA label', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('labelledById', ['label' => __('Labelled-by element ID', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('hashValue', ['label' => __('Custom hash value', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('closeButtonLabel', ['label' => __('Close button label', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->end_controls_section();
+
+        $this->start_controls_section('behavior-block', ['label' => __('Behavior', 'smartcloud-flow')]);
+        $this->add_boolean_override_control('openOnHash', __('Open on hash', 'smartcloud-flow'));
+        $this->add_boolean_override_control('closeOnEsc', __('Close on Escape', 'smartcloud-flow'));
+        $this->add_boolean_override_control('closeOnBackdrop', __('Close on backdrop', 'smartcloud-flow'));
+        $this->add_boolean_override_control('closeOnCancel', __('Close on cancel action', 'smartcloud-flow'));
+        $this->add_boolean_override_control('closeOnOk', __('Close on OK action', 'smartcloud-flow'));
+        $this->add_boolean_override_control('closeOnFlowSubmitSuccess', __('Close on Flow submit success', 'smartcloud-flow'));
+        $this->add_boolean_override_control('restoreFocusOnClose', __('Restore focus on close', 'smartcloud-flow'));
+        $this->add_boolean_override_control('preventBackgroundScroll', __('Prevent background scroll', 'smartcloud-flow'));
+        $this->add_boolean_override_control('dispatchLifecycleEvents', __('Dispatch lifecycle events', 'smartcloud-flow'));
+        $this->add_boolean_override_control('showCloseButton', __('Show close button', 'smartcloud-flow'));
+        $this->add_boolean_override_control(
+            'allowBodyFullscreen',
+            __('Allow body fullscreen', 'smartcloud-flow'),
+            __('Shows the fullscreen toggle beside the built-in close button and lets Escape restore before closing.', 'smartcloud-flow')
+        );
+        $this->end_controls_section();
+
+        $this->start_controls_section('layout-block', ['label' => __('Layout', 'smartcloud-flow')]);
+        $this->add_control('size', [
+            'label' => __('Size', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => $this->get_modal_size_options(),
+            'default' => '',
+        ]);
+        $this->add_control('position', [
+            'label' => __('Position', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => $this->get_modal_position_options(),
+            'default' => '',
+        ]);
+        $this->add_control('mobileBehavior', [
+            'label' => __('Mobile behavior', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => $this->get_modal_mobile_behavior_options(),
+            'default' => '',
+        ]);
+        $this->add_control('backdropStyle', [
+            'label' => __('Backdrop style', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => $this->get_modal_backdrop_options(),
+            'default' => '',
+        ]);
+        $this->add_control('animation', [
+            'label' => __('Animation', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => $this->get_modal_animation_options(),
+            'default' => '',
+        ]);
+        foreach ([
+            'width' => __('Width', 'smartcloud-flow'),
+            'maxWidth' => __('Max width', 'smartcloud-flow'),
+            'height' => __('Height', 'smartcloud-flow'),
+            'maxHeight' => __('Max height', 'smartcloud-flow'),
+            'panelPadding' => __('Panel padding', 'smartcloud-flow'),
+            'panelRadius' => __('Panel radius', 'smartcloud-flow'),
+            'panelShadow' => __('Panel shadow', 'smartcloud-flow'),
+        ] as $control_name => $control_label) {
+            $this->add_control($control_name, [
+                'label' => $control_label,
+                'type' => \Elementor\Controls_Manager::TEXT,
+            ]);
+        }
+        $this->end_controls_section();
+
+        $this->start_controls_section('actions-block', ['label' => __('Actions', 'smartcloud-flow')]);
+        foreach ([
+            'defaultPrimaryAction' => __('Default primary action', 'smartcloud-flow'),
+            'defaultSecondaryAction' => __('Default secondary action', 'smartcloud-flow'),
+            'defaultDismissAction' => __('Default dismiss action', 'smartcloud-flow'),
+            'defaultOkAction' => __('Default OK action', 'smartcloud-flow'),
+            'defaultCancelAction' => __('Default cancel action', 'smartcloud-flow'),
+        ] as $control_name => $control_label) {
+            $this->add_control($control_name, [
+                'label' => $control_label,
+                'type' => \Elementor\Controls_Manager::TEXT,
+            ]);
+        }
+        $this->end_controls_section();
+
+        $this->start_controls_section('status-block', ['label' => __('Status Text', 'smartcloud-flow')]);
+        $this->add_control('busyText', ['label' => __('Busy text', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('errorText', ['label' => __('Error text', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->end_controls_section();
+    }
+
+    protected function render()
+    {
+        $all = $this->get_settings_for_display();
+
+        $simple_attrs = [
+            'modalId',
+            'ariaLabel',
+            'labelledById',
+            'openOnHash',
+            'hashValue',
+            'closeOnEsc',
+            'closeOnBackdrop',
+            'closeOnCancel',
+            'closeOnOk',
+            'closeOnFlowSubmitSuccess',
+            'restoreFocusOnClose',
+            'preventBackgroundScroll',
+            'dispatchLifecycleEvents',
+            'showCloseButton',
+            'closeButtonLabel',
+            'allowBodyFullscreen',
+            'size',
+            'position',
+            'mobileBehavior',
+            'width',
+            'maxWidth',
+            'height',
+            'maxHeight',
+            'panelPadding',
+            'panelRadius',
+            'panelShadow',
+            'backdropStyle',
+            'animation',
+            'defaultPrimaryAction',
+            'defaultSecondaryAction',
+            'defaultDismissAction',
+            'defaultOkAction',
+            'defaultCancelAction',
+            'busyText',
+            'errorText',
+        ];
+
+        $atts = array_intersect_key($all, array_flip($simple_attrs));
+        $atts['id'] = $all['pattern'];
+        $atts = array_filter(
+            $atts,
+            fn($v, $k) => !is_array($v) && !is_object($v) && $v !== '',
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        smartcloud_flow_do_shortcode('smartcloud-flow-modal', $atts);
+    }
+}
+
 add_action('elementor/widgets/register', static function ($m) {
     $m->register(new \SmartCloud\WPSuite\Flow\Flow_Form_Widget());
     $m->register(new \SmartCloud\WPSuite\Flow\Flow_Content_Root_Widget());
+    $m->register(new \SmartCloud\WPSuite\Flow\Flow_Modal_Widget());
 });

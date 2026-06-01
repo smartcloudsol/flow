@@ -6,7 +6,7 @@
  * Requires at least: 6.2
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.9
+ * Version:           1.1.10
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.9';
+const VERSION = '1.1.10';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -110,6 +110,9 @@ final class Flow
 
     public function init(): void
     {
+        add_filter('block_bindings_supported_attributes', [$this, 'filterBlockBindingsSupportedAttributes'], 20, 2);
+        add_filter('block_bindings_supported_attributes_smartcloud-flow/form', [$this, 'filterFormBlockBindingsSupportedAttributes'], 20, 1);
+
         $this->registerBlocks();
 
         add_action('wp_head', array($this, 'addMainScript', ), 1);
@@ -126,11 +129,108 @@ final class Flow
         // Shortcode registration
         add_shortcode('smartcloud-flow-form', [$this, 'shortcodeFlowForm']);
         add_shortcode('smartcloud-flow-content-root', [$this, 'shortcodeContentRoot']);
+        add_shortcode('smartcloud-flow-modal', [$this, 'shortcodeFlowModal']);
         add_filter('no_texturize_shortcodes', function ($shortcodes) {
             $shortcodes[] = 'smartcloud-flow-form';
             $shortcodes[] = 'smartcloud-flow-content-root';
+            $shortcodes[] = 'smartcloud-flow-modal';
             return $shortcodes;
         });
+    }
+
+    public function filterFormBlockBindingsSupportedAttributes(array $supported_attributes): array
+    {
+        return array_values(array_unique(array_merge($supported_attributes, $this->getFormBindableAttributes())));
+    }
+
+    public function filterBlockBindingsSupportedAttributes(array $supported_attributes, ?string $block_type_name = null): array
+    {
+        if ($block_type_name === 'smartcloud-flow/form') {
+            return $this->filterFormBlockBindingsSupportedAttributes($supported_attributes);
+        }
+
+        return $supported_attributes;
+    }
+
+    private function getFormBindableAttributes(): array
+    {
+        return array(
+            'formId',
+            'formName',
+            'submitLabel',
+            'successMessage',
+            'errorMessage',
+            'hideFormOnSuccess',
+            'endpointPath',
+            'endpointMethod',
+            'endpointHeaders',
+            'language',
+            'direction',
+            'colorMode',
+            'primaryColor',
+            'primaryShade',
+            'colors',
+            'themeOverrides',
+            'allowDrafts',
+            'showDraftResumePanel',
+            'draftExpiryDays',
+            'draftAllowDelete',
+            'draftResumeTitle',
+            'draftResumeDescription',
+            'draftSaveSuccessMessage',
+            'actions',
+            'autoReplyTemplateKey',
+            'workflowIds',
+        );
+    }
+
+    private function getShortcodeAttributeKeys(string $attr_name): array
+    {
+        $slugged = preg_replace('/([a-z])([A-Z])/', '$1-$2', $attr_name);
+
+        return array_unique(
+            array(
+                strtolower($attr_name),
+                strtolower(str_replace('-', '_', $slugged)),
+                strtolower($slugged),
+            )
+        );
+    }
+
+    private function getProvidedShortcodeAttributeValue(array $provided_atts, string $attr_name, &$value = null): bool
+    {
+        foreach ($this->getShortcodeAttributeKeys($attr_name) as $candidate_key) {
+            if (!array_key_exists($candidate_key, $provided_atts)) {
+                continue;
+            }
+
+            $value = $provided_atts[$candidate_key];
+            return true;
+        }
+
+        return false;
+    }
+
+    private function normalizeShortcodeBooleanOverride($value): ?bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (in_array($normalized, array('1', 'true', 'yes', 'on'), true)) {
+            return true;
+        }
+
+        if (in_array($normalized, array('0', 'false', 'no', 'off'), true)) {
+            return false;
+        }
+
+        return null;
     }
 
     /**
@@ -162,14 +262,7 @@ final class Flow
         $attrs = array();
         foreach ($attribute_defaults as $attr_name => $default_value) {
             // Support camelCase / kebab-case / snake_case variants for shortcodes
-            $slugged = preg_replace('/([a-z])([A-Z])/', '$1-$2', $attr_name);
-            $shortcode_keys = array_unique(
-                array(
-                    strtolower($attr_name),
-                    strtolower(str_replace('-', '_', $slugged)),
-                    strtolower($slugged),
-                )
-            );
+            $shortcode_keys = $this->getShortcodeAttributeKeys($attr_name);
 
             $has_provided_value = false;
             $provided_value = null;
@@ -511,9 +604,141 @@ final class Flow
         );
     }
 
+    /**
+     * Shortcode handler for [smartcloud-flow-modal id="123" ...]
+     *
+     * @param array $atts
+     * @param string|null $content
+     * @return string
+     */
+    public function shortcodeFlowModal($atts, $content = null): string
+    {
+        unset($content);
+
+        $provided_atts = array_change_key_case((array) $atts, CASE_LOWER);
+        $pattern_id = isset($provided_atts['id']) ? intval($provided_atts['id']) : 0;
+
+        if (!$pattern_id) {
+            return '<div class="smartcloud-flow-modal-error">Missing pattern ID</div>';
+        }
+
+        $pattern_post = get_post($pattern_id);
+        if (!$pattern_post || $pattern_post->post_type !== 'wp_block') {
+            return '<div class="smartcloud-flow-modal-error">Invalid pattern ID</div>';
+        }
+
+        $blocks = parse_blocks($pattern_post->post_content);
+        $modal_block = null;
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') === 'smartcloud-flow/modal') {
+                $modal_block = $block;
+                break;
+            }
+        }
+
+        if (!$modal_block) {
+            return '<div class="smartcloud-flow-modal-error">Pattern does not contain a Flow Modal block</div>';
+        }
+
+        $block_atts = is_array($modal_block['attrs'] ?? null) ? $modal_block['attrs'] : array();
+
+        $attribute_defaults = array(
+            'modalId' => (string) ($block_atts['modalId'] ?? ''),
+            'ariaLabel' => (string) ($block_atts['ariaLabel'] ?? ''),
+            'labelledById' => (string) ($block_atts['labelledById'] ?? ''),
+            'openOnHash' => array_key_exists('openOnHash', $block_atts) ? (bool) $block_atts['openOnHash'] : true,
+            'hashValue' => (string) ($block_atts['hashValue'] ?? ''),
+            'closeOnEsc' => array_key_exists('closeOnEsc', $block_atts) ? (bool) $block_atts['closeOnEsc'] : true,
+            'closeOnBackdrop' => array_key_exists('closeOnBackdrop', $block_atts) ? (bool) $block_atts['closeOnBackdrop'] : true,
+            'closeOnCancel' => array_key_exists('closeOnCancel', $block_atts) ? (bool) $block_atts['closeOnCancel'] : true,
+            'closeOnOk' => array_key_exists('closeOnOk', $block_atts) ? (bool) $block_atts['closeOnOk'] : true,
+            'closeOnFlowSubmitSuccess' => array_key_exists('closeOnFlowSubmitSuccess', $block_atts) ? (bool) $block_atts['closeOnFlowSubmitSuccess'] : false,
+            'restoreFocusOnClose' => array_key_exists('restoreFocusOnClose', $block_atts) ? (bool) $block_atts['restoreFocusOnClose'] : true,
+            'preventBackgroundScroll' => array_key_exists('preventBackgroundScroll', $block_atts) ? (bool) $block_atts['preventBackgroundScroll'] : true,
+            'dispatchLifecycleEvents' => array_key_exists('dispatchLifecycleEvents', $block_atts) ? (bool) $block_atts['dispatchLifecycleEvents'] : true,
+            'showCloseButton' => array_key_exists('showCloseButton', $block_atts) ? (bool) $block_atts['showCloseButton'] : true,
+            'closeButtonLabel' => (string) ($block_atts['closeButtonLabel'] ?? 'Close dialog'),
+            'allowBodyFullscreen' => array_key_exists('allowBodyFullscreen', $block_atts) ? (bool) $block_atts['allowBodyFullscreen'] : false,
+            'size' => (string) ($block_atts['size'] ?? 'md'),
+            'position' => (string) ($block_atts['position'] ?? 'center'),
+            'mobileBehavior' => (string) ($block_atts['mobileBehavior'] ?? 'normal'),
+            'width' => (string) ($block_atts['width'] ?? ''),
+            'maxWidth' => (string) ($block_atts['maxWidth'] ?? ''),
+            'height' => (string) ($block_atts['height'] ?? ''),
+            'maxHeight' => (string) ($block_atts['maxHeight'] ?? ''),
+            'panelPadding' => (string) ($block_atts['panelPadding'] ?? ''),
+            'panelRadius' => (string) ($block_atts['panelRadius'] ?? ''),
+            'panelShadow' => (string) ($block_atts['panelShadow'] ?? ''),
+            'backdropStyle' => (string) ($block_atts['backdropStyle'] ?? 'default'),
+            'animation' => (string) ($block_atts['animation'] ?? 'fade'),
+            'defaultPrimaryAction' => (string) ($block_atts['defaultPrimaryAction'] ?? ''),
+            'defaultSecondaryAction' => (string) ($block_atts['defaultSecondaryAction'] ?? ''),
+            'defaultDismissAction' => (string) ($block_atts['defaultDismissAction'] ?? ''),
+            'defaultOkAction' => (string) ($block_atts['defaultOkAction'] ?? ''),
+            'defaultCancelAction' => (string) ($block_atts['defaultCancelAction'] ?? ''),
+            'busyText' => (string) ($block_atts['busyText'] ?? ''),
+            'errorText' => (string) ($block_atts['errorText'] ?? ''),
+        );
+
+        list($attrs, $is_preview) = $this->buildShortcodeBlockAttrs(
+            $provided_atts,
+            null,
+            $attribute_defaults
+        );
+
+        $boolean_attribute_names = array(
+            'openOnHash',
+            'closeOnEsc',
+            'closeOnBackdrop',
+            'closeOnCancel',
+            'closeOnOk',
+            'closeOnFlowSubmitSuccess',
+            'restoreFocusOnClose',
+            'preventBackgroundScroll',
+            'dispatchLifecycleEvents',
+            'showCloseButton',
+            'allowBodyFullscreen',
+        );
+
+        foreach ($boolean_attribute_names as $attribute_name) {
+            $provided_value = null;
+            if (!$this->getProvidedShortcodeAttributeValue($provided_atts, $attribute_name, $provided_value)) {
+                continue;
+            }
+
+            $normalized_value = $this->normalizeShortcodeBooleanOverride($provided_value);
+            if ($normalized_value === null) {
+                continue;
+            }
+
+            $attrs[$attribute_name] = $normalized_value;
+        }
+
+        return $this->renderShortcodeBlock('smartcloud-flow/modal', $modal_block, $attrs, $is_preview);
+    }
+
     public function createAdminMenu(): void
     {
         $this->admin->addMenu();
+    }
+
+    private function getWpsuiteThemeCssHref(): ?string
+    {
+        if (!defined('SMARTCLOUD_WPSUITE_SLUG')) {
+            return null;
+        }
+
+        $upload_dir_info = wp_upload_dir();
+        $css_path = trailingslashit($upload_dir_info['basedir']) . SMARTCLOUD_WPSUITE_SLUG . '/wpsuite-theme.css';
+
+        if (!file_exists($css_path)) {
+            return null;
+        }
+
+        $css_url = trailingslashit($upload_dir_info['baseurl']) . SMARTCLOUD_WPSUITE_SLUG . '/wpsuite-theme.css';
+        $version = filemtime($css_path) ?: SMARTCLOUD_FLOW_VERSION;
+
+        return add_query_arg('ver', (string) $version, $css_url);
     }
 
     private function enqueueMainRuntimeScript(): void
@@ -632,6 +857,7 @@ final class Flow
                 SMARTCLOUD_FLOW_VERSION,
                 SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.css'
             ),
+            'wpsuiteThemeCssHref' => $this->getWpsuiteThemeCssHref(),
         );
 
         $js = 'const __flowGlobal = (typeof globalThis !== "undefined") ? globalThis : window;

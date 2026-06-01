@@ -4,6 +4,8 @@ import type {
   FlowModalApi,
   FlowModalOptions,
 } from "@smart-cloud/flow-core";
+import { __ } from "@wordpress/i18n";
+import { TEXT_DOMAIN } from "../constants";
 import { initFlowGalleryRuntime } from "../gallery/view";
 import "./view.css";
 
@@ -35,6 +37,7 @@ type ModalEventDetail = {
 
 type FlowModalRuntimeOptions = FlowModalOptions & {
   preventBackgroundScroll?: boolean;
+  allowBodyFullscreen?: boolean;
   defaultPrimaryAction?: string;
   defaultSecondaryAction?: string;
   defaultDismissAction?: string;
@@ -59,11 +62,17 @@ type ModalRecord = {
     openOnHash: boolean;
     hashValue: string;
   };
+  bodySlot?: HTMLElement;
   cleanupController: AbortController;
+  fullscreenToggleButtons: HTMLButtonElement[];
   lastTrigger?: HTMLElement;
+  lastBodyFullscreenExitAt?: number;
+  panelElement: HTMLElement;
+  pendingCloseReturnValue?: string;
   pendingCloseContext?: ModalCloseContext;
   pendingActionTrigger?: HTMLElement;
   pendingActionTriggerAriaBusy?: string | null;
+  wasBodyFullscreen: boolean;
 };
 
 type ModalRuntimeState = {
@@ -71,6 +80,15 @@ type ModalRuntimeState = {
   actions: Map<string, FlowModalActionHandler>;
   fallbackOpenCount: number;
   observer?: MutationObserver;
+};
+
+type RuntimeTask = () => void;
+
+type WindowWithIdleCallback = Window & {
+  requestIdleCallback?: (
+    callback: () => void,
+    options?: { timeout: number },
+  ) => number;
 };
 
 declare global {
@@ -94,6 +112,7 @@ const DEFAULT_OPTIONS: Required<FlowModalRuntimeOptions> & {
   closeOnFlowSubmitSuccess: false,
   restoreFocusOnClose: true,
   preventBackgroundScroll: true,
+  allowBodyFullscreen: false,
   dispatchLifecycleEvents: true,
   defaultPrimaryAction: "",
   defaultSecondaryAction: "",
@@ -106,6 +125,9 @@ const DEFAULT_OPTIONS: Required<FlowModalRuntimeOptions> & {
 
 const ACTION_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_.:-]{0,80}$/;
 const MODAL_SELECTOR = "dialog.wps-flow-modal[data-wps-flow-modal-id]";
+const MODAL_BODY_SLOT_SELECTOR =
+  ".wps-flow-modal__content > .wps-flow-modal-slot--body";
+const BODY_FULLSCREEN_ESCAPE_GRACE_MS = 240;
 
 const runtimeState =
   window.__smartcloudFlowModalRuntimeState ??
@@ -114,6 +136,22 @@ const runtimeState =
     actions: new Map<string, FlowModalActionHandler>(),
     fallbackOpenCount: 0,
   });
+
+function scheduleAfterInitialPaint(task: RuntimeTask, timeout = 1500): void {
+  const runtimeWindow = window as WindowWithIdleCallback;
+
+  const runWhenIdle = () => {
+    if (typeof runtimeWindow.requestIdleCallback === "function") {
+      runtimeWindow.requestIdleCallback(() => task(), { timeout });
+    } else {
+      setTimeout(task, 300);
+    }
+  };
+
+  runtimeWindow.requestAnimationFrame(() => {
+    runtimeWindow.requestAnimationFrame(runWhenIdle);
+  });
+}
 
 function getFlowRoot(): Record<string, unknown> {
   const wpsuiteWindow = window as unknown as { WpSuite?: FlowWindowRoot };
@@ -191,9 +229,7 @@ function isRecordOpen(record: ModalRecord): boolean {
 }
 
 function focusPanel(record: ModalRecord): void {
-  const panel = record.element.querySelector<HTMLElement>(
-    ".wps-flow-modal__panel",
-  );
+  const panel = record.panelElement;
   if (!panel) {
     return;
   }
@@ -225,6 +261,148 @@ function restoreFocus(record: ModalRecord): void {
       nextFocusTarget.focus({ preventScroll: true });
     } catch {
       nextFocusTarget.focus();
+    }
+  });
+}
+
+function getModalBodySlot(record: ModalRecord): HTMLElement | null {
+  if (record.bodySlot?.isConnected) {
+    return record.bodySlot;
+  }
+
+  const bodySlot = record.element.querySelector<HTMLElement>(
+    MODAL_BODY_SLOT_SELECTOR,
+  );
+
+  record.bodySlot = bodySlot ?? undefined;
+  return bodySlot;
+}
+
+function getModalPanelElement(record: ModalRecord): HTMLElement | null {
+  if (record.panelElement?.isConnected) {
+    return record.panelElement;
+  }
+
+  const panelElement = record.element.querySelector<HTMLElement>(
+    ".wps-flow-modal__panel",
+  );
+
+  if (!panelElement) {
+    return null;
+  }
+
+  record.panelElement = panelElement;
+  return panelElement;
+}
+
+function isRecordBodyFullscreen(record: ModalRecord): boolean {
+  const panelElement = getModalPanelElement(record);
+
+  return Boolean(panelElement && document.fullscreenElement === panelElement);
+}
+
+function shouldIgnoreEscapeClose(record: ModalRecord): boolean {
+  if (isRecordBodyFullscreen(record)) {
+    return true;
+  }
+
+  const lastExitAt = record.lastBodyFullscreenExitAt ?? 0;
+  return Date.now() - lastExitAt < BODY_FULLSCREEN_ESCAPE_GRACE_MS;
+}
+
+function getFullscreenToggleLabel(isActive: boolean): string {
+  return isActive
+    ? __("Restore modal body", TEXT_DOMAIN)
+    : __("Fullscreen modal body", TEXT_DOMAIN);
+}
+
+function updateFullscreenToggleButtons(record: ModalRecord): void {
+  const isActive = isRecordBodyFullscreen(record);
+
+  record.fullscreenToggleButtons.forEach((button) => {
+    button.setAttribute("aria-label", getFullscreenToggleLabel(isActive));
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  if (record.wasBodyFullscreen && !isActive) {
+    record.lastBodyFullscreenExitAt = Date.now();
+  }
+
+  record.wasBodyFullscreen = isActive;
+  record.element.classList.toggle("is-body-fullscreen", isActive);
+}
+
+function refreshBodyFullscreenControls(record: ModalRecord): void {
+  record.fullscreenToggleButtons = Array.from(
+    record.element.querySelectorAll<HTMLButtonElement>(
+      "[data-wps-flow-modal-fullscreen-toggle]",
+    ),
+  );
+
+  const panelElement = getModalPanelElement(record);
+  const bodySlot = getModalBodySlot(record);
+  const canUseFullscreen =
+    record.options.allowBodyFullscreen &&
+    Boolean(panelElement) &&
+    Boolean(bodySlot) &&
+    typeof panelElement?.requestFullscreen === "function" &&
+    typeof document.exitFullscreen === "function" &&
+    document.fullscreenEnabled !== false;
+
+  record.element.classList.toggle(
+    "has-body-fullscreen-control",
+    canUseFullscreen,
+  );
+
+  record.fullscreenToggleButtons.forEach((button) => {
+    button.hidden = !canUseFullscreen;
+    button.setAttribute("aria-disabled", canUseFullscreen ? "false" : "true");
+    button.disabled = !canUseFullscreen;
+  });
+
+  updateFullscreenToggleButtons(record);
+}
+
+async function toggleBodyFullscreen(record: ModalRecord): Promise<void> {
+  const panelElement = getModalPanelElement(record);
+  const bodySlot = getModalBodySlot(record);
+
+  if (
+    !record.options.allowBodyFullscreen ||
+    !panelElement ||
+    !bodySlot ||
+    typeof panelElement.requestFullscreen !== "function" ||
+    typeof document.exitFullscreen !== "function" ||
+    document.fullscreenEnabled === false
+  ) {
+    return;
+  }
+
+  try {
+    if (isRecordBodyFullscreen(record)) {
+      await document.exitFullscreen();
+    } else {
+      await panelElement.requestFullscreen();
+    }
+  } catch (error) {
+    console.warn("[Flow] Failed to toggle modal body fullscreen", {
+      modalId: record.id,
+      error,
+    });
+  }
+}
+
+function handleFullscreenChange(): void {
+  Array.from(runtimeState.records.values()).forEach((record) => {
+    updateFullscreenToggleButtons(record);
+
+    if (
+      !isRecordBodyFullscreen(record) &&
+      typeof record.pendingCloseReturnValue !== "undefined"
+    ) {
+      const pendingCloseReturnValue = record.pendingCloseReturnValue;
+      record.pendingCloseReturnValue = undefined;
+      modalApi.close(record.id, pendingCloseReturnValue);
     }
   });
 }
@@ -261,6 +439,8 @@ function setBusyState(record: ModalRecord, busy: boolean): void {
         ".wps-flow-modal-cancel",
         "[data-wps-flow-modal-close]",
         ".wps-flow-modal-close",
+        "[data-wps-flow-modal-fullscreen-toggle]",
+        ".wps-flow-modal-fullscreen-toggle",
       ].join(", "),
     )
     .forEach((element) => {
@@ -681,6 +861,12 @@ function createModalApi(): FlowModalApi {
       const existingRecord = runtimeState.records.get(modalId);
       if (existingRecord?.element === modal) {
         existingRecord.options = parseModalOptions(modal, options);
+        existingRecord.panelElement =
+          modal.querySelector<HTMLElement>(".wps-flow-modal__panel") || modal;
+        existingRecord.bodySlot =
+          modal.querySelector<HTMLElement>(MODAL_BODY_SLOT_SELECTOR) ||
+          undefined;
+        refreshBodyFullscreenControls(existingRecord);
         updateDocumentScrollLock();
         return;
       }
@@ -694,14 +880,23 @@ function createModalApi(): FlowModalApi {
         id: modalId,
         element: modal,
         options: parseModalOptions(modal, options),
+        panelElement:
+          modal.querySelector<HTMLElement>(".wps-flow-modal__panel") || modal,
+        bodySlot:
+          modal.querySelector<HTMLElement>(MODAL_BODY_SLOT_SELECTOR) ||
+          undefined,
+        fullscreenToggleButtons: [],
+        wasBodyFullscreen: false,
         cleanupController,
       };
+
+      refreshBodyFullscreenControls(record);
 
       modal.addEventListener(
         "cancel",
         (event) => {
           event.preventDefault();
-          if (!record.options.closeOnEsc) {
+          if (!record.options.closeOnEsc || shouldIgnoreEscapeClose(record)) {
             return;
           }
 
@@ -716,6 +911,7 @@ function createModalApi(): FlowModalApi {
         () => {
           const closeContext = consumePendingCloseContext(record);
 
+          record.pendingCloseReturnValue = undefined;
           setBusyState(record, false);
           updateDocumentScrollLock();
           emitModalEvent(record, "close", {
@@ -828,6 +1024,12 @@ function createModalApi(): FlowModalApi {
         return true;
       }
 
+      if (isRecordBodyFullscreen(record)) {
+        record.pendingCloseReturnValue = returnValue;
+        void document.exitFullscreen();
+        return true;
+      }
+
       if (!emitModalEvent(record, "before-close", { returnValue }, true)) {
         record.pendingCloseContext = undefined;
         return false;
@@ -846,6 +1048,7 @@ function createModalApi(): FlowModalApi {
         });
         restoreFocus(record);
         void runDismissActionOnClose(record, returnValue, closeContext);
+        refreshBodyFullscreenControls(record);
         return true;
       }
 
@@ -982,9 +1185,11 @@ function isDelegatedTriggerElement(element: Element): element is HTMLElement {
     element.hasAttribute("data-wps-flow-modal-open") ||
     element.hasAttribute("data-wps-flow-modal-toggle") ||
     element.hasAttribute("data-wps-flow-modal-close") ||
+    element.hasAttribute("data-wps-flow-modal-fullscreen-toggle") ||
     element.hasAttribute("data-wps-flow-modal-cancel") ||
     element.hasAttribute("data-wps-flow-modal-ok") ||
     element.classList.contains("wps-flow-modal-close") ||
+    element.classList.contains("wps-flow-modal-fullscreen-toggle") ||
     element.classList.contains("wps-flow-modal-cancel") ||
     element.classList.contains("wps-flow-modal-ok")
   ) {
@@ -1040,6 +1245,9 @@ function handleDelegatedClick(event: Event): void {
   const isCloseTrigger =
     triggerElement.hasAttribute("data-wps-flow-modal-close") ||
     triggerElement.classList.contains("wps-flow-modal-close");
+  const isFullscreenToggleTrigger =
+    triggerElement.hasAttribute("data-wps-flow-modal-fullscreen-toggle") ||
+    triggerElement.classList.contains("wps-flow-modal-fullscreen-toggle");
   const isCancelTrigger =
     triggerElement.hasAttribute("data-wps-flow-modal-cancel") ||
     triggerElement.classList.contains("wps-flow-modal-cancel");
@@ -1052,6 +1260,7 @@ function handleDelegatedClick(event: Event): void {
     !modalOpenTarget &&
     !modalToggleTarget &&
     !isCloseTrigger &&
+    !isFullscreenToggleTrigger &&
     !isCancelTrigger &&
     !isOkTrigger &&
     !hashTarget
@@ -1068,6 +1277,14 @@ function handleDelegatedClick(event: Event): void {
 
   if (modalToggleTarget) {
     modalApi.toggle(modalToggleTarget, { triggerElement });
+    return;
+  }
+
+  if (isFullscreenToggleTrigger) {
+    const record = getNearestModalRecord(triggerElement);
+    if (record) {
+      void toggleBodyFullscreen(record);
+    }
     return;
   }
 
@@ -1116,7 +1333,11 @@ function handleEscapeKeydown(event: KeyboardEvent): void {
 
   const record = getTopmostOpenRecord();
 
-  if (!record || !record.options.closeOnEsc) {
+  if (
+    !record ||
+    !record.options.closeOnEsc ||
+    shouldIgnoreEscapeClose(record)
+  ) {
     return;
   }
 
@@ -1192,6 +1413,7 @@ function initModalRuntime(): void {
 
   document.addEventListener("click", handleDelegatedClick);
   document.addEventListener("keydown", handleEscapeKeydown);
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
   document.addEventListener(
     "smartcloud-flow:submit-success",
     handleFlowSubmitSuccess,
@@ -1210,10 +1432,18 @@ function bootFrontEndLightDomRuntime(): void {
   initModalRuntime();
 }
 
+function scheduleFrontEndLightDomRuntimeBoot(): void {
+  scheduleAfterInitialPaint(bootFrontEndLightDomRuntime, 500);
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bootFrontEndLightDomRuntime, {
-    once: true,
-  });
+  document.addEventListener(
+    "DOMContentLoaded",
+    scheduleFrontEndLightDomRuntimeBoot,
+    {
+      once: true,
+    },
+  );
 } else {
-  bootFrontEndLightDomRuntime();
+  scheduleFrontEndLightDomRuntimeBoot();
 }

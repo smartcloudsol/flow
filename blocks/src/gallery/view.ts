@@ -2,6 +2,15 @@ import { __ } from "@wordpress/i18n";
 import { TEXT_DOMAIN } from "../constants";
 import "./view.css";
 
+type FlowGallerySwipeState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  currentX: number;
+  currentY: number;
+  isDragging: boolean;
+};
+
 type FlowGalleryRecord = {
   element: HTMLElement;
   slides: HTMLElement[];
@@ -21,15 +30,7 @@ type FlowGalleryRecord = {
   nextButton: HTMLButtonElement;
   swipeState?: FlowGallerySwipeState;
   suppressClick: boolean;
-};
-
-type FlowGallerySwipeState = {
-  pointerId: number;
-  startX: number;
-  startY: number;
-  currentX: number;
-  currentY: number;
-  isDragging: boolean;
+  transitionTimeoutId?: number;
 };
 
 type FlowModalOpenEventDetail = {
@@ -41,6 +42,7 @@ const GALLERY_SELECTOR = '[data-wps-flow-gallery="true"]';
 const SWIPE_START_THRESHOLD = 12;
 const SWIPE_COMMIT_THRESHOLD = 56;
 const MAX_DRAG_OFFSET = 120;
+const ENTER_TRANSITION_DURATION = 220;
 const records = new WeakMap<HTMLElement, FlowGalleryRecord>();
 let galleryRuntimeInitialized = false;
 
@@ -68,7 +70,7 @@ function parsePositiveInteger(
 function parseBoolean(
   value: string | null | undefined,
   fallbackValue: boolean,
-) {
+): boolean {
   if (value === "true") {
     return true;
   }
@@ -151,6 +153,93 @@ function createNavigationButton(direction: "prev" | "next"): HTMLButtonElement {
   return button;
 }
 
+function isPlaceholderImageSource(value: string | null | undefined): boolean {
+  const normalizedValue = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (normalizedValue === "") {
+    return true;
+  }
+
+  return normalizedValue.startsWith("data:image/");
+}
+
+function getFirstSrcsetCandidate(value: string | null | undefined): string {
+  const candidates = String(value ?? "")
+    .split(",")
+    .map((item) => item.trim().split(/\s+/)[0] || "")
+    .filter(Boolean);
+
+  return (
+    candidates.find((candidate) => !isPlaceholderImageSource(candidate)) || ""
+  );
+}
+
+function resolveThumbnailSource(image: HTMLImageElement): string {
+  const candidates = [
+    image.currentSrc,
+    image.getAttribute("data-src"),
+    image.getAttribute("data-lazy-src"),
+    image.getAttribute("data-orig-file"),
+    image.getAttribute("data-large-file"),
+    getFirstSrcsetCandidate(image.getAttribute("data-srcset")),
+    getFirstSrcsetCandidate(image.getAttribute("data-lazy-srcset")),
+    getFirstSrcsetCandidate(image.getAttribute("srcset")),
+    image.getAttribute("src"),
+  ];
+
+  return (
+    candidates.find((candidate) => !isPlaceholderImageSource(candidate)) ||
+    String(image.currentSrc || image.src || "")
+  );
+}
+
+function syncThumbnailSource(
+  image: HTMLImageElement,
+  thumbnailImage: HTMLImageElement,
+): void {
+  const resolvedSource = resolveThumbnailSource(image);
+
+  if (resolvedSource !== "") {
+    thumbnailImage.src = resolvedSource;
+  }
+
+  const sizesValue = image.getAttribute("sizes");
+  if (sizesValue) {
+    thumbnailImage.setAttribute("sizes", sizesValue);
+  }
+}
+
+function observeThumbnailSource(
+  image: HTMLImageElement,
+  thumbnailImage: HTMLImageElement,
+): void {
+  syncThumbnailSource(image, thumbnailImage);
+  image.addEventListener("load", () => {
+    syncThumbnailSource(image, thumbnailImage);
+  });
+
+  const observer = new MutationObserver(() => {
+    syncThumbnailSource(image, thumbnailImage);
+  });
+
+  observer.observe(image, {
+    attributes: true,
+    attributeFilter: [
+      "src",
+      "srcset",
+      "sizes",
+      "data-src",
+      "data-lazy-src",
+      "data-srcset",
+      "data-lazy-srcset",
+      "data-orig-file",
+      "data-large-file",
+    ],
+  });
+}
+
 function createThumbnailButton(
   slide: HTMLElement,
   slideIndex: number,
@@ -171,11 +260,11 @@ function createThumbnailButton(
   );
 
   if (image) {
-    thumbnailImage.src = image.currentSrc || image.src;
     thumbnailImage.alt = altText;
-    thumbnailImage.loading = "lazy";
+    thumbnailImage.loading = "eager";
     thumbnailImage.decoding = "async";
     thumbnailImage.className = "wps-flow-gallery__thumbnail-image";
+    observeThumbnailSource(image, thumbnailImage);
     button.appendChild(thumbnailImage);
   } else {
     button.textContent = String(slideIndex + 1);
@@ -232,12 +321,102 @@ function endSwipe(record: FlowGalleryRecord): void {
   clearDragOffset(record);
 }
 
+function clearEnterTransition(record: FlowGalleryRecord): void {
+  if (record.transitionTimeoutId) {
+    window.clearTimeout(record.transitionTimeoutId);
+    record.transitionTimeoutId = undefined;
+  }
+
+  record.stageElement.classList.remove(
+    "is-committing",
+    "is-entering-from-left",
+    "is-entering-from-right",
+  );
+}
+
+function commitSwipeTransition(
+  record: FlowGalleryRecord,
+  direction: "next" | "prev",
+): void {
+  clearEnterTransition(record);
+
+  record.stageElement.classList.add("is-committing");
+  record.stageElement.classList.add(
+    direction === "next" ? "is-entering-from-right" : "is-entering-from-left",
+  );
+
+  record.transitionTimeoutId = window.setTimeout(() => {
+    clearEnterTransition(record);
+  }, ENTER_TRANSITION_DURATION);
+}
+
 function isSwipeGestureTarget(eventTarget: EventTarget | null): boolean {
   if (!(eventTarget instanceof Element)) {
     return false;
   }
 
   return !eventTarget.closest(".wps-flow-gallery__nav");
+}
+
+function updateGallery(record: FlowGalleryRecord, nextIndex: number): void {
+  const clampedIndex = clampIndex(nextIndex, record.slides.length, record.loop);
+
+  record.activeIndex = clampedIndex;
+
+  record.slides.forEach((slide, slideIndex) => {
+    const isActive = slideIndex === clampedIndex;
+
+    slide.hidden = !isActive;
+    slide.setAttribute("aria-hidden", isActive ? "false" : "true");
+    slide.classList.toggle("is-active", isActive);
+  });
+
+  record.element.dataset.wpsFlowGalleryActiveIndex = String(clampedIndex + 1);
+  record.element.classList.toggle(
+    "has-single-slide",
+    record.slides.length <= 1,
+  );
+  record.thumbnailsElement.hidden =
+    !record.showThumbnails || record.slides.length <= 1;
+
+  record.prevButton.disabled =
+    record.slides.length <= 1 || (!record.loop && clampedIndex === 0);
+  record.nextButton.disabled =
+    record.slides.length <= 1 ||
+    (!record.loop && clampedIndex === record.slides.length - 1);
+
+  record.thumbnailButtons.forEach((button, buttonIndex) => {
+    const isActive = buttonIndex === clampedIndex;
+
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "true" : "false");
+  });
+
+  if (record.showCounter && record.slides.length > 0) {
+    record.counterElement.hidden = false;
+    record.counterElement.textContent = `${clampedIndex + 1} / ${
+      record.slides.length
+    }`;
+  } else {
+    record.counterElement.hidden = true;
+    record.counterElement.textContent = "";
+  }
+
+  if (record.showCaptions) {
+    const activeCaption =
+      record.slides[clampedIndex]?.querySelector("figcaption");
+
+    if (activeCaption && activeCaption.innerHTML.trim() !== "") {
+      record.captionElement.hidden = false;
+      record.captionElement.innerHTML = activeCaption.innerHTML;
+    } else {
+      record.captionElement.hidden = true;
+      record.captionElement.innerHTML = "";
+    }
+  } else {
+    record.captionElement.hidden = true;
+    record.captionElement.innerHTML = "";
+  }
 }
 
 function attachSwipeHandlers(record: FlowGalleryRecord): void {
@@ -325,13 +504,20 @@ function attachSwipeHandlers(record: FlowGalleryRecord): void {
       !cancelled && activeSwipe.isDragging && absDeltaX >= threshold;
 
     record.suppressClick = activeSwipe.isDragging;
-    endSwipe(record);
 
-    if (!shouldNavigate) {
+    if (shouldNavigate) {
+      const direction = deltaX < 0 ? "next" : "prev";
+
+      commitSwipeTransition(record, direction);
+      endSwipe(record);
+      updateGallery(
+        record,
+        record.activeIndex + (direction === "next" ? 1 : -1),
+      );
       return;
     }
 
-    updateGallery(record, record.activeIndex + (deltaX < 0 ? 1 : -1));
+    endSwipe(record);
   };
 
   stageElement.addEventListener("pointerup", (event) => {
@@ -355,67 +541,6 @@ function attachSwipeHandlers(record: FlowGalleryRecord): void {
     },
     true,
   );
-}
-
-function updateGallery(record: FlowGalleryRecord, nextIndex: number): void {
-  const clampedIndex = clampIndex(nextIndex, record.slides.length, record.loop);
-
-  record.activeIndex = clampedIndex;
-
-  record.slides.forEach((slide, slideIndex) => {
-    const isActive = slideIndex === clampedIndex;
-
-    slide.hidden = !isActive;
-    slide.setAttribute("aria-hidden", isActive ? "false" : "true");
-    slide.classList.toggle("is-active", isActive);
-  });
-
-  record.element.dataset.wpsFlowGalleryActiveIndex = String(clampedIndex + 1);
-  record.element.classList.toggle(
-    "has-single-slide",
-    record.slides.length <= 1,
-  );
-  record.thumbnailsElement.hidden =
-    !record.showThumbnails || record.slides.length <= 1;
-
-  record.prevButton.disabled =
-    record.slides.length <= 1 || (!record.loop && clampedIndex === 0);
-  record.nextButton.disabled =
-    record.slides.length <= 1 ||
-    (!record.loop && clampedIndex === record.slides.length - 1);
-
-  record.thumbnailButtons.forEach((button, buttonIndex) => {
-    const isActive = buttonIndex === clampedIndex;
-
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-current", isActive ? "true" : "false");
-  });
-
-  if (record.showCounter && record.slides.length > 0) {
-    record.counterElement.hidden = false;
-    record.counterElement.textContent = `${clampedIndex + 1} / ${
-      record.slides.length
-    }`;
-  } else {
-    record.counterElement.hidden = true;
-    record.counterElement.textContent = "";
-  }
-
-  if (record.showCaptions) {
-    const activeCaption =
-      record.slides[clampedIndex]?.querySelector("figcaption");
-
-    if (activeCaption && activeCaption.innerHTML.trim() !== "") {
-      record.captionElement.hidden = false;
-      record.captionElement.innerHTML = activeCaption.innerHTML;
-    } else {
-      record.captionElement.hidden = true;
-      record.captionElement.innerHTML = "";
-    }
-  } else {
-    record.captionElement.hidden = true;
-    record.captionElement.innerHTML = "";
-  }
 }
 
 function getGalleryRecord(element: HTMLElement): FlowGalleryRecord | null {
@@ -542,6 +667,7 @@ function handleModalOpen(event: Event): void {
   }
 
   modalGalleryRecords.forEach((record) => {
+    clearEnterTransition(record);
     updateGallery(record, record.defaultIndex);
   });
 
@@ -597,6 +723,8 @@ function handleGalleryClick(event: Event): void {
     return;
   }
 
+  clearEnterTransition(record);
+
   if (thumbnailElement) {
     const thumbnailIndex = Number.parseInt(
       thumbnailElement.dataset.wpsFlowGalleryThumbnailIndex || "",
@@ -638,6 +766,8 @@ function handleGalleryKeydown(event: KeyboardEvent): void {
   if (!record) {
     return;
   }
+
+  clearEnterTransition(record);
 
   if (event.key === "ArrowLeft") {
     event.preventDefault();

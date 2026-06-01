@@ -1,8 +1,8 @@
 .wps-flow-gallery {
   --wps-flow-gallery-stage-background: color-mix(
     in srgb,
-    var(--wps-flow-modal-content-background, #ffffff) 92%,
-    black 8%
+    var(--wps-flow-modal-panel-color, #111827) 86%,
+    black 14%
   );
   --wps-flow-gallery-nav-background: rgba(15, 23, 42, 0.72);
   --wps-flow-gallery-nav-color: #ffffff;
@@ -29,12 +29,14 @@
   min-block-size: 0;
   transform: translate3d(var(--wps-flow-gallery-drag-offset, 0px), 0, 0);
   transition: transform 160ms ease;
+  position: relative;
 }
 
 .wps-flow-gallery__stage.is-dragging {
   cursor: grabbing;
 }
 
+.wps-flow-gallery__stage.is-committing .wps-flow-gallery__slides,
 .wps-flow-gallery__stage.is-dragging .wps-flow-gallery__slides {
   transition: none;
 }
@@ -42,6 +44,16 @@
 .wps-flow-gallery__slide {
   margin: 0;
   inline-size: 100%;
+}
+
+.wps-flow-gallery__stage.is-entering-from-left
+  .wps-flow-gallery__slide.is-active {
+  animation: wps-flow-gallery-enter-from-left 220ms ease both;
+}
+
+.wps-flow-gallery__stage.is-entering-from-right
+  .wps-flow-gallery__slide.is-active {
+  animation: wps-flow-gallery-enter-from-right 220ms ease both;
 }
 
 .wps-flow-gallery__slide[hidden] {
@@ -181,6 +193,30 @@
 .wps-flow-gallery__counter[hidden],
 .wps-flow-gallery.has-single-slide .wps-flow-gallery__nav {
   display: none;
+}
+
+@keyframes wps-flow-gallery-enter-from-left {
+  from {
+    opacity: 0.64;
+    transform: translateX(-36px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes wps-flow-gallery-enter-from-right {
+  from {
+    opacity: 0.64;
+    transform: translateX(36px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 767px) {

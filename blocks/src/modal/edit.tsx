@@ -43,6 +43,7 @@ type FlowModalAttributes = {
   dispatchLifecycleEvents?: boolean;
   showCloseButton?: boolean;
   closeButtonLabel?: string;
+  allowBodyFullscreen?: boolean;
   size?: string;
   position?: string;
   mobileBehavior?: string;
@@ -660,6 +661,17 @@ export default function Edit({
               )}
             />
           ) : null}
+          <ToggleControl
+            label={__("Allow body fullscreen", TEXT_DOMAIN)}
+            checked={attributes.allowBodyFullscreen ?? false}
+            onChange={(allowBodyFullscreen) =>
+              setAttributes({ allowBodyFullscreen })
+            }
+            help={__(
+              "Shows a fullscreen toggle next to the built-in close button and lets Escape leave fullscreen before the modal closes.",
+              TEXT_DOMAIN,
+            )}
+          />
         </PanelBody>
 
         <PanelBody title={__("Behavior", TEXT_DOMAIN)} initialOpen={false}>

@@ -50,6 +50,10 @@ import { DIRECTION_OPTIONS } from "../index";
 import { parseOptions, parseTextList } from "../shared/field-utils";
 import { FORM_CHILD_BLOCKS } from "../shared/form-child-blocks";
 import { KeyValueListEditor } from "../shared/options-source-editor";
+import {
+  type BlockMetadata,
+  usePatternOverrideEditingSupport,
+} from "../shared/patternOverrides";
 import type {
   FieldConfig,
   FormActionDefinition,
@@ -701,11 +705,21 @@ export default function Edit({
   attributes,
   setAttributes,
   clientId,
+  isSelected = false,
 }: {
-  attributes: FormAttributes;
+  attributes: FormAttributes & { metadata?: BlockMetadata };
   setAttributes: (next: Partial<FormAttributes>) => void;
   clientId: string;
+  isSelected?: boolean;
 }) {
+  const { metadata } = attributes;
+
+  usePatternOverrideEditingSupport({
+    clientId,
+    isSelected,
+    metadata,
+  });
+
   const blockProps = useBlockProps({
     className: "smartcloud-flow-form-editor",
   });

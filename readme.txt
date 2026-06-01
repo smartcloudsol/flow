@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.9
+Stable tag: 1.1.10
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,12 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.10 =
+* Performance: Added schedule-after-initial-paint mounting so frontend UI yields the main thread sooner and improves early paint metrics where supported.
+* Feature: Added the Gallery block with modal-aware start-position support, so outer trigger CSS/classes can open a Flow modal directly on a selected gallery item.
+* Feature: Flow now loads shared WPSuite Theme CSS inside supported shadow-root UI for reusable site-wide styling alongside per-block overrides.
+* Feature: Added pattern override support so synced patterns can override selected original block attributes without duplicating the whole pattern.
+
 = 1.1.9 =
 * Performance: Moved frontend runtime scripts and shared vendor assets to the footer and enabled deferred loading where safe, reducing render-blocking work during initial page load.
 * Internal: Improved script loading order so lightweight bootstrap data can be available early without forcing heavier frontend dependencies into the page head.
@@ -288,6 +294,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.10 =
+Recommended feature update if you use shared styling or modal-driven UI; this release adds Gallery, shared WPSuite Theme CSS support, pattern overrides, and later frontend mounting.
 
 = 1.1.9 =
 Recommended performance update. Frontend scripts now load later and defer where safe, reducing render-blocking work while preserving existing plugin behavior.

@@ -9,6 +9,8 @@ import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
 import {
   createFormTheme,
+  ensureShadowStylesheets,
+  getFlowRuntimeStylesheetHrefs,
   hashStringDjb2,
   sanitizeThemeOverrides,
 } from "../form/renderForm";
@@ -77,7 +79,6 @@ export async function renderContentRoot(
   target.setAttribute("data-mantine-color-scheme", resolvedColorScheme);
 
   const shadowRoot = target.shadowRoot || target.attachShadow({ mode: "open" });
-  const styleHref = `${pluginUrl}blocks/view.css`;
   let rootElement = shadowRoot.querySelector<HTMLDivElement>(
     ".smartcloud-flow-content-root-shadow-root",
   );
@@ -86,15 +87,10 @@ export async function renderContentRoot(
   if (isInitialRender) {
     shadowRoot.innerHTML = "";
 
-    const styleLink = document.createElement("link");
-    styleLink.rel = "stylesheet";
-    styleLink.href = styleHref;
-
-    await new Promise<void>((resolve) => {
-      styleLink.onload = () => resolve();
-      styleLink.onerror = () => resolve();
-      shadowRoot.appendChild(styleLink);
-    });
+    await ensureShadowStylesheets(
+      shadowRoot,
+      getFlowRuntimeStylesheetHrefs(pluginUrl),
+    );
 
     rootElement = document.createElement("div");
     rootElement.className = shadowRootClassName;
