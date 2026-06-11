@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.10
+Stable tag: 1.1.11
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -18,11 +18,11 @@ Design forms in Gutenberg and run durable, event‑driven workflows in your own 
 
 It combines a modern Gutenberg editor experience with a React/Mantine runtime for forms, a native `<dialog>`-based light-DOM modal block, and an optional AWS backend, so site owners can design forms and supporting UI in WordPress while choosing where submissions should be posted and, in Pro, running submissions, templates, workflows, and integrations in their own AWS account.
 
-Flow is part of the WPSuite family of plugins by Smart Cloud Solutions, Inc.
+Flow is part of the WP Suite product family by Smart Cloud Solutions, Inc. WP Suite keeps WordPress as the CMS and editing layer, while optional connected features can extend selected workflows into modular AWS-backed services for identity, AI, APIs, workflows, protected routes, and static delivery. The free Flow features described here do not require a WP Suite account, subscription, or AWS backend unless you explicitly configure an external service or upgrade-only backend feature.
 
 **Free mode**
 
-Flow does not require a hosted SaaS backend or a WPSuite connection to render forms.
+Flow does not require a hosted SaaS backend or a WP Suite connection to render forms.
 In Free mode, each form can post directly from the browser to a URL you define per form. That endpoint may be:
 
 * your own custom endpoint,
@@ -31,7 +31,7 @@ In Free mode, each form can post directly from the browser to a URL you define p
 
 **Pro mode**
 
-Pro becomes available after connecting your WordPress site to a WPSuite.io workspace. It is designed to work especially well with the separately deployed **WP Suite Flow Backend** in your own AWS account.
+Pro becomes available after connecting your WordPress site to a WP Suite workspace. It is designed to work especially well with the separately deployed **WP Suite Flow Backend** in your own AWS account.
 
 A typical Pro setup is:
 
@@ -74,11 +74,11 @@ In Free mode:
 
 * forms are rendered in the browser,
 * submissions are posted directly to the endpoint URL configured for the form,
-* no WPSuite connection is required.
+* no WP Suite connection is required.
 
 Flow does **not** inherently store submissions in WordPress. If you want submissions handled inside WordPress, you need to implement and expose your own receiving endpoint there.
 
-**Pro features** are optional and become available after connecting your WordPress site to a WPSuite.io workspace.
+**Pro features** are optional and become available after connecting your WordPress site to a WP Suite workspace.
 
 The main Pro scenario is to use the separately deployed **WP Suite Flow Backend** in your own AWS account. In that setup:
 
@@ -96,15 +96,15 @@ This simplifies secure communication between the WordPress-side Flow plugin and 
 3. Go to **WP Admin → SmartCloud → Flow Settings**, review the configuration.
 4. Build a form in Gutenberg and configure its submission target.
 5. Optionally, for Pro:
-   * connect the site to a WPSuite workspace,
+   * connect the site to a WP Suite workspace,
    * deploy the WP Suite Flow Backend into AWS,
    * add the backend API to Gatey,
    * then select that API in **SmartCloud → Flow Settings → API Settings**.
 
 == Machine-readable resources ==
 
-* Plugin manifest: https://wpsuite.io/.well-known/flow-plugin.json
-* OpenAPI spec (backend): https://wpsuite.io/.well-known/flow-openapi.yaml
+* Plugin manifest: https://wpsuite.io/.well-known/ai-plugin.json
+* OpenAPI spec (backend): https://wpsuite.io/.well-known/openapi.yaml
 
 == Frequently Asked Questions ==
 
@@ -173,8 +173,8 @@ This plugin may integrate with the following external services, depending on con
    - **Where it goes:** Requests are sent directly from the browser to the configured endpoint URL, either through direct fetch calls or, in Pro, through a Gatey-integrated authenticated API flow.
    - **How it’s called:** Standard HTTPS requests. Authentication depends on your configuration and may be none, IAM, or Cognito-based.
 
-3. **WPSuite platform connection (optional; workspace linking and shared features)**
-   - **When it applies:** When you connect the site to a WPSuite.io workspace to enable Pro features and shared admin capabilities.
+3. **WP Suite platform connection (optional; workspace linking and shared features)**
+   - **When it applies:** When you connect the site to a WP Suite workspace to enable Pro features and shared admin capabilities.
    - **What it’s used for:** Workspace linking, shared admin capabilities, license/subscription handling, and related WP Suite platform features.
    - **What data may be sent:** Minimal site/workspace identifiers and authentication/session data required for linking and management.
    - **Where it goes:** Secure HTTPS requests to WPSuite.io services such as `wpsuite.io` and `api.wpsuite.io`.
@@ -190,7 +190,7 @@ This plugin may integrate with the following external services, depending on con
      - AWS Privacy: https://aws.amazon.com/privacy/
 
 5. **Stripe (optional; subscription/purchase flow)**
-   - **When it applies:** Only when the user opens the optional WPSuite subscription / purchase flow in the shared admin component.
+   - **When it applies:** Only when the user opens the optional WP Suite subscription / purchase flow in the shared admin component.
    - **What it’s used for:** Displaying hosted pricing/subscription UI for optional paid features.
    - **What data may be sent:** Browser/session data required by Stripe to render the hosted purchase UI and process the purchase flow.
    - **Links:**
@@ -213,7 +213,7 @@ All code that ships in the public (free) version of Flow is available here: http
 **Build & distribution:**
 Flow is shipped to WordPress.org as a pre-built distribution. Build steps and developer notes are maintained in the GitHub repository documentation.
 
-**Shared WPSuite components:**
+**Shared WP Suite components:**
 Some admin UI modules may originate from shared WP Suite components to support workspace linking, license validation, and subscription management across WP Suite plugins.
 
 **Pro-only features (source availability):**
@@ -221,10 +221,13 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.11 =
+* Docs: Updated WP Suite brand wording and platform positioning across the readme.
+
 = 1.1.10 =
 * Performance: Added schedule-after-initial-paint mounting so frontend UI yields the main thread sooner and improves early paint metrics where supported.
 * Feature: Added the Gallery block with modal-aware start-position support, so outer trigger CSS/classes can open a Flow modal directly on a selected gallery item.
-* Feature: Flow now loads shared WPSuite Theme CSS inside supported shadow-root UI for reusable site-wide styling alongside per-block overrides.
+* Feature: Flow now loads shared WP Suite Theme CSS inside supported shadow-root UI for reusable site-wide styling alongside per-block overrides.
 * Feature: Added pattern override support so synced patterns can override selected original block attributes without duplicating the whole pattern.
 
 = 1.1.9 =
@@ -278,10 +281,10 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Fix: Flow design token selectors now align with the runtime class names, so theme overrides apply more reliably to action buttons and field controls.
 
 = 1.1.0 =
-* Maintenance: Updated the admin UI dependency stack, including the shared UI React packages used by WPSuite admin screens.
-* Maintenance: Updated shared Gatey Core and WPSuite Core dependencies used by Flow integrations.
+* Maintenance: Updated the admin UI dependency stack, including the shared UI React packages used by WP Suite admin screens.
+* Maintenance: Updated shared Gatey Core and WP Suite Core dependencies used by Flow integrations.
 * Compatibility: Updated the "Tested up to" value for WordPress 7.0.
-* Internal cleanup: Refreshed related frontend and shared runtime dependencies for better alignment across WPSuite plugins.
+* Internal cleanup: Refreshed related frontend and shared runtime dependencies for better alignment across WP Suite plugins.
 
 = 1.0.1 =
 * Fix: The optional "Powered by" attribution now renders correctly below the Flow content root / form when `enablePoweredBy` is enabled in the admin settings.
@@ -295,8 +298,11 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Upgrade Notice ==
 
+= 1.1.11 =
+No urgent update required; this is a documentation-only readme update.
+
 = 1.1.10 =
-Recommended feature update if you use shared styling or modal-driven UI; this release adds Gallery, shared WPSuite Theme CSS support, pattern overrides, and later frontend mounting.
+Recommended feature update if you use shared styling or modal-driven UI; this release adds Gallery, shared WP Suite Theme CSS support, pattern overrides, and later frontend mounting.
 
 = 1.1.9 =
 Recommended performance update. Frontend scripts now load later and defer where safe, reducing render-blocking work while preserving existing plugin behavior.
@@ -326,7 +332,7 @@ Recommended update if you use Flow in the WordPress 7.0 Site Editor, rely on cus
 Fixes backend form sync for WordPress 7.0 Site Editor and template part editing, and improves Flow design token overrides so runtime control styling applies more reliably.
 
 = 1.1.0 =
-Recommended update. Refreshes Flow’s shared admin UI and WPSuite runtime dependencies, and marks compatibility with WordPress 7.0. No configuration changes are required.
+Recommended update. Refreshes Flow’s shared admin UI and WP Suite runtime dependencies, and marks compatibility with WordPress 7.0. No configuration changes are required.
 
 = 1.0.1 =
 Fixes the optional "Powered by" attribution so it appears below rendered Flow content/forms when enabled.

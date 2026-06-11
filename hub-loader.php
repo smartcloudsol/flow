@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 use SmartCloud\WPSuite\Flow\Logger;
 
-const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.2';
+const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.3';
 
 final class FlowHubLoader
 {
@@ -86,7 +86,7 @@ final class FlowHubLoader
 
         $connect_suffix = add_submenu_page(
             SMARTCLOUD_WPSUITE_SLUG,
-            __('Connect your Site to WPSuite', 'smartcloud-flow'),
+            __('Connect your Site to WP Suite', 'smartcloud-flow'),
             __('Connect your Site', 'smartcloud-flow'),
             'manage_options',
             SMARTCLOUD_WPSUITE_SLUG,
