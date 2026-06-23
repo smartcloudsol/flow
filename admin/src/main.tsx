@@ -844,8 +844,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                 )}
               </Text>
 
-              {(formConfig ?? decryptedConfig)?.subscriptionType !==
-                "PROFESSIONAL" && (
+              {!(formConfig ?? decryptedConfig)?.subscriptionType && (
                 <Alert
                   variant="light"
                   color="yellow"
@@ -887,8 +886,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                 OPERATIONS_VIEW_DEFINITIONS[activeOperationsView].scrollToId
               }
               showProFeature={
-                (formConfig ?? decryptedConfig)?.subscriptionType !==
-                "PROFESSIONAL"
+                !(formConfig ?? decryptedConfig)?.subscriptionType
               }
               InfoLabel={InfoLabel}
               openInfo={openInfo}
