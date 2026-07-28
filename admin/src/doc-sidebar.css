@@ -1,0 +1,14 @@
+.wpsuite-doc-sidebar ul,
+.wpsuite-doc-sidebar ol {
+  margin: 0.75rem 0;
+  padding-inline-start: 1.5rem;
+}
+
+.wpsuite-doc-sidebar ul { list-style: disc outside; }
+.wpsuite-doc-sidebar ol { list-style: decimal outside; }
+.wpsuite-doc-sidebar li {
+  display: list-item;
+  margin-block: 0.35rem;
+}
+.wpsuite-doc-sidebar li::marker { color: #646970; }
+.wpsuite-doc-sidebar .mantine-List-itemWrapper { display: inline; }

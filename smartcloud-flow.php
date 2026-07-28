@@ -3,10 +3,10 @@
  * Plugin Name:       SmartCloud Flow – Block‑based Forms & Workflow Automation
  * Plugin URI:        https://wpsuite.io/flow/
  * Description:       Mantine-based Gutenberg form blocks with AWS-native workflows, submissions, templates, and admin automation tools.
- * Requires at least: 6.2
+ * Requires at least: 6.9
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.12
+ * Version:           1.1.13
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.12';
+const VERSION = '1.1.13';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -1059,6 +1059,13 @@ __flowGlobal.WpSuite.constants.flow = ' . wp_json_encode($constants) . ';
         // Hub admin classes
         if (file_exists(SMARTCLOUD_FLOW_PATH . 'hub-loader.php')) {
             require_once SMARTCLOUD_FLOW_PATH . 'hub-loader.php';
+        }
+
+        if (!class_exists('\SmartCloud\WPSuite\Hub\Abilities\Product_Provider_Base') && file_exists(SMARTCLOUD_FLOW_PATH . 'hub-for-wpsuiteio/abilities.php')) {
+            require_once SMARTCLOUD_FLOW_PATH . 'hub-for-wpsuiteio/abilities.php';
+        }
+        if (class_exists('\SmartCloud\WPSuite\Hub\Abilities\Product_Provider_Base') && file_exists(SMARTCLOUD_FLOW_PATH . 'includes/abilities-provider.php')) {
+            require_once SMARTCLOUD_FLOW_PATH . 'includes/abilities-provider.php';
         }
 
         // Admin classes

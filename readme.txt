@@ -2,10 +2,10 @@
 === SmartCloud Flow – Block‑based Forms & Workflow Automation ===
 Contributors: smartcloud
 Tags: forms, workflows, gutenberg, aws, automation
-Requires at least: 6.2
+Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.12
+Stable tag: 1.1.13
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,12 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.13 =
+* Feature: Added an optional native WordPress Abilities API provider for Flow component discovery, schema inspection, validation, materialization, runtime capability reporting, and safe backend status inspection.
+* Compatibility: The provider loads only when the WordPress Abilities API and the shared WP Suite Hub abilities layer are available, so existing Flow behavior is unchanged on older WordPress runtimes.
+* Integration: Added a private provider profile for SmartCloud Agent Composer without adding a product-level MCP server or public MCP exposure.
+* Safety: Flow does not register a server-side sync-form ability; backend synchronization remains the existing editor-save workflow.
+
 = 1.1.12 =
 * Compatibility: Refined paid-feature handling in preparation for upcoming WP Suite Agency subscriptions.
 
@@ -300,6 +306,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.13 =
+Recommended update for SmartCloud Agent Composer provider integration testing. No configuration changes are required, and the new Abilities provider remains inactive when the WordPress Abilities API is unavailable.
 
 = 1.1.12 =
 Recommended compatibility update in preparation for upcoming WP Suite Agency subscriptions. No configuration changes are required.

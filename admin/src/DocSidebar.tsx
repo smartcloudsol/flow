@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { __ } from "@wordpress/i18n";
 import { TEXT_DOMAIN } from "@smart-cloud/flow-core";
 import classes from "./main.module.css";
+import "./doc-sidebar.css";
 
 const pages = {
   general: (
@@ -897,6 +898,7 @@ export default function DocSidebar({
 
   return (
     <Drawer
+      classNames={{ content: "wpsuite-doc-sidebar" }}
       opened={opened}
       onClose={close}
       title="Flow Documentation"
