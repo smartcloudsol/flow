@@ -8,6 +8,7 @@
     "dev": "vite --port 3001",
     "build": "tsc && vite build",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx' 'src/index.tsx' --report-unused-disable-directives --max-warnings 0",
+    "test": "node --test tests/*.test.ts",
     "preview": "vite preview",
     "build-wp": "wp-scripts build --config=webpack.config.cjs --webpack-copy-php --stats-error-details --output-path",
     "format": "wp-scripts format",

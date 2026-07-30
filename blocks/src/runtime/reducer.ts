@@ -33,7 +33,7 @@ export interface FormRuntimeState {
 export type FormAction =
   | { type: "INIT"; fields: FieldConfig[]; values: FormValues }
   | { type: "SET_VALUE"; name: string; value: unknown }
-  | { type: "SET_ERRORS"; errors: FormErrors }
+  | { type: "SET_ERRORS"; errors: FormErrors; message?: string }
   | { type: "SET_FIELD_ERROR"; name: string; error: string | undefined }
   | { type: "SET_STATUS"; status: FormStatus; message?: string }
   | { type: "AI_SUGGESTIONS_LOADING"; signature?: string }
@@ -171,6 +171,7 @@ export function formReducer(
         ...state,
         errors: action.errors,
         status: "error",
+        message: action.message,
         touched: new Set([...state.touched, ...Object.keys(action.errors)]),
       };
     case "SET_FIELD_ERROR":

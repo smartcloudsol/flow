@@ -522,7 +522,11 @@ final class Provider extends Product_Provider_Base
             if (!is_array($image) || (string) ($image['blockName'] ?? '') !== 'core/image') {
                 return new WP_Error(
                     'smartcloud_flow_gallery_image_invalid',
-                    sprintf(__('Gallery item %d must be a canonical core/image block.', 'smartcloud-flow'), $index + 1)
+                    sprintf(
+                        /* translators: %d: One-based position of the gallery item. */
+                        __('Gallery item %d must be a canonical core/image block.', 'smartcloud-flow'),
+                        $index + 1
+                    )
                 );
             }
 
@@ -545,7 +549,11 @@ final class Provider extends Product_Provider_Base
             ) {
                 return new WP_Error(
                     'smartcloud_flow_gallery_image_invalid',
-                    sprintf(__('Gallery item %d is not a safe canonical core/image leaf block.', 'smartcloud-flow'), $index + 1)
+                    sprintf(
+                        /* translators: %d: One-based position of the gallery item. */
+                        __('Gallery item %d is not a safe canonical core/image leaf block.', 'smartcloud-flow'),
+                        $index + 1
+                    )
                 );
             }
 

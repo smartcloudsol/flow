@@ -77,6 +77,10 @@ import {
   type FormPreviewSelection,
 } from "../context/FormPreviewContext";
 import { FormStateProvider } from "../context/FormStateContext";
+import {
+  createFlowRequestErrorFeedback,
+  createFlowResponseError,
+} from "../errorHandling";
 import { formReducer, getInitialValues } from "../reducer";
 import { validateField, validateValues } from "../validation";
 import { FlowPoweredBy } from "./FlowPoweredBy";
@@ -1038,8 +1042,7 @@ export function FormShell({
         });
 
         if (!response.ok) {
-          const text = await response.text();
-          throw new Error(text || `Request failed (${response.status})`);
+          throw await createFlowResponseError(response);
         }
 
         return (await response.json()) as TResponse;
@@ -1090,8 +1093,7 @@ export function FormShell({
       });
 
       if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Request failed (${response.status})`);
+        throw await createFlowResponseError(response);
       }
 
       return (await response.json()) as TResponse;
@@ -1155,9 +1157,7 @@ export function FormShell({
             });
 
             if (!uploadResponse.ok) {
-              throw new Error(
-                I18n.get("File upload failed.") || "File upload failed.",
-              );
+              throw await createFlowResponseError(uploadResponse);
             }
 
             const fileReference: UploadedFileReference = {
@@ -1205,6 +1205,33 @@ export function FormShell({
       rootElement.removeAttribute("data-flow-draft-resume-active");
     };
   }, [rootElement, currentDirection, currentLanguage, effectiveResumeMode]);
+
+  const handleRequestFailure = useCallback(
+    (action: string, error: unknown, generalFallback?: string) => {
+      const feedback = createFlowRequestErrorFeedback(
+        error,
+        (message) => I18n.get(message),
+        generalFallback,
+      );
+      if (feedback.details?.kind === "cancelled") {
+        dispatch({ type: "SET_STATUS", status: "idle" });
+        return feedback;
+      }
+
+      const message = feedback.message || I18n.get("An error occurred");
+      emitFormEvent("smartcloud-flow:error", {
+        action,
+        formId: form.formId,
+        message,
+        status: feedback.details?.status,
+        code: feedback.details?.code,
+        requestId: feedback.details?.requestId,
+      });
+      dispatch({ type: "SET_STATUS", status: "error", message });
+      return feedback;
+    },
+    [emitFormEvent, form.formId],
+  );
 
   const actions = useMemo(
     () => ({
@@ -1314,22 +1341,7 @@ export function FormShell({
           });
           return response;
         } catch (error) {
-          emitFormEvent("smartcloud-flow:error", {
-            action: "save-draft",
-            formId: form.formId,
-            message:
-              error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred"),
-          });
-          dispatch({
-            type: "SET_STATUS",
-            status: "error",
-            message:
-              error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred"),
-          });
+          handleRequestFailure("save-draft", error);
           return undefined;
         }
       },
@@ -1358,22 +1370,7 @@ export function FormShell({
             response,
           });
         } catch (error) {
-          emitFormEvent("smartcloud-flow:error", {
-            action: "load-draft",
-            formId: form.formId,
-            message:
-              error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred"),
-          });
-          dispatch({
-            type: "SET_STATUS",
-            status: "error",
-            message:
-              error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred"),
-          });
+          handleRequestFailure("load-draft", error);
         }
       },
       deleteDraft: async () => {
@@ -1402,22 +1399,7 @@ export function FormShell({
             status: "deleted",
           });
         } catch (error) {
-          emitFormEvent("smartcloud-flow:error", {
-            action: "delete-draft",
-            formId: form.formId,
-            message:
-              error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred"),
-          });
-          dispatch({
-            type: "SET_STATUS",
-            status: "error",
-            message:
-              error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred"),
-          });
+          handleRequestFailure("delete-draft", error);
         }
       },
 
@@ -1501,14 +1483,20 @@ export function FormShell({
           if (runId !== aiSuggestionsRunIdRef.current) {
             return;
           }
+          const feedback = createFlowRequestErrorFeedback(
+            error,
+            (message) => I18n.get(message),
+            I18n.get("Failed to generate suggestions."),
+          );
+          if (feedback.details?.kind === "cancelled") {
+            dispatch({ type: "AI_SUGGESTIONS_RESET" });
+            return;
+          }
           dispatch({
             type: "AI_SUGGESTIONS_DONE",
             suggestions: [],
             rawText:
-              error instanceof Error
-                ? error.message
-                : I18n.get("Failed to generate suggestions.") ||
-                  "Failed to generate suggestions.",
+              feedback.message || I18n.get("Failed to generate suggestions."),
           });
         }
       },
@@ -1553,7 +1541,13 @@ export function FormShell({
           state.fieldStates,
         );
         if (Object.keys(errors).length > 0) {
-          dispatch({ type: "SET_ERRORS", errors });
+          dispatch({
+            type: "SET_ERRORS",
+            errors,
+            message: I18n.get(
+              "Review the highlighted fields and try again.",
+            ),
+          });
           return;
         }
 
@@ -1665,24 +1659,7 @@ export function FormShell({
             response,
           });
         } catch (error) {
-          emitFormEvent("smartcloud-flow:error", {
-            action: "submit",
-            formId: form.formId,
-            message:
-              form.errorMessage ||
-              (error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred")),
-          });
-          dispatch({
-            type: "SET_STATUS",
-            status: "error",
-            message:
-              form.errorMessage ||
-              (error instanceof Error
-                ? error.message
-                : I18n.get("An error occurred")),
-          });
+          handleRequestFailure("submit", error, form.errorMessage);
         }
       },
     }),
@@ -1695,6 +1672,7 @@ export function FormShell({
       fields,
       form,
       formReturnIntent,
+      handleRequestFailure,
       initialValues,
       currentLanguage,
       prepareSerializableValues,
@@ -1968,6 +1946,11 @@ export function FormShell({
                     {state.message ? (
                       <Alert
                         color={state.status === "success" ? "green" : "red"}
+                        role={state.status === "error" ? "alert" : "status"}
+                        aria-live={
+                          state.status === "error" ? "assertive" : "polite"
+                        }
+                        data-flow-status={state.status}
                       >
                         {state.message}
                       </Alert>
@@ -1988,7 +1971,7 @@ export function FormShell({
                     />
                     <Group className="flow-draft-resume-actions">
                       <Button
-                        className="flow-draft-resume-action flow-draft-resume-action--load"
+                        className="flow-draft-resume-action flow-draft-resume-action--load flow-action-button"
                         onClick={() => void actions.loadDraft()}
                         disabled={!resumeDraftIdInput || !resumePasswordInput}
                         loading={state.status === "loading-draft"}
@@ -1997,7 +1980,7 @@ export function FormShell({
                       </Button>
                       {form.draftAllowDelete ? (
                         <Button
-                          className="flow-draft-resume-action flow-draft-resume-action--delete"
+                          className="flow-draft-resume-action flow-draft-resume-action--delete flow-action-button"
                           variant="outline"
                           color="red"
                           onClick={confirmDeleteDraft}
@@ -2008,7 +1991,7 @@ export function FormShell({
                         </Button>
                       ) : null}
                       <Button
-                        className="flow-draft-resume-action flow-draft-resume-action--new"
+                        className="flow-draft-resume-action flow-draft-resume-action--new flow-action-button"
                         variant="subtle"
                         onClick={actions.startNewForm}
                       >
@@ -2044,6 +2027,11 @@ export function FormShell({
                     {state.message && state.status !== "idle" ? (
                       <Alert
                         color={state.status === "success" ? "green" : "red"}
+                        role={state.status === "error" ? "alert" : "status"}
+                        aria-live={
+                          state.status === "error" ? "assertive" : "polite"
+                        }
+                        data-flow-status={state.status}
                       >
                         {state.message}
                       </Alert>
@@ -2051,7 +2039,12 @@ export function FormShell({
                     {draftSubmissionId &&
                     draftPassword &&
                     state.status === "success" ? (
-                      <Alert color="blue" title={I18n.get("Draft information")}>
+                      <Alert
+                        color="blue"
+                        title={I18n.get("Draft information")}
+                        role="status"
+                        aria-live="polite"
+                      >
                         <Stack gap="xs">
                           <Text size="sm">
                             {I18n.get("Save these details to continue later:")}

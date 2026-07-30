@@ -413,7 +413,7 @@ export function WizardContainer({
             variant="default"
             onClick={handlePrev}
             disabled={isFirstStep}
-            className="flow-wizard-prev-button flow-wizard-action-button"
+            className="flow-wizard-prev-button flow-wizard-action-button flow-action-button"
           >
             {prevButtonLabel || I18n.get("Previous") || "Previous"}
           </Button>
@@ -431,7 +431,7 @@ export function WizardContainer({
             {!isLastStep && (
               <Button
                 onClick={handleNext}
-                className="flow-wizard-next-button flow-wizard-action-button"
+                className="flow-wizard-next-button flow-wizard-action-button flow-action-button"
               >
                 {nextButtonLabel || I18n.get("Next") || "Next"}
               </Button>

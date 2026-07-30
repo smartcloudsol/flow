@@ -88,6 +88,8 @@ export const enDict: Record<string, string> = {
   "Related documentation": "Related documentation",
   "Review the generated suggestions before continuing.":
     "Review the generated suggestions before continuing.",
+  "Review the highlighted fields and try again.":
+    "Review the highlighted fields and try again.",
   "Route not found": "Route not found",
   "Save draft": "Save draft",
   "Save these details to continue later:":
@@ -114,6 +116,20 @@ export const enDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook endpoint not found",
   "Why this may help": "Why this may help",
   "Workflow not found": "Workflow not found",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "We couldn't reach the form service. Check your connection and try again.",
+  "We couldn't verify that you're human. Please try again.":
+    "We couldn't verify that you're human. Please try again.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "The form could not be submitted. Review the highlighted fields and try again.",
+  "The form service is temporarily unavailable. Please try again.":
+    "The form service is temporarily unavailable. Please try again.",
+  "Too many requests. Please wait a moment and try again.":
+    "Too many requests. Please wait a moment and try again.",
+  "Something went wrong. Please try again.":
+    "Something went wrong. Please try again.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "You are not authorized to submit this form. Please sign in or contact the site owner.",
   Yes: "Yes",
   "You can continue without selecting a suggestion.":
     "You can continue without selecting a suggestion.",

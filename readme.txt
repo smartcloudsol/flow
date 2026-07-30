@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.14
+Stable tag: 1.1.15
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,13 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.15 =
+* Fix: Added visible, localized, and accessible failure feedback across public form submission, wizard, draft-resume, and AI-suggestion actions while preserving entered values for retry.
+* Fix: Added distinct handling for human-verification, validation, authorization, throttling, network, backend, and cancellation outcomes with safe status, error-code, and request-ID diagnostics.
+* Theming: Aligned submit, save-draft, wizard, and draft-resume action states with resolved Mantine primary and contrast colors and shared WP Suite shadow-root styling.
+* Shared Hub: Added ownership-safe WP Suite Theme CSS fragment updates and hardened the frontend settings bootstrap for CSS-rich configuration values.
+* Compatibility: Updated the bundled shared Hub runtime to 2.5.6.
+
 = 1.1.14 =
 * Fix: Made the shared WP Suite Abilities foundation safe to load from multiple product plugin paths without redeclaring its base provider class.
 * Compatibility: Updated the bundled shared Hub runtime to 2.5.5 so existing sites re-elect a current Hub owner after upgrading.
@@ -310,6 +317,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.15 =
+Recommended update for actionable, retry-safe public form errors, consistent action theming, safe shared WP Suite Theme CSS management, and reliable frontend bootstrap data.
 
 = 1.1.14 =
 Recommended compatibility update for sites running multiple WP Suite plugins. It prevents a shared Abilities class redeclaration during plugin loading or updates.

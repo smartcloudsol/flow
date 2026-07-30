@@ -90,6 +90,8 @@ export const huDict: Record<string, string> = {
   "Related documentation": "Kapcsolódó dokumentáció",
   "Review the generated suggestions before continuing.":
     "A folytatás előtt nézd át a generált javaslatokat.",
+  "Review the highlighted fields and try again.":
+    "Ellenőrizd a megjelölt mezőket, majd próbáld újra.",
   "Route not found": "Az útvonal nem található",
   "Save draft": "Piszkozat mentése",
   "Save these details to continue later:":
@@ -116,6 +118,20 @@ export const huDict: Record<string, string> = {
   "Webhook endpoint not found": "A webhook endpoint nem található",
   "Why this may help": "Miért segíthet ez",
   "Workflow not found": "A munkafolyamat nem található",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Az űrlapszolgáltatás nem érhető el. Ellenőrizd a kapcsolatot, majd próbáld újra.",
+  "We couldn't verify that you're human. Please try again.":
+    "Nem sikerült ellenőrizni, hogy ember vagy. Próbáld újra.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Az űrlapot nem sikerült beküldeni. Ellenőrizd a megjelölt mezőket, majd próbáld újra.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Az űrlapszolgáltatás átmenetileg nem érhető el. Próbáld újra.",
+  "Too many requests. Please wait a moment and try again.":
+    "Túl sok kérés érkezett. Várj egy kicsit, majd próbáld újra.",
+  "Something went wrong. Please try again.":
+    "Hiba történt. Próbáld újra.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Nincs jogosultságod az űrlap beküldéséhez. Jelentkezz be, vagy lépj kapcsolatba a webhely üzemeltetőjével.",
   Yes: "Igen",
   "You can continue without selecting a suggestion.":
     "Javaslat kiválasztása nélkül is folytathatod.",
