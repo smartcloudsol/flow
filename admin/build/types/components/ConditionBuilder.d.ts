@@ -9,5 +9,5 @@ export interface ConditionBuilderProps {
     onChange: (conditions: WorkflowCondition[]) => void;
     forms?: FormDefinition[];
 }
-export default function ConditionBuilder({ conditions, onChange, forms, }: ConditionBuilderProps): import("react/jsx-runtime").JSX.Element;
+export default function ConditionBuilder({ conditions, onChange, forms, }: ConditionBuilderProps): import("react").JSX.Element;
 //# sourceMappingURL=ConditionBuilder.d.ts.map

@@ -12,5 +12,5 @@ export interface MonacoEditorProps {
     wordWrap?: "on" | "off" | "wordWrapColumn" | "bounded";
     onMount?: (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 }
-export default function MonacoEditor({ value, onChange, language, height, minHeight, readOnly, theme, minimap, wordWrap, onMount, }: MonacoEditorProps): import("react/jsx-runtime").JSX.Element;
+export default function MonacoEditor({ value, onChange, language, height, minHeight, readOnly, theme, minimap, wordWrap, onMount, }: MonacoEditorProps): import("react").JSX.Element;
 //# sourceMappingURL=MonacoEditor.d.ts.map

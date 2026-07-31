@@ -8,6 +8,6 @@ export interface OperationsRuntimeAppProps {
     language?: string;
     direction?: "ltr" | "rtl" | "auto";
 }
-export default function OperationsRuntimeApp({ store, initialTab, availableTabs, title, language: languageOverride, direction: directionOverride, }: OperationsRuntimeAppProps): import("react/jsx-runtime").JSX.Element;
+export default function OperationsRuntimeApp({ store, initialTab, availableTabs, title, language: languageOverride, direction: directionOverride, }: OperationsRuntimeAppProps): import("react").JSX.Element;
 export {};
 //# sourceMappingURL=OperationsRuntimeApp.d.ts.map

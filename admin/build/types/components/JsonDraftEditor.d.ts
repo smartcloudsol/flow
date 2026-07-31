@@ -7,5 +7,5 @@ export interface JsonDraftEditorProps {
     minHeight?: string | number;
     warnings?: Array<string | null | undefined>;
 }
-export default function JsonDraftEditor({ label, description, value, onChange, height, minHeight, warnings, }: JsonDraftEditorProps): import("react/jsx-runtime").JSX.Element;
+export default function JsonDraftEditor({ label, description, value, onChange, height, minHeight, warnings, }: JsonDraftEditorProps): import("react").JSX.Element;
 //# sourceMappingURL=JsonDraftEditor.d.ts.map

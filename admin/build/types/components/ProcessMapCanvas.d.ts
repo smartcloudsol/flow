@@ -17,5 +17,5 @@ export interface ProcessMapCanvasProps {
     }) => JSX.Element;
     openInfo?: (targetScrollToId: string) => void;
 }
-export default function ProcessMapCanvas(props: ProcessMapCanvasProps): import("react/jsx-runtime").JSX.Element;
+export default function ProcessMapCanvas(props: ProcessMapCanvasProps): import("react").JSX.Element;
 //# sourceMappingURL=ProcessMapCanvas.d.ts.map

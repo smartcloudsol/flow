@@ -13,6 +13,6 @@ interface TemplateVariablePickerProps {
     zIndex?: number;
     onInsert?: (path: string, label: string) => void;
 }
-export default function TemplateVariablePicker({ editor, formDefinition, variables, size, zIndex, onInsert, }: TemplateVariablePickerProps): import("react/jsx-runtime").JSX.Element;
+export default function TemplateVariablePicker({ editor, formDefinition, variables, size, zIndex, onInsert, }: TemplateVariablePickerProps): import("react").JSX.Element;
 export {};
 //# sourceMappingURL=TemplateVariablePicker.d.ts.map

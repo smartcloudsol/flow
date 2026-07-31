@@ -9,5 +9,5 @@ export interface StepBuilderProps {
     templates?: EmailTemplate[];
     webhooks?: WebhookEndpoint[];
 }
-export default function StepBuilder({ steps, onChange, templates, webhooks, }: StepBuilderProps): import("react/jsx-runtime").JSX.Element;
+export default function StepBuilder({ steps, onChange, templates, webhooks, }: StepBuilderProps): import("react").JSX.Element;
 //# sourceMappingURL=StepBuilder.d.ts.map

@@ -15,5 +15,5 @@ export interface WorkflowEditorModalProps {
     persistTriggerEvent?: boolean;
     zIndex?: number;
 }
-export default function WorkflowEditorModal({ opened, onClose, initialWorkflow, client, boot, onSaved, allowedTriggerEvents, defaultTriggerEvent, defaultConditions, persistTriggerEvent, zIndex, }: WorkflowEditorModalProps): import("react/jsx-runtime").JSX.Element;
+export default function WorkflowEditorModal({ opened, onClose, initialWorkflow, client, boot, onSaved, allowedTriggerEvents, defaultTriggerEvent, defaultConditions, persistTriggerEvent, zIndex, }: WorkflowEditorModalProps): import("react").JSX.Element;
 //# sourceMappingURL=WorkflowEditorModal.d.ts.map

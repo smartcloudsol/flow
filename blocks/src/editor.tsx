@@ -1,4 +1,5 @@
 import "./index";
+import "./shared/register-stable-serialized-block-props";
 
 import "./content-root/index";
 import "./display-blockquote/index";

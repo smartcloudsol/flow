@@ -6,6 +6,6 @@ export declare function KeyValueGrid({ value, maxHeight, fieldSchema, }: {
     value: Record<string, unknown>;
     maxHeight?: number;
     fieldSchema?: Record<string, FieldSchema>;
-}): import("react/jsx-runtime").JSX.Element;
+}): import("react").JSX.Element;
 export {};
 //# sourceMappingURL=KeyValueGrid.d.ts.map
