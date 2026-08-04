@@ -1,5 +1,9 @@
+import { registerReactFallbackBlock } from "@smart-cloud/wpsuite-blocks/editor";
+
 import "./index";
 import "./shared/register-stable-serialized-block-props";
+
+registerReactFallbackBlock();
 
 import "./content-root/index";
 import "./display-blockquote/index";

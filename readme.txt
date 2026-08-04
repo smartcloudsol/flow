@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.16
+Stable tag: 1.1.17
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,16 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.17 =
+* Feature: Added native, server-rendered Gutenberg fallback content for Flow Form and Content Root while their React interfaces initialize.
+* Performance: Mounted React into dedicated child roots so authored fallback content remains visible until React commits.
+* Compatibility: Preserved pattern-ID shortcode and Elementor rendering without requiring fallback content outside Gutenberg patterns.
+* Compatibility: Allowed authored React fallback blocks and their native Gutenberg content in Form and Content Root Abilities validation.
+* Safety: Kept fallback blocks restricted to their supported direct parent roots.
+* Packaging: Renamed the bundled shared runtime directory to `smartcloud-wpsuite`.
+* Migration: Made `smartcloud-wpsuite` the canonical admin, option, and REST namespace while retaining legacy aliases for rolling upgrades.
+* Cleanup: Added multisite-aware uninstall removal for Flow settings and backend-sync metadata without touching shared WP Suite licences.
+
 = 1.1.16 =
 * Maintenance: Refreshed the Flow package chain, AWS Amplify UI integration, WordPress build tooling, and dependency security fixes.
 * Compatibility: Updated the bundled shared Hub runtime to 2.5.7.
@@ -321,6 +331,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.17 =
+Recommended feature and compatibility update. Adds crawler-visible Gutenberg fallbacks, validates them through WordPress Abilities, migrates the shared runtime namespace, and adds plugin-owned uninstall cleanup while preserving shortcode, Elementor, and shared licence behavior.
 
 = 1.1.15 =
 Recommended update for actionable, retry-safe public form errors, consistent action theming, safe shared WP Suite Theme CSS management, and reliable frontend bootstrap data.

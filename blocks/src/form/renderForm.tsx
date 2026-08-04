@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
+import { dismissReactFallbackWhenMounted } from "@smart-cloud/wpsuite-blocks";
 import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
 import { translations } from "../i18n";
@@ -245,6 +246,8 @@ export interface RenderFormHandle {
 
 export interface RenderFormArgs {
   target: HTMLElement;
+  container?: HTMLElement;
+  hostElement?: HTMLDivElement;
   form: FormAttributes;
   fields: FieldConfig[];
   states?: FormStateContents;
@@ -258,6 +261,8 @@ export async function renderForm(
   args: RenderFormArgs,
 ): Promise<RenderFormHandle> {
   const { target, form, fields } = args;
+  const container = args.container ?? target;
+  const hostElement = args.hostElement ?? (container as HTMLDivElement);
   const states = args.states ?? {};
   const customFormClassNames = normalizeClassNames(form.classNames);
   const shadowRootClassName = [
@@ -358,6 +363,8 @@ export async function renderForm(
     reactRoots.set(target, root);
   }
 
+  dismissReactFallbackWhenMounted(container, rootEl!);
+
   // Render or update React tree
   root.render(
     <MantineProvider
@@ -373,7 +380,7 @@ export async function renderForm(
           preview={args.preview}
           store={store}
           rootElement={rootEl!}
-          hostElement={target as HTMLDivElement}
+          hostElement={hostElement}
         />
       </ModalsProvider>
     </MantineProvider>,
@@ -396,7 +403,7 @@ export async function renderForm(
   };
 
   return {
-    container: target as HTMLDivElement,
+    container: container as HTMLDivElement,
     unmount: cleanup,
   };
 }

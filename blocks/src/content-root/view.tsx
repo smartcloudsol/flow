@@ -1,4 +1,5 @@
 import { waitForFlowReady } from "@smart-cloud/flow-core";
+import { showReactFallback } from "@smart-cloud/wpsuite-blocks";
 import { parseContentRootElement } from "../shared/serialization";
 import {
   renderContentRoot,
@@ -134,10 +135,12 @@ async function mountContentRoot(id: string) {
 
   const mountPromise = (async () => {
     try {
+      showReactFallback(element);
       await waitForFlowReady();
       const parsed = parseContentRootElement(element);
       const handle = await renderContentRoot({
-        target: element,
+        target: mountNode,
+        container: element,
         rootAttributes: parsed.root,
         fields: parsed.fields,
       });
@@ -148,6 +151,7 @@ async function mountContentRoot(id: string) {
       jQuery(element).data("rendered", "true");
       return handle;
     } catch (error) {
+      showReactFallback(element);
       mountedContentRoots.delete(id);
       console.error("[Flow Debug] mountContentRoot failed", { id, error });
       throw error;

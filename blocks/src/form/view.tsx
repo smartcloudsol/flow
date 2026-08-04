@@ -1,4 +1,5 @@
 import { waitForFlowReady } from "@smart-cloud/flow-core";
+import { showReactFallback } from "@smart-cloud/wpsuite-blocks";
 import { parseFormElement } from "../shared/serialization";
 import { renderForm, type RenderFormHandle } from "./renderForm";
 
@@ -145,6 +146,7 @@ async function mountForm(id: string) {
   // Create a Promise for the mount operation and store it immediately
   const mountPromise = (async () => {
     try {
+      showReactFallback(element);
       await waitForFlowReady();
 
       // Parse form data
@@ -152,7 +154,9 @@ async function mountForm(id: string) {
 
       // Render form with shadow DOM isolation
       const handle = await renderForm({
-        target: element,
+        target: mountNode,
+        container: element,
+        hostElement: element as HTMLDivElement,
         form: parsed.form,
         fields: parsed.fields,
         states: parsed.states,
@@ -167,6 +171,7 @@ async function mountForm(id: string) {
 
       return handle;
     } catch (error) {
+      showReactFallback(element);
       mountedForms.delete(id);
       console.error("[Flow Debug] mountForm failed", { id, error });
       throw error;

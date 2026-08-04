@@ -6,7 +6,7 @@
  * Requires at least: 6.9
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.16
+ * Version:           1.1.17
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.16';
+const VERSION = '1.1.17';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -1048,8 +1048,8 @@ __flowGlobal.WpSuite.constants.flow = ' . wp_json_encode($constants) . ';
             require_once SMARTCLOUD_FLOW_PATH . 'hub-loader.php';
         }
 
-        if (!class_exists('\SmartCloud\WPSuite\Hub\Abilities\Product_Provider_Base') && file_exists(SMARTCLOUD_FLOW_PATH . 'hub-for-wpsuiteio/abilities.php')) {
-            require_once SMARTCLOUD_FLOW_PATH . 'hub-for-wpsuiteio/abilities.php';
+        if (!class_exists('\SmartCloud\WPSuite\Hub\Abilities\Product_Provider_Base') && file_exists(SMARTCLOUD_FLOW_PATH . 'smartcloud-wpsuite/abilities.php')) {
+            require_once SMARTCLOUD_FLOW_PATH . 'smartcloud-wpsuite/abilities.php';
         }
         if (class_exists('\SmartCloud\WPSuite\Hub\Abilities\Product_Provider_Base') && file_exists(SMARTCLOUD_FLOW_PATH . 'includes/abilities-provider.php')) {
             require_once SMARTCLOUD_FLOW_PATH . 'includes/abilities-provider.php';

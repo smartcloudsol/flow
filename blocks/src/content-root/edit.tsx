@@ -1,5 +1,6 @@
 import { DEFAULT_THEME } from "@mantine/core";
 import { LANGUAGE_OPTIONS, waitForFlowReady } from "@smart-cloud/flow-core";
+import { REACT_FALLBACK_BLOCK_NAME } from "@smart-cloud/wpsuite-blocks";
 import {
   BlockControls,
   InnerBlocks,
@@ -539,7 +540,10 @@ export default function Edit({
                 {__("Edit content blocks:", TEXT_DOMAIN)}
               </p>
               <InnerBlocks
-                allowedBlocks={CONTENT_ROOT_CHILD_BLOCKS as unknown as string[]}
+                allowedBlocks={[
+                  ...(CONTENT_ROOT_CHILD_BLOCKS as unknown as string[]),
+                  REACT_FALLBACK_BLOCK_NAME,
+                ]}
                 templateLock={false}
                 renderAppender={InnerBlocks.ButtonBlockAppender}
               />

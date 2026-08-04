@@ -170,7 +170,7 @@ const SettingsTitle = () => {
           <Text c="dimmed" size="xs">
             To use Pro features, please connect this WordPress site to a{" "}
             <strong>WPSuite</strong> workspace. Go to the{" "}
-            <a href="?page=hub-for-wpsuiteio">
+            <a href="?page=smartcloud-wpsuite">
               <strong>SmartCloud → Connect your Site to WPSuite</strong>
             </a>{" "}
             menu and complete the linking process.

@@ -16,6 +16,8 @@ if (!defined('ABSPATH')) {
 
 final class Provider extends Product_Provider_Base
 {
+    private const REACT_FALLBACK_BLOCK = 'wpsuite/react-fallback';
+
     /** @var string[] */
     private array $components = array('form', 'content-root', 'success-state', 'modal-gallery');
 
@@ -685,6 +687,12 @@ final class Provider extends Product_Provider_Base
                 continue;
             }
             $name = (string) ($block['blockName'] ?? '');
+            if ($name === self::REACT_FALLBACK_BLOCK) {
+                if (!in_array($parent, array('smartcloud-flow/form', 'smartcloud-flow/content-root'), true)) {
+                    $errors[] = $this->validation_issue('smartcloud_flow_fallback_parent_invalid', 'The React fallback block is accepted only as a direct Form or Content Root child.', $current_path);
+                }
+                continue;
+            }
             if ($name === 'core/group') {
                 $class_name = (string) ($block['attrs']['className'] ?? '');
                 $class_tokens = preg_split('/\\s+/', trim($class_name)) ?: array();

@@ -88,7 +88,7 @@ final class Admin
     public function addMenu(): void
     {
         $page = add_submenu_page(
-            SMARTCLOUD_WPSUITE_SLUG,
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG,
             __('Flow Settings', 'smartcloud-flow'),
             __('Flow Settings', 'smartcloud-flow'),
             'manage_options',
@@ -97,7 +97,7 @@ final class Admin
         );
 
         add_submenu_page(
-            SMARTCLOUD_WPSUITE_SLUG,
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG,
             __('Flow Patterns', 'smartcloud-flow'),
             __('Flow Patterns', 'smartcloud-flow'),
             'edit_posts',
@@ -362,7 +362,7 @@ final class Admin
     public function highlightMenu($parent_file)
     {
         if ($this->isFlowPatternsRequest((string) get_query_var('post_type'), (string) get_query_var('s'))) {
-            return SMARTCLOUD_WPSUITE_SLUG;
+            return SMARTCLOUD_WPSUITE_CANONICAL_SLUG;
         }
         return $parent_file;
     }

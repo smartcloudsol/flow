@@ -84,8 +84,18 @@ $smartcloud_flow_div_attrs[] = 'data-config="' . esc_attr($smartcloud_flow_form_
 $smartcloud_flow_div_attrs[] = get_block_wrapper_attributes([
     'class' => 'smartcloud-flow-form',
 ]);
+
+$smartcloud_flow_fallback = '';
+if (isset($block) && is_object($block) && !empty($block->inner_blocks)) {
+    foreach ($block->inner_blocks as $smartcloud_flow_inner_block) {
+        if (($smartcloud_flow_inner_block->name ?? '') === 'wpsuite/react-fallback') {
+            $smartcloud_flow_fallback .= $smartcloud_flow_inner_block->render();
+        }
+    }
+}
 ?>
 <div <?php echo wp_kses_data(implode(' ', $smartcloud_flow_div_attrs)); ?>>
+    <?php echo wp_kses_post($smartcloud_flow_fallback); ?>
     <div class="smartcloud-flow-form__mount"></div>
     <div class="smartcloud-flow-form__config" hidden>
         <?php echo wp_kses_post($content); ?>

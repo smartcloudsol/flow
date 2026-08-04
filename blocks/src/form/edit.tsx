@@ -9,6 +9,7 @@ import {
   getFlowPlugin,
 } from "@smart-cloud/flow-core";
 import { getWpSuite, type SiteSettings } from "@smart-cloud/wpsuite-core";
+import { REACT_FALLBACK_BLOCK_NAME } from "@smart-cloud/wpsuite-blocks";
 import { createBlock, serialize } from "@wordpress/blocks";
 import {
   BlockControls,
@@ -2219,6 +2220,7 @@ export default function Edit({
               allowedBlocks={[
                 ...(FORM_CHILD_BLOCKS as unknown as string[]),
                 "smartcloud-flow/success-state",
+                REACT_FALLBACK_BLOCK_NAME,
               ]}
               renderAppender={InnerBlocks.ButtonBlockAppender}
             />

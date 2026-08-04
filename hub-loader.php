@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 use SmartCloud\WPSuite\Flow\Logger;
 
-const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.7';
+const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.8';
 
 final class FlowHubLoader
 {
@@ -78,28 +78,37 @@ final class FlowHubLoader
             __('SmartCloud', 'smartcloud-flow'),
             __('SmartCloud', 'smartcloud-flow'),
             'manage_options',
-            SMARTCLOUD_WPSUITE_SLUG,
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG,
             null,
             $icon_url,
             58,
         );
 
         $connect_suffix = add_submenu_page(
-            SMARTCLOUD_WPSUITE_SLUG,
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG,
             __('Connect your Site to WP Suite', 'smartcloud-flow'),
             __('Connect your Site', 'smartcloud-flow'),
             'manage_options',
-            SMARTCLOUD_WPSUITE_SLUG,
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG,
             array($this->admin, 'renderAdminPage'),
         );
 
         $settings_suffix = add_submenu_page(
-            SMARTCLOUD_WPSUITE_SLUG,
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG,
             __('WPSuite General Settings', 'smartcloud-flow'),
             __('Global Settings', 'smartcloud-flow'),
             'manage_options',
-            SMARTCLOUD_WPSUITE_SLUG . '-settings',
+            SMARTCLOUD_WPSUITE_CANONICAL_SLUG . '-settings',
             array($this->admin, 'renderAdminPage'),
+        );
+
+        add_submenu_page(
+            null,
+            __('WP Suite', 'smartcloud-flow'),
+            __('WP Suite', 'smartcloud-flow'),
+            'manage_options',
+            SMARTCLOUD_WPSUITE_LEGACY_SLUG,
+            array($this->admin, 'renderLegacyAdminPage'),
         );
 
         $this->admin->enqueueAdminScripts($connect_suffix, $settings_suffix);
@@ -127,24 +136,43 @@ final class FlowHubLoader
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
-        if (!empty($GLOBALS['smartcloud_wpsuite_menu_parent'])) {
-            Logger::debug('Hub includes() skipped - menu parent already exists', [
+        $runtime_already_loaded = !empty($GLOBALS['smartcloud_wpsuite_menu_parent']);
+        if ($runtime_already_loaded) {
+            Logger::debug('Hub runtime already loaded; ownership migration will still run', [
                 'plugin' => $this->plugin,
                 'existing_parent' => $GLOBALS['smartcloud_wpsuite_menu_parent']
             ]);
-            return false;
         }
 
         // If Hub is not present, try to create a single common top-level menu
         // Mutex: first writer wins on the option
-        if (!defined('SMARTCLOUD_WPSUITE_SLUG')) {
-            define('SMARTCLOUD_WPSUITE_SLUG', 'hub-for-wpsuiteio');
+        if (!defined('SMARTCLOUD_WPSUITE_CANONICAL_SLUG')) {
+            define('SMARTCLOUD_WPSUITE_CANONICAL_SLUG', 'smartcloud-wpsuite');
         }
-        $fallback_parent = SMARTCLOUD_WPSUITE_SLUG; // common top-level slug
-        $owner_option = SMARTCLOUD_WPSUITE_SLUG . '/top-menu-owner';
+        if (!defined('SMARTCLOUD_WPSUITE_LEGACY_SLUG')) {
+            define('SMARTCLOUD_WPSUITE_LEGACY_SLUG', 'hub-for-wpsuiteio');
+        }
+        if (!defined('SMARTCLOUD_WPSUITE_SLUG')) {
+            define('SMARTCLOUD_WPSUITE_SLUG', SMARTCLOUD_WPSUITE_CANONICAL_SLUG);
+        }
+        if (!defined('SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY')) {
+            define('SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY', 'smartcloud-wpsuite');
+        }
+        $fallback_parent = SMARTCLOUD_WPSUITE_CANONICAL_SLUG;
+        $owner_option = SMARTCLOUD_WPSUITE_CANONICAL_SLUG . '/top-menu-owner';
+        $legacy_owner_option = SMARTCLOUD_WPSUITE_LEGACY_SLUG . '/top-menu-owner';
 
         $owner = get_option($owner_option); // may be string or false/null
         $owner_version = get_option($owner_option . '/version') ?? "1.0.0";
+        if (empty($owner)) {
+            $legacy_owner = get_option($legacy_owner_option);
+            if (!empty($legacy_owner)) {
+                $owner = $legacy_owner;
+                $owner_version = get_option($legacy_owner_option . '/version') ?? "1.0.0";
+                add_option($owner_option, $owner, '', false);
+                add_option($owner_option . '/version', $owner_version, '', false);
+            }
+        }
         $owner_missing = empty($owner);
         $owner_is_me = ($owner === $this->plugin);
 
@@ -179,6 +207,16 @@ final class FlowHubLoader
         $owner_version_is_smaller = version_compare($owner_version, SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION) === -1;
         $owner_version_equals = version_compare($owner_version, SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION) === 0;
 
+        if ($runtime_already_loaded) {
+            if ($owner_missing || $owner_inactive || $owner_version_is_smaller) {
+                update_option($owner_option, $this->plugin, false);
+                update_option($owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+                update_option($legacy_owner_option, $this->plugin, false);
+                update_option($legacy_owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+            }
+            return false;
+        }
+
         // If there is no owner yet, try to claim it
         if ($owner_missing || $owner_is_me || $owner_inactive || $owner_version_is_smaller) {
             Logger::debug('Hub ownership claim attempt', [
@@ -205,9 +243,9 @@ final class FlowHubLoader
                 ]);
 
                 define('SMARTCLOUD_WPSUITE_VERSION', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION);
-                define('SMARTCLOUD_WPSUITE_PATH', plugin_dir_path(__FILE__) . SMARTCLOUD_WPSUITE_SLUG . '/');
-                define('SMARTCLOUD_WPSUITE_URL', plugin_dir_url(__FILE__) . SMARTCLOUD_WPSUITE_SLUG . '/');
-                define('SMARTCLOUD_WPSUITE_READY_HOOK', SMARTCLOUD_WPSUITE_SLUG . '/ready');
+                define('SMARTCLOUD_WPSUITE_PATH', plugin_dir_path(__FILE__) . SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY . '/');
+                define('SMARTCLOUD_WPSUITE_URL', plugin_dir_url(__FILE__) . SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY . '/');
+                define('SMARTCLOUD_WPSUITE_READY_HOOK', SMARTCLOUD_WPSUITE_CANONICAL_SLUG . '/ready');
 
                 if (file_exists(SMARTCLOUD_WPSUITE_PATH . 'index.php')) {
                     require_once SMARTCLOUD_WPSUITE_PATH . 'index.php';
@@ -218,6 +256,8 @@ final class FlowHubLoader
                 if (!$owner_is_me || !$owner_version_equals) {
                     update_option($owner_option, $this->plugin, false);
                     update_option($owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+                    update_option($legacy_owner_option, $this->plugin, false);
+                    update_option($legacy_owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
 
                     Logger::info('Hub ownership registered in database', [
                         'plugin' => $this->plugin,
@@ -233,6 +273,8 @@ final class FlowHubLoader
             if (!$owner_is_me && $owner_version_is_smaller) {
                 update_option($owner_option, $this->plugin, false);
                 update_option($owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+                update_option($legacy_owner_option, $this->plugin, false);
+                update_option($legacy_owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
 
                 Logger::info('Hub ownership updated due to version upgrade', [
                     'plugin' => $this->plugin,

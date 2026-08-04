@@ -5,6 +5,7 @@ import "../runtime/components/FlowDesignTokens.css";
 import { MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
+import { dismissReactFallbackWhenMounted } from "@smart-cloud/wpsuite-blocks";
 import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
 import {
@@ -42,6 +43,7 @@ export interface RenderContentRootHandle {
 
 export interface RenderContentRootArgs {
   target: HTMLElement;
+  container?: HTMLElement;
   rootAttributes: FormAttributes;
   fields: FieldConfig[];
   isEditorPreview?: boolean;
@@ -53,6 +55,7 @@ export async function renderContentRoot(
   args: RenderContentRootArgs,
 ): Promise<RenderContentRootHandle> {
   const { target, rootAttributes, fields, isEditorPreview } = args;
+  const container = args.container ?? target;
   const customClassNames = normalizeClassNames(rootAttributes.classNames);
   const shadowRootClassName = [
     "smartcloud-flow-shadow-root",
@@ -134,6 +137,8 @@ export async function renderContentRoot(
     reactRoots.set(target, root);
   }
 
+  dismissReactFallbackWhenMounted(container, rootElement!);
+
   root.render(
     <MantineProvider
       theme={createFormTheme(rootAttributes)}
@@ -152,7 +157,7 @@ export async function renderContentRoot(
   );
 
   return {
-    container: target as HTMLDivElement,
+    container: container as HTMLDivElement,
     unmount: () => {
       const existingRoot = reactRoots.get(target);
       if (existingRoot) {
