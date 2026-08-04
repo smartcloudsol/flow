@@ -24,9 +24,14 @@ if (isset($block) && is_object($block) && !empty($block->inner_blocks)) {
         }
     }
 }
+
 ?>
 <div <?php echo wp_kses_data(implode(' ', $smartcloud_flow_div_attrs)); ?>>
-    <?php echo wp_kses_post($smartcloud_flow_fallback); ?>
+    <?php
+    // WP_Block::render() returns display-ready markup for the authored fallback block and its children.
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    echo $smartcloud_flow_fallback;
+    ?>
     <div class="smartcloud-flow-content-root__mount"></div>
     <div class="smartcloud-flow-content-root__config" hidden>
         <?php echo wp_kses_post($content); ?>

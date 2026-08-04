@@ -223,6 +223,7 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 = 1.1.17 =
 * Feature: Added native, server-rendered Gutenberg fallback content for Flow Form and Content Root while their React interfaces initialize.
+* Fix: Preserved native rendered Gutenberg child markup inside server-rendered Flow fallback content.
 * Performance: Mounted React into dedicated child roots so authored fallback content remains visible until React commits.
 * Compatibility: Preserved pattern-ID shortcode and Elementor rendering without requiring fallback content outside Gutenberg patterns.
 * Compatibility: Allowed authored React fallback blocks and their native Gutenberg content in Form and Content Root Abilities validation.

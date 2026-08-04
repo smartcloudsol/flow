@@ -85,7 +85,7 @@ function expect(bool $condition, string $message): void
     }
 }
 
-$fallback = new TestInnerBlock('wpsuite/react-fallback', '<div data-wpsuite-react-fallback>Loading form</div>');
+$fallback = new TestInnerBlock('wpsuite/react-fallback', '<div data-wpsuite-react-fallback><fallback-placeholder data-fallback-marker></fallback-placeholder></div>');
 $config = new TestInnerBlock('smartcloud-flow/text', '<p>configuration child</p>');
 
 foreach (['form', 'content-root'] as $blockName) {
@@ -94,6 +94,7 @@ foreach (['form', 'content-root'] as $blockName) {
     $withoutFallback = renderTemplate($template, [$config]);
 
     expect(str_contains($withFallback, 'data-wpsuite-react-fallback'), $blockName . ' must render its authored fallback.');
+    expect(str_contains($withFallback, 'data-fallback-marker'), $blockName . ' must preserve native rendered child-block markup without a second allowlist.');
     expect(str_contains($withFallback, 'smartcloud-flow-' . $blockName . '__mount'), $blockName . ' must expose a dedicated React mount.');
     expect(str_contains($withoutFallback, 'smartcloud-flow-' . $blockName . '__mount'), $blockName . ' must remain mountable without a fallback.');
 }
