@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 use SmartCloud\WPSuite\Flow\Logger;
 
-const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.8';
+const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.9';
 
 final class FlowHubLoader
 {
