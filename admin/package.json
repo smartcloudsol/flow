@@ -1,7 +1,7 @@
 {
   "name": "@smart-cloud/flow-admin",
   "private": true,
-  "version": "1.1.7",
+  "version": "1.1.8",
   "type": "module",
   "exports": {
     "./editor-runtime": {
@@ -34,8 +34,8 @@
     "@hello-pangea/dnd": "^18.0.1",
     "@mantine/tiptap": "^8.3.18",
     "@monaco-editor/react": "^4.7.0",
-    "@smart-cloud/flow-core": "^1.1.6",
-    "@smart-cloud/gatey-core": "^2.3.2",
+    "@smart-cloud/flow-core": "^1.1.7",
+    "@smart-cloud/gatey-core": "^2.3.3",
     "@smart-cloud/wpsuite-core": "^2.3.2",
     "@tabler/icons-react": "^3.46.0",
     "@tanstack/react-query": "^5.100.14",
@@ -66,8 +66,8 @@
   },
   "peerDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "^6.16.0",
-    "@smart-cloud/aws-amplify-ui-react": "^6.16.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.5",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
     "@mantine/core": "^8.3.18",
     "@mantine/dates": "^8.3.18",
     "@mantine/form": "^8.3.18",
@@ -89,8 +89,8 @@
   },
   "devDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "^6.16.0",
-    "@smart-cloud/aws-amplify-ui-react": "^6.16.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.5",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
     "@eslint/js": "^10.0.1",
     "@mantine/core": "^8.3.18",
     "@mantine/dates": "^8.3.18",

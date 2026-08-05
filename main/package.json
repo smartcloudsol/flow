@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-main",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "type": "module",
   "license": "ISC",
   "scripts": {
@@ -16,13 +16,13 @@
     "check-licenses": "wp-scripts check-licenses --prod"
   },
   "dependencies": {
-    "@smart-cloud/flow-core": "^1.1.6",
+    "@smart-cloud/flow-core": "^1.1.7",
     "@smart-cloud/wpsuite-core": "^2.3.2"
   },
   "peerDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "^6.16.0",
-    "@smart-cloud/aws-amplify-ui-react": "^6.16.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.5",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
     "@wordpress/data": "^10.52.0",
     "@wordpress/i18n": "^6.25.0",
     "aws-amplify": "^6.20.0",
@@ -32,8 +32,8 @@
   "devDependencies": {
     "@aws-amplify/core": "^6.18.0",
     "@eslint/js": "^10.0.1",
-    "@smart-cloud/aws-amplify-ui": "^6.16.0",
-    "@smart-cloud/aws-amplify-ui-react": "^6.16.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.5",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
     "@types/jquery": "^4.0.0",
     "@types/node": "^26.1.2",
     "@types/react": "^18.3.31",

@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -40,7 +40,7 @@
     "rollup": "^4.62.3"
   },
   "dependencies": {
-    "@smart-cloud/gatey-core": "^2.3.2",
+    "@smart-cloud/gatey-core": "^2.3.3",
     "@smart-cloud/wpsuite-core": "^2.3.2",
     "aws-amplify": "^6.20.0"
   },
@@ -51,8 +51,8 @@
   },
   "devDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "^6.16.0",
-    "@smart-cloud/aws-amplify-ui-react": "^6.16.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.5",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.2",
     "@types/react": "^18.3.31",

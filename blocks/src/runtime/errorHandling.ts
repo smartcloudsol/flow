@@ -8,12 +8,20 @@ export type FlowRequestErrorKind =
   | "server"
   | "general";
 
+export type HumanVerificationClassification =
+  | "TOKEN_REJECTED"
+  | "ACTION_REJECTED"
+  | "RISK_REJECTED"
+  | "PROVIDER_UNAVAILABLE";
+
 export type FlowRequestErrorDetails = {
   kind: FlowRequestErrorKind;
   status?: number;
   code?: string;
   safeMessage?: string;
   requestId?: string;
+  classification?: HumanVerificationClassification;
+  retryable?: boolean;
 };
 
 export type FlowRequestErrorFeedback = {
@@ -44,6 +52,17 @@ function asStatus(value: unknown): number | undefined {
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isInteger(parsed) && parsed >= 100 && parsed <= 599
     ? parsed
+    : undefined;
+}
+
+function asHumanVerificationClassification(
+  value: unknown,
+): HumanVerificationClassification | undefined {
+  return value === "TOKEN_REJECTED" ||
+    value === "ACTION_REJECTED" ||
+    value === "RISK_REJECTED" ||
+    value === "PROVIDER_UNAVAILABLE"
+    ? value
     : undefined;
 }
 
@@ -171,6 +190,16 @@ export function normalizeFlowRequestError(
         ),
       )
       .find(Boolean);
+  const classification = records
+    .map((record) =>
+      asHumanVerificationClassification(record.classification),
+    )
+    .find((value) => value !== undefined);
+  const retryable = records
+    .map((record) =>
+      typeof record.retryable === "boolean" ? record.retryable : undefined,
+    )
+    .find((value) => value !== undefined);
 
   const combined = `${(code ?? "").toUpperCase()} ${safeMessage ?? ""}`;
   let kind: FlowRequestErrorKind = "general";
@@ -201,7 +230,15 @@ export function normalizeFlowRequestError(
     kind = "server";
   }
 
-  return { kind, status, code, safeMessage, requestId };
+  return {
+    kind,
+    status,
+    code,
+    safeMessage,
+    requestId,
+    ...(classification ? { classification } : {}),
+    ...(retryable === undefined ? {} : { retryable }),
+  };
 }
 
 export function getFlowRequestErrorMessage(
@@ -209,6 +246,11 @@ export function getFlowRequestErrorMessage(
   translate: (message: string) => string = (message) => message,
   generalFallback?: string,
 ): string {
+  if (details.classification === "PROVIDER_UNAVAILABLE") {
+    return translate(
+      "Human verification is temporarily unavailable. Please try again.",
+    );
+  }
   const messages: Record<FlowRequestErrorKind, string> = {
     cancelled: "",
     "human-verification":

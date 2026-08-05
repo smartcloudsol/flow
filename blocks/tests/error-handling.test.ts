@@ -12,7 +12,9 @@ test("normalizes reCAPTCHA 403 envelopes without exposing token data", async () 
     JSON.stringify({
       error: {
         code: "HUMAN_VERIFICATION_FAILED",
+        classification: "RISK_REJECTED",
         message: "reCAPTCHA verification failed",
+        retryable: true,
         requestId: "req-flow-403",
         token: "sensitive-token",
       },
@@ -28,12 +30,59 @@ test("normalizes reCAPTCHA 403 envelopes without exposing token data", async () 
     code: "HUMAN_VERIFICATION_FAILED",
     safeMessage: "reCAPTCHA verification failed",
     requestId: "req-flow-403",
+    classification: "RISK_REJECTED",
+    retryable: true,
   });
   assert.equal(
     feedback.message,
     "We couldn't verify that you're human. Please try again.",
   );
   assert.doesNotMatch(JSON.stringify(feedback), /sensitive-token/);
+});
+
+test("keeps provider outages distinct from ordinary backend failures", async () => {
+  const response = new Response(
+    JSON.stringify({
+      error: {
+        code: "HUMAN_VERIFICATION_UNAVAILABLE",
+        classification: "PROVIDER_UNAVAILABLE",
+        message: "reCAPTCHA verification is temporarily unavailable",
+        retryable: true,
+        requestId: "req-flow-503",
+      },
+    }),
+    { status: 503 },
+  );
+  const feedback = createFlowRequestErrorFeedback(
+    await createFlowResponseError(response),
+  );
+
+  assert.equal(feedback.details?.kind, "human-verification");
+  assert.equal(
+    feedback.details?.classification,
+    "PROVIDER_UNAVAILABLE",
+  );
+  assert.equal(feedback.details?.retryable, true);
+  assert.equal(
+    feedback.message,
+    "Human verification is temporarily unavailable. Please try again.",
+  );
+});
+
+test("continues to recognize the legacy Flow reCAPTCHA response during rollout", async () => {
+  const response = new Response(
+    JSON.stringify({
+      message: "reCAPTCHA verification failed",
+      details: { success: false, score: 0.1, reasons: [] },
+    }),
+    { status: 403 },
+  );
+  const details = normalizeFlowRequestError(
+    await createFlowResponseError(response),
+  );
+
+  assert.equal(details.kind, "human-verification");
+  assert.equal(details.classification, undefined);
 });
 
 test("categorizes validation, throttling, network, and backend failures", () => {
