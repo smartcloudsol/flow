@@ -117,6 +117,30 @@ export const ptDict: Record<string, string> = {
   "Webhook endpoint not found": "Endpoint de webhook não encontrado",
   "Why this may help": "Por que isso pode ajudar",
   "Workflow not found": "Fluxo de trabalho não encontrado",
+  "Review the highlighted fields and try again.":
+    "Revise os campos destacados e tente novamente.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Não foi possível aceder ao serviço de formulários. Verifique a ligação e tente novamente.",
+  "We couldn't verify that you're human. Please try again.":
+    "Não foi possível confirmar que é uma pessoa. Tente novamente.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "A verificação humana está temporariamente indisponível. Tente novamente.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Não foi possível enviar o formulário. Revise os campos destacados e tente novamente.",
+  "The form service is temporarily unavailable. Please try again.":
+    "O serviço de formulários está temporariamente indisponível. Tente novamente.",
+  "Too many requests. Please wait a moment and try again.":
+    "Demasiados pedidos. Aguarde um momento e tente novamente.",
+  "Something went wrong. Please try again.":
+    "Ocorreu um problema. Tente novamente.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Não tem autorização para enviar este formulário. Inicie sessão ou contacte o proprietário do site.",
+  "Powered by": "Desenvolvido por",
+  "Show all items": "Mostrar todos os itens",
+  "Show fewer items": "Mostrar menos itens",
+  "Show less": "Mostrar menos",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "mais",
   Yes: "Sim",
   "You can continue without selecting a suggestion.":
     "Você pode continuar sem selecionar uma sugestão.",

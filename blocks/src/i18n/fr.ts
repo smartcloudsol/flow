@@ -115,6 +115,30 @@ export const frDict: Record<string, string> = {
   "Webhook endpoint not found": "Point de terminaison du webhook introuvable",
   "Why this may help": "Pourquoi cela peut aider",
   "Workflow not found": "Flux de travail non trouvé",
+  "Review the highlighted fields and try again.":
+    "Vérifiez les champs en surbrillance et réessayez.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Impossible de joindre le service de formulaires. Vérifiez votre connexion et réessayez.",
+  "We couldn't verify that you're human. Please try again.":
+    "Nous n'avons pas pu vérifier que vous êtes une personne. Réessayez.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "La vérification humaine est temporairement indisponible. Réessayez.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Le formulaire n'a pas pu être envoyé. Vérifiez les champs en surbrillance et réessayez.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Le service de formulaires est temporairement indisponible. Réessayez.",
+  "Too many requests. Please wait a moment and try again.":
+    "Trop de requêtes. Patientez un instant et réessayez.",
+  "Something went wrong. Please try again.":
+    "Une erreur s'est produite. Réessayez.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Vous n'êtes pas autorisé à envoyer ce formulaire. Connectez-vous ou contactez le propriétaire du site.",
+  "Powered by": "Propulsé par",
+  "Show all items": "Afficher tous les éléments",
+  "Show fewer items": "Afficher moins d’éléments",
+  "Show less": "Afficher moins",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "de plus",
   Yes: "Oui",
   "You can continue without selecting a suggestion.":
     "Vous pouvez continuer sans sélectionner de suggestion.",

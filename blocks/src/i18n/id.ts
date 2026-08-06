@@ -115,6 +115,30 @@ export const idDict: Record<string, string> = {
   "Webhook endpoint not found": "Endpoint webhook tidak ditemukan",
   "Why this may help": "Mengapa ini mungkin membantu",
   "Workflow not found": "Workflow tidak ditemukan",
+  "Review the highlighted fields and try again.":
+    "Tinjau kolom yang ditandai lalu coba lagi.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Kami tidak dapat menjangkau layanan formulir. Periksa koneksi Anda lalu coba lagi.",
+  "We couldn't verify that you're human. Please try again.":
+    "Kami tidak dapat memverifikasi bahwa Anda manusia. Coba lagi.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Verifikasi manusia sementara tidak tersedia. Coba lagi.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Formulir tidak dapat dikirim. Tinjau kolom yang ditandai lalu coba lagi.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Layanan formulir sementara tidak tersedia. Coba lagi.",
+  "Too many requests. Please wait a moment and try again.":
+    "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.",
+  "Something went wrong. Please try again.":
+    "Terjadi kesalahan. Coba lagi.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Anda tidak berwenang mengirim formulir ini. Silakan masuk atau hubungi pemilik situs.",
+  "Powered by": "Didukung oleh",
+  "Show all items": "Tampilkan semua item",
+  "Show fewer items": "Tampilkan lebih sedikit item",
+  "Show less": "Tampilkan lebih sedikit",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "lagi",
   Yes: "Ya",
   "You can continue without selecting a suggestion.":
     "Anda dapat melanjutkan tanpa memilih saran.",

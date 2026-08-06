@@ -117,6 +117,30 @@ export const uaDict: Record<string, string> = {
   "Webhook endpoint not found": "Кінцеву точку вебхука не знайдено",
   "Why this may help": "Чому це може допомогти",
   "Workflow not found": "Робочий процес не знайдено",
+  "Review the highlighted fields and try again.":
+    "Перевірте виділені поля та спробуйте ще раз.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Не вдалося підключитися до служби форм. Перевірте з’єднання та спробуйте ще раз.",
+  "We couldn't verify that you're human. Please try again.":
+    "Не вдалося підтвердити, що ви людина. Спробуйте ще раз.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Перевірка користувача тимчасово недоступна. Спробуйте ще раз.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Не вдалося надіслати форму. Перевірте виділені поля та спробуйте ще раз.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Служба форм тимчасово недоступна. Спробуйте ще раз.",
+  "Too many requests. Please wait a moment and try again.":
+    "Забагато запитів. Зачекайте трохи та спробуйте ще раз.",
+  "Something went wrong. Please try again.":
+    "Щось пішло не так. Спробуйте ще раз.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Ви не маєте дозволу надсилати цю форму. Увійдіть або зверніться до власника сайту.",
+  "Powered by": "Працює на",
+  "Show all items": "Показати всі елементи",
+  "Show fewer items": "Показати менше елементів",
+  "Show less": "Показати менше",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "ще",
   Yes: "Так",
   "You can continue without selecting a suggestion.":
     "Ви можете продовжити, не вибираючи підказку.",

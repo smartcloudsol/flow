@@ -118,6 +118,30 @@ export const ruDict: Record<string, string> = {
   "Webhook endpoint not found": "Конечная точка вебхука не найдена",
   "Why this may help": "Почему это может помочь",
   "Workflow not found": "Рабочий процесс не найден",
+  "Review the highlighted fields and try again.":
+    "Проверьте выделенные поля и повторите попытку.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Не удалось подключиться к службе форм. Проверьте соединение и повторите попытку.",
+  "We couldn't verify that you're human. Please try again.":
+    "Не удалось подтвердить, что вы человек. Повторите попытку.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Проверка пользователя временно недоступна. Повторите попытку.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Не удалось отправить форму. Проверьте выделенные поля и повторите попытку.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Служба форм временно недоступна. Повторите попытку.",
+  "Too many requests. Please wait a moment and try again.":
+    "Слишком много запросов. Подождите немного и повторите попытку.",
+  "Something went wrong. Please try again.":
+    "Что-то пошло не так. Повторите попытку.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "У вас нет разрешения на отправку этой формы. Войдите в систему или свяжитесь с владельцем сайта.",
+  "Powered by": "Работает на",
+  "Show all items": "Показать все элементы",
+  "Show fewer items": "Показать меньше элементов",
+  "Show less": "Показать меньше",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "ещё",
   Yes: "Да",
   "You can continue without selecting a suggestion.":
     "Вы можете продолжить, не выбирая подсказку.",

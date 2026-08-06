@@ -80,6 +80,7 @@ import { FormStateProvider } from "../context/FormStateContext";
 import {
   createFlowRequestErrorFeedback,
   createFlowResponseError,
+  shouldScrollFlowRequestFailureIntoView,
 } from "../errorHandling";
 import { formReducer, getInitialValues } from "../reducer";
 import { validateField, validateValues } from "../validation";
@@ -1228,9 +1229,12 @@ export function FormShell({
         requestId: feedback.details?.requestId,
       });
       dispatch({ type: "SET_STATUS", status: "error", message });
+      if (shouldScrollFlowRequestFailureIntoView(action, feedback)) {
+        requestViewScrollReset();
+      }
       return feedback;
     },
-    [emitFormEvent, form.formId],
+    [emitFormEvent, form.formId, requestViewScrollReset],
   );
 
   const actions = useMemo(

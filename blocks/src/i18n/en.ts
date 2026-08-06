@@ -120,6 +120,8 @@ export const enDict: Record<string, string> = {
     "We couldn't reach the form service. Check your connection and try again.",
   "We couldn't verify that you're human. Please try again.":
     "We couldn't verify that you're human. Please try again.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Human verification is temporarily unavailable. Please try again.",
   "The form could not be submitted. Review the highlighted fields and try again.":
     "The form could not be submitted. Review the highlighted fields and try again.",
   "The form service is temporarily unavailable. Please try again.":
@@ -130,6 +132,12 @@ export const enDict: Record<string, string> = {
     "Something went wrong. Please try again.",
   "You are not authorized to submit this form. Please sign in or contact the site owner.":
     "You are not authorized to submit this form. Please sign in or contact the site owner.",
+  "Powered by": "Powered by",
+  "Show all items": "Show all items",
+  "Show fewer items": "Show fewer items",
+  "Show less": "Show less",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "more",
   Yes: "Yes",
   "You can continue without selecting a suggestion.":
     "You can continue without selecting a suggestion.",

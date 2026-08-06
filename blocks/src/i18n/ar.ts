@@ -114,6 +114,30 @@ export const arDict: Record<string, string> = {
   "Webhook endpoint not found": "لم يتم العثور على نقطة نهاية Webhook",
   "Why this may help": "لماذا قد يساعد هذا",
   "Workflow not found": "سير العمل غير موجود",
+  "Review the highlighted fields and try again.":
+    "راجع الحقول المميزة وحاول مرة أخرى.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "تعذر الوصول إلى خدمة النموذج. تحقق من اتصالك وحاول مرة أخرى.",
+  "We couldn't verify that you're human. Please try again.":
+    "تعذر التحقق من أنك إنسان. حاول مرة أخرى.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "التحقق البشري غير متاح مؤقتًا. حاول مرة أخرى.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "تعذر إرسال النموذج. راجع الحقول المميزة وحاول مرة أخرى.",
+  "The form service is temporarily unavailable. Please try again.":
+    "خدمة النموذج غير متاحة مؤقتًا. حاول مرة أخرى.",
+  "Too many requests. Please wait a moment and try again.":
+    "عدد الطلبات كبير جدًا. انتظر قليلًا وحاول مرة أخرى.",
+  "Something went wrong. Please try again.":
+    "حدث خطأ ما. حاول مرة أخرى.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "غير مصرح لك بإرسال هذا النموذج. سجّل الدخول أو تواصل مع مالك الموقع.",
+  "Powered by": "بدعم من",
+  "Show all items": "عرض كل العناصر",
+  "Show fewer items": "عرض عناصر أقل",
+  "Show less": "عرض أقل",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "إضافية",
   Yes: "نعم",
   "You can continue without selecting a suggestion.":
     "يمكنك المتابعة دون اختيار اقتراح.",

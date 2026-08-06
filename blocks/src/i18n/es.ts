@@ -117,6 +117,30 @@ export const esDict: Record<string, string> = {
   "Webhook endpoint not found": "Endpoint de webhook no encontrado",
   "Why this may help": "Por qué esto puede ayudar",
   "Workflow not found": "Flujo de trabajo no encontrado",
+  "Review the highlighted fields and try again.":
+    "Revisa los campos resaltados e inténtalo de nuevo.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "No pudimos conectar con el servicio de formularios. Comprueba tu conexión e inténtalo de nuevo.",
+  "We couldn't verify that you're human. Please try again.":
+    "No pudimos verificar que eres una persona. Inténtalo de nuevo.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "La verificación humana no está disponible temporalmente. Inténtalo de nuevo.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "No se pudo enviar el formulario. Revisa los campos resaltados e inténtalo de nuevo.",
+  "The form service is temporarily unavailable. Please try again.":
+    "El servicio de formularios no está disponible temporalmente. Inténtalo de nuevo.",
+  "Too many requests. Please wait a moment and try again.":
+    "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+  "Something went wrong. Please try again.":
+    "Algo salió mal. Inténtalo de nuevo.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "No tienes autorización para enviar este formulario. Inicia sesión o contacta con el propietario del sitio.",
+  "Powered by": "Desarrollado por",
+  "Show all items": "Mostrar todos los elementos",
+  "Show fewer items": "Mostrar menos elementos",
+  "Show less": "Mostrar menos",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "más",
   Yes: "Sí",
   "You can continue without selecting a suggestion.":
     "Puedes continuar sin seleccionar una sugerencia.",

@@ -119,6 +119,30 @@ export const deDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook-Endpunkt nicht gefunden",
   "Why this may help": "Warum das hilfreich sein könnte",
   "Workflow not found": "Workflow nicht gefunden",
+  "Review the highlighted fields and try again.":
+    "Überprüfe die markierten Felder und versuche es erneut.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Wir konnten den Formulardienst nicht erreichen. Überprüfe deine Verbindung und versuche es erneut.",
+  "We couldn't verify that you're human. Please try again.":
+    "Wir konnten nicht bestätigen, dass du ein Mensch bist. Versuche es erneut.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Die menschliche Verifizierung ist vorübergehend nicht verfügbar. Versuche es erneut.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Das Formular konnte nicht gesendet werden. Überprüfe die markierten Felder und versuche es erneut.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Der Formulardienst ist vorübergehend nicht verfügbar. Versuche es erneut.",
+  "Too many requests. Please wait a moment and try again.":
+    "Zu viele Anfragen. Warte einen Moment und versuche es erneut.",
+  "Something went wrong. Please try again.":
+    "Etwas ist schiefgelaufen. Versuche es erneut.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Du bist nicht berechtigt, dieses Formular zu senden. Melde dich an oder kontaktiere den Websitebetreiber.",
+  "Powered by": "Bereitgestellt von",
+  "Show all items": "Alle Elemente anzeigen",
+  "Show fewer items": "Weniger Elemente anzeigen",
+  "Show less": "Weniger anzeigen",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "mehr",
   Yes: "Ja",
   "You can continue without selecting a suggestion.":
     "Du kannst fortfahren, ohne einen Vorschlag auszuwählen.",

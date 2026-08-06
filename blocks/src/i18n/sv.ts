@@ -116,6 +116,30 @@ export const svDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook-slutpunkt hittades inte",
   "Why this may help": "Varför detta kan hjälpa",
   "Workflow not found": "Arbetsflöde hittades inte",
+  "Review the highlighted fields and try again.":
+    "Granska de markerade fälten och försök igen.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Vi kunde inte nå formulärtjänsten. Kontrollera anslutningen och försök igen.",
+  "We couldn't verify that you're human. Please try again.":
+    "Vi kunde inte verifiera att du är en människa. Försök igen.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Mänsklig verifiering är tillfälligt otillgänglig. Försök igen.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Formuläret kunde inte skickas. Granska de markerade fälten och försök igen.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Formulärtjänsten är tillfälligt otillgänglig. Försök igen.",
+  "Too many requests. Please wait a moment and try again.":
+    "För många förfrågningar. Vänta en stund och försök igen.",
+  "Something went wrong. Please try again.":
+    "Något gick fel. Försök igen.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Du har inte behörighet att skicka formuläret. Logga in eller kontakta webbplatsens ägare.",
+  "Powered by": "Drivs av",
+  "Show all items": "Visa alla objekt",
+  "Show fewer items": "Visa färre objekt",
+  "Show less": "Visa mindre",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "till",
   Yes: "Ja",
   "You can continue without selecting a suggestion.":
     "Du kan fortsätta utan att välja ett förslag.",

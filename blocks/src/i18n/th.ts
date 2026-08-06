@@ -112,6 +112,30 @@ export const thDict: Record<string, string> = {
   "Webhook endpoint not found": "ไม่พบปลายทางเว็บฮุค",
   "Why this may help": "เหตุใดสิ่งนี้จึงอาจช่วยได้",
   "Workflow not found": "ไม่พบเวิร์กโฟลว์",
+  "Review the highlighted fields and try again.":
+    "ตรวจสอบช่องที่ไฮไลต์แล้วลองอีกครั้ง",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "ไม่สามารถเชื่อมต่อบริการแบบฟอร์มได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+  "We couldn't verify that you're human. Please try again.":
+    "ไม่สามารถยืนยันได้ว่าคุณเป็นมนุษย์ โปรดลองอีกครั้ง",
+  "Human verification is temporarily unavailable. Please try again.":
+    "การยืนยันว่าเป็นมนุษย์ไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "ไม่สามารถส่งแบบฟอร์มได้ ตรวจสอบช่องที่ไฮไลต์แล้วลองอีกครั้ง",
+  "The form service is temporarily unavailable. Please try again.":
+    "บริการแบบฟอร์มไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง",
+  "Too many requests. Please wait a moment and try again.":
+    "มีคำขอมากเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง",
+  "Something went wrong. Please try again.":
+    "เกิดข้อผิดพลาด โปรดลองอีกครั้ง",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "คุณไม่มีสิทธิ์ส่งแบบฟอร์มนี้ โปรดเข้าสู่ระบบหรือติดต่อเจ้าของเว็บไซต์",
+  "Powered by": "ขับเคลื่อนโดย",
+  "Show all items": "แสดงรายการทั้งหมด",
+  "Show fewer items": "แสดงรายการน้อยลง",
+  "Show less": "แสดงน้อยลง",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "เพิ่มเติม",
   Yes: "ใช่",
   "You can continue without selecting a suggestion.":
     "คุณสามารถดำเนินการต่อได้โดยไม่ต้องเลือกคำแนะนำ",

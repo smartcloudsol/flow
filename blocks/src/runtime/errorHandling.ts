@@ -274,6 +274,13 @@ export function clearFlowRequestErrorFeedback(): FlowRequestErrorFeedback {
   return { message: null, details: null };
 }
 
+export function shouldScrollFlowRequestFailureIntoView(
+  action: string,
+  feedback: FlowRequestErrorFeedback,
+): boolean {
+  return action === "submit" && feedback.details?.kind !== "cancelled";
+}
+
 export function createFlowRequestErrorFeedback(
   error: unknown,
   translate?: (message: string) => string,

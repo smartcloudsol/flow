@@ -117,6 +117,30 @@ export const koDict: Record<string, string> = {
   "Webhook endpoint not found": "웹훅 엔드포인트를 찾을 수 없습니다",
   "Why this may help": "왜 도움이 될 수 있는지",
   "Workflow not found": "워크플로를 찾을 수 없습니다",
+  "Review the highlighted fields and try again.":
+    "강조 표시된 필드를 확인하고 다시 시도하세요.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "양식 서비스에 연결할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요.",
+  "We couldn't verify that you're human. Please try again.":
+    "사람인지 확인할 수 없습니다. 다시 시도하세요.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "사람 확인 서비스를 일시적으로 사용할 수 없습니다. 다시 시도하세요.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "양식을 제출할 수 없습니다. 강조 표시된 필드를 확인하고 다시 시도하세요.",
+  "The form service is temporarily unavailable. Please try again.":
+    "양식 서비스를 일시적으로 사용할 수 없습니다. 다시 시도하세요.",
+  "Too many requests. Please wait a moment and try again.":
+    "요청이 너무 많습니다. 잠시 기다린 후 다시 시도하세요.",
+  "Something went wrong. Please try again.":
+    "문제가 발생했습니다. 다시 시도하세요.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "이 양식을 제출할 권한이 없습니다. 로그인하거나 사이트 소유자에게 문의하세요.",
+  "Powered by": "제공:",
+  "Show all items": "모든 항목 표시",
+  "Show fewer items": "더 적은 항목 표시",
+  "Show less": "간략히 표시",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "개 더보기",
   Yes: "예",
   "You can continue without selecting a suggestion.":
     "제안을 선택하지 않고도 계속 진행할 수 있습니다.",

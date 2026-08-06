@@ -5,6 +5,8 @@ export const heDict: Record<string, string> = {
     "{fieldLabel} חייב להיות רשימת תגיות.",
   "{fieldLabel} must be a list of values.":
     "{fieldLabel} חייב להיות רשימת ערכים.",
+  "{fieldLabel} must be a valid email address.":
+    "{fieldLabel} חייב להיות כתובת אימייל תקינה.",
   "{fieldLabel} must be a valid number.": "{fieldLabel} חייב להיות מספר תקין.",
   "{fieldLabel} must be a valid phone number.":
     "{fieldLabel} חייב להיות מספר טלפון תקין.",
@@ -111,6 +113,30 @@ export const heDict: Record<string, string> = {
   "Webhook endpoint not found": "נקודת קצה של webhook לא נמצאה",
   "Why this may help": "למה זה עשוי לעזור",
   "Workflow not found": "זרימת העבודה לא נמצאה",
+  "Review the highlighted fields and try again.":
+    "בדוק את השדות המסומנים ונסה שוב.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "לא הצלחנו להגיע לשירות הטפסים. בדוק את החיבור שלך ונסה שוב.",
+  "We couldn't verify that you're human. Please try again.":
+    "לא הצלחנו לוודא שאתה בן אדם. נסה שוב.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "אימות אנושי אינו זמין זמנית. נסה שוב.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "לא ניתן היה לשלוח את הטופס. בדוק את השדות המסומנים ונסה שוב.",
+  "The form service is temporarily unavailable. Please try again.":
+    "שירות הטפסים אינו זמין זמנית. נסה שוב.",
+  "Too many requests. Please wait a moment and try again.":
+    "יותר מדי בקשות. המתן רגע ונסה שוב.",
+  "Something went wrong. Please try again.":
+    "משהו השתבש. נסה שוב.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "אין לך הרשאה לשלוח את הטופס הזה. היכנס לחשבון או פנה לבעל האתר.",
+  "Powered by": "מופעל על ידי",
+  "Show all items": "הצג את כל הפריטים",
+  "Show fewer items": "הצג פחות פריטים",
+  "Show less": "הצג פחות",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "נוספים",
   Yes: "כן",
   "You can continue without selecting a suggestion.":
     "אפשר להמשיך בלי לבחור הצעה.",

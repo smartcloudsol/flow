@@ -116,6 +116,30 @@ export const plDict: Record<string, string> = {
   "Webhook endpoint not found": "Nie znaleziono punktu końcowego webhooka",
   "Why this may help": "Dlaczego to może pomóc",
   "Workflow not found": "Nie znaleziono przepływu pracy",
+  "Review the highlighted fields and try again.":
+    "Sprawdź wyróżnione pola i spróbuj ponownie.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Nie udało się połączyć z usługą formularzy. Sprawdź połączenie i spróbuj ponownie.",
+  "We couldn't verify that you're human. Please try again.":
+    "Nie udało się potwierdzić, że jesteś człowiekiem. Spróbuj ponownie.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Weryfikacja użytkownika jest tymczasowo niedostępna. Spróbuj ponownie.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Nie udało się przesłać formularza. Sprawdź wyróżnione pola i spróbuj ponownie.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Usługa formularzy jest tymczasowo niedostępna. Spróbuj ponownie.",
+  "Too many requests. Please wait a moment and try again.":
+    "Zbyt wiele żądań. Poczekaj chwilę i spróbuj ponownie.",
+  "Something went wrong. Please try again.":
+    "Coś poszło nie tak. Spróbuj ponownie.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Nie masz uprawnień do przesłania tego formularza. Zaloguj się lub skontaktuj się z właścicielem witryny.",
+  "Powered by": "Obsługiwane przez",
+  "Show all items": "Pokaż wszystkie elementy",
+  "Show fewer items": "Pokaż mniej elementów",
+  "Show less": "Pokaż mniej",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "więcej",
   Yes: "Tak",
   "You can continue without selecting a suggestion.":
     "Możesz kontynuować bez wybierania sugestii.",

@@ -116,6 +116,30 @@ export const trDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook uç noktası bulunamadı",
   "Why this may help": "Bu neden yardımcı olabilir",
   "Workflow not found": "İş akışı bulunamadı",
+  "Review the highlighted fields and try again.":
+    "Vurgulanan alanları gözden geçirip tekrar deneyin.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Form hizmetine ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+  "We couldn't verify that you're human. Please try again.":
+    "İnsan olduğunuz doğrulanamadı. Tekrar deneyin.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "İnsan doğrulaması geçici olarak kullanılamıyor. Tekrar deneyin.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Form gönderilemedi. Vurgulanan alanları gözden geçirip tekrar deneyin.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Form hizmeti geçici olarak kullanılamıyor. Tekrar deneyin.",
+  "Too many requests. Please wait a moment and try again.":
+    "Çok fazla istek var. Biraz bekleyip tekrar deneyin.",
+  "Something went wrong. Please try again.":
+    "Bir sorun oluştu. Tekrar deneyin.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Bu formu gönderme yetkiniz yok. Oturum açın veya site sahibiyle iletişime geçin.",
+  "Powered by": "Altyapı:",
+  "Show all items": "Tüm öğeleri göster",
+  "Show fewer items": "Daha az öğe göster",
+  "Show less": "Daha az göster",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "daha",
   Yes: "Evet",
   "You can continue without selecting a suggestion.":
     "Bir öneri seçmeden devam edebilirsiniz.",

@@ -114,6 +114,30 @@ export const nbDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook-endepunkt ikke funnet",
   "Why this may help": "Hvorfor dette kan hjelpe",
   "Workflow not found": "Arbeidsflyt ikke funnet",
+  "Review the highlighted fields and try again.":
+    "Se gjennom de markerte feltene og prøv igjen.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Vi kunne ikke nå skjematjenesten. Kontroller tilkoblingen og prøv igjen.",
+  "We couldn't verify that you're human. Please try again.":
+    "Vi kunne ikke bekrefte at du er et menneske. Prøv igjen.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Menneskelig verifisering er midlertidig utilgjengelig. Prøv igjen.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Skjemaet kunne ikke sendes inn. Se gjennom de markerte feltene og prøv igjen.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Skjematjenesten er midlertidig utilgjengelig. Prøv igjen.",
+  "Too many requests. Please wait a moment and try again.":
+    "For mange forespørsler. Vent litt og prøv igjen.",
+  "Something went wrong. Please try again.":
+    "Noe gikk galt. Prøv igjen.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Du har ikke tillatelse til å sende inn dette skjemaet. Logg inn eller kontakt nettstedets eier.",
+  "Powered by": "Levert av",
+  "Show all items": "Vis alle elementer",
+  "Show fewer items": "Vis færre elementer",
+  "Show less": "Vis mindre",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "til",
   Yes: "Ja",
   "You can continue without selecting a suggestion.":
     "Du kan fortsette uten å velge et forslag.",

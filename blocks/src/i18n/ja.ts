@@ -118,6 +118,30 @@ export const jaDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook エンドポイントが見つかりません",
   "Why this may help": "これが役立つ理由",
   "Workflow not found": "ワークフローが見つかりません",
+  "Review the highlighted fields and try again.":
+    "ハイライトされたフィールドを確認して、もう一度お試しください。",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "フォームサービスに接続できませんでした。接続を確認して、もう一度お試しください。",
+  "We couldn't verify that you're human. Please try again.":
+    "人間であることを確認できませんでした。もう一度お試しください。",
+  "Human verification is temporarily unavailable. Please try again.":
+    "人間による認証は一時的に利用できません。もう一度お試しください。",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "フォームを送信できませんでした。ハイライトされたフィールドを確認して、もう一度お試しください。",
+  "The form service is temporarily unavailable. Please try again.":
+    "フォームサービスは一時的に利用できません。もう一度お試しください。",
+  "Too many requests. Please wait a moment and try again.":
+    "リクエストが多すぎます。しばらく待ってから、もう一度お試しください。",
+  "Something went wrong. Please try again.":
+    "問題が発生しました。もう一度お試しください。",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "このフォームを送信する権限がありません。ログインするか、サイト所有者にお問い合わせください。",
+  "Powered by": "提供:",
+  "Show all items": "すべての項目を表示",
+  "Show fewer items": "表示する項目を減らす",
+  "Show less": "表示を減らす",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "件",
   Yes: "はい",
   "You can continue without selecting a suggestion.":
     "候補を選択しなくても続行できます。",

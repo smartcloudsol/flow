@@ -5,6 +5,7 @@ import {
   createFlowRequestErrorFeedback,
   createFlowResponseError,
   normalizeFlowRequestError,
+  shouldScrollFlowRequestFailureIntoView,
 } from "../src/runtime/errorHandling.ts";
 
 test("normalizes reCAPTCHA 403 envelopes without exposing token data", async () => {
@@ -117,6 +118,28 @@ test("treats cancellation separately and clears stale retry feedback", () => {
     message: null,
     details: null,
   });
+});
+
+test("scrolls handled final-submit failures into view", () => {
+  const failed = createFlowRequestErrorFeedback({ status: 503 });
+  const cancelled = createFlowRequestErrorFeedback(
+    Object.assign(new Error("The operation was aborted"), {
+      name: "AbortError",
+    }),
+  );
+
+  assert.equal(
+    shouldScrollFlowRequestFailureIntoView("submit", failed),
+    true,
+  );
+  assert.equal(
+    shouldScrollFlowRequestFailureIntoView("save-draft", failed),
+    false,
+  );
+  assert.equal(
+    shouldScrollFlowRequestFailureIntoView("submit", cancelled),
+    false,
+  );
 });
 
 test("uses custom form copy only for uncategorized errors", () => {

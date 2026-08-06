@@ -117,6 +117,30 @@ export const hiDict: Record<string, string> = {
   "Webhook endpoint not found": "वेबहुक एंडपॉइंट नहीं मिला",
   "Why this may help": "यह क्यों सहायक हो सकता है",
   "Workflow not found": "वर्कफ़्लो नहीं मिला",
+  "Review the highlighted fields and try again.":
+    "हाइलाइट किए गए फ़ील्ड की समीक्षा करें और फिर से प्रयास करें।",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "फ़ॉर्म सेवा से संपर्क नहीं हो सका। अपना कनेक्शन जाँचें और फिर से प्रयास करें।",
+  "We couldn't verify that you're human. Please try again.":
+    "हम यह सत्यापित नहीं कर सके कि आप इंसान हैं। फिर से प्रयास करें।",
+  "Human verification is temporarily unavailable. Please try again.":
+    "मानव सत्यापन अस्थायी रूप से उपलब्ध नहीं है। फिर से प्रयास करें।",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "फ़ॉर्म सबमिट नहीं किया जा सका। हाइलाइट किए गए फ़ील्ड की समीक्षा करें और फिर से प्रयास करें।",
+  "The form service is temporarily unavailable. Please try again.":
+    "फ़ॉर्म सेवा अस्थायी रूप से उपलब्ध नहीं है। फिर से प्रयास करें।",
+  "Too many requests. Please wait a moment and try again.":
+    "बहुत अधिक अनुरोध हैं। कुछ देर प्रतीक्षा करें और फिर से प्रयास करें।",
+  "Something went wrong. Please try again.":
+    "कुछ गलत हो गया। फिर से प्रयास करें।",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "आपको यह फ़ॉर्म सबमिट करने की अनुमति नहीं है। साइन इन करें या साइट के मालिक से संपर्क करें।",
+  "Powered by": "द्वारा संचालित",
+  "Show all items": "सभी आइटम दिखाएँ",
+  "Show fewer items": "कम आइटम दिखाएँ",
+  "Show less": "कम दिखाएँ",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "और",
   Yes: "हाँ",
   "You can continue without selecting a suggestion.":
     "आप बिना कोई सुझाव चुने आगे बढ़ सकते हैं।",

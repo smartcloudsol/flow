@@ -103,6 +103,30 @@ export const zhDict: Record<string, string> = {
   "Webhook endpoint not found": "未找到 Webhook 端点",
   "Why this may help": "为什么这可能有帮助",
   "Workflow not found": "未找到工作流",
+  "Review the highlighted fields and try again.":
+    "检查突出显示的字段，然后重试。",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "无法连接表单服务。请检查网络连接后重试。",
+  "We couldn't verify that you're human. Please try again.":
+    "无法验证您是真人。请重试。",
+  "Human verification is temporarily unavailable. Please try again.":
+    "真人验证暂时不可用。请重试。",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "无法提交表单。请检查突出显示的字段后重试。",
+  "The form service is temporarily unavailable. Please try again.":
+    "表单服务暂时不可用。请重试。",
+  "Too many requests. Please wait a moment and try again.":
+    "请求过多。请稍候再试。",
+  "Something went wrong. Please try again.":
+    "出现问题。请重试。",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "您无权提交此表单。请登录或联系网站所有者。",
+  "Powered by": "技术支持：",
+  "Show all items": "显示所有项目",
+  "Show fewer items": "显示较少项目",
+  "Show less": "收起",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "项",
   Yes: "是",
   "You can continue without selecting a suggestion.":
     "你可以在不选择建议的情况下继续。",

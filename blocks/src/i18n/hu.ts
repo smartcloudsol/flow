@@ -122,6 +122,8 @@ export const huDict: Record<string, string> = {
     "Az űrlapszolgáltatás nem érhető el. Ellenőrizd a kapcsolatot, majd próbáld újra.",
   "We couldn't verify that you're human. Please try again.":
     "Nem sikerült ellenőrizni, hogy ember vagy. Próbáld újra.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Az emberi ellenőrzés átmenetileg nem érhető el. Próbáld újra.",
   "The form could not be submitted. Review the highlighted fields and try again.":
     "Az űrlapot nem sikerült beküldeni. Ellenőrizd a megjelölt mezőket, majd próbáld újra.",
   "The form service is temporarily unavailable. Please try again.":
@@ -132,6 +134,12 @@ export const huDict: Record<string, string> = {
     "Hiba történt. Próbáld újra.",
   "You are not authorized to submit this form. Please sign in or contact the site owner.":
     "Nincs jogosultságod az űrlap beküldéséhez. Jelentkezz be, vagy lépj kapcsolatba a webhely üzemeltetőjével.",
+  "Powered by": "Működteti:",
+  "Show all items": "Összes elem megjelenítése",
+  "Show fewer items": "Kevesebb elem megjelenítése",
+  "Show less": "Kevesebb megjelenítése",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "további",
   Yes: "Igen",
   "You can continue without selecting a suggestion.":
     "Javaslat kiválasztása nélkül is folytathatod.",

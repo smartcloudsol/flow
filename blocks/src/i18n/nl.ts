@@ -118,6 +118,30 @@ export const nlDict: Record<string, string> = {
   "Webhook endpoint not found": "Webhook-eindpunt niet gevonden",
   "Why this may help": "Waarom dit kan helpen",
   "Workflow not found": "Workflow niet gevonden",
+  "Review the highlighted fields and try again.":
+    "Controleer de gemarkeerde velden en probeer het opnieuw.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "We konden de formulierenservice niet bereiken. Controleer je verbinding en probeer het opnieuw.",
+  "We couldn't verify that you're human. Please try again.":
+    "We konden niet bevestigen dat je een mens bent. Probeer het opnieuw.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "Menselijke verificatie is tijdelijk niet beschikbaar. Probeer het opnieuw.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Het formulier kon niet worden verzonden. Controleer de gemarkeerde velden en probeer het opnieuw.",
+  "The form service is temporarily unavailable. Please try again.":
+    "De formulierenservice is tijdelijk niet beschikbaar. Probeer het opnieuw.",
+  "Too many requests. Please wait a moment and try again.":
+    "Te veel aanvragen. Wacht even en probeer het opnieuw.",
+  "Something went wrong. Please try again.":
+    "Er is iets misgegaan. Probeer het opnieuw.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Je bent niet gemachtigd om dit formulier te verzenden. Meld je aan of neem contact op met de site-eigenaar.",
+  "Powered by": "Mogelijk gemaakt door",
+  "Show all items": "Alle items tonen",
+  "Show fewer items": "Minder items tonen",
+  "Show less": "Minder tonen",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "meer",
   Yes: "Ja",
   "You can continue without selecting a suggestion.":
     "Je kunt doorgaan zonder een suggestie te selecteren.",

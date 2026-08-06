@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.19
+Stable tag: 1.1.20
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,10 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.20 =
+* Accessibility: Scroll the form status alert into view after a failed final submission while respecting reduced-motion preferences.
+* Localization: Completed submission, validation, human-verification, and runtime interface translations across every bundled locale.
+
 = 1.1.19 =
 * Dependency: Replaced the deprecated SmartCloud Amplify UI 6.16.0 package line with exact supported 6.15.5/3.6.5/6.15.5 versions and rebuilt the shared vendor runtime.
 * Reliability: Preserved reCAPTCHA classification and retryability metadata, and report temporary provider outages separately without exposing sensitive response data.
@@ -339,6 +343,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.20 =
+Recommended usability and localization update for clear, visible form submission errors in every bundled language.
 
 = 1.1.19 =
 Recommended dependency refresh away from deprecated SmartCloud Amplify UI releases.

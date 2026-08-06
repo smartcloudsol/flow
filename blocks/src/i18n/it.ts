@@ -118,6 +118,30 @@ export const itDict: Record<string, string> = {
   "Webhook endpoint not found": "Endpoint webhook non trovato",
   "Why this may help": "Perché può essere utile",
   "Workflow not found": "Flusso di lavoro non trovato",
+  "Review the highlighted fields and try again.":
+    "Controlla i campi evidenziati e riprova.",
+  "We couldn't reach the form service. Check your connection and try again.":
+    "Non è stato possibile raggiungere il servizio dei moduli. Controlla la connessione e riprova.",
+  "We couldn't verify that you're human. Please try again.":
+    "Non è stato possibile verificare che tu sia una persona. Riprova.",
+  "Human verification is temporarily unavailable. Please try again.":
+    "La verifica umana è temporaneamente non disponibile. Riprova.",
+  "The form could not be submitted. Review the highlighted fields and try again.":
+    "Non è stato possibile inviare il modulo. Controlla i campi evidenziati e riprova.",
+  "The form service is temporarily unavailable. Please try again.":
+    "Il servizio dei moduli è temporaneamente non disponibile. Riprova.",
+  "Too many requests. Please wait a moment and try again.":
+    "Troppe richieste. Attendi un momento e riprova.",
+  "Something went wrong. Please try again.":
+    "Si è verificato un problema. Riprova.",
+  "You are not authorized to submit this form. Please sign in or contact the site owner.":
+    "Non sei autorizzato a inviare questo modulo. Accedi o contatta il proprietario del sito.",
+  "Powered by": "Offerto da",
+  "Show all items": "Mostra tutti gli elementi",
+  "Show fewer items": "Mostra meno elementi",
+  "Show less": "Mostra meno",
+  "SmartCloud Flow": "SmartCloud Flow",
+  more: "altri",
   Yes: "Sì",
   "You can continue without selecting a suggestion.":
     "Puoi continuare senza selezionare un suggerimento.",
