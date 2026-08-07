@@ -115,7 +115,42 @@ export interface BackendCallOptions {
     signal?: AbortSignal;
     headers?: Record<string, string>;
     query?: Record<string, string | number | boolean>;
+    humanVerification?: boolean;
     onStatus?: (event: FlowStatusEvent) => void;
+}
+export interface ContentReference {
+    namespace: string;
+    type: string;
+    id: string;
+}
+export type ContentTargetSource = "wordpress-context" | "explicit" | "canonical-url";
+export type PublicationStatus = "pending" | "published" | "hidden" | "spam";
+export type PublicRenderState = "visible" | "tombstone";
+export interface PublicDiscussionItem {
+    submissionId: string;
+    parentSubmissionId: string | null;
+    threadRootSubmissionId: string;
+    replyDepth: number;
+    createdAt: string;
+    updatedAt?: string;
+    renderState: PublicRenderState;
+    authorName?: string;
+    body?: string;
+    directReplyCount: number;
+    totalReplyCount: number;
+    replyPreview?: PublicDiscussionItem[];
+    replyPreviewCursor?: string;
+}
+export interface PublicDiscussionPage {
+    items: PublicDiscussionItem[];
+    cursor?: string;
+}
+export interface DiscussionQuery {
+    contentRef: ContentReference;
+    limit?: number;
+    cursor?: string;
+    sortDir?: "asc" | "desc";
+    replyPreviewLimit?: number;
 }
 export type FlowStatusStep = "decide" | "backend:request" | "backend:waiting" | "backend:response" | "done" | "error";
 export interface FlowStatusEvent {
@@ -126,7 +161,11 @@ export interface FlowStatusEvent {
 }
 export declare class BackendError extends Error {
     readonly decision?: unknown | undefined;
-    constructor(message: string, decision?: unknown | undefined);
+    readonly code?: string | undefined;
+    readonly statusCode?: number | undefined;
+    readonly requestId?: string | undefined;
+    readonly retryable: boolean;
+    constructor(message: string, decision?: unknown | undefined, code?: string | undefined, statusCode?: number | undefined, requestId?: string | undefined, retryable?: boolean);
 }
 export interface Capabilities {
     decideCapability: () => Promise<CapabilityDecision>;
@@ -139,5 +178,5 @@ export interface Capabilities {
     }>;
 }
 export interface Backend<TResponse> {
-    dispatchBackend: (decision: CapabilityDecision, context: ContextKind, customPath: string, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: unknown, options: BackendCallOptions) => Promise<TResponse>;
+    dispatchBackend: (decision: CapabilityDecision, context: ContextKind, customPath: string, method: "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: unknown, options: BackendCallOptions) => Promise<TResponse>;
 }

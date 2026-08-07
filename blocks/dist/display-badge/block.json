@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/badge",
+  "version": "1.0.0",
+  "title": "Badge",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "tag",
+  "description": "Display compact badge labels inside Flow forms.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "content": {
+      "type": "string",
+      "default": "Badge"
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "variant": {
+      "type": "string",
+      "default": "light"
+    },
+    "size": {
+      "type": "string",
+      "default": "md"
+    },
+    "radius": {
+      "type": "string",
+      "default": "xl"
+    },
+    "fullWidth": {
+      "type": "boolean",
+      "default": false
+    },
+    "circle": {
+      "type": "boolean",
+      "default": false
+    },
+    "autoContrast": {
+      "type": "boolean",
+      "default": false
+    },
+    "gradientFrom": {
+      "type": "string",
+      "default": ""
+    },
+    "gradientTo": {
+      "type": "string",
+      "default": ""
+    },
+    "gradientDeg": {
+      "type": "number",
+      "default": 90
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

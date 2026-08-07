@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "smartcloud-flow/form",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "title": "Flow Form",
   "category": "smartcloud-flow",
   "icon": "feedback",
@@ -44,7 +44,7 @@
     "endpointPath": {
       "type": "string",
       "role": "content",
-      "default": "/frontend/forms/contact-form/submit"
+      "default": ""
     },
     "endpointMethod": {
       "type": "string",
@@ -56,6 +56,65 @@
       "role": "content",
       "default": ""
     },
+    "submissionRetentionMode": {
+      "type": "string",
+      "role": "content",
+      "default": "inherit"
+    },
+    "submissionRetentionDays": {
+      "type": "number",
+      "role": "content",
+      "default": 30
+    },
+    "contentBindingEnabled": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "contentTargetRequired": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "contentTargetSource": {
+      "type": "string",
+      "role": "content",
+      "default": "wordpress-context"
+    },
+    "targetNamespace": { "type": "string", "role": "content", "default": "" },
+    "targetType": { "type": "string", "role": "content", "default": "" },
+    "targetId": { "type": "string", "role": "content", "default": "" },
+    "discussionEnabled": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "discussionAllowReplies": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "discussionMaxReplyDepth": {
+      "type": "number",
+      "role": "content",
+      "default": 5
+    },
+    "discussionModerationMode": {
+      "type": "string",
+      "role": "content",
+      "default": "required"
+    },
+    "discussionAuthorNameField": { "type": "string", "role": "content", "default": "name" },
+    "discussionBodyField": { "type": "string", "role": "content", "default": "comment" },
+    "discussionBodyMaxLength": { "type": "number", "role": "content", "default": 10000 },
+    "discussionChannel": { "type": "string", "role": "content", "default": "" },
+    "pendingModerationMessage": {
+      "type": "string",
+      "role": "content",
+      "default": "Your submission is awaiting moderation."
+    },
+    "replyingToLabel": { "type": "string", "role": "content", "default": "Replying to" },
+    "cancelReplyLabel": { "type": "string", "role": "content", "default": "Cancel reply" },
     "language": {
       "type": "string",
       "role": "content"

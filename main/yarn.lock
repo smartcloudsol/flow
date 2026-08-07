@@ -4660,10 +4660,10 @@
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/flow-core@^1.1.7":
-  version "1.1.7"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.7.tgz#11eb879bc03ccbdd1f670c2f8e627e016cef2be8"
-  integrity sha512-gqyQk1pGwymYpC0bM5M/HEhiI19z440Tk/qmJKCZnpYHuVNt6pMnXw6RGJSQJ8Lu2DrrWw01Iqik75YUY6sG+Q==
+"@smart-cloud/flow-core@^1.1.8":
+  version "1.1.8"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.8.tgz#19833d936b97044d7fec2e273d399e6a73657850"
+  integrity sha512-04rAlml3cMdHsFB03zOp16dxLZv+OOJbP1Av3y6JQ5k9mRW5lFkFdq0k/5IwujYwJ18V49qM8fH1B9Bmz5suQw==
   dependencies:
     "@smart-cloud/gatey-core" "^2.3.3"
     "@smart-cloud/wpsuite-core" "^2.3.2"

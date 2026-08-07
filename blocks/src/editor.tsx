@@ -18,6 +18,7 @@ import "./display-spoiler/index";
 import "./display-text/index";
 import "./display-title/index";
 import "./form/index";
+import "./discussion/index";
 import "./list/index";
 import "./list-item/index";
 import "./modal/index";

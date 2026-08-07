@@ -10,7 +10,9 @@ export declare class FlowBackendClient {
     listSubmissionEvents(formId: string, submissionId: string): Promise<{
         items: SubmissionEvent[];
     }>;
-    patchSubmission(formId: string, submissionId: string, body: Partial<Submission>): Promise<Submission>;
+    patchSubmission(formId: string, submissionId: string, body: Partial<Submission> & {
+        privacyPurge?: boolean;
+    }): Promise<Submission>;
     deleteSubmission(formId: string, submissionId: string): Promise<void>;
     invokeSubmissionAction(formId: string, submissionId: string, actionKey: string, variables?: Record<string, unknown>): Promise<SubmissionActionResponse>;
     listTemplates(limit?: number, cursor?: string): Promise<ListResponse<EmailTemplate>>;

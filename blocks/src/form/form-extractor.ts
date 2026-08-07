@@ -30,6 +30,22 @@ export interface FormBlockAttributes {
   endpointPath?: string;
   endpointMethod?: "GET" | "POST" | "PUT" | "PATCH";
   endpointHeaders?: string;
+  submissionRetentionMode?: "inherit" | "days" | "forever";
+  submissionRetentionDays?: number;
+  contentBindingEnabled?: boolean;
+  contentTargetRequired?: boolean;
+  contentTargetSource?: "wordpress-context" | "explicit" | "canonical-url";
+  targetNamespace?: string;
+  targetType?: string;
+  targetId?: string;
+  discussionEnabled?: boolean;
+  discussionAllowReplies?: boolean;
+  discussionMaxReplyDepth?: number;
+  discussionModerationMode?: "required" | "automatic";
+  discussionAuthorNameField?: string;
+  discussionBodyField?: string;
+  discussionBodyMaxLength?: number;
+  discussionChannel?: string;
   allowDrafts?: boolean;
   showDraftResumePanel?: boolean;
   draftExpiryDays?: number;
@@ -231,6 +247,30 @@ export function extractCanonicalFormConfig(
 
   const settings: Record<string, unknown> = {};
 
+  if (attributes.submissionRetentionMode === "forever") {
+    settings.submissionRetentionDays = null;
+  } else if (attributes.submissionRetentionMode === "days") {
+    settings.submissionRetentionDays = attributes.submissionRetentionDays;
+  }
+  const discussionEnabled = attributes.discussionEnabled === true;
+  settings.contentBinding = {
+    enabled: discussionEnabled || attributes.contentBindingEnabled === true,
+    targetRequired:
+      discussionEnabled || attributes.contentTargetRequired === true,
+  };
+  settings.discussion = {
+    enabled: discussionEnabled,
+    allowReplies: attributes.discussionAllowReplies !== false,
+    maxReplyDepth: attributes.discussionMaxReplyDepth ?? 5,
+    moderationMode:
+      attributes.discussionModerationMode === "automatic"
+        ? "automatic"
+        : "required",
+    authorNameField: attributes.discussionAuthorNameField || "name",
+    bodyField: attributes.discussionBodyField || "comment",
+    bodyMaxLength: attributes.discussionBodyMaxLength ?? 10000,
+  };
+
   if (attributes.successMessage) {
     settings.successMessage = attributes.successMessage;
   }
@@ -287,7 +327,7 @@ export function extractCanonicalFormConfig(
     sourceId: postId,
     sourceStatus: postStatus,
     renderMode: "mixed",
-    schemaVersion: 1,
+    schemaVersion: 2,
     fields: normalizedFields,
     settings,
     autoReplyTemplateKey,
@@ -340,6 +380,28 @@ export function validateCanonicalConfig(
   }
   if (!canonical.fields || canonical.fields.length === 0) {
     return "Form must have at least one field";
+  }
+  const settings = canonical.settings;
+  const discussion = settings?.discussion as
+    | Record<string, unknown>
+    | undefined;
+  if (discussion?.enabled === true) {
+    if (settings?.submissionRetentionDays !== null) {
+      return "Discussion forms must use forever retention";
+    }
+    const fieldNames = new Set(
+      (canonical.fields as Array<Record<string, unknown>>)
+        .map((field) =>
+          typeof field.name === "string" ? field.name.trim() : "",
+        )
+        .filter(Boolean),
+    );
+    if (!fieldNames.has(String(discussion.authorNameField || ""))) {
+      return "Discussion author field must reference a form field";
+    }
+    if (!fieldNames.has(String(discussion.bodyField || ""))) {
+      return "Discussion body field must reference a form field";
+    }
   }
 
   return null;

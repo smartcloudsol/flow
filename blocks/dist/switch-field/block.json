@@ -1,0 +1,86 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/switch-field",
+  "version": "1.0.0",
+  "title": "Switch field",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "editor-table",
+  "description": "Switch toggle field for Flow Form.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "default": "toggle"
+    },
+    "label": {
+      "type": "string",
+      "default": "Switch"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "size": {
+      "type": "string"
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "labelPosition": {
+      "type": "string",
+      "default": "right"
+    },
+    "onLabel": {
+      "type": "string",
+      "default": ""
+    },
+    "offLabel": {
+      "type": "string",
+      "default": ""
+    },
+    "thumbIcon": {
+      "type": "string",
+      "default": ""
+    },
+    "withThumbIndicator": {
+      "type": "boolean",
+      "default": false
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "logicType": "all",
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

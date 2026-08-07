@@ -751,6 +751,86 @@ class Flow_Form_Widget extends Flow_Base_Widget
     }
 }
 
+class Flow_Discussion_Widget extends Flow_Base_Widget
+{
+    public function get_name()
+    {
+        return 'smartcloud_flow_discussion';
+    }
+
+    public function get_title()
+    {
+        return __('Flow Discussion', 'smartcloud-flow');
+    }
+
+    public function get_icon()
+    {
+        return 'eicon-comments';
+    }
+
+    protected function register_controls()
+    {
+        $this->start_controls_section('discussion', ['label' => __('Discussion', 'smartcloud-flow')]);
+        $this->add_control('pattern', [
+            'label' => __('Pattern', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT2,
+            'options' => $this->get_flow_pattern_options(),
+        ]);
+        $this->add_control('formId', ['label' => __('Form ID', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('discussionChannel', ['label' => __('Discussion channel', 'smartcloud-flow'), 'type' => \Elementor\Controls_Manager::TEXT]);
+        $this->add_control('contentTargetSource', [
+            'label' => __('Target source', 'smartcloud-flow'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'default' => 'wordpress-context',
+            'options' => [
+                'wordpress-context' => __('Current WordPress content', 'smartcloud-flow'),
+                'explicit' => __('Explicit content reference', 'smartcloud-flow'),
+                'canonical-url' => __('Canonical page URL', 'smartcloud-flow'),
+            ],
+        ]);
+        foreach (['targetNamespace' => __('Target namespace', 'smartcloud-flow'), 'targetType' => __('Target type', 'smartcloud-flow'), 'targetId' => __('Target ID', 'smartcloud-flow')] as $key => $label) {
+            $this->add_control($key, ['label' => $label, 'type' => \Elementor\Controls_Manager::TEXT]);
+        }
+        foreach (['pageSize' => 20, 'replyPageSize' => 10, 'replyPreviewLimit' => 2] as $key => $default) {
+            $this->add_control($key, ['label' => $key, 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => $default]);
+        }
+        foreach (['title', 'emptyMessage', 'loadingMessage', 'errorMessage', 'retryLabel', 'anonymousAuthorLabel', 'tombstoneLabel', 'replyLabel', 'cancelReplyLabel', 'loadMoreLabel', 'loadRepliesLabel', 'depthLimitLabel'] as $key) {
+            $this->add_control($key, ['label' => $key, 'type' => \Elementor\Controls_Manager::TEXT]);
+        }
+        $this->end_controls_section();
+    }
+
+    protected function render()
+    {
+        $settings = $this->get_settings_for_display();
+        $atts = array_filter([
+            'id' => $settings['pattern'] ?? '',
+            'formId' => $settings['formId'] ?? '',
+            'discussionChannel' => $settings['discussionChannel'] ?? '',
+            'contentTargetSource' => $settings['contentTargetSource'] ?? '',
+            'targetNamespace' => $settings['targetNamespace'] ?? '',
+            'targetType' => $settings['targetType'] ?? '',
+            'targetId' => $settings['targetId'] ?? '',
+            'pageSize' => $settings['pageSize'] ?? '',
+            'replyPageSize' => $settings['replyPageSize'] ?? '',
+            'replyPreviewLimit' => $settings['replyPreviewLimit'] ?? '',
+            'title' => $settings['title'] ?? '',
+            'emptyMessage' => $settings['emptyMessage'] ?? '',
+            'loadingMessage' => $settings['loadingMessage'] ?? '',
+            'errorMessage' => $settings['errorMessage'] ?? '',
+            'retryLabel' => $settings['retryLabel'] ?? '',
+            'anonymousAuthorLabel' => $settings['anonymousAuthorLabel'] ?? '',
+            'tombstoneLabel' => $settings['tombstoneLabel'] ?? '',
+            'replyLabel' => $settings['replyLabel'] ?? '',
+            'cancelReplyLabel' => $settings['cancelReplyLabel'] ?? '',
+            'loadMoreLabel' => $settings['loadMoreLabel'] ?? '',
+            'loadRepliesLabel' => $settings['loadRepliesLabel'] ?? '',
+            'depthLimitLabel' => $settings['depthLimitLabel'] ?? '',
+        ], fn($value) => $value !== '' && $value !== null);
+        smartcloud_flow_do_shortcode('smartcloud-flow-discussion', $atts);
+    }
+}
+
 class Flow_Content_Root_Widget extends Flow_Base_Widget
 {
     public function get_name()
@@ -1253,6 +1333,7 @@ class Flow_Modal_Widget extends Flow_Base_Widget
 
 add_action('elementor/widgets/register', static function ($m) {
     $m->register(new \SmartCloud\WPSuite\Flow\Flow_Form_Widget());
+    $m->register(new \SmartCloud\WPSuite\Flow\Flow_Discussion_Widget());
     $m->register(new \SmartCloud\WPSuite\Flow\Flow_Content_Root_Widget());
     $m->register(new \SmartCloud\WPSuite\Flow\Flow_Modal_Widget());
 });

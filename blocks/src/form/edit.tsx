@@ -77,6 +77,12 @@ type EditableFormAction = {
   enabled: boolean;
 };
 
+function hasNamedField(
+  field: FieldConfig,
+): field is FieldConfig & { name: string; label?: string } {
+  return "name" in field && typeof field.name === "string";
+}
+
 const EMPTY_FORM_ACTION: EditableFormAction = {
   actionKey: "",
   label: "",
@@ -1342,6 +1348,185 @@ export default function Edit({
               TEXT_DOMAIN,
             )}
           />
+        </PanelBody>
+
+        <PanelBody
+          title={__("Content binding and discussion", TEXT_DOMAIN)}
+          initialOpen={false}
+        >
+          <SelectControl
+            label={__("Submission retention", TEXT_DOMAIN)}
+            value={attributes.submissionRetentionMode || "inherit"}
+            options={[
+              { label: __("Inherit backend default", TEXT_DOMAIN), value: "inherit" },
+              { label: __("Specific number of days", TEXT_DOMAIN), value: "days" },
+              { label: __("Forever", TEXT_DOMAIN), value: "forever" },
+            ]}
+            onChange={(value) =>
+              setAttributes({
+                submissionRetentionMode: value as
+                  | "inherit"
+                  | "days"
+                  | "forever",
+              })
+            }
+          />
+          {attributes.submissionRetentionMode === "days" ? (
+            <TextControl
+              type="number"
+              label={__("Retention days", TEXT_DOMAIN)}
+              min={1}
+              max={3650}
+              value={String(attributes.submissionRetentionDays ?? 30)}
+              onChange={(value) =>
+                setAttributes({ submissionRetentionDays: Number(value) })
+              }
+            />
+          ) : null}
+          <ToggleControl
+            label={__("Bind submissions to page content", TEXT_DOMAIN)}
+            checked={attributes.contentBindingEnabled === true}
+            onChange={(contentBindingEnabled) =>
+              setAttributes({ contentBindingEnabled })
+            }
+          />
+          <ToggleControl
+            label={__("Require a content target", TEXT_DOMAIN)}
+            checked={attributes.contentTargetRequired === true}
+            onChange={(contentTargetRequired) =>
+              setAttributes({ contentTargetRequired })
+            }
+          />
+          <SelectControl
+            label={__("Content target source", TEXT_DOMAIN)}
+            value={attributes.contentTargetSource || "wordpress-context"}
+            options={[
+              { label: __("Current WordPress content", TEXT_DOMAIN), value: "wordpress-context" },
+              { label: __("Explicit content reference", TEXT_DOMAIN), value: "explicit" },
+              { label: __("Canonical page URL", TEXT_DOMAIN), value: "canonical-url" },
+            ]}
+            onChange={(contentTargetSource) =>
+              setAttributes({
+                contentTargetSource: contentTargetSource as
+                  | "wordpress-context"
+                  | "explicit"
+                  | "canonical-url",
+              })
+            }
+          />
+          {attributes.contentTargetSource === "explicit" ? (
+            <>
+              <TextControl
+                label={__("Target namespace", TEXT_DOMAIN)}
+                value={attributes.targetNamespace || ""}
+                onChange={(targetNamespace) => setAttributes({ targetNamespace })}
+              />
+              <TextControl
+                label={__("Target type", TEXT_DOMAIN)}
+                value={attributes.targetType || ""}
+                onChange={(targetType) => setAttributes({ targetType })}
+              />
+              <TextControl
+                label={__("Target ID", TEXT_DOMAIN)}
+                value={attributes.targetId || ""}
+                onChange={(targetId) => setAttributes({ targetId })}
+              />
+            </>
+          ) : null}
+          <ToggleControl
+            label={__("Enable discussion", TEXT_DOMAIN)}
+            checked={attributes.discussionEnabled === true}
+            onChange={(discussionEnabled) =>
+              setAttributes({
+                discussionEnabled,
+                ...(discussionEnabled
+                  ? {
+                      submissionRetentionMode: "forever",
+                      contentBindingEnabled: true,
+                      contentTargetRequired: true,
+                    }
+                  : {}),
+              })
+            }
+            help={__(
+              "Discussion requires forever retention and a required content target.",
+              TEXT_DOMAIN,
+            )}
+          />
+          {attributes.discussionEnabled ? (
+            <>
+              <ToggleControl
+                label={__("Allow replies", TEXT_DOMAIN)}
+                checked={attributes.discussionAllowReplies !== false}
+                onChange={(discussionAllowReplies) =>
+                  setAttributes({ discussionAllowReplies })
+                }
+              />
+              <TextControl
+                type="number"
+                min={1}
+                max={5}
+                label={__("Maximum reply depth", TEXT_DOMAIN)}
+                value={String(attributes.discussionMaxReplyDepth ?? 5)}
+                onChange={(value) =>
+                  setAttributes({ discussionMaxReplyDepth: Number(value) })
+                }
+              />
+              <SelectControl
+                label={__("Moderation", TEXT_DOMAIN)}
+                value={attributes.discussionModerationMode || "required"}
+                options={[
+                  { label: __("Require moderation", TEXT_DOMAIN), value: "required" },
+                  { label: __("Publish automatically", TEXT_DOMAIN), value: "automatic" },
+                ]}
+                onChange={(discussionModerationMode) =>
+                  setAttributes({
+                    discussionModerationMode: discussionModerationMode as
+                      | "required"
+                      | "automatic",
+                  })
+                }
+              />
+              <SelectControl
+                label={__("Public author field", TEXT_DOMAIN)}
+                value={attributes.discussionAuthorNameField || "name"}
+                options={fields
+                  .filter(hasNamedField)
+                  .map((field) => ({
+                    label: String("label" in field && field.label ? field.label : field.name),
+                    value: String(field.name),
+                  }))}
+                onChange={(discussionAuthorNameField) =>
+                  setAttributes({ discussionAuthorNameField })
+                }
+              />
+              <SelectControl
+                label={__("Public body field", TEXT_DOMAIN)}
+                value={attributes.discussionBodyField || "comment"}
+                options={fields
+                  .filter(hasNamedField)
+                  .map((field) => ({
+                    label: String("label" in field && field.label ? field.label : field.name),
+                    value: String(field.name),
+                  }))}
+                onChange={(discussionBodyField) =>
+                  setAttributes({ discussionBodyField })
+                }
+              />
+              <TextControl
+                label={__("Discussion channel", TEXT_DOMAIN)}
+                value={attributes.discussionChannel || ""}
+                onChange={(discussionChannel) => setAttributes({ discussionChannel })}
+              />
+              <TextControl
+                label={__("Pending moderation message", TEXT_DOMAIN)}
+                value={attributes.pendingModerationMessage || ""}
+                onChange={(pendingModerationMessage) =>
+                  setAttributes({ pendingModerationMessage })
+                }
+              />
+            </>
+          ) : null}
         </PanelBody>
 
         <PanelBody title={__("Drafts", TEXT_DOMAIN)} initialOpen={false}>

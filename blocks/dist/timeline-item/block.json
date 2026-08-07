@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/timeline-item",
+  "version": "1.0.0",
+  "title": "Timeline.Item",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/timeline"
+  ],
+  "icon": "editor-ol-rtl",
+  "description": "A single item inside a Flow timeline.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "bullet": {
+      "type": "string",
+      "default": ""
+    },
+    "color": {
+      "type": "string",
+      "default": ""
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

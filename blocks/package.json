@@ -1,7 +1,7 @@
 {
   "name": "@smart-cloud/flow-blocks",
   "private": true,
-  "version": "1.1.14",
+  "version": "1.1.15",
   "type": "module",
   "license": "ISC",
   "scripts": {
@@ -25,7 +25,7 @@
     "@mantine/tiptap": "^8.3.18",
     "@monaco-editor/react": "^4.7.0",
     "@smart-cloud/ai-kit-core": "^1.5.3",
-    "@smart-cloud/flow-core": "^1.1.7",
+    "@smart-cloud/flow-core": "^1.1.8",
     "@smart-cloud/wpsuite-blocks": "^1.0.0",
     "@smart-cloud/wpsuite-core": "^2.3.2",
     "@tabler/icons-react": "^3.46.0",

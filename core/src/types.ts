@@ -187,7 +187,51 @@ export interface BackendCallOptions {
   signal?: AbortSignal;
   headers?: Record<string, string>;
   query?: Record<string, string | number | boolean>;
+  humanVerification?: boolean;
   onStatus?: (event: FlowStatusEvent) => void;
+}
+
+export interface ContentReference {
+  namespace: string;
+  type: string;
+  id: string;
+}
+
+export type ContentTargetSource =
+  | "wordpress-context"
+  | "explicit"
+  | "canonical-url";
+
+export type PublicationStatus = "pending" | "published" | "hidden" | "spam";
+export type PublicRenderState = "visible" | "tombstone";
+
+export interface PublicDiscussionItem {
+  submissionId: string;
+  parentSubmissionId: string | null;
+  threadRootSubmissionId: string;
+  replyDepth: number;
+  createdAt: string;
+  updatedAt?: string;
+  renderState: PublicRenderState;
+  authorName?: string;
+  body?: string;
+  directReplyCount: number;
+  totalReplyCount: number;
+  replyPreview?: PublicDiscussionItem[];
+  replyPreviewCursor?: string;
+}
+
+export interface PublicDiscussionPage {
+  items: PublicDiscussionItem[];
+  cursor?: string;
+}
+
+export interface DiscussionQuery {
+  contentRef: ContentReference;
+  limit?: number;
+  cursor?: string;
+  sortDir?: "asc" | "desc";
+  replyPreviewLimit?: number;
 }
 
 export type FlowStatusStep =
@@ -209,6 +253,10 @@ export class BackendError extends Error {
   constructor(
     message: string,
     public readonly decision?: unknown,
+    public readonly code?: string,
+    public readonly statusCode?: number,
+    public readonly requestId?: string,
+    public readonly retryable = false,
   ) {
     super(message);
     this.name = "BackendError";
@@ -232,7 +280,7 @@ export interface Backend<TResponse> {
     decision: CapabilityDecision,
     context: ContextKind,
     customPath: string,
-    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+    method: "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE",
     requestBody: unknown,
     options: BackendCallOptions,
   ) => Promise<TResponse>;

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/overflow-list",
+  "version": "1.0.0",
+  "title": "OverflowList",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "ellipsis",
+  "description": "Display the first few items inline and summarize the rest.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "maxVisible": {
+      "type": "number",
+      "default": 3
+    },
+    "maxVisibleItems": {
+      "type": "number",
+      "default": 3
+    },
+    "gap": {
+      "type": "string",
+      "default": "sm"
+    },
+    "layout": {
+      "type": "string",
+      "default": "horizontal"
+    },
+    "align": {
+      "type": "string"
+    },
+    "justify": {
+      "type": "string"
+    },
+    "overflowLabel": {
+      "type": "string",
+      "default": "more"
+    },
+    "overflowVariant": {
+      "type": "string",
+      "default": "light"
+    },
+    "overflowColor": {
+      "type": "string",
+      "default": ""
+    },
+    "overflowSize": {
+      "type": "string",
+      "default": "sm"
+    },
+    "overflowRadius": {
+      "type": "string",
+      "default": "xl"
+    },
+    "overflowAutoContrast": {
+      "type": "boolean",
+      "default": false
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

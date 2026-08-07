@@ -37,12 +37,20 @@ export const observe = () => {
     jQuery(document).trigger("smartcloud-flow-content-root-block", el.id);
   };
 
+  const mountDiscussion = (el: HTMLElement) => {
+    if (!el?.id || jQuery(el).data("rendered")) return;
+    document.dispatchEvent(new CustomEvent("smartcloud-flow:mount-discussions"));
+  };
+
   const mount = () => {
     jQuery(".smartcloud-flow-form").each((_idx, n) => {
       mountForm(n);
     });
     jQuery(".smartcloud-flow-content-root").each((_idx, n) => {
       mountContentRoot(n);
+    });
+    jQuery(".smartcloud-flow-discussion").each((_idx, n) => {
+      mountDiscussion(n);
     });
   };
 
@@ -58,6 +66,14 @@ export const observe = () => {
         "frontend/element_ready/shortcode.default",
         () => {
           mount();
+        },
+      );
+      elementorFrontend.hooks.addAction(
+        "frontend/element_ready/smartcloud_flow_discussion.default",
+        () => {
+          jQuery(".smartcloud-flow-discussion").each((_idx, n) => {
+            mountDiscussion(n);
+          });
         },
       );
       elementorFrontend.hooks.addAction(

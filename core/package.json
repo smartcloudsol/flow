@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "build:js": "tsup --minify",
     "build:types": "tsc -p tsconfig.types.json",
     "lint": "eslint 'src/**/*.ts' --report-unused-disable-directives --max-warnings 0",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "esbuild tests/backend.test.ts --bundle --platform=node --format=cjs --packages=external --outfile=.test-dist/backend.test.cjs && node --test .test-dist/backend.test.cjs",
     "release:npm": "WPSUITE_PREMIUM=true yarn build && npm publish --access=public --registry=https://registry.npmjs.org/"
   },
   "publishConfig": {

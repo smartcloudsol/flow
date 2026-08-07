@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/mark",
+  "version": "1.0.0",
+  "title": "Mark",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "marker",
+  "description": "Display highlighted inline text inside Flow forms.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "content": {
+      "type": "string",
+      "default": "Only this phrase should be marked inside the sentence."
+    },
+    "highlight": {
+      "type": "string",
+      "default": "this phrase"
+    },
+    "color": {
+      "type": "string",
+      "default": "yellow"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

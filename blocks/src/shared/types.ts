@@ -44,6 +44,25 @@ export interface FormAttributes {
   endpointPath?: string;
   endpointMethod?: "GET" | "POST" | "PUT" | "PATCH";
   endpointHeaders?: string;
+  submissionRetentionMode?: "inherit" | "days" | "forever";
+  submissionRetentionDays?: number;
+  contentBindingEnabled?: boolean;
+  contentTargetRequired?: boolean;
+  contentTargetSource?: "wordpress-context" | "explicit" | "canonical-url";
+  targetNamespace?: string;
+  targetType?: string;
+  targetId?: string;
+  discussionEnabled?: boolean;
+  discussionAllowReplies?: boolean;
+  discussionMaxReplyDepth?: number;
+  discussionModerationMode?: "required" | "automatic";
+  discussionAuthorNameField?: string;
+  discussionBodyField?: string;
+  discussionBodyMaxLength?: number;
+  discussionChannel?: string;
+  pendingModerationMessage?: string;
+  replyingToLabel?: string;
+  cancelReplyLabel?: string;
   actions?: FormActionDefinition[];
   autoReplyTemplateKey?: string;
   workflowIds?: string[];
@@ -58,8 +77,15 @@ export interface FormAttributes {
   classNames?: string[];
   fieldOverrides?: Record<string, Record<string, unknown>>;
   wpContext?: WordPressRuntimeContext;
+  contentRef?: ContentReference;
   configB64?: string;
   configFormat?: string;
+}
+
+export interface ContentReference {
+  namespace: string;
+  type: string;
+  id: string;
 }
 
 export interface FormStateContent {
@@ -1405,7 +1431,13 @@ export interface FormSubmitRequest {
 export interface FormSubmitResponse {
   submissionId: string;
   acceptedAt: string;
-  status: "accepted" | "rejected" | "submitted";
+  status: string;
+  publicationStatus?: "pending" | "published" | "hidden" | "spam";
+  contentRef?: ContentReference;
+  parentSubmissionId?: string | null;
+  threadRootSubmissionId?: string;
+  replyDepth?: number;
+  publicItem?: Record<string, unknown>;
   message?: string;
 }
 

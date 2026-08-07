@@ -6,7 +6,7 @@
  * Requires at least: 6.9
  * Tested up to:      7.0
  * Requires PHP:      8.1
- * Version:           1.1.20
+ * Version:           1.1.21
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.20';
+const VERSION = '1.1.21';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -41,6 +41,7 @@ final class Flow
     /** @var string[] */
     private array $blocks = [
         'form',
+        'discussion',
         'content-root',
         'modal',
         'operations',
@@ -128,10 +129,12 @@ final class Flow
 
         // Shortcode registration
         add_shortcode('smartcloud-flow-form', [$this, 'shortcodeFlowForm']);
+        add_shortcode('smartcloud-flow-discussion', [$this, 'shortcodeFlowDiscussion']);
         add_shortcode('smartcloud-flow-content-root', [$this, 'shortcodeContentRoot']);
         add_shortcode('smartcloud-flow-modal', [$this, 'shortcodeFlowModal']);
         add_filter('no_texturize_shortcodes', function ($shortcodes) {
             $shortcodes[] = 'smartcloud-flow-form';
+            $shortcodes[] = 'smartcloud-flow-discussion';
             $shortcodes[] = 'smartcloud-flow-content-root';
             $shortcodes[] = 'smartcloud-flow-modal';
             return $shortcodes;
@@ -400,12 +403,33 @@ final class Flow
             'draftresumetitle' => 'draftResumeTitle',
             'draftresumedescription' => 'draftResumeDescription',
             'draftsavesuccessmessage' => 'draftSaveSuccessMessage',
+            'submissionretentionmode' => 'submissionRetentionMode',
+            'submissionretentiondays' => 'submissionRetentionDays',
+            'contentbindingenabled' => 'contentBindingEnabled',
+            'contenttargetrequired' => 'contentTargetRequired',
+            'contenttargetsource' => 'contentTargetSource',
+            'targetnamespace' => 'targetNamespace',
+            'targettype' => 'targetType',
+            'targetid' => 'targetId',
+            'discussionenabled' => 'discussionEnabled',
+            'discussionallowreplies' => 'discussionAllowReplies',
+            'discussionmaxreplydepth' => 'discussionMaxReplyDepth',
+            'discussionmoderationmode' => 'discussionModerationMode',
+            'discussionauthornamefield' => 'discussionAuthorNameField',
+            'discussionbodyfield' => 'discussionBodyField',
+            'discussionbodymaxlength' => 'discussionBodyMaxLength',
+            'discussionchannel' => 'discussionChannel',
+            'pendingmoderationmessage' => 'pendingModerationMessage',
         );
         $boolean_override_keys = array(
             'hideFormOnSuccess',
             'allowDrafts',
             'showDraftResumePanel',
             'draftAllowDelete',
+            'contentBindingEnabled',
+            'contentTargetRequired',
+            'discussionEnabled',
+            'discussionAllowReplies',
         );
         foreach ($override_attribute_map as $shortcode_key => $attribute_key) {
             if (!array_key_exists($shortcode_key, $atts)) {
@@ -422,7 +446,7 @@ final class Flow
                 }
             }
 
-            if ($attribute_key === 'draftExpiryDays' && $value !== '' && $value !== null) {
+            if (in_array($attribute_key, array('draftExpiryDays', 'submissionRetentionDays', 'discussionMaxReplyDepth', 'discussionBodyMaxLength'), true) && $value !== '' && $value !== null) {
                 $value = intval($value);
             }
 
@@ -486,6 +510,23 @@ final class Flow
             'draftResumeTitle' => null,
             'draftResumeDescription' => null,
             'draftSaveSuccessMessage' => null,
+            'submissionRetentionMode' => 'inherit',
+            'submissionRetentionDays' => 30,
+            'contentBindingEnabled' => false,
+            'contentTargetRequired' => false,
+            'contentTargetSource' => 'wordpress-context',
+            'targetNamespace' => null,
+            'targetType' => null,
+            'targetId' => null,
+            'discussionEnabled' => false,
+            'discussionAllowReplies' => true,
+            'discussionMaxReplyDepth' => 5,
+            'discussionModerationMode' => 'required',
+            'discussionAuthorNameField' => 'name',
+            'discussionBodyField' => 'comment',
+            'discussionBodyMaxLength' => 10000,
+            'discussionChannel' => null,
+            'pendingModerationMessage' => null,
             'colorMode' => null,
             'primaryColor' => null,
             'primaryShade' => null,
@@ -506,6 +547,84 @@ final class Flow
         );
 
         return $this->renderShortcodeBlock('smartcloud-flow/form', $form_block, $attrs, $is_preview);
+    }
+
+    /**
+     * Render a Flow discussion block stored in a synced pattern.
+     *
+     * @param array $atts
+     * @param string|null $content
+     */
+    public function shortcodeFlowDiscussion($atts, $content = null): string
+    {
+        $provided = array_change_key_case((array) $atts, CASE_LOWER);
+        $pattern_id = isset($provided['id']) ? intval($provided['id']) : 0;
+        if (!$pattern_id) {
+            return '<div class="smartcloud-flow-discussion-error">Missing pattern ID</div>';
+        }
+        $pattern_post = get_post($pattern_id);
+        if (!$pattern_post || $pattern_post->post_type !== 'wp_block') {
+            return '<div class="smartcloud-flow-discussion-error">Invalid pattern ID</div>';
+        }
+        $discussion_block = null;
+        foreach (parse_blocks($pattern_post->post_content) as $candidate) {
+            if (($candidate['blockName'] ?? '') === 'smartcloud-flow/discussion') {
+                $discussion_block = $candidate;
+                break;
+            }
+        }
+        if (!$discussion_block) {
+            return '<div class="smartcloud-flow-discussion-error">Pattern does not contain a Flow Discussion block</div>';
+        }
+        $defaults = array(
+            'formId' => null,
+            'contentTargetSource' => 'wordpress-context',
+            'targetNamespace' => null,
+            'targetType' => null,
+            'targetId' => null,
+            'discussionChannel' => null,
+            'pageSize' => 20,
+            'replyPageSize' => 10,
+            'replyPreviewLimit' => 2,
+            'initialReplyDepth' => 1,
+            'rootSortDirection' => 'desc',
+            'replySortDirection' => 'desc',
+            'title' => null,
+            'emptyMessage' => null,
+            'loadingMessage' => null,
+            'errorMessage' => null,
+            'retryLabel' => null,
+            'anonymousAuthorLabel' => null,
+            'tombstoneLabel' => null,
+            'replyLabel' => null,
+            'cancelReplyLabel' => null,
+            'loadMoreLabel' => null,
+            'loadRepliesLabel' => null,
+            'depthLimitLabel' => null,
+            'language' => null,
+            'direction' => null,
+            'colorMode' => null,
+            'primaryColor' => null,
+            'themeOverrides' => null,
+        );
+        $defaults = array_merge($defaults, (array) ($discussion_block['attrs'] ?? array()));
+        if (class_exists('FormSyncMeta')) {
+            $backend_form_id = FormSyncMeta::getFormId($pattern_id);
+            if ($backend_form_id && empty($provided['formid'])) {
+                $defaults['formId'] = $backend_form_id;
+            }
+        }
+        list($attrs, $is_preview) = $this->buildShortcodeBlockAttrs(
+            $provided,
+            $content,
+            $defaults
+        );
+        return $this->renderShortcodeBlock(
+            'smartcloud-flow/discussion',
+            $discussion_block,
+            $attrs,
+            $is_preview
+        );
     }
 
     /**

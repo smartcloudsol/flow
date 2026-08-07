@@ -71,6 +71,23 @@ export interface Submission {
     };
     metadata?: Record<string, unknown>;
     internalNotes?: string;
+    contentRef?: {
+        namespace: string;
+        type: string;
+        id: string;
+    };
+    contentTargetHash?: string;
+    parentSubmissionId?: string;
+    threadRootSubmissionId?: string;
+    replyDepth?: number;
+    ancestorSubmissionIds?: string[];
+    directReplyCountAll?: number;
+    descendantReplyCountAll?: number;
+    directReplyCountPublic?: number;
+    descendantReplyCountPublic?: number;
+    publicationStatus?: "pending" | "published" | "hidden" | "spam";
+    publicRenderState?: "visible" | "tombstone";
+    privacyPurgedAt?: string;
 }
 export interface SubmissionEvent {
     eventId?: string;
@@ -194,6 +211,13 @@ export interface SubmissionListQuery {
     email?: string;
     sortBy?: "createdAt" | "updatedAt" | "status";
     sortDir?: "asc" | "desc";
+    publicationStatus?: "pending" | "published" | "hidden" | "spam";
+    targetNamespace?: string;
+    targetType?: string;
+    targetId?: string;
+    parentSubmissionId?: string;
+    threadRootSubmissionId?: string;
+    contentBoundOnly?: boolean;
 }
 export interface ProcessNodeLayout {
     x: number;

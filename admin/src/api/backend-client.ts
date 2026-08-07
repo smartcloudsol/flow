@@ -56,6 +56,13 @@ export class FlowBackendClient {
       sortDir: query.sortDir,
       limit: query.pageSize,
       cursor: query.cursor,
+      publicationStatus: query.publicationStatus,
+      targetNamespace: query.targetNamespace,
+      targetType: query.targetType,
+      targetId: query.targetId,
+      parentSubmissionId: query.parentSubmissionId,
+      threadRootSubmissionId: query.threadRootSubmissionId,
+      contentBoundOnly: query.contentBoundOnly,
     });
     return this.request(`/submissions?${qs}`);
   }
@@ -79,7 +86,7 @@ export class FlowBackendClient {
   patchSubmission(
     formId: string,
     submissionId: string,
-    body: Partial<Submission>,
+    body: Partial<Submission> & { privacyPurge?: boolean },
   ): Promise<Submission> {
     return this.request(
       `/forms/${formId}/submissions/${submissionId}`,

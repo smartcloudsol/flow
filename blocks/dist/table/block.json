@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/table",
+  "version": "1.0.0",
+  "title": "Table",
+  "category": "smartcloud-flow",
+  "parent": [
+    "smartcloud-flow/form",
+    "smartcloud-flow/content-root",
+    "smartcloud-flow/stack",
+    "smartcloud-flow/group",
+    "smartcloud-flow/grid",
+    "smartcloud-flow/fieldset",
+    "smartcloud-flow/collapse",
+    "smartcloud-flow/visually-hidden",
+    "smartcloud-flow/wizard-step"
+  ],
+  "icon": "table-row-after",
+  "description": "Display a structured table with Flow content cells.",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "attributes": {
+    "caption": {
+      "type": "string",
+      "default": ""
+    },
+    "striped": {
+      "type": "boolean",
+      "default": false
+    },
+    "withTableBorder": {
+      "type": "boolean",
+      "default": true
+    },
+    "withColumnBorders": {
+      "type": "boolean",
+      "default": false
+    },
+    "horizontalSpacing": {
+      "type": "string",
+      "default": "sm"
+    },
+    "verticalSpacing": {
+      "type": "string",
+      "default": "xs"
+    },
+    "conditionalLogic": {
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "rules": []
+      }
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script"
+}

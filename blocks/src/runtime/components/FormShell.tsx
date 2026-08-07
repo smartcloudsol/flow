@@ -37,6 +37,7 @@ import {
 import { CheckIcon, CopyIcon } from "../../icons";
 import type {
   AiSuggestionsSubmissionMetadata,
+  ContentReference,
   FieldConfig,
   FileFieldConfig,
   FormAttributes,
@@ -86,6 +87,10 @@ import { formReducer, getInitialValues } from "../reducer";
 import { validateField, validateValues } from "../validation";
 import { FlowPoweredBy } from "./FlowPoweredBy";
 import { FieldRenderer } from "./field-renderers";
+import {
+  resolveFormContentReference,
+  sameContentReference,
+} from "../../form/content-reference";
 
 interface SubmissionMetaRuntime {
   submissionId?: string;
@@ -104,6 +109,18 @@ interface SubmissionMetaRuntime {
 }
 
 type CustomEndpointMethod = "GET" | "POST" | "PUT" | "PATCH";
+
+interface DiscussionReplyContext {
+  contentRef: ContentReference;
+  parentSubmissionId: string;
+  parentAuthorName?: string;
+  discussionChannel: string;
+}
+
+function newIdempotencyKey(): string {
+  return globalThis.crypto?.randomUUID?.() ??
+    `flow-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
 
 function isAbsoluteHttpUrl(value: string): boolean {
   return /^https?:\/\//i.test(value);
@@ -723,6 +740,12 @@ export function FormShell({
   const [formReturnIntent, setFormReturnIntent] =
     useState<FormReturnIntent>(null);
   const [scrollResetKey, setScrollResetKey] = useState(0);
+  const [replyContext, setReplyContext] =
+    useState<DiscussionReplyContext | null>(null);
+  const idempotencyAttemptRef = useRef<{
+    fingerprint: string;
+    key: string;
+  } | null>(null);
   const [lastCompletedAction, setLastCompletedAction] = useState<
     | "submit"
     | "save-draft"
@@ -732,6 +755,54 @@ export function FormShell({
     | null
   >(null);
   const effectiveResumeMode = isEditorPreview ? false : resumeMode;
+  const contentRef = useMemo(() => resolveFormContentReference(form), [form]);
+  const discussionChannel = useMemo(
+    () =>
+      form.discussionChannel?.trim() ||
+      `${form.formId || "form"}:${contentRef?.namespace || ""}:${contentRef?.type || ""}:${contentRef?.id || ""}`,
+    [contentRef, form.discussionChannel, form.formId],
+  );
+
+  useEffect(() => {
+    if (isEditorPreview || !form.formId) return;
+    const onReplyRequested = (rawEvent: Event) => {
+      const event = rawEvent as CustomEvent<{
+        formId?: string;
+        discussionChannel?: string;
+        contentRef?: ContentReference;
+        parentSubmissionId?: string;
+        parentAuthorName?: string;
+      }>;
+      const detail = event.detail;
+      if (
+        detail?.formId !== form.formId ||
+        detail.discussionChannel !== discussionChannel ||
+        !detail.parentSubmissionId ||
+        !sameContentReference(detail.contentRef, contentRef)
+      ) {
+        return;
+      }
+      setReplyContext({
+        contentRef: detail.contentRef as ContentReference,
+        parentSubmissionId: detail.parentSubmissionId,
+        ...(detail.parentAuthorName
+          ? { parentAuthorName: detail.parentAuthorName }
+          : {}),
+        discussionChannel,
+      });
+      idempotencyAttemptRef.current = null;
+    };
+    document.addEventListener(
+      "smartcloud-flow:discussion-reply-requested",
+      onReplyRequested,
+    );
+    return () => {
+      document.removeEventListener(
+        "smartcloud-flow:discussion-reply-requested",
+        onReplyRequested,
+      );
+    };
+  }, [contentRef, discussionChannel, form.formId, isEditorPreview]);
 
   const initialValues = useMemo(() => {
     const baseValues = getInitialValues(fields, form.wpContext);
@@ -1598,6 +1669,35 @@ export function FormShell({
                 state.aiSuggestions,
               ),
             },
+            ...(contentRef ? { contentRef } : {}),
+            ...(replyContext
+              ? { parentSubmissionId: replyContext.parentSubmissionId }
+              : {}),
+          };
+          if (
+            (form.contentBindingEnabled || form.discussionEnabled) &&
+            !contentRef
+          ) {
+            throw new Error(
+              form.errorMessage || "The content target is missing.",
+            );
+          }
+          const logicalFingerprint = JSON.stringify({
+            values: serializedValues,
+            contentRef: contentRef ?? null,
+            parentSubmissionId: replyContext?.parentSubmissionId ?? null,
+          });
+          if (
+            !idempotencyAttemptRef.current ||
+            idempotencyAttemptRef.current.fingerprint !== logicalFingerprint
+          ) {
+            idempotencyAttemptRef.current = {
+              fingerprint: logicalFingerprint,
+              key: newIdempotencyKey(),
+            };
+          }
+          const idempotencyHeaders = {
+            "Idempotency-Key": idempotencyAttemptRef.current.key,
           };
 
           const submissionSource =
@@ -1614,7 +1714,7 @@ export function FormShell({
               resolvedEndpointPath,
               endpointPayload,
               resolvedEndpointMethod,
-              resolvedEndpointHeaders,
+              { ...resolvedEndpointHeaders, ...idempotencyHeaders },
             );
           } else {
             const backend = await resolveBackend();
@@ -1642,17 +1742,22 @@ export function FormShell({
                 : `/forms/${encodeURIComponent(form.formId)}/submit`,
               "POST",
               submitRequest,
-              {},
+              { headers: idempotencyHeaders, humanVerification: true },
             )) as FormSubmitResponse;
           }
 
+          idempotencyAttemptRef.current = null;
+          setReplyContext(null);
           setDraftPassword(undefined);
           setLastSubmitResponse(response);
           setLastSubmissionSource(submissionSource);
           setLastCompletedAction("submit");
           dispatch({
             type: "SUBMIT_SUCCESS",
-            message: form.successMessage ?? response.message,
+            message:
+              response.publicationStatus === "pending"
+                ? form.pendingModerationMessage ?? response.message
+                : form.successMessage ?? response.message,
           });
           emitFormEvent("smartcloud-flow:submit-success", {
             action: "submit",
@@ -1660,6 +1765,16 @@ export function FormShell({
             submissionId: response.submissionId,
             status: response.status,
             acceptedAt: response.acceptedAt,
+            contentRef: response.contentRef ?? contentRef,
+            parentSubmissionId:
+              response.parentSubmissionId ??
+              replyContext?.parentSubmissionId ??
+              null,
+            threadRootSubmissionId: response.threadRootSubmissionId,
+            replyDepth: response.replyDepth,
+            publicationStatus: response.publicationStatus,
+            publicItem: response.publicItem,
+            discussionChannel,
             response,
           });
         } catch (error) {
@@ -1679,11 +1794,14 @@ export function FormShell({
       handleRequestFailure,
       initialValues,
       currentLanguage,
+      contentRef,
+      discussionChannel,
       prepareSerializableValues,
       requestViewScrollReset,
       resolvedEndpointHeaders,
       resolvedEndpointMethod,
       resolvedEndpointPath,
+      replyContext,
       resumeDraftIdInput,
       resumePasswordInput,
       state.aiSuggestions,
@@ -2028,6 +2146,28 @@ export function FormShell({
                 >
                   <Stack>
                     <Text fw={600}>{form.formName}</Text>
+                    {replyContext ? (
+                      <Alert color="blue" role="status" aria-live="polite">
+                        <Group justify="space-between" align="center">
+                          <Text size="sm">
+                            {form.replyingToLabel}
+                            {replyContext.parentAuthorName
+                              ? ` ${replyContext.parentAuthorName}`
+                              : ""}
+                          </Text>
+                          <Button
+                            size="xs"
+                            variant="subtle"
+                            onClick={() => {
+                              setReplyContext(null);
+                              idempotencyAttemptRef.current = null;
+                            }}
+                          >
+                            {form.cancelReplyLabel}
+                          </Button>
+                        </Group>
+                      </Alert>
+                    ) : null}
                     {state.message && state.status !== "idle" ? (
                       <Alert
                         color={state.status === "success" ? "green" : "red"}

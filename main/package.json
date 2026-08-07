@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-main",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "type": "module",
   "license": "ISC",
   "scripts": {
@@ -16,7 +16,7 @@
     "check-licenses": "wp-scripts check-licenses --prod"
   },
   "dependencies": {
-    "@smart-cloud/flow-core": "^1.1.7",
+    "@smart-cloud/flow-core": "^1.1.8",
     "@smart-cloud/wpsuite-core": "^2.3.2"
   },
   "peerDependencies": {

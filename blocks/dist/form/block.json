@@ -1,0 +1,250 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "smartcloud-flow/form",
+  "version": "1.1.8",
+  "title": "Flow Form",
+  "category": "smartcloud-flow",
+  "icon": "feedback",
+  "description": "Form container block rendered as a single React tree.",
+  "supports": {
+    "html": false
+  },
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
+  "attributes": {
+    "formId": {
+      "type": "string",
+      "role": "content"
+    },
+    "formName": {
+      "type": "string",
+      "role": "content",
+      "default": "Contact us"
+    },
+    "submitLabel": {
+      "type": "string",
+      "role": "content",
+      "default": "Send"
+    },
+    "successMessage": {
+      "type": "string",
+      "role": "content",
+      "default": "Thanks, we received your message."
+    },
+    "errorMessage": {
+      "type": "string",
+      "role": "content",
+      "default": "Unable to send the form right now."
+    },
+    "hideFormOnSuccess": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "endpointPath": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "endpointMethod": {
+      "type": "string",
+      "role": "content",
+      "default": "POST"
+    },
+    "endpointHeaders": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "submissionRetentionMode": {
+      "type": "string",
+      "role": "content",
+      "default": "inherit"
+    },
+    "submissionRetentionDays": {
+      "type": "number",
+      "role": "content",
+      "default": 30
+    },
+    "contentBindingEnabled": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "contentTargetRequired": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "contentTargetSource": {
+      "type": "string",
+      "role": "content",
+      "default": "wordpress-context"
+    },
+    "targetNamespace": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "targetType": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "targetId": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "discussionEnabled": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "discussionAllowReplies": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "discussionMaxReplyDepth": {
+      "type": "number",
+      "role": "content",
+      "default": 5
+    },
+    "discussionModerationMode": {
+      "type": "string",
+      "role": "content",
+      "default": "required"
+    },
+    "discussionAuthorNameField": {
+      "type": "string",
+      "role": "content",
+      "default": "name"
+    },
+    "discussionBodyField": {
+      "type": "string",
+      "role": "content",
+      "default": "comment"
+    },
+    "discussionBodyMaxLength": {
+      "type": "number",
+      "role": "content",
+      "default": 10000
+    },
+    "discussionChannel": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "pendingModerationMessage": {
+      "type": "string",
+      "role": "content",
+      "default": "Your submission is awaiting moderation."
+    },
+    "replyingToLabel": {
+      "type": "string",
+      "role": "content",
+      "default": "Replying to"
+    },
+    "cancelReplyLabel": {
+      "type": "string",
+      "role": "content",
+      "default": "Cancel reply"
+    },
+    "language": {
+      "type": "string",
+      "role": "content"
+    },
+    "direction": {
+      "type": "string",
+      "role": "content"
+    },
+    "colorMode": {
+      "type": "string",
+      "role": "content",
+      "default": "light"
+    },
+    "primaryColor": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "primaryShade": {
+      "type": "object",
+      "role": "content",
+      "default": {}
+    },
+    "colors": {
+      "type": "object",
+      "role": "content",
+      "default": {}
+    },
+    "themeOverrides": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "allowDrafts": {
+      "type": "boolean",
+      "role": "content",
+      "default": false
+    },
+    "showDraftResumePanel": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "draftExpiryDays": {
+      "type": "number",
+      "role": "content",
+      "default": 30
+    },
+    "draftAllowDelete": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "draftResumeTitle": {
+      "type": "string",
+      "role": "content",
+      "default": "Continue a saved form"
+    },
+    "draftResumeDescription": {
+      "type": "string",
+      "role": "content",
+      "default": "Enter your draft ID and password to continue, or start a new form."
+    },
+    "draftSaveSuccessMessage": {
+      "type": "string",
+      "role": "content",
+      "default": "Draft saved. Keep your draft ID and password to continue later."
+    },
+    "actions": {
+      "type": "array",
+      "role": "content",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "autoReplyTemplateKey": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
+    "workflowIds": {
+      "type": "array",
+      "role": "content",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "editorScript": "smartcloud-flow-blocks-editor-script",
+  "viewScript": "smartcloud-flow-view-script",
+  "render": "file:./render.php"
+}

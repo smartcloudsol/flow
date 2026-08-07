@@ -19,10 +19,10 @@ final class Provider extends Product_Provider_Base
     private const REACT_FALLBACK_BLOCK = 'wpsuite/react-fallback';
 
     /** @var string[] */
-    private array $components = array('form', 'content-root', 'success-state', 'modal-gallery');
+    private array $components = array('form', 'discussion', 'content-root', 'success-state', 'modal-gallery');
 
     /** @var string[] */
-    private array $root_blocks = array('smartcloud-flow/form', 'smartcloud-flow/content-root', 'smartcloud-flow/modal');
+    private array $root_blocks = array('smartcloud-flow/form', 'smartcloud-flow/discussion', 'smartcloud-flow/content-root', 'smartcloud-flow/modal');
 
     /** @var string[] */
     private array $modal_gallery_blocks = array('smartcloud-flow/modal', 'smartcloud-flow/gallery');
@@ -145,7 +145,7 @@ final class Provider extends Product_Provider_Base
         $block_names = array_merge($this->all_owned_blocks(), array('core/group', 'core/image'));
         $block_status = $this->block_registration_status($block_names);
         $missing = array();
-        foreach (array('smartcloud-flow/form', 'smartcloud-flow/content-root', 'smartcloud-flow/success-state') as $required) {
+        foreach (array('smartcloud-flow/form', 'smartcloud-flow/discussion', 'smartcloud-flow/content-root', 'smartcloud-flow/success-state') as $required) {
             if (empty($block_status[$required])) {
                 $missing[] = 'block-not-registered:' . $required;
             }
@@ -172,6 +172,12 @@ final class Provider extends Product_Provider_Base
                     'runtime_ready' => empty($missing),
                     'missing_requirements' => $missing,
                 ),
+                'discussion' => array(
+                    'runtime_ready' => !empty($block_status['smartcloud-flow/discussion']) && !empty($backend['backend_sync_enabled']),
+                    'missing_requirements' => !empty($block_status['smartcloud-flow/discussion'])
+                        ? array()
+                        : array('block-not-registered:smartcloud-flow/discussion'),
+                ),
                 'success-state' => array(
                     'runtime_ready' => !empty($block_status['smartcloud-flow/success-state']),
                     'missing_requirements' => !empty($block_status['smartcloud-flow/success-state'])
@@ -196,6 +202,7 @@ final class Provider extends Product_Provider_Base
             'contract_version' => $this->contract_version,
             'components' => array(
                 array('id' => 'form', 'label' => 'Flow form', 'block_names' => array('smartcloud-flow/form'), 'materializable' => true),
+                array('id' => 'discussion', 'label' => 'Flow discussion', 'block_names' => array('smartcloud-flow/discussion'), 'materializable' => true),
                 array('id' => 'content-root', 'label' => 'Flow content root', 'block_names' => array('smartcloud-flow/content-root'), 'materializable' => true),
                 array('id' => 'success-state', 'label' => 'Flow success state', 'block_names' => array('smartcloud-flow/success-state'), 'materializable' => true),
                 array(
@@ -222,6 +229,7 @@ final class Provider extends Product_Provider_Base
 
         $block_names = match ($component) {
             'form' => array_merge(array('smartcloud-flow/form'), array_values($this->field_type_blocks), array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta')),
+            'discussion' => array('smartcloud-flow/discussion'),
             'content-root' => array_merge(array('smartcloud-flow/content-root'), $this->content_blocks),
             default => array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta'),
         };
@@ -254,6 +262,7 @@ final class Provider extends Product_Provider_Base
         $spec = is_array($input['spec'] ?? null) ? $input['spec'] : array();
         $blocks = match ($component) {
             'form' => $this->materialize_form($spec),
+            'discussion' => $this->materialize_discussion($spec),
             'content-root' => $this->materialize_content_root($spec),
             'modal-gallery' => $this->materialize_modal_gallery($spec),
             default => $this->materialize_success_state($spec),
@@ -349,6 +358,20 @@ final class Provider extends Product_Provider_Base
         }
 
         return array($this->transparent_block('smartcloud-flow/content-root', $attrs, $children));
+    }
+
+    private function materialize_discussion(array $spec): array|WP_Error
+    {
+        $attrs = $this->filter_attrs($this->plugin_path, 'smartcloud-flow/discussion', $spec);
+        foreach (array('title', 'emptyMessage', 'loadingMessage', 'errorMessage', 'retryLabel', 'anonymousAuthorLabel', 'tombstoneLabel', 'replyLabel', 'cancelReplyLabel', 'loadMoreLabel', 'loadRepliesLabel', 'depthLimitLabel') as $required_label) {
+            if (!isset($attrs[$required_label]) || trim((string) $attrs[$required_label]) === '') {
+                return new WP_Error(
+                    'smartcloud_flow_discussion_label_required',
+                    sprintf(__('Discussion attribute %s must contain authored visible text.', 'smartcloud-flow'), $required_label)
+                );
+            }
+        }
+        return array($this->transparent_block('smartcloud-flow/discussion', $attrs, array()));
     }
 
     private function materialize_success_state(array $spec): array
