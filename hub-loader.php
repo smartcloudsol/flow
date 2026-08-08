@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 use SmartCloud\WPSuite\Flow\Logger;
 
-const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.10';
+const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.11';
 
 final class FlowHubLoader
 {
@@ -161,18 +161,38 @@ final class FlowHubLoader
         $fallback_parent = SMARTCLOUD_WPSUITE_CANONICAL_SLUG;
         $owner_option = SMARTCLOUD_WPSUITE_CANONICAL_SLUG . '/top-menu-owner';
         $legacy_owner_option = SMARTCLOUD_WPSUITE_LEGACY_SLUG . '/top-menu-owner';
+        $site_id = get_current_blog_id();
 
-        $owner = get_option($owner_option); // may be string or false/null
-        $owner_version = get_option($owner_option . '/version') ?? "1.0.0";
+        $get_blog_option = static function (string $name, $default = '') use ($site_id) {
+            if (is_multisite()) {
+                return get_blog_option($site_id, $name, $default);
+            }
+            return get_option($name, $default);
+        };
+        $update_blog_option = static function (string $name, $value, bool $autoload = false) use ($site_id) {
+            if (is_multisite()) {
+                return update_blog_option($site_id, $name, $value);
+            }
+            return update_option($name, $value, $autoload);
+        };
+
+        $owner = $get_blog_option($owner_option, '');
+        $owner_version = $get_blog_option($owner_option . '/version', '1.0.0');
         if (empty($owner)) {
-            $legacy_owner = get_option($legacy_owner_option);
+            $legacy_owner = $get_blog_option($legacy_owner_option, '');
             if (!empty($legacy_owner)) {
                 $owner = $legacy_owner;
-                $owner_version = get_option($legacy_owner_option . '/version') ?? "1.0.0";
-                add_option($owner_option, $owner, '', false);
-                add_option($owner_option . '/version', $owner_version, '', false);
+                $owner_version = $get_blog_option($legacy_owner_option . '/version', '1.0.0');
+                $update_blog_option($owner_option, $owner, false);
+                $update_blog_option($owner_option . '/version', $owner_version, false);
             }
         }
+        $set_owner = static function (string $plugin, string $version) use ($owner_option, $legacy_owner_option, $update_blog_option): void {
+            $update_blog_option($owner_option, $plugin, false);
+            $update_blog_option($owner_option . '/version', $version, false);
+            $update_blog_option($legacy_owner_option, $plugin, false);
+            $update_blog_option($legacy_owner_option . '/version', $version, false);
+        };
         $owner_missing = empty($owner);
         $owner_is_me = ($owner === $this->plugin);
 
@@ -188,7 +208,11 @@ final class FlowHubLoader
         $plugin_dir = plugin_dir_path(__DIR__);
         $owner_plugin = ltrim(str_replace('\\/', '/', wp_unslash((string) $owner)), '/\\');
         $owner_plugin_path = wp_normalize_path(untrailingslashit($plugin_dir) . '/' . $owner_plugin);
-        $active_valid_plugins = array_map('wp_normalize_path', wp_get_active_and_valid_plugins());
+        $active_valid_plugins = wp_get_active_and_valid_plugins();
+        if (is_multisite()) {
+            $active_valid_plugins = array_merge($active_valid_plugins, wp_get_active_network_plugins());
+        }
+        $active_valid_plugins = array_map('wp_normalize_path', $active_valid_plugins);
 
         $owner_is_active = !empty($owner_plugin) && is_plugin_active($owner_plugin);
         $owner_exists = !empty($owner_plugin) && file_exists($owner_plugin_path);
@@ -209,10 +233,7 @@ final class FlowHubLoader
 
         if ($runtime_already_loaded) {
             if ($owner_missing || $owner_inactive || $owner_version_is_smaller) {
-                update_option($owner_option, $this->plugin, false);
-                update_option($owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
-                update_option($legacy_owner_option, $this->plugin, false);
-                update_option($legacy_owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+                $set_owner($this->plugin, SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION);
             }
             return false;
         }
@@ -254,10 +275,7 @@ final class FlowHubLoader
                     $this->admin = new HubAdmin();
                 }
                 if (!$owner_is_me || !$owner_version_equals) {
-                    update_option($owner_option, $this->plugin, false);
-                    update_option($owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
-                    update_option($legacy_owner_option, $this->plugin, false);
-                    update_option($legacy_owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+                    $set_owner($this->plugin, SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION);
 
                     Logger::info('Hub ownership registered in database', [
                         'plugin' => $this->plugin,
@@ -267,14 +285,11 @@ final class FlowHubLoader
             } else {
                 Logger::debug('Hub ownership race lost - another plugin already claimed', [
                     'plugin' => $this->plugin,
-                    'winner' => get_option($owner_option) ?? 'unknown'
+                    'winner' => $get_blog_option($owner_option, 'unknown')
                 ]);
             }
             if (!$owner_is_me && $owner_version_is_smaller) {
-                update_option($owner_option, $this->plugin, false);
-                update_option($owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
-                update_option($legacy_owner_option, $this->plugin, false);
-                update_option($legacy_owner_option . '/version', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION, false);
+                $set_owner($this->plugin, SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION);
 
                 Logger::info('Hub ownership updated due to version upgrade', [
                     'plugin' => $this->plugin,

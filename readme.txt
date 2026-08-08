@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.21
+Stable tag: 1.1.22
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.22 =
+* Multisite: Store shared Hub ownership per site and recognize network-activated owners.
+
 = 1.1.21 =
 * Feature: Added content-bound submissions, nested public discussions, moderation, tombstones, reply counters, and backend-powered discussion rendering.
 * Reliability: Added idempotent transactional discussion writes, per-form retention, TTL payload cleanup, and operational alarms.
@@ -349,6 +352,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.22 =
+Recommended for multisite installations using the shared WP Suite Hub.
 
 = 1.1.21 =
 Adds content-bound discussion support and the associated backend retention, moderation, and cleanup controls.
