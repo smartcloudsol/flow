@@ -1179,15 +1179,6 @@ export function FormShell({
       accountId?: string,
       siteId?: string,
     ) => {
-      const formId = form.formId;
-      if (!formId) {
-        throw new Error(
-          I18n.get(
-            "Form ID is missing. Please ensure the form is properly synced with the backend.",
-          ),
-        );
-      }
-
       const nextValues = { ...rawValues };
       for (const fileField of fileFields) {
         const rawValue = nextValues[fileField.name];
@@ -1199,6 +1190,15 @@ export function FormShell({
 
         if (selectedFiles.length === 0) {
           continue;
+        }
+
+        const formId = form.formId;
+        if (!formId) {
+          throw new Error(
+            I18n.get(
+              "Form ID is missing. Please ensure the form is properly synced with the backend.",
+            ),
+          );
         }
 
         if (!accountId || !siteId) {
@@ -1628,14 +1628,6 @@ export function FormShell({
 
         dispatch({ type: "SET_STATUS", status: "submitting" });
         try {
-          if (!form.formId) {
-            throw new Error(
-              I18n.get(
-                "Form ID is missing. Please ensure the form is properly synced with the backend.",
-              ),
-            );
-          }
-
           let wpSuiteSiteSettings = {} as SiteSettings;
           if (typeof WpSuite !== "undefined") {
             wpSuiteSiteSettings = WpSuite.siteSettings;
@@ -1717,6 +1709,14 @@ export function FormShell({
               { ...resolvedEndpointHeaders, ...idempotencyHeaders },
             );
           } else {
+            const formId = form.formId;
+            if (!formId) {
+              throw new Error(
+                I18n.get(
+                  "Form ID is missing. Please ensure the form is properly synced with the backend.",
+                ),
+              );
+            }
             const backend = await resolveBackend();
 
             if (!backend.available) {
@@ -1737,9 +1737,9 @@ export function FormShell({
               "frontend",
               draftSubmissionId && draftPassword
                 ? `/forms/${encodeURIComponent(
-                    form.formId,
+                    formId,
                   )}/drafts/${encodeURIComponent(draftSubmissionId)}/submit`
-                : `/forms/${encodeURIComponent(form.formId)}/submit`,
+                : `/forms/${encodeURIComponent(formId)}/submit`,
               "POST",
               submitRequest,
               { headers: idempotencyHeaders, humanVerification: true },

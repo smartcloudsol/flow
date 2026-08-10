@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.22
+Stable tag: 1.1.23
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,11 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.23 =
+* Compatibility: Matched Composer-generated field payloads to the current Gutenberg save contract so generated Flow forms open without block recovery.
+* Submission: Allowed non-file forms to post directly to an absolute custom endpoint without requiring a backend form ID.
+* Editor: Bypassed backend form sync and backend workflow controls when a form uses a custom endpoint.
+
 = 1.1.22 =
 * Multisite: Store shared Hub ownership per site and recognize network-activated owners.
 
@@ -352,6 +357,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.23 =
+Recommended for generated forms and sites that submit directly to a custom HTTPS endpoint.
 
 = 1.1.22 =
 Recommended for multisite installations using the shared WP Suite Hub.

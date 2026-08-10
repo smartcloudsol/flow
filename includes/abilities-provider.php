@@ -636,6 +636,14 @@ final class Provider extends Product_Provider_Base
         if (array_key_exists('hidden', $attrs) && $attrs['hidden'] === false) {
             unset($attrs['hidden']);
         }
+        $conditional_logic = $attrs['conditionalLogic'] ?? null;
+        if (
+            is_array($conditional_logic)
+            && ($conditional_logic['enabled'] ?? false) !== true
+            && (!isset($conditional_logic['rules']) || !is_array($conditional_logic['rules']) || $conditional_logic['rules'] === array())
+        ) {
+            unset($attrs['conditionalLogic']);
+        }
         if (in_array($type, array('select', 'radio', 'tags'), true)) {
             $options_text = (string) ($attrs['optionsText'] ?? '');
             unset($attrs['optionsText']);

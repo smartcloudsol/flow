@@ -4990,19 +4990,19 @@
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/flow-core@^1.1.8":
-  version "1.1.8"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.8.tgz#19833d936b97044d7fec2e273d399e6a73657850"
-  integrity sha512-04rAlml3cMdHsFB03zOp16dxLZv+OOJbP1Av3y6JQ5k9mRW5lFkFdq0k/5IwujYwJ18V49qM8fH1B9Bmz5suQw==
+"@smart-cloud/flow-core@^1.1.9":
+  version "1.1.9"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.9.tgz#d935aff4b5b47bf1aa69be92e639ae2258b74a9b"
+  integrity sha512-x4SOERYy4HMr5x8vGzvDsjAc1hpcj6v9S+3kyeZMe5a3AHsv4L2NJuoBxkyG5zXc58sACoseFl04QDdvCwpcZw==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.3.3"
+    "@smart-cloud/gatey-core" "^2.3.4"
     "@smart-cloud/wpsuite-core" "^2.3.2"
     aws-amplify "^6.20.0"
 
-"@smart-cloud/gatey-core@^2.3.3":
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.3.tgz#5419cd60f5b9bb24c8071519f7ec05005b69b57c"
-  integrity sha512-dIpJQMWkZ5DWsRtdDL26Ybec3qs6u0rfoWO7TjNlNxqLH4ztWLONqXuoHt0zqr4heo2K5E5yLSpp93BQHuIuug==
+"@smart-cloud/gatey-core@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.4.tgz#b465f44dd7fa8d1299b75b11e47f86fdd888cf03"
+  integrity sha512-Fdx3NZThXaZjqIB/n0zalvLVmTbJ7j9TMApbaR69yVjn+4o/kUJC1nKWSUvLVH/ONyXjJxoB5MXvR632hNzsIQ==
   dependencies:
     "@smart-cloud/wpsuite-core" "^2.3.2"
 
@@ -10568,10 +10568,10 @@ domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@3.2.7, dompurify@^3.4.12:
-  version "3.4.12"
-  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.12.tgz#6fa2265e9bbdce882c4ace4107626051b448ffa8"
-  integrity sha512-zQvGet8Z2sWbQhCmfFz/T5QWH2oBmjnqK3qvOjaqaNLrLEF912WamU+ohnTp0TCep/MFVHpdJuCZEdFOdTnEFg==
+dompurify@3.2.7, dompurify@^3.4.13:
+  version "3.4.13"
+  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.13.tgz#fc28949d59f92d62e28a3a764bcbeee35897a1be"
+  integrity sha512-2vmYIoqjze2d+kakP8S/nS5shfsl587kzwEjcGlTdiksUVgFHnFCsLYDVj/JNqJVOQZGSYBTmuycv0PodwmnMQ==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 

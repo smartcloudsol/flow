@@ -2459,10 +2459,15 @@
     "@babel/plugin-transform-modules-commonjs" "^7.29.7"
     "@babel/plugin-transform-typescript" "^7.29.7"
 
-"@babel/runtime@^7.12.5", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.13", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.7":
+"@babel/runtime@^7.12.5", "@babel/runtime@^7.18.3", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.7":
   version "7.28.6"
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.28.6.tgz"
   integrity sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==
+
+"@babel/runtime@^7.20.13":
+  version "7.29.7"
+  resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.7.tgz#12022450c45a4da6d8d8287b18a4ff2ddb23f768"
+  integrity sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==
 
 "@babel/runtime@^7.29.2":
   version "7.29.2"
@@ -3064,7 +3069,7 @@
   dependencies:
     "@floating-ui/dom" "^1.6.1"
 
-"@floating-ui/react-dom@^2.0.0", "@floating-ui/react-dom@^2.0.8":
+"@floating-ui/react-dom@^2.0.0", "@floating-ui/react-dom@^2.0.8", "@floating-ui/react-dom@^2.1.9":
   version "2.1.9"
   resolved "https://registry.npmjs.org/@floating-ui/react-dom/-/react-dom-2.1.9.tgz#f42a5f469ea56d6f2e2751efa1cf936243a87355"
   integrity sha512-JDjEFGCpImxDCA7JJKviA0M9+RtmJdj0m/NVU5IMgBK+AmZouAQQ7/+2GLH0GXXY0YMw9oXPB8hKdbPYg5QLYg==
@@ -3079,12 +3084,12 @@
     "@floating-ui/dom" "^1.7.6"
 
 "@floating-ui/react@^0.27.16":
-  version "0.27.19"
-  resolved "https://registry.npmjs.org/@floating-ui/react/-/react-0.27.19.tgz"
-  integrity sha512-31B8h5mm8YxotlE7/AU/PhNAl8eWxAmjL/v2QOxroDNkTFLk3Uu82u63N3b6TXa4EGJeeZLVcd/9AlNlVqzeog==
+  version "0.27.20"
+  resolved "https://registry.npmjs.org/@floating-ui/react/-/react-0.27.20.tgz#353664b4a2b329e9f91f8d9150f7992b5ace20f4"
+  integrity sha512-CMqMy7OaXl9W0eq1Uy7L7i2Y/anPvHmFmESd2CEw0t5YvZhcVCeo4MBevAmswRllX7Y2dEidA4ozGPunLSTQpw==
   dependencies:
-    "@floating-ui/react-dom" "^2.1.8"
-    "@floating-ui/utils" "^0.2.11"
+    "@floating-ui/react-dom" "^2.1.9"
+    "@floating-ui/utils" "^0.2.12"
     tabbable "^6.0.0"
 
 "@floating-ui/utils@^0.2.11":
@@ -5056,12 +5061,12 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@smart-cloud/ai-kit-core@^1.5.3":
-  version "1.5.3"
-  resolved "https://registry.npmjs.org/@smart-cloud/ai-kit-core/-/ai-kit-core-1.5.3.tgz#ad29a1ba2e2851c8fd9a901b7711c68542cb9fc2"
-  integrity sha512-fiKLdrjfcLitLwHr6/lp6S6ZUQSwER4ParCQc3E9eobnDIDfjtht1qx1yDXi9r8B3a9o7+EG6At/xfRpj24tXA==
+"@smart-cloud/ai-kit-core@^1.5.4":
+  version "1.5.4"
+  resolved "https://registry.npmjs.org/@smart-cloud/ai-kit-core/-/ai-kit-core-1.5.4.tgz#b4f69d50f7e22ca732393fa5005e67d51f44eb60"
+  integrity sha512-EN8oYqJzCcTYIIYOLDDrMJn8l2H3iGqsmFnMf+GyoX+fFHp4skpBlVgcYbtA1yYpyOS1VU5la2Hh7yoVVsyxYg==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.3.3"
+    "@smart-cloud/gatey-core" "^2.3.4"
     "@smart-cloud/wpsuite-core" "^2.3.2"
     aws-amplify "^6.20.0"
 
@@ -5102,19 +5107,19 @@
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/flow-core@^1.1.8":
-  version "1.1.8"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.8.tgz#19833d936b97044d7fec2e273d399e6a73657850"
-  integrity sha512-04rAlml3cMdHsFB03zOp16dxLZv+OOJbP1Av3y6JQ5k9mRW5lFkFdq0k/5IwujYwJ18V49qM8fH1B9Bmz5suQw==
+"@smart-cloud/flow-core@^1.1.9":
+  version "1.1.9"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.9.tgz#d935aff4b5b47bf1aa69be92e639ae2258b74a9b"
+  integrity sha512-x4SOERYy4HMr5x8vGzvDsjAc1hpcj6v9S+3kyeZMe5a3AHsv4L2NJuoBxkyG5zXc58sACoseFl04QDdvCwpcZw==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.3.3"
+    "@smart-cloud/gatey-core" "^2.3.4"
     "@smart-cloud/wpsuite-core" "^2.3.2"
     aws-amplify "^6.20.0"
 
-"@smart-cloud/gatey-core@^2.3.3":
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.3.tgz#5419cd60f5b9bb24c8071519f7ec05005b69b57c"
-  integrity sha512-dIpJQMWkZ5DWsRtdDL26Ybec3qs6u0rfoWO7TjNlNxqLH4ztWLONqXuoHt0zqr4heo2K5E5yLSpp93BQHuIuug==
+"@smart-cloud/gatey-core@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.4.tgz#b465f44dd7fa8d1299b75b11e47f86fdd888cf03"
+  integrity sha512-Fdx3NZThXaZjqIB/n0zalvLVmTbJ7j9TMApbaR69yVjn+4o/kUJC1nKWSUvLVH/ONyXjJxoB5MXvR632hNzsIQ==
   dependencies:
     "@smart-cloud/wpsuite-core" "^2.3.2"
 
@@ -10498,10 +10503,10 @@ domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@3.2.7, dompurify@^3.4.12:
-  version "3.4.12"
-  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.12.tgz#6fa2265e9bbdce882c4ace4107626051b448ffa8"
-  integrity sha512-zQvGet8Z2sWbQhCmfFz/T5QWH2oBmjnqK3qvOjaqaNLrLEF912WamU+ohnTp0TCep/MFVHpdJuCZEdFOdTnEFg==
+dompurify@3.2.7, dompurify@^3.4.13:
+  version "3.4.13"
+  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.13.tgz#fc28949d59f92d62e28a3a764bcbeee35897a1be"
+  integrity sha512-2vmYIoqjze2d+kakP8S/nS5shfsl587kzwEjcGlTdiksUVgFHnFCsLYDVj/JNqJVOQZGSYBTmuycv0PodwmnMQ==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -15255,9 +15260,9 @@ react-is@^18.3.0:
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
 react-number-format@^5.4.4:
-  version "5.4.4"
-  resolved "https://registry.npmjs.org/react-number-format/-/react-number-format-5.4.4.tgz"
-  integrity sha512-wOmoNZoOpvMminhifQYiYSTCLUDOiUbBunrMrMjA+dV52sY+vck1S4UhR6PkgnoCquvvMSeJjErXZ4qSaWCliA==
+  version "5.4.5"
+  resolved "https://registry.npmjs.org/react-number-format/-/react-number-format-5.4.5.tgz#5855f2ae4e4153e6231d3a36b635c38be6824c8a"
+  integrity sha512-y8O2yHHj3w0aE9XO8d2BCcUOOdQTRSVq+WIuMlLVucAm5XNjJAy+BoOJiuQMldVYVOKTMyvVNfnbl2Oqp+YxGw==
 
 react-refresh@^0.14.0:
   version "0.14.2"
@@ -15274,7 +15279,7 @@ react-remove-scroll-bar@^2.3.7:
 
 react-remove-scroll@^2.6.3, react-remove-scroll@^2.7.1, react-remove-scroll@^2.7.2:
   version "2.7.2"
-  resolved "https://registry.npmjs.org/react-remove-scroll/-/react-remove-scroll-2.7.2.tgz"
+  resolved "https://registry.npmjs.org/react-remove-scroll/-/react-remove-scroll-2.7.2.tgz#6442da56791117661978ae99cd29be9026fecca0"
   integrity sha512-Iqb9NjCCTt6Hf+vOdNIZGdTiH1QSqr27H/Ek9sv/a97gfueI/5h1s3yRi1nngzMUaOOToin5dI1dXKdXiF+u0Q==
   dependencies:
     react-remove-scroll-bar "^2.3.7"
@@ -15293,7 +15298,7 @@ react-style-singleton@^2.2.2, react-style-singleton@^2.2.3:
 
 react-textarea-autosize@8.5.9:
   version "8.5.9"
-  resolved "https://registry.npmjs.org/react-textarea-autosize/-/react-textarea-autosize-8.5.9.tgz"
+  resolved "https://registry.npmjs.org/react-textarea-autosize/-/react-textarea-autosize-8.5.9.tgz#ab8627b09aa04d8a2f45d5b5cd94c84d1d4a8893"
   integrity sha512-U1DGlIQN5AwgjTyOEnI1oCcMuEr1pv1qOtklB2l4nyMGbHzWrI0eFsYK0zos2YWqAolJyG0IWJaqWmWj5ETh0A==
   dependencies:
     "@babel/runtime" "^7.20.13"
@@ -16636,7 +16641,12 @@ synckit@^0.11.13, synckit@^0.11.8:
   dependencies:
     "@pkgr/core" "^0.3.6"
 
-tabbable@^6.0.0, tabbable@^6.4.0:
+tabbable@^6.0.0:
+  version "6.5.0"
+  resolved "https://registry.npmjs.org/tabbable/-/tabbable-6.5.0.tgz#a65101385a4fd6cbd580b7546da0170f307b535d"
+  integrity sha512-wieBHXygIm7OyQOu5hQlkk62/WyCFYGlWg7L6/ZCUZwx0o398Zkn4pVmMyfYhfMG8kGrj/Krt8eIk6UKC6VzwA==
+
+tabbable@^6.4.0:
   version "6.4.0"
   resolved "https://registry.npmjs.org/tabbable/-/tabbable-6.4.0.tgz"
   integrity sha512-05PUHKSNE8ou2dwIxTngl4EzcnsCDZGJ/iCLtDflR/SHB/ny14rXc+qU5P4mG9JkusiV7EivzY9Mhm55AzAvCg==
@@ -16937,7 +16947,7 @@ type-fest@^3.2.0:
 
 type-fest@^4.18.2, type-fest@^4.41.0:
   version "4.41.0"
-  resolved "https://registry.npmjs.org/type-fest/-/type-fest-4.41.0.tgz"
+  resolved "https://registry.npmjs.org/type-fest/-/type-fest-4.41.0.tgz#6ae1c8e5731273c2bf1f58ad39cbae2c91a46c58"
   integrity sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==
 
 type-is@~1.6.18:
@@ -17145,17 +17155,17 @@ use-callback-ref@^1.3.3:
 
 use-composed-ref@^1.3.0:
   version "1.4.0"
-  resolved "https://registry.npmjs.org/use-composed-ref/-/use-composed-ref-1.4.0.tgz"
+  resolved "https://registry.npmjs.org/use-composed-ref/-/use-composed-ref-1.4.0.tgz#09e023bf798d005286ad85cd20674bdf5770653b"
   integrity sha512-djviaxuOOh7wkj0paeO1Q/4wMZ8Zrnag5H6yBvzN7AKKe8beOaED9SF5/ByLqsku8NP4zQqsvM2u3ew/tJK8/w==
 
 use-isomorphic-layout-effect@^1.1.1, use-isomorphic-layout-effect@^1.1.2:
   version "1.2.1"
-  resolved "https://registry.npmjs.org/use-isomorphic-layout-effect/-/use-isomorphic-layout-effect-1.2.1.tgz"
+  resolved "https://registry.npmjs.org/use-isomorphic-layout-effect/-/use-isomorphic-layout-effect-1.2.1.tgz#2f11a525628f56424521c748feabc2ffcc962fce"
   integrity sha512-tpZZ+EX0gaghDAiFR37hj5MgY6ZN55kLiPkJsKxBMZ6GZdOSPJXiOzPM984oPYZ5AnehYx5WQp1+ME8I/P/pRA==
 
 use-latest@^1.2.1:
   version "1.3.0"
-  resolved "https://registry.npmjs.org/use-latest/-/use-latest-1.3.0.tgz"
+  resolved "https://registry.npmjs.org/use-latest/-/use-latest-1.3.0.tgz#549b9b0d4c1761862072f0899c6f096eb379137a"
   integrity sha512-mhg3xdm9NaM8q+gLT8KryJPnRFOz1/5XPBhmDEVZK1webPzDjrPk7f/mbpeLqTgB9msytYWANxgALOCJKnLvcQ==
   dependencies:
     use-isomorphic-layout-effect "^1.1.1"

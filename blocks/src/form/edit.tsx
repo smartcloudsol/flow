@@ -792,6 +792,8 @@ export default function Edit({
     const plugin = getFlowPlugin();
     return plugin?.settings?.formsBackendSyncEnabled ?? true;
   }, []);
+  const usesCustomEndpoint = Boolean(attributes.endpointPath?.trim());
+  const backendSyncActive = backendSyncEnabled && !usesCustomEndpoint;
 
   // Get inner blocks from block editor store
   const innerBlocks = useSelect(
@@ -1058,7 +1060,7 @@ export default function Edit({
   // Load available templates and workflows from backend
   useEffect(() => {
     const loadBackendOptions = async () => {
-      if (!backendSyncEnabled) return;
+      if (!backendSyncActive) return;
 
       try {
         const decision = await getDecisionForAdminBackend();
@@ -1136,14 +1138,14 @@ export default function Edit({
     };
 
     loadBackendOptions();
-  }, [attributes.autoReplyTemplateKey, backendSyncEnabled, setAttributes]);
+  }, [attributes.autoReplyTemplateKey, backendSyncActive, setAttributes]);
 
   // Use backend sync hook
   const { syncStatus, performSync } = useFormSync({
     postId: editorPostContext.postId,
     postType: editorPostContext.postType,
     postStatus: editorPostContext.postStatus,
-    enabled: backendSyncEnabled,
+    enabled: backendSyncActive,
     formAttributes: attributes,
     fields,
     setAttributes,
@@ -1273,10 +1275,20 @@ export default function Edit({
             value={attributes.endpointPath ?? ""}
             onChange={(endpointPath) => setAttributes({ endpointPath })}
             help={__(
-              "API endpoint for form submission. Leave empty for default.",
+              "Absolute HTTPS endpoint for direct browser submission. Leave empty to use the configured Flow backend.",
               TEXT_DOMAIN,
             )}
           />
+          {backendSyncEnabled && usesCustomEndpoint && (
+            <Notice status="info" isDismissible={false}>
+              <p style={{ margin: 0, fontSize: "13px" }}>
+                {__(
+                  "This form uses a custom endpoint, so automatic Flow backend sync and backend workflows are bypassed.",
+                  TEXT_DOMAIN,
+                )}
+              </p>
+            </Notice>
+          )}
           <SelectControl
             label={__("Endpoint method", TEXT_DOMAIN)}
             value={attributes.endpointMethod || "POST"}
@@ -1632,7 +1644,7 @@ export default function Edit({
         </PanelBody>
 
         {/* Backend Sync Panel */}
-        {backendSyncEnabled && (
+        {backendSyncActive && (
           <PanelBody
             title={__("Backend Sync", TEXT_DOMAIN)}
             initialOpen={false}
@@ -1719,7 +1731,7 @@ export default function Edit({
               </Notice>
             )}
 
-            {backendSyncEnabled && !editorPostContext.postId && (
+            {!editorPostContext.postId && (
               <Notice status="warning" isDismissible={false}>
                 <p style={{ margin: 0, fontSize: "13px" }}>
                   {__(
@@ -1759,7 +1771,7 @@ export default function Edit({
         )}
 
         {/* Workflows & Automation Panel */}
-        {backendSyncEnabled && (
+        {backendSyncActive && (
           <PanelBody
             title={__("Workflows & Automation", TEXT_DOMAIN)}
             initialOpen={false}
