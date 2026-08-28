@@ -16,6 +16,82 @@
 	overflow-wrap: anywhere;
 }
 
+.smartcloud-flow-discussion__article {
+	border-radius: var(--mantine-radius-sm);
+	margin-inline: -0.5rem;
+	padding: 0.5rem;
+	transition: background-color 120ms ease;
+}
+
+.smartcloud-flow-discussion__article:hover,
+.smartcloud-flow-discussion__article:focus-within {
+	background: var(--mantine-color-default-hover);
+}
+
+.smartcloud-flow-discussion__actions {
+	transition: opacity 120ms ease;
+}
+
+.smartcloud-flow-discussion__action {
+	color: var(--mantine-color-text) !important;
+}
+
+.smartcloud-flow-discussion__action--delete {
+	color: var(--mantine-color-red-7) !important;
+}
+
+.smartcloud-flow-discussion__action--delete:hover {
+	background: var(--mantine-color-red-light) !important;
+	color: var(--mantine-color-red-8) !important;
+}
+
+.smartcloud-flow-discussion__delete-confirm {
+	background: var(--mantine-color-red-7) !important;
+	color: var(--mantine-color-white) !important;
+	opacity: 1 !important;
+}
+
+.smartcloud-flow-discussion__delete-confirm:hover {
+	background: var(--mantine-color-red-8) !important;
+	color: var(--mantine-color-white) !important;
+}
+
+.smartcloud-flow-discussion__load-replies {
+	color: var(--mantine-color-text) !important;
+	margin-block-start: 0.25rem;
+}
+
+.smartcloud-flow-discussion__retry,
+.smartcloud-flow-discussion__retry:hover {
+	background: var(--mantine-primary-color-filled) !important;
+	color: var(--mantine-color-white) !important;
+	opacity: 1 !important;
+}
+
+.smartcloud-flow-discussion__retry:hover {
+	background: var(--mantine-primary-color-filled-hover) !important;
+}
+
 .smartcloud-flow-discussion__body {
 	white-space: pre-wrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+	.smartcloud-flow-discussion__actions {
+		opacity: 0;
+	}
+
+	.smartcloud-flow-discussion__article:hover .smartcloud-flow-discussion__actions,
+	.smartcloud-flow-discussion__article:focus-within .smartcloud-flow-discussion__actions {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.smartcloud-flow-discussion__article,
+	.smartcloud-flow-discussion__actions {
+		transition: none;
+	}
 }

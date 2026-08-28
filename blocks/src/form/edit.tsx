@@ -83,6 +83,24 @@ function hasNamedField(
   return "name" in field && typeof field.name === "string";
 }
 
+function collectRatingFields(fields: FieldConfig[]): Array<
+  Extract<FieldConfig, { type: "rating" }>
+> {
+  return fields.flatMap((field) => {
+    const matches =
+      field.type === "rating" && field.name.trim() ? [field] : [];
+    const children = (field as { children?: FieldConfig[] }).children;
+    const nestedChildren = Array.isArray(children)
+      ? collectRatingFields(children)
+      : [];
+    const nestedSteps =
+      field.type === "wizard"
+        ? field.steps.flatMap((step) => collectRatingFields(step.children))
+        : [];
+    return [...matches, ...nestedChildren, ...nestedSteps];
+  });
+}
+
 const EMPTY_FORM_ACTION: EditableFormAction = {
   actionKey: "",
   label: "",
@@ -814,6 +832,7 @@ export default function Edit({
         .filter(Boolean) as FieldConfig[],
     [innerBlocks],
   );
+  const ratingFields = useMemo(() => collectRatingFields(fields), [fields]);
   const wizardPreviewOptions = useMemo(
     () => collectWizardPreviewOptions(fields),
     [fields],
@@ -1360,6 +1379,17 @@ export default function Edit({
               TEXT_DOMAIN,
             )}
           />
+          <TextControl
+            label={__("Show form again label", TEXT_DOMAIN)}
+            value={attributes.showFormAgainLabel ?? ""}
+            onChange={(showFormAgainLabel) =>
+              setAttributes({ showFormAgainLabel })
+            }
+            help={__(
+              "When the form is hidden after success, show a button with this label that resets and opens it again. Leave empty to omit the button.",
+              TEXT_DOMAIN,
+            )}
+          />
         </PanelBody>
 
         <PanelBody
@@ -1500,18 +1530,103 @@ export default function Edit({
                 }
               />
               <SelectControl
-                label={__("Public author field", TEXT_DOMAIN)}
-                value={attributes.discussionAuthorNameField || "name"}
-                options={fields
-                  .filter(hasNamedField)
-                  .map((field) => ({
-                    label: String("label" in field && field.label ? field.label : field.name),
-                    value: String(field.name),
-                  }))}
-                onChange={(discussionAuthorNameField) =>
-                  setAttributes({ discussionAuthorNameField })
+                label={__("Comment access", TEXT_DOMAIN)}
+                value={attributes.discussionAuthMode || "anonymous"}
+                options={[
+                  { label: __("Anonymous visitors", TEXT_DOMAIN), value: "anonymous" },
+                  { label: __("Visitors or signed-in users", TEXT_DOMAIN), value: "optional" },
+                  { label: __("Signed-in users only", TEXT_DOMAIN), value: "required" },
+                ]}
+                onChange={(discussionAuthMode) =>
+                  setAttributes({
+                    discussionAuthMode: discussionAuthMode as
+                      | "anonymous"
+                      | "optional"
+                      | "required",
+                    ...(discussionAuthMode === "anonymous"
+                      ? { discussionAuthorNameSource: "field" as const }
+                      : {}),
+                  })
                 }
               />
+              {attributes.discussionAuthMode !== "anonymous" ? (
+                <TextareaControl
+                  label={__("Allowed Cognito groups", TEXT_DOMAIN)}
+                  value={(attributes.discussionAllowedGroups || []).join("\n")}
+                  onChange={(value) =>
+                    setAttributes({ discussionAllowedGroups: parseTextList(value) })
+                  }
+                  help={__(
+                    "Optional. One group per line. When set, only members of these groups can comment.",
+                    TEXT_DOMAIN,
+                  )}
+                />
+              ) : null}
+              <SelectControl
+                label={__("Public author name source", TEXT_DOMAIN)}
+                value={attributes.discussionAuthorNameSource || "field"}
+                options={[
+                  { label: __("Form field", TEXT_DOMAIN), value: "field" },
+                  ...(attributes.discussionAuthMode !== "anonymous"
+                    ? [{ label: __("Verified Cognito identity", TEXT_DOMAIN), value: "identity" }]
+                    : []),
+                ]}
+                onChange={(discussionAuthorNameSource) =>
+                  setAttributes({
+                    discussionAuthorNameSource:
+                      discussionAuthorNameSource as "field" | "identity",
+                  })
+                }
+              />
+              {attributes.discussionAuthorNameSource !== "identity" ||
+              attributes.discussionAuthMode === "optional" ? (
+                <SelectControl
+                  label={__("Anonymous author field", TEXT_DOMAIN)}
+                  value={attributes.discussionAuthorNameField || "name"}
+                  options={fields
+                    .filter(hasNamedField)
+                    .map((field) => ({
+                      label: String("label" in field && field.label ? field.label : field.name),
+                      value: String(field.name),
+                    }))}
+                  onChange={(discussionAuthorNameField) =>
+                    setAttributes({ discussionAuthorNameField })
+                  }
+                />
+              ) : null}
+              {attributes.discussionAuthorNameSource === "identity" ? (
+                <>
+                  <TextControl
+                    label={__("Cognito author name template", TEXT_DOMAIN)}
+                    value={
+                      attributes.discussionAuthorNameTemplate ||
+                      "{given_name} {family_name}"
+                    }
+                    onChange={(discussionAuthorNameTemplate) =>
+                      setAttributes({ discussionAuthorNameTemplate })
+                    }
+                    help={__(
+                      "Allowed placeholders include given_name, family_name, nickname, name, preferred_username and cognito:username.",
+                      TEXT_DOMAIN,
+                    )}
+                  />
+                  <TextareaControl
+                    label={__("Cognito author fallback attributes", TEXT_DOMAIN)}
+                    value={(
+                      attributes.discussionAuthorNameFallbackClaims || [
+                        "nickname",
+                        "preferred_username",
+                        "cognito:username",
+                      ]
+                    ).join("\n")}
+                    onChange={(value) =>
+                      setAttributes({
+                        discussionAuthorNameFallbackClaims: parseTextList(value),
+                      })
+                    }
+                  />
+                </>
+              ) : null}
               <SelectControl
                 label={__("Public body field", TEXT_DOMAIN)}
                 value={attributes.discussionBodyField || "comment"}
@@ -1525,10 +1640,98 @@ export default function Edit({
                   setAttributes({ discussionBodyField })
                 }
               />
+              <SelectControl
+                label={__("Discussion rating field", TEXT_DOMAIN)}
+                value={attributes.discussionRatingField || ""}
+                options={[
+                  { label: __("No discussion rating", TEXT_DOMAIN), value: "" },
+                  ...ratingFields.map((field) => ({
+                    label: field.label?.trim() || field.name,
+                    value: field.name,
+                  })),
+                ]}
+                onChange={(discussionRatingField) =>
+                  setAttributes({ discussionRatingField })
+                }
+                help={__(
+                  "Ratings are stored on root comments only. Replies do not include this field.",
+                  TEXT_DOMAIN,
+                )}
+              />
               <TextControl
                 label={__("Discussion channel", TEXT_DOMAIN)}
                 value={attributes.discussionChannel || ""}
                 onChange={(discussionChannel) => setAttributes({ discussionChannel })}
+              />
+              <ToggleControl
+                label={__("Allow authors to edit their comments", TEXT_DOMAIN)}
+                checked={attributes.discussionAllowAuthorEdit === true}
+                onChange={(discussionAllowAuthorEdit) =>
+                  setAttributes({ discussionAllowAuthorEdit })
+                }
+              />
+              {attributes.discussionAllowAuthorEdit ? (
+                <TextControl
+                  type="number"
+                  min={0}
+                  max={525600}
+                  label={__("Author edit window in minutes", TEXT_DOMAIN)}
+                  value={String(
+                    attributes.discussionAuthorEditWindowMinutes ?? 30,
+                  )}
+                  onChange={(value) =>
+                    setAttributes({
+                      discussionAuthorEditWindowMinutes: Number(value),
+                    })
+                  }
+                  help={__("Use 0 for no time limit.", TEXT_DOMAIN)}
+                />
+              ) : null}
+              <ToggleControl
+                label={__("Allow authors to delete their comments", TEXT_DOMAIN)}
+                checked={attributes.discussionAllowAuthorDelete === true}
+                onChange={(discussionAllowAuthorDelete) =>
+                  setAttributes({ discussionAllowAuthorDelete })
+                }
+              />
+              <ToggleControl
+                label={__("Allow moderator deletion", TEXT_DOMAIN)}
+                checked={attributes.discussionAllowModeratorDelete === true}
+                onChange={(discussionAllowModeratorDelete) =>
+                  setAttributes({ discussionAllowModeratorDelete })
+                }
+              />
+              {attributes.discussionAllowModeratorDelete ? (
+                <TextareaControl
+                  label={__("Moderator Cognito groups", TEXT_DOMAIN)}
+                  value={(attributes.discussionModeratorGroups || []).join("\n")}
+                  onChange={(value) =>
+                    setAttributes({
+                      discussionModeratorGroups: parseTextList(value),
+                    })
+                  }
+                />
+              ) : null}
+              <TextControl
+                label={__("Sign-in required message", TEXT_DOMAIN)}
+                value={attributes.discussionSignInRequiredMessage || ""}
+                onChange={(discussionSignInRequiredMessage) =>
+                  setAttributes({ discussionSignInRequiredMessage })
+                }
+              />
+              <TextControl
+                label={__("Sign-in action label", TEXT_DOMAIN)}
+                value={attributes.discussionSignInLabel || ""}
+                onChange={(discussionSignInLabel) =>
+                  setAttributes({ discussionSignInLabel })
+                }
+              />
+              <TextControl
+                label={__("Permission denied message", TEXT_DOMAIN)}
+                value={attributes.discussionPermissionDeniedMessage || ""}
+                onChange={(discussionPermissionDeniedMessage) =>
+                  setAttributes({ discussionPermissionDeniedMessage })
+                }
               />
               <TextControl
                 label={__("Pending moderation message", TEXT_DOMAIN)}

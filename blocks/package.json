@@ -26,6 +26,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@smart-cloud/ai-kit-core": "^1.5.4",
     "@smart-cloud/flow-core": "^1.1.9",
+    "@smart-cloud/gatey-core": "^2.3.4",
     "@smart-cloud/wpsuite-blocks": "^1.0.0",
     "@smart-cloud/wpsuite-core": "^2.3.2",
     "@tabler/icons-react": "^3.46.0",

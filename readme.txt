@@ -3,9 +3,9 @@
 Contributors: smartcloud
 Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.23
+Stable tag: 1.1.24
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,14 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.1.24 =
+* Compatibility: Declared compatibility with WordPress 7.1.
+* Feature: Added optional or required Gatey/Cognito identity for discussions, backend-enforced group access, verified author-name templates, owner edit/delete, moderator delete, confirmation, and per-viewer action capabilities.
+* Feature: Added locale-aware discussion dates, edited indicators, and a reusable add-another-comment action after successful submission.
+* Fix: Resolved synchronized form IDs correctly in dynamic form and discussion renderers.
+* Fix: Passed synchronized form IDs to shortcode-rendered forms using the supported formId attribute.
+* Fix: Used the current site's Flow REST URL for editor sync metadata so subdirectory multisite forms synchronize against the correct site.
+
 = 1.1.23 =
 * Compatibility: Matched Composer-generated field payloads to the current Gutenberg save contract so generated Flow forms open without block recovery.
 * Submission: Allowed non-file forms to post directly to an absolute custom endpoint without requiring a backend form ID.
@@ -357,6 +365,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.1.24 =
+Adds authenticated discussion actions and author identities, declares compatibility with WordPress 7.1, and fixes synchronized form IDs and multisite editor synchronization.
 
 = 1.1.23 =
 Recommended for generated forms and sites that submit directly to a custom HTTPS endpoint.

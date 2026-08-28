@@ -74,65 +74,207 @@
       "role": "content",
       "default": "desc"
     },
-    "title": {
+    "showRatingSummary": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "showRatingFilter": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "ratingFilterOperator": {
       "type": "string",
       "role": "content",
-      "default": "Discussion"
+      "default": "all"
+    },
+    "ratingFilterValue": {
+      "type": "number",
+      "role": "content",
+      "default": 5
+    },
+    "allRatingsLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "atLeastLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "atMostLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "averageRatingLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "exactlyLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "filterRatingsLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "ratingCountLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "ratingCountPluralLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "ratingDistributionLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "ratingValueLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "ratingValueTemplate": {
+      "type": "string",
+      "role": "content"
+    },
+    "title": {
+      "type": "string",
+      "role": "content"
     },
     "emptyMessage": {
       "type": "string",
-      "role": "content",
-      "default": "No discussion yet."
+      "role": "content"
     },
     "loadingMessage": {
       "type": "string",
-      "role": "content",
-      "default": "Loading discussion..."
+      "role": "content"
     },
     "errorMessage": {
       "type": "string",
-      "role": "content",
-      "default": "Unable to load the discussion."
+      "role": "content"
     },
     "retryLabel": {
       "type": "string",
-      "role": "content",
-      "default": "Retry"
+      "role": "content"
     },
     "anonymousAuthorLabel": {
       "type": "string",
-      "role": "content",
-      "default": "Anonymous"
+      "role": "content"
     },
     "tombstoneLabel": {
       "type": "string",
-      "role": "content",
-      "default": "This item is no longer available."
+      "role": "content"
     },
     "replyLabel": {
       "type": "string",
-      "role": "content",
-      "default": "Reply"
+      "role": "content"
     },
     "cancelReplyLabel": {
       "type": "string",
-      "role": "content",
-      "default": "Cancel reply"
+      "role": "content"
     },
     "loadMoreLabel": {
       "type": "string",
-      "role": "content",
-      "default": "Load more"
+      "role": "content"
+    },
+    "loadReplyLabel": {
+      "type": "string",
+      "role": "content"
     },
     "loadRepliesLabel": {
       "type": "string",
+      "role": "content"
+    },
+    "replyCountLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "replyCountPluralLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "showCommentCount": {
+      "type": "boolean",
       "role": "content",
-      "default": "Load replies"
+      "default": true
+    },
+    "commentCountLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "commentCountPluralLabel": {
+      "type": "string",
+      "role": "content"
     },
     "depthLimitLabel": {
       "type": "string",
+      "role": "content"
+    },
+    "editLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "deleteLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "saveEditLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "cancelEditLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "editedLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "deleteConfirmTitle": {
+      "type": "string",
+      "role": "content"
+    },
+    "deleteConfirmMessage": {
+      "type": "string",
+      "role": "content"
+    },
+    "deleteConfirmLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "cancelDeleteLabel": {
+      "type": "string",
+      "role": "content"
+    },
+    "actionErrorMessage": {
+      "type": "string",
+      "role": "content"
+    },
+    "discussionAuthMode": {
+      "type": "string",
       "role": "content",
-      "default": "Maximum reply depth reached."
+      "default": "anonymous"
+    },
+    "discussionAllowedGroups": {
+      "type": "array",
+      "role": "content",
+      "default": []
+    },
+    "showDate": {
+      "type": "boolean",
+      "role": "content",
+      "default": true
+    },
+    "dateStyle": {
+      "type": "string",
+      "role": "content",
+      "default": "medium"
+    },
+    "timeStyle": {
+      "type": "string",
+      "role": "content",
+      "default": "short"
     },
     "language": {
       "type": "string",

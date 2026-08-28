@@ -19,6 +19,11 @@ function esc_attr($value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+function esc_html($value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
 function get_block_wrapper_attributes(array $attributes = []): string
 {
     return 'class="' . ($attributes['class'] ?? 'wp-block-test') . '"';
@@ -36,8 +41,38 @@ function wp_kses_post($value): string
 
 function get_the_ID(): int
 {
-    return 0;
+    return 42;
 }
+
+function get_post_type(int $postId): string
+{
+    return 42 === $postId ? 'post' : '';
+}
+
+function get_post_field(string $field, int $postId): string
+{
+    return 42 === $postId && 'post_name' === $field ? 'discussion-test-post' : '';
+}
+
+function get_the_title(int $postId): string
+{
+    return 42 === $postId ? 'Discussion test post' : '';
+}
+
+function get_permalink(int $postId): string
+{
+    return 42 === $postId ? 'https://example.test/discussion-test-post/' : '';
+}
+
+final class TestFormSyncMeta
+{
+    public static function getFormId(int $postId): ?string
+    {
+        return 42 === $postId ? 'form-from-post-meta' : null;
+    }
+}
+
+class_alias(TestFormSyncMeta::class, 'SmartCloud\\WPSuite\\Flow\\FormSyncMeta');
 
 function sanitize_key($value): string
 {
@@ -99,10 +134,24 @@ foreach (['form', 'content-root'] as $blockName) {
     expect(str_contains($withoutFallback, 'smartcloud-flow-' . $blockName . '__mount'), $blockName . ' must remain mountable without a fallback.');
 }
 
+$discussionTemplate = dirname(__DIR__) . '/src/discussion/render.php';
+$discussion = renderTemplate($discussionTemplate, []);
+$discussionConfig = '';
+if (preg_match('/data-config="([^"]+)"/', $discussion, $matches)) {
+    $discussionConfig = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+}
+$decodedDiscussion = json_decode((string) base64_decode($discussionConfig, true), true);
+expect(is_array($decodedDiscussion), 'Flow discussion must expose a decodable runtime configuration.');
+expect(str_contains($discussion, 'data-wpsuite-react-fallback'), 'Flow discussion must mark its loading fallback for dismissal after React mounts.');
+expect(($decodedDiscussion['formId'] ?? null) === 'form-from-post-meta', 'Flow discussion must inherit the synchronized form ID for the current post.');
+expect(($decodedDiscussion['contentRef'] ?? null) === ['namespace' => 'wordpress', 'type' => 'post', 'id' => '42'], 'Flow discussion must bind to the current WordPress post ID.');
+
 $pluginSource = (string) file_get_contents(dirname(__DIR__, 2) . '/smartcloud-flow.php');
 $widgetSource = (string) file_get_contents(dirname(__DIR__, 2) . '/flow-elementor-widgets.php');
 
 expect(str_contains($pluginSource, "renderShortcodeBlock('smartcloud-flow/form', \$form_block"), 'Flow form shortcode must retain the selected pattern block.');
+expect(str_contains($pluginSource, "\$block_atts['formId'] = \$backend_form_id;"), 'Flow form shortcode must pass the synchronized backend ID as formId.');
+expect(!str_contains($pluginSource, "\$block_atts['backendFormId'] = \$backend_form_id;"), 'Flow form shortcode must not use the unsupported backendFormId attribute.');
 expect(str_contains($pluginSource, "'smartcloud-flow/content-root',\n            \$content_root_block"), 'Flow content-root shortcode must retain the selected pattern block.');
 expect(str_contains($widgetSource, "\$atts['id'] = \$all['pattern'];"), 'Flow Elementor widgets must pass their pattern as shortcode ID.');
 expect(str_contains($widgetSource, "smartcloud_flow_do_shortcode('smartcloud-flow-form'"), 'Flow form Elementor widget must retain its shortcode adapter.');

@@ -44,7 +44,18 @@ export interface FormBlockAttributes {
   discussionModerationMode?: "required" | "automatic";
   discussionAuthorNameField?: string;
   discussionBodyField?: string;
+  discussionRatingField?: string;
   discussionBodyMaxLength?: number;
+  discussionAuthMode?: "anonymous" | "optional" | "required";
+  discussionAllowedGroups?: string[];
+  discussionAuthorNameSource?: "field" | "identity";
+  discussionAuthorNameTemplate?: string;
+  discussionAuthorNameFallbackClaims?: string[];
+  discussionAllowAuthorEdit?: boolean;
+  discussionAuthorEditWindowMinutes?: number;
+  discussionAllowAuthorDelete?: boolean;
+  discussionAllowModeratorDelete?: boolean;
+  discussionModeratorGroups?: string[];
   discussionChannel?: string;
   allowDrafts?: boolean;
   showDraftResumePanel?: boolean;
@@ -213,6 +224,33 @@ function normalizeActionsForBackend(
   }, []);
 }
 
+function findFieldByName(
+  fields: FieldBlockData[],
+  fieldName: string,
+): FieldBlockData | undefined {
+  for (const field of fields) {
+    if (field.name === fieldName) return field;
+    if (Array.isArray(field.children)) {
+      const child = findFieldByName(
+        field.children as FieldBlockData[],
+        fieldName,
+      );
+      if (child) return child;
+    }
+    if (Array.isArray(field.steps)) {
+      for (const step of field.steps as Array<Record<string, unknown>>) {
+        if (!Array.isArray(step.children)) continue;
+        const child = findFieldByName(
+          step.children as FieldBlockData[],
+          fieldName,
+        );
+        if (child) return child;
+      }
+    }
+  }
+  return undefined;
+}
+
 export function extractCanonicalFormConfig(
   source: FormSourceData,
   boot: FormSyncBootConfig,
@@ -244,6 +282,13 @@ export function extractCanonicalFormConfig(
     normalizeFieldForBackend(field),
   );
   const normalizedActions = normalizeActionsForBackend(attributes.actions);
+  const discussionRatingFieldName =
+    typeof attributes.discussionRatingField === "string"
+      ? attributes.discussionRatingField.trim()
+      : "";
+  const discussionRatingField = discussionRatingFieldName
+    ? findFieldByName(fields, discussionRatingFieldName)
+    : undefined;
 
   const settings: Record<string, unknown> = {};
 
@@ -268,7 +313,41 @@ export function extractCanonicalFormConfig(
         : "required",
     authorNameField: attributes.discussionAuthorNameField || "name",
     bodyField: attributes.discussionBodyField || "comment",
+    ...(discussionRatingField?.type === "rating"
+      ? {
+          rating: {
+            field: discussionRatingFieldName,
+            maximum:
+              typeof discussionRatingField.count === "number"
+                ? discussionRatingField.count
+                : 5,
+            fractions:
+              typeof discussionRatingField.fractions === "number"
+                ? discussionRatingField.fractions
+                : 1,
+            required: discussionRatingField.required === true,
+          },
+        }
+      : {}),
     bodyMaxLength: attributes.discussionBodyMaxLength ?? 10000,
+    authMode: attributes.discussionAuthMode || "anonymous",
+    allowedGroups: attributes.discussionAllowedGroups || [],
+    authorNameSource: attributes.discussionAuthorNameSource || "field",
+    authorNameTemplate:
+      attributes.discussionAuthorNameTemplate || "{given_name} {family_name}",
+    authorNameFallbackClaims:
+      attributes.discussionAuthorNameFallbackClaims || [
+        "nickname",
+        "preferred_username",
+        "cognito:username",
+      ],
+    allowAuthorEdit: attributes.discussionAllowAuthorEdit === true,
+    authorEditWindowMinutes:
+      attributes.discussionAuthorEditWindowMinutes ?? 30,
+    allowAuthorDelete: attributes.discussionAllowAuthorDelete === true,
+    allowModeratorDelete:
+      attributes.discussionAllowModeratorDelete === true,
+    moderatorGroups: attributes.discussionModeratorGroups || [],
   };
 
   if (attributes.successMessage) {

@@ -23,21 +23,45 @@ function assertValidPostId(postId: number): number {
   return postId;
 }
 
+export function buildSyncMetaUrl(restUrl: string, postId: number): string {
+  const resolvedPostId = assertValidPostId(postId);
+  const normalizedRestUrl = restUrl.trim().replace(/\/+$/, "");
+
+  if (!normalizedRestUrl) {
+    throw new Error("Cannot manage form sync metadata without a Flow REST URL.");
+  }
+
+  return `${normalizedRestUrl}/forms/${resolvedPostId}/sync-meta`;
+}
+
+function getSyncRequestContext(postId: number): {
+  url: string;
+  nonce: string;
+} {
+  const plugin = getFlowPlugin();
+
+  if (!plugin) {
+    throw new Error("Cannot manage form sync metadata before Flow is ready.");
+  }
+
+  return {
+    url: buildSyncMetaUrl(plugin.restUrl, postId),
+    nonce: plugin.nonce || "",
+  };
+}
+
 export async function getFormSyncMeta(
   postId: number,
 ): Promise<FormSyncMetadata> {
-  const resolvedPostId = assertValidPostId(postId);
-  const response = await fetch(
-    `/wp-json/smartcloud-flow/v1/forms/${resolvedPostId}/sync-meta`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "X-WP-Nonce": getFlowPlugin()!.nonce || "",
-      },
-      credentials: "same-origin",
+  const request = getSyncRequestContext(postId);
+  const response = await fetch(request.url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-WP-Nonce": request.nonce,
     },
-  );
+    credentials: "same-origin",
+  });
 
   if (!response.ok) {
     const error = await response.text();
@@ -51,19 +75,16 @@ export async function updateFormSyncMeta(
   postId: number,
   updates: Partial<FormSyncMetadata>,
 ): Promise<FormSyncMetadata> {
-  const resolvedPostId = assertValidPostId(postId);
-  const response = await fetch(
-    `/wp-json/smartcloud-flow/v1/forms/${resolvedPostId}/sync-meta`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-WP-Nonce": getFlowPlugin()!.nonce || "",
-      },
-      credentials: "same-origin",
-      body: JSON.stringify(updates),
+  const request = getSyncRequestContext(postId);
+  const response = await fetch(request.url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-WP-Nonce": request.nonce,
     },
-  );
+    credentials: "same-origin",
+    body: JSON.stringify(updates),
+  });
 
   if (!response.ok) {
     const error = await response.text();

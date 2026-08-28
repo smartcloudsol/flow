@@ -4,9 +4,9 @@
  * Plugin URI:        https://wpsuite.io/flow/
  * Description:       Mantine-based Gutenberg form blocks with AWS-native workflows, submissions, templates, and admin automation tools.
  * Requires at least: 6.9
- * Tested up to:      7.0
+ * Tested up to:      7.1
  * Requires PHP:      8.1
- * Version:           1.1.23
+ * Version:           1.1.24
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.23';
+const VERSION = '1.1.24';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -418,6 +418,13 @@ final class Flow
             'discussionauthornamefield' => 'discussionAuthorNameField',
             'discussionbodyfield' => 'discussionBodyField',
             'discussionbodymaxlength' => 'discussionBodyMaxLength',
+            'discussionauthmode' => 'discussionAuthMode',
+            'discussionauthornamesource' => 'discussionAuthorNameSource',
+            'discussionauthornametemplate' => 'discussionAuthorNameTemplate',
+            'discussionallowauthoredit' => 'discussionAllowAuthorEdit',
+            'discussionauthoreditwindowminutes' => 'discussionAuthorEditWindowMinutes',
+            'discussionallowauthordelete' => 'discussionAllowAuthorDelete',
+            'discussionallowmoderatordelete' => 'discussionAllowModeratorDelete',
             'discussionchannel' => 'discussionChannel',
             'pendingmoderationmessage' => 'pendingModerationMessage',
         );
@@ -430,6 +437,9 @@ final class Flow
             'contentTargetRequired',
             'discussionEnabled',
             'discussionAllowReplies',
+            'discussionAllowAuthorEdit',
+            'discussionAllowAuthorDelete',
+            'discussionAllowModeratorDelete',
         );
         foreach ($override_attribute_map as $shortcode_key => $attribute_key) {
             if (!array_key_exists($shortcode_key, $atts)) {
@@ -446,7 +456,7 @@ final class Flow
                 }
             }
 
-            if (in_array($attribute_key, array('draftExpiryDays', 'submissionRetentionDays', 'discussionMaxReplyDepth', 'discussionBodyMaxLength'), true) && $value !== '' && $value !== null) {
+            if (in_array($attribute_key, array('draftExpiryDays', 'submissionRetentionDays', 'discussionMaxReplyDepth', 'discussionBodyMaxLength', 'discussionAuthorEditWindowMinutes'), true) && $value !== '' && $value !== null) {
                 $value = intval($value);
             }
 
@@ -488,7 +498,7 @@ final class Flow
 
         // Add backend formId to block attributes if available
         if ($backend_form_id) {
-            $block_atts['backendFormId'] = $backend_form_id;
+            $block_atts['formId'] = $backend_form_id;
         }
 
         $attribute_defaults = array(
@@ -525,6 +535,16 @@ final class Flow
             'discussionAuthorNameField' => 'name',
             'discussionBodyField' => 'comment',
             'discussionBodyMaxLength' => 10000,
+            'discussionAuthMode' => 'anonymous',
+            'discussionAllowedGroups' => array(),
+            'discussionAuthorNameSource' => 'field',
+            'discussionAuthorNameTemplate' => '{given_name} {family_name}',
+            'discussionAuthorNameFallbackClaims' => array('nickname', 'preferred_username', 'cognito:username'),
+            'discussionAllowAuthorEdit' => false,
+            'discussionAuthorEditWindowMinutes' => 30,
+            'discussionAllowAuthorDelete' => false,
+            'discussionAllowModeratorDelete' => false,
+            'discussionModeratorGroups' => array(),
             'discussionChannel' => null,
             'pendingModerationMessage' => null,
             'colorMode' => null,
@@ -536,7 +556,6 @@ final class Flow
             'actions' => array(),
             'autoReplyTemplateKey' => null,
             'workflowIds' => array(),
-            'backendFormId' => null,
         );
 
         list($attrs, $is_preview) = $this->buildShortcodeBlockAttrs(
@@ -601,6 +620,18 @@ final class Flow
             'loadMoreLabel' => null,
             'loadRepliesLabel' => null,
             'depthLimitLabel' => null,
+            'editLabel' => null,
+            'deleteLabel' => null,
+            'saveEditLabel' => null,
+            'cancelEditLabel' => null,
+            'editedLabel' => null,
+            'deleteConfirmTitle' => null,
+            'deleteConfirmMessage' => null,
+            'deleteConfirmLabel' => null,
+            'cancelDeleteLabel' => null,
+            'actionErrorMessage' => null,
+            'discussionAuthMode' => 'anonymous',
+            'discussionAllowedGroups' => array(),
             'language' => null,
             'direction' => null,
             'colorMode' => null,

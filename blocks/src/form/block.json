@@ -41,6 +41,11 @@
       "role": "content",
       "default": true
     },
+    "showFormAgainLabel": {
+      "type": "string",
+      "role": "content",
+      "default": ""
+    },
     "endpointPath": {
       "type": "string",
       "role": "content",
@@ -106,15 +111,28 @@
     },
     "discussionAuthorNameField": { "type": "string", "role": "content", "default": "name" },
     "discussionBodyField": { "type": "string", "role": "content", "default": "comment" },
+    "discussionRatingField": { "type": "string", "role": "content", "default": "" },
     "discussionBodyMaxLength": { "type": "number", "role": "content", "default": 10000 },
+    "discussionAuthMode": { "type": "string", "role": "content", "default": "anonymous" },
+    "discussionAllowedGroups": { "type": "array", "role": "content", "default": [] },
+    "discussionAuthorNameSource": { "type": "string", "role": "content", "default": "field" },
+    "discussionAuthorNameTemplate": { "type": "string", "role": "content", "default": "{given_name} {family_name}" },
+    "discussionAuthorNameFallbackClaims": { "type": "array", "role": "content", "default": ["nickname", "preferred_username", "cognito:username"] },
+    "discussionAllowAuthorEdit": { "type": "boolean", "role": "content", "default": false },
+    "discussionAuthorEditWindowMinutes": { "type": "number", "role": "content", "default": 30 },
+    "discussionAllowAuthorDelete": { "type": "boolean", "role": "content", "default": false },
+    "discussionAllowModeratorDelete": { "type": "boolean", "role": "content", "default": false },
+    "discussionModeratorGroups": { "type": "array", "role": "content", "default": [] },
     "discussionChannel": { "type": "string", "role": "content", "default": "" },
     "pendingModerationMessage": {
       "type": "string",
-      "role": "content",
-      "default": "Your submission is awaiting moderation."
+      "role": "content"
     },
-    "replyingToLabel": { "type": "string", "role": "content", "default": "Replying to" },
-    "cancelReplyLabel": { "type": "string", "role": "content", "default": "Cancel reply" },
+    "replyingToLabel": { "type": "string", "role": "content" },
+    "cancelReplyLabel": { "type": "string", "role": "content" },
+    "discussionSignInRequiredMessage": { "type": "string", "role": "content" },
+    "discussionSignInLabel": { "type": "string", "role": "content" },
+    "discussionPermissionDeniedMessage": { "type": "string", "role": "content" },
     "language": {
       "type": "string",
       "role": "content"

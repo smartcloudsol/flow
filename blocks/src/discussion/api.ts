@@ -3,8 +3,12 @@ import {
   dispatchBackend,
   resolveBackend,
   type ContentReference,
-  type PublicDiscussionPage,
 } from "@smart-cloud/flow-core";
+import type {
+  DiscussionRatingOperator,
+  PublicDiscussionItem,
+  PublicDiscussionPage,
+} from "./types";
 
 const MAX_READ_ATTEMPTS = 3;
 const INITIAL_RETRY_DELAY_MS = 200;
@@ -59,6 +63,9 @@ export async function fetchDiscussionPage(input: {
   cursor?: string;
   sortDir: "asc" | "desc";
   replyPreviewLimit?: number;
+  includeCapabilities?: boolean;
+  ratingOperator?: Exclude<DiscussionRatingOperator, "all">;
+  rating?: number;
   signal?: AbortSignal;
 }): Promise<PublicDiscussionPage> {
   const backend = await resolveBackend();
@@ -96,6 +103,15 @@ export async function fetchDiscussionPage(input: {
             input.replyPreviewLimit !== undefined
               ? { replyPreviewLimit: input.replyPreviewLimit }
               : {}),
+            ...(input.includeCapabilities
+              ? { includeCapabilities: true }
+              : {}),
+            ...(input.ratingOperator && input.rating !== undefined
+              ? {
+                  ratingOperator: input.ratingOperator,
+                  rating: input.rating,
+                }
+              : {}),
           },
         },
       )) as PublicDiscussionPage;
@@ -113,4 +129,44 @@ export async function fetchDiscussionPage(input: {
   }
 
   throw new Error("Discussion read retry loop completed unexpectedly");
+}
+
+export async function mutateDiscussionItem(input: {
+  method: "PATCH" | "DELETE";
+  formId: string;
+  submissionId: string;
+  contentRef: ContentReference;
+  expectedUpdatedAt: string;
+  body?: string;
+  rating?: number | null;
+}): Promise<{ item: PublicDiscussionItem }> {
+  const backend = await resolveBackend();
+  if (!backend.available) {
+    throw new Error(backend.reason || "Flow backend is unavailable");
+  }
+  return (await dispatchBackend(
+    {
+      backendAvailable: true,
+      backendTransport: backend.transport,
+      backendApiName: backend.apiName,
+      backendBaseUrl: backend.baseUrl,
+      reason: "Discussion item mutation",
+    },
+    "frontend",
+    `/forms/${encodeURIComponent(input.formId)}/discussion/${encodeURIComponent(input.submissionId)}`,
+    input.method,
+    {
+      contentRef: input.contentRef,
+      expectedUpdatedAt: input.expectedUpdatedAt,
+      ...(input.method === "PATCH"
+        ? {
+            body: input.body ?? "",
+            ...(input.rating !== undefined ? { rating: input.rating } : {}),
+          }
+        : {}),
+    },
+    {
+      humanVerification: false,
+    },
+  )) as { item: PublicDiscussionItem };
 }

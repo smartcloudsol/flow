@@ -1,5 +1,6 @@
 import { waitForFlowReady } from "@smart-cloud/flow-core";
 import { renderDiscussion } from "./renderDiscussion";
+import { decodeAdjacentFormId } from "./runtime-config";
 import type { DiscussionAttributes } from "./types";
 
 const mounted = new Map<string, Awaited<ReturnType<typeof renderDiscussion>>>();
@@ -7,6 +8,36 @@ const mounted = new Map<string, Awaited<ReturnType<typeof renderDiscussion>>>();
 function decodeConfig(element: HTMLElement): DiscussionAttributes {
   const encoded = element.dataset.config || "";
   return JSON.parse(atob(encoded)) as DiscussionAttributes;
+}
+
+function findAdjacentFormId(element: HTMLElement): string | undefined {
+  let sibling = element.previousElementSibling;
+
+  while (sibling) {
+    const form = sibling.classList.contains("smartcloud-flow-form")
+      ? sibling
+      : Array.from(
+          sibling.querySelectorAll<HTMLElement>(
+            ".smartcloud-flow-form[data-config]",
+          ),
+        ).at(-1);
+    if (form instanceof HTMLElement) {
+      const formId = decodeAdjacentFormId(form.dataset.config || "");
+      if (formId) return formId;
+    }
+    sibling = sibling.previousElementSibling;
+  }
+
+  return undefined;
+}
+
+function resolveRuntimeAttributes(
+  element: HTMLElement,
+  attributes: DiscussionAttributes,
+): DiscussionAttributes {
+  if (attributes.formId?.trim()) return attributes;
+  const formId = findAdjacentFormId(element);
+  return formId ? { ...attributes, formId } : attributes;
 }
 
 export async function mountDiscussion(id: string) {
@@ -22,7 +53,7 @@ export async function mountDiscussion(id: string) {
       target,
       container: element,
       hostElement: element,
-      attributes: decodeConfig(element),
+      attributes: resolveRuntimeAttributes(element, decodeConfig(element)),
     }),
   );
 }

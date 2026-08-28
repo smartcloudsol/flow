@@ -45,8 +45,8 @@ if ($smartcloud_flow_post_id) {
 
 $smartcloud_flow_backend_form_id = null;
 
-if ($smartcloud_flow_post_id && class_exists('FormSyncMeta')) {
-    $smartcloud_flow_backend_form_id = FormSyncMeta::getFormId($smartcloud_flow_post_id);
+if ($smartcloud_flow_post_id && class_exists('\SmartCloud\WPSuite\Flow\FormSyncMeta')) {
+    $smartcloud_flow_backend_form_id = \SmartCloud\WPSuite\Flow\FormSyncMeta::getFormId($smartcloud_flow_post_id);
 }
 
 // Add backend formId to attributes if available

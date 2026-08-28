@@ -72,6 +72,19 @@ import {
 } from "../../shared/runtime-context";
 import { FormActionsProvider } from "../context/FormActionsContext";
 import type { FormReturnIntent } from "../context/FormActionsContext";
+import {
+  shouldRenderFormFields,
+  shouldShowFormAgainButton,
+} from "../submission-visibility";
+import {
+  resolveDiscussionAuthState,
+  resolveDiscussionSignInUrl,
+  type DiscussionAuthState,
+} from "../discussion-auth";
+import {
+  applyHiddenFormField,
+  omitReplyRatingValue,
+} from "../discussion-fields";
 import { FormAttributesProvider } from "../context/FormAttributesContext";
 import {
   FormPreviewProvider,
@@ -115,6 +128,13 @@ interface DiscussionReplyContext {
   parentSubmissionId: string;
   parentAuthorName?: string;
   discussionChannel: string;
+}
+
+function authoredOrTranslated(
+  authored: string | undefined,
+  translated: string,
+): string {
+  return typeof authored === "string" ? authored : translated;
 }
 
 function newIdempotencyKey(): string {
@@ -663,7 +683,7 @@ function collectFileFields(fields: FieldConfig[]): FileFieldConfig[] {
 
 export function FormShell({
   form,
-  fields,
+  fields: authoredFields,
   states,
   preview,
   store,
@@ -723,6 +743,109 @@ export function FormShell({
     return dir as "ltr" | "rtl";
   }, [form.direction, currentLanguage, directionInStore]);
 
+  const discussionCopy = useMemo(() => {
+    // Amplify I18n stores the active locale globally; keep this memo tied to it.
+    void currentLanguage;
+    return {
+      cancelReplyLabel: authoredOrTranslated(
+        form.cancelReplyLabel,
+        I18n.get("Cancel reply"),
+      ),
+      pendingModerationMessage: authoredOrTranslated(
+        form.pendingModerationMessage,
+        I18n.get("Your submission is awaiting moderation."),
+      ),
+      permissionDeniedMessage: authoredOrTranslated(
+        form.discussionPermissionDeniedMessage,
+        I18n.get("Your account is not allowed to join this discussion."),
+      ),
+      replyingToLabel: authoredOrTranslated(
+        form.replyingToLabel,
+        I18n.get("Replying to"),
+      ),
+      signInLabel: authoredOrTranslated(
+        form.discussionSignInLabel,
+        I18n.get("Sign in or create an account"),
+      ),
+      signInRequiredMessage: authoredOrTranslated(
+        form.discussionSignInRequiredMessage,
+        I18n.get("Sign in to join the discussion."),
+      ),
+    };
+  }, [form, currentLanguage]);
+
+  const [discussionAuth, setDiscussionAuth] = useState<DiscussionAuthState>({
+    loaded: form.discussionAuthMode === "anonymous",
+    authenticated: false,
+    canComment: form.discussionAuthMode !== "required",
+  });
+  useEffect(() => {
+    let active = true;
+    const request = form.discussionEnabled
+      ? resolveDiscussionAuthState({
+          mode: form.discussionAuthMode,
+          allowedGroups: form.discussionAllowedGroups,
+        })
+      : Promise.resolve({
+          loaded: true,
+          authenticated: false,
+          canComment: true,
+        });
+    void request.then((state) => {
+      if (active) setDiscussionAuth(state);
+    });
+    return () => {
+      active = false;
+    };
+  }, [
+    form.discussionAllowedGroups,
+    form.discussionAuthMode,
+    form.discussionEnabled,
+  ]);
+  const discussionSignInUrl = useMemo(
+    () =>
+      form.discussionEnabled &&
+      form.discussionAuthMode === "required" &&
+      !discussionAuth.authenticated
+        ? resolveDiscussionSignInUrl()
+        : undefined,
+    [
+      discussionAuth.authenticated,
+      form.discussionAuthMode,
+      form.discussionEnabled,
+    ],
+  );
+
+  const [replyContext, setReplyContext] =
+    useState<DiscussionReplyContext | null>(null);
+  const fields = useMemo(
+    () => {
+      const withAuthenticatedAuthor = applyHiddenFormField(
+        authoredFields,
+        form.discussionAuthorNameField,
+        Boolean(
+          form.discussionEnabled &&
+            form.discussionAuthorNameSource === "identity" &&
+            discussionAuth.authenticated,
+        ),
+      );
+      return applyHiddenFormField(
+        withAuthenticatedAuthor,
+        form.discussionRatingField,
+        Boolean(form.discussionEnabled && replyContext),
+      );
+    },
+    [
+      authoredFields,
+      discussionAuth.authenticated,
+      form.discussionAuthorNameField,
+      form.discussionAuthorNameSource,
+      form.discussionEnabled,
+      form.discussionRatingField,
+      replyContext,
+    ],
+  );
+
   const [draftSubmissionId, setDraftSubmissionId] = useState<
     string | undefined
   >();
@@ -740,8 +863,6 @@ export function FormShell({
   const [formReturnIntent, setFormReturnIntent] =
     useState<FormReturnIntent>(null);
   const [scrollResetKey, setScrollResetKey] = useState(0);
-  const [replyContext, setReplyContext] =
-    useState<DiscussionReplyContext | null>(null);
   const idempotencyAttemptRef = useRef<{
     fingerprint: string;
     key: string;
@@ -1361,10 +1482,15 @@ export function FormShell({
           let wpSuiteSiteSettings = {} as SiteSettings;
           if (typeof WpSuite !== "undefined")
             wpSuiteSiteSettings = WpSuite.siteSettings;
-          const serializedValues = await prepareSerializableValues(
+          const preparedValues = await prepareSerializableValues(
             state.values,
             wpSuiteSiteSettings?.accountId,
             wpSuiteSiteSettings?.siteId,
+          );
+          const serializedValues = omitReplyRatingValue(
+            preparedValues,
+            form.discussionRatingField,
+            Boolean(replyContext),
           );
           const draftRequest = {
             accountId: wpSuiteSiteSettings?.accountId,
@@ -1756,7 +1882,7 @@ export function FormShell({
             type: "SUBMIT_SUCCESS",
             message:
               response.publicationStatus === "pending"
-                ? form.pendingModerationMessage ?? response.message
+                ? discussionCopy.pendingModerationMessage
                 : form.successMessage ?? response.message,
           });
           emitFormEvent("smartcloud-flow:submit-success", {
@@ -1796,6 +1922,7 @@ export function FormShell({
       currentLanguage,
       contentRef,
       discussionChannel,
+      discussionCopy.pendingModerationMessage,
       prepareSerializableValues,
       requestViewScrollReset,
       resolvedEndpointHeaders,
@@ -1902,8 +2029,6 @@ export function FormShell({
     ],
   );
 
-  const shouldShowSubmittedState =
-    state.status === "success" && lastCompletedAction === "submit";
   const shouldShowStandaloneState = Boolean(activeStandaloneState?.html);
   const lastShownSuccessStateRef = useRef<string | null>(null);
 
@@ -2150,7 +2275,7 @@ export function FormShell({
                       <Alert color="blue" role="status" aria-live="polite">
                         <Group justify="space-between" align="center">
                           <Text size="sm">
-                            {form.replyingToLabel}
+                            {discussionCopy.replyingToLabel}
                             {replyContext.parentAuthorName
                               ? ` ${replyContext.parentAuthorName}`
                               : ""}
@@ -2163,7 +2288,7 @@ export function FormShell({
                               idempotencyAttemptRef.current = null;
                             }}
                           >
-                            {form.cancelReplyLabel}
+                            {discussionCopy.cancelReplyLabel}
                           </Button>
                         </Group>
                       </Alert>
@@ -2274,8 +2399,47 @@ export function FormShell({
                         </Stack>
                       </Alert>
                     ) : null}
-                    {!shouldShowSubmittedState &&
-                      !(state.status === "success" && form.hideFormOnSuccess) &&
+                    {shouldShowFormAgainButton({
+                      status: state.status,
+                      hideFormOnSuccess: form.hideFormOnSuccess,
+                      label: form.showFormAgainLabel,
+                    }) ? (
+                      <Button variant="subtle" onClick={actions.startNewForm}>
+                        {form.showFormAgainLabel}
+                      </Button>
+                    ) : null}
+                    {shouldRenderFormFields(
+                      state.status,
+                      form.hideFormOnSuccess,
+                    ) && form.discussionEnabled && discussionAuth.loaded && !discussionAuth.canComment ? (
+                      <Alert color="yellow" role="status">
+                        <Stack gap="xs" align="flex-start">
+                          <Text>
+                            {discussionAuth.authenticated
+                              ? discussionCopy.permissionDeniedMessage
+                              : discussionCopy.signInRequiredMessage}
+                          </Text>
+                          {!discussionAuth.authenticated &&
+                          discussionSignInUrl &&
+                          discussionCopy.signInLabel ? (
+                            <Button
+                              component="a"
+                              href={discussionSignInUrl}
+                              size="xs"
+                              variant="light"
+                            >
+                              {discussionCopy.signInLabel}
+                            </Button>
+                          ) : null}
+                        </Stack>
+                      </Alert>
+                    ) : null}
+                    {shouldRenderFormFields(
+                      state.status,
+                      form.hideFormOnSuccess,
+                    ) &&
+                      (!form.discussionEnabled ||
+                        (discussionAuth.loaded && discussionAuth.canComment)) &&
                       fields.map((field, idx) => (
                         <FieldRenderer
                           key={

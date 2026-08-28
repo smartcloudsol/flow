@@ -164,6 +164,19 @@ test("every Flow locale matches the English vocabulary", () => {
   }
 });
 
+test("every Flow locale keeps its vocabulary keys in alphabetical order", () => {
+  const collator = new Intl.Collator("en", { sensitivity: "base" });
+
+  for (const [locale, vocabulary] of Object.entries(vocabularies)) {
+    const keys = Object.keys(vocabulary);
+    assert.deepEqual(
+      keys,
+      [...keys].sort((left, right) => collator.compare(left, right)),
+      `${locale} vocabulary keys are not in alphabetical order`,
+    );
+  }
+});
+
 test("every static Flow runtime I18n key exists in the English vocabulary", () => {
   const missing = [...collectStaticI18nKeys()]
     .filter((key) => !(key in enDict))

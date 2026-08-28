@@ -15,6 +15,20 @@ $smartcloud_flow_discussion_post_type = !empty($smartcloud_flow_discussion_conte
     : sanitize_key((string) get_post_type($smartcloud_flow_discussion_post_id));
 $smartcloud_flow_discussion_source = (string) ($smartcloud_flow_discussion_attributes['contentTargetSource'] ?? 'wordpress-context');
 
+// A discussion rendered beside its source form shares the form definition
+// synchronized for the current post. Keep an explicitly authored formId, but
+// fill an empty one from the same post meta that the form renderer uses.
+if (
+    empty($smartcloud_flow_discussion_attributes['formId'])
+    && $smartcloud_flow_discussion_post_id
+    && class_exists('\SmartCloud\WPSuite\Flow\FormSyncMeta')
+) {
+    $smartcloud_flow_discussion_backend_form_id = \SmartCloud\WPSuite\Flow\FormSyncMeta::getFormId($smartcloud_flow_discussion_post_id);
+    if ($smartcloud_flow_discussion_backend_form_id) {
+        $smartcloud_flow_discussion_attributes['formId'] = $smartcloud_flow_discussion_backend_form_id;
+    }
+}
+
 if ($smartcloud_flow_discussion_source === 'wordpress-context' && $smartcloud_flow_discussion_post_id && $smartcloud_flow_discussion_post_type !== '') {
     $smartcloud_flow_discussion_attributes['contentRef'] = [
         'namespace' => 'wordpress',
@@ -43,6 +57,6 @@ $smartcloud_flow_discussion_config = base64_encode(wp_json_encode($smartcloud_fl
     data-config="<?php echo esc_attr($smartcloud_flow_discussion_config); ?>"
     <?php echo wp_kses_data(get_block_wrapper_attributes(['class' => 'smartcloud-flow-discussion'])); ?>
 >
-    <div class="smartcloud-flow-discussion__fallback"><?php echo esc_html((string) ($smartcloud_flow_discussion_attributes['loadingMessage'] ?? '')); ?></div>
+    <div class="smartcloud-flow-discussion__fallback" data-wpsuite-react-fallback><?php echo esc_html((string) ($smartcloud_flow_discussion_attributes['loadingMessage'] ?? '')); ?></div>
     <div class="smartcloud-flow-discussion__mount"></div>
 </div>
