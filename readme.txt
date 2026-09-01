@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,9 @@ Some admin UI modules may originate from shared WP Suite components to support w
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.2.1 =
+* Packaging: Added the Rating Summary block files omitted from the previous WordPress.org package.
 
 = 1.2.0 =
 * Feature: Added a standalone Rating Summary block for backend-calculated averages, counts, and optional rating distributions.
