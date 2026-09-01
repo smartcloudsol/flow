@@ -1,7 +1,7 @@
 {
   "name": "@smart-cloud/flow-blocks",
   "private": true,
-  "version": "1.1.17",
+  "version": "1.2.0",
   "type": "module",
   "license": "ISC",
   "scripts": {
@@ -24,7 +24,7 @@
     "@mantine/colors-generator": "^8.3.18",
     "@mantine/tiptap": "^8.3.18",
     "@monaco-editor/react": "^4.7.0",
-    "@smart-cloud/ai-kit-core": "^1.5.4",
+    "@smart-cloud/ai-kit-core": "^1.5.5",
     "@smart-cloud/flow-core": "^1.1.9",
     "@smart-cloud/gatey-core": "^2.3.4",
     "@smart-cloud/wpsuite-blocks": "^1.0.0",

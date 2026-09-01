@@ -42,6 +42,13 @@ export const observe = () => {
     document.dispatchEvent(new CustomEvent("smartcloud-flow:mount-discussions"));
   };
 
+  const mountRatingSummary = (el: HTMLElement) => {
+    if (!el?.id || jQuery(el).data("rendered")) return;
+    document.dispatchEvent(
+      new CustomEvent("smartcloud-flow:mount-rating-summaries"),
+    );
+  };
+
   const mount = () => {
     jQuery(".smartcloud-flow-form").each((_idx, n) => {
       mountForm(n);
@@ -51,6 +58,9 @@ export const observe = () => {
     });
     jQuery(".smartcloud-flow-discussion").each((_idx, n) => {
       mountDiscussion(n);
+    });
+    jQuery(".smartcloud-flow-rating-summary").each((_idx, n) => {
+      mountRatingSummary(n);
     });
   };
 
@@ -73,6 +83,14 @@ export const observe = () => {
         () => {
           jQuery(".smartcloud-flow-discussion").each((_idx, n) => {
             mountDiscussion(n);
+          });
+        },
+      );
+      elementorFrontend.hooks.addAction(
+        "frontend/element_ready/smartcloud_flow_rating_summary.default",
+        () => {
+          jQuery(".smartcloud-flow-rating-summary").each((_idx, n) => {
+            mountRatingSummary(n);
           });
         },
       );

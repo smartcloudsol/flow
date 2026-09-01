@@ -1,6 +1,6 @@
 # WP Suite Flow
 
-Flow is a WordPress plugin for building **block-based forms and workflow-driven submission flows** in Gutenberg, with an optional **AWS backend** for durable submissions, templates, workflows, and admin automation.
+Flow is a WordPress plugin for building **multi-step** Gutenberg forms with **save and resume**, backend-powered **discussions** and **ratings**, browser-side experiences for **static WordPress**, and optional **AWS workflows** for durable submissions, events, templates, integrations, and admin automation.
 
 This repository contains the source code and frontend modules for the **free / OSS parts** of the WP Suite Flow plugin.
 
@@ -36,6 +36,7 @@ Free mode supports:
 
 - **Gutenberg form builder** with dedicated layout and field blocks
 - **Front-end form rendering** with Mantine-based UI
+- **Discussion and rating surfaces**, including a standalone Rating Summary block for aggregate scores and distributions
 - **Light-DOM modal block** with native `<dialog>`, class/data/hash triggers, and a browser API on `WpSuite.plugins.flow.modals`
 - **Light-DOM gallery block** with core Image inner blocks, previous/next plus optional thumbnail navigation, and modal-aware start positions via opener classes
 - **Conditional logic and validation**
@@ -94,13 +95,13 @@ This keeps WordPress as the editing and presentation layer while AWS handles dur
 	Gutenberg form builder blocks, field blocks, conditional logic UI, and front-end rendering support; build here and copy the generated assets from `blocks/dist/` into the final plugin layout.
 
 - `wpsuite-main/` (in the Hub repository)  
-	Shared frontend bundle copied into `hub-for-wpsuiteio/`; its `dist/` output provides the script loaded on every page to initialize WPSuite reCAPTCHA v3 when needed.
+	Shared frontend bundle copied into `smartcloud-wpsuite/`; its `dist/` output provides the script loaded on every page to initialize WPSuite reCAPTCHA v3 when needed.
 
 - `wpsuite-admin/` (in the Hub repository)  
 	Shared WP Suite admin interface used across WP Suite plugins.
 
 - `wpsuite-*-vendor/` (in the Hub repository)  
-	Shared vendor bundles whose `dist/` outputs are copied into `hub-for-wpsuiteio/assets/js/` and `hub-for-wpsuiteio/assets/css/`.
+	Shared vendor bundles whose `dist/` outputs are copied into `smartcloud-wpsuite/assets/js/` and `smartcloud-wpsuite/assets/css/`.
 
 - `dist/` folders under `main/`, `admin/`, and `blocks/`  
 	Compiled and minified frontend output used by the WordPress plugin.
@@ -113,7 +114,7 @@ It lives in the separate Hub repository and is published on npm as `@smart-cloud
 
 ### Source of Shared WPSuite Hub Code
 
-The shared WordPress Hub code lives in the `wpsuite-admin/`, `wpsuite-main/`, and `wpsuite-*-vendor/` directories of the [Hub for WPSuite.io](https://github.com/smartcloudsol/hub-for-wpsuiteio) repository.  
+The shared WordPress Hub code lives in the `wpsuite-admin/`, `wpsuite-main/`, and `wpsuite-*-vendor/` directories of the [SmartCloud WP Suite](https://github.com/smartcloudsol/smartcloud-wpsuite) repository.
 That repository hosts the shared administrative interface, global frontend assets, and vendor bundles used across WPSuite plugins, including Flow.
 
 ---
@@ -132,7 +133,7 @@ That repository hosts the shared administrative interface, global frontend asset
 You typically want Flow and the Hub repository side-by-side so local linking and shared Hub asset packaging work cleanly:
 
 ```bash
-git clone https://github.com/smartcloudsol/hub-for-wpsuiteio.git
+git clone https://github.com/smartcloudsol/smartcloud-wpsuite.git
 git clone https://github.com/smartcloudsol/flow.git
 ```
 
@@ -140,7 +141,7 @@ Suggested structure:
 
 ```text
 /projects/
-	hub-for-wpsuiteio/
+	smartcloud-wpsuite/
 		wpsuite-core/
 		wpsuite-admin/
 		wpsuite-main/
@@ -158,7 +159,7 @@ Suggested structure:
 
 ```bash
 # Hub repo
-cd hub-for-wpsuiteio/wpsuite-core
+cd smartcloud-wpsuite/wpsuite-core
 yarn install
 
 cd ../wpsuite-admin
@@ -195,7 +196,7 @@ yarn install
 First, build and link `wpsuite-core` from the Hub repo:
 
 ```bash
-cd ../../hub-for-wpsuiteio/wpsuite-core
+cd ../../smartcloud-wpsuite/wpsuite-core
 yarn run build
 npm link
 ```
@@ -240,7 +241,7 @@ yarn run build-wp dist
 
 After building `main/`, `admin/`, and `blocks/`, copy the generated assets from each module's `dist/` directory into the matching plugin directory. For `admin/`, copy the PHP files from `admin/php/` as well.
 
-If you build shared Hub assets locally, run `yarn run build-wp dist` in `hub-for-wpsuiteio/wpsuite-main` and `hub-for-wpsuiteio/wpsuite-admin`, and run `yarn run build` in any touched `hub-for-wpsuiteio/wpsuite-*-vendor` workspace before packaging.
+If you build shared Hub assets locally, run `yarn run build-wp dist` in `smartcloud-wpsuite/wpsuite-main` and `smartcloud-wpsuite/wpsuite-admin`, and run `yarn run build` in any touched `smartcloud-wpsuite/wpsuite-*-vendor` workspace before packaging.
 
 ### 6) Install PHP dependencies
 
@@ -268,12 +269,12 @@ Ensure the built assets are copied into the simplified plugin layout:
 - `blocks/dist/*` → `blocks/`
 - `admin/php/*` and `admin/dist/*` → `admin/`
 
-If you rebuild the shared Hub assets in the separate Hub repository, copy the following outputs into the plugin's `hub-for-wpsuiteio/` directory according to that repository's instructions:
+If you rebuild the shared Hub assets in the separate Hub repository, copy the following outputs into the plugin's `smartcloud-wpsuite/` directory according to that repository's instructions:
 
-- `wpsuite-main/dist/*` → `hub-for-wpsuiteio/`
-- `wpsuite-admin/php/*` and `wpsuite-admin/dist/*` → `hub-for-wpsuiteio/`
-- `wpsuite-*-vendor/dist/*.js` → `hub-for-wpsuiteio/assets/js/`
-- `wpsuite-*-vendor/dist/*.css` → `hub-for-wpsuiteio/assets/css/`
+- `wpsuite-main/dist/*` → `smartcloud-wpsuite/`
+- `wpsuite-admin/php/*` and `wpsuite-admin/dist/*` → `smartcloud-wpsuite/`
+- `wpsuite-*-vendor/dist/*.js` → `smartcloud-wpsuite/assets/js/`
+- `wpsuite-*-vendor/dist/*.css` → `smartcloud-wpsuite/assets/css/`
 
 The `wpsuite-main/dist/` bundle provides the script that loads on every page and initializes the reCAPTCHA v3 flow used by WPSuite plugins whenever it is needed.
 

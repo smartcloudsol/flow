@@ -5,16 +5,16 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.24
+Stable tag: 1.2.0
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
 
-Design forms in Gutenberg and run durable, event‑driven workflows in your own AWS account. 
+Build multi-step forms with save and resume, discussions, ratings, and AWS workflows for dynamic or static WordPress.
 
 == Description ==
 
-**SmartCloud Flow** is a block-based forms and workflow plugin for WordPress.
+**SmartCloud Flow** is a block-based forms and workflow plugin for WordPress, with explicit support for multi-step journeys, save and resume, backend-powered discussions and ratings, static WordPress delivery, and optional AWS workflows.
 
 It combines a modern Gutenberg editor experience with a React/Mantine runtime for forms, a native `<dialog>`-based light-DOM modal block, and an optional AWS backend, so site owners can design forms and supporting UI in WordPress while choosing where submissions should be posted and, in Pro, running submissions, templates, workflows, and integrations in their own AWS account.
 
@@ -46,6 +46,7 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 
 * **Gutenberg form builder** — Build forms with a dedicated Form block, layout/container blocks, and rich field blocks.
 * **Single React runtime per form** — Front-end forms run as one mounted React tree.
+* **Discussion and rating surfaces** — Publish threaded discussions, collect ratings through a Form, and place a standalone Rating Summary block anywhere the same content target needs an aggregate score and distribution.
 * **Light-DOM modal block** — Wrap any Gutenberg content in a native dialog with class and data-attribute triggers, hash opening, default header/body/actions slots, action-role aware buttons, and a stable browser API on `WpSuite.plugins.flow.modals`.
 * **Light-DOM gallery block** — Build a Mantine-free gallery/lightbox from core Image blocks with previous/next controls, optional thumbnails, optional captions/counter, and modal-aware start positions driven by outer trigger classes.
 * **Rich display & content blocks** — Use styled content primitives such as blockquotes, marks, badges, code blocks, spoilers, lists, tables, timelines, and overflow lists alongside inputs.
@@ -221,6 +222,13 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.2.0 =
+* Feature: Added a standalone Rating Summary block for backend-calculated averages, counts, and optional rating distributions.
+* Integration: Refreshes matching summaries after successful Flow submissions and supports current WordPress or explicit content targets on dynamic and static pages.
+
+= 1.1.25 =
+* Documentation: Made multi-step, save and resume, discussions, ratings, static WordPress, and AWS workflows explicit in the plugin short description and opening overview.
+
 = 1.1.24 =
 * Compatibility: Declared compatibility with WordPress 7.1.
 * Feature: Added optional or required Gatey/Cognito identity for discussions, backend-enforced group access, verified author-name templates, owner edit/delete, moderator delete, confirmation, and per-viewer action capabilities.
@@ -365,6 +373,12 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds a reusable Rating Summary block for displaying the aggregate ratings already maintained by the Flow backend.
+
+= 1.1.25 =
+Clarifies Flow's guided forms, discussion and rating surfaces, static WordPress support, and AWS workflow path.
 
 = 1.1.24 =
 Adds authenticated discussion actions and author identities, declares compatibility with WordPress 7.1, and fixes synchronized form IDs and multisite editor synchronization.

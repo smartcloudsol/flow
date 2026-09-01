@@ -19,6 +19,7 @@ import {
   omitReplyRatingValue,
 } from "../src/runtime/discussion-fields.ts";
 import type { FieldConfig } from "../src/shared/types.ts";
+import { readFileSync } from "node:fs";
 
 function item(
   overrides: Partial<PublicDiscussionItem> = {},
@@ -156,4 +157,15 @@ test("form extraction snapshots the recursively selected rating field", () => {
     fractions: 2,
     required: true,
   });
+});
+
+test("standalone rating summary uses the aggregate-only discussion request", () => {
+  const source = readFileSync(
+    new URL("../src/rating-summary/RatingSummaryShell.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /limit:\s*1/);
+  assert.match(source, /replyPreviewLimit:\s*0/);
+  assert.match(source, /includeCapabilities:\s*false/);
+  assert.match(source, /smartcloud-flow:submit-success/);
 });

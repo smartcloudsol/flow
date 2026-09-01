@@ -2,11 +2,11 @@
 /**
  * Plugin Name:       SmartCloud Flow – Block‑based Forms & Workflow Automation
  * Plugin URI:        https://wpsuite.io/flow/
- * Description:       Mantine-based Gutenberg form blocks with AWS-native workflows, submissions, templates, and admin automation tools.
+ * Description:       Multi-step forms with save and resume, discussions, ratings, static WordPress delivery, and optional AWS workflows.
  * Requires at least: 6.9
  * Tested up to:      7.1
  * Requires PHP:      8.1
- * Version:           1.1.24
+ * Version:           1.2.0
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.1.24';
+const VERSION = '1.2.0';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -42,6 +42,7 @@ final class Flow
     private array $blocks = [
         'form',
         'discussion',
+        'rating-summary',
         'content-root',
         'modal',
         'operations',

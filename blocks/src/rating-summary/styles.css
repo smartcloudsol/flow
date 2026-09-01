@@ -1,0 +1,33 @@
+.smartcloud-flow-rating-summary__root {
+  container-type: inline-size;
+}
+
+.smartcloud-flow-rating-summary__summary {
+  inline-size: 100%;
+}
+
+.smartcloud-flow-rating-summary__bucket {
+  inline-size: 100%;
+}
+
+.smartcloud-flow-rating-summary__retry,
+.smartcloud-flow-rating-summary__retry:hover {
+  background: var(--mantine-primary-color-filled) !important;
+  color: var(--mantine-color-white) !important;
+  opacity: 1 !important;
+}
+
+.smartcloud-flow-rating-summary__retry:hover {
+  background: var(--mantine-primary-color-filled-hover) !important;
+}
+
+@container (max-width: 30rem) {
+  .smartcloud-flow-rating-summary__bucket {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .smartcloud-flow-rating-summary__bucket > :nth-child(2) {
+    flex-basis: calc(100% - 3rem) !important;
+  }
+}

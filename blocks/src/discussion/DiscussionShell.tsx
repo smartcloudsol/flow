@@ -3,7 +3,6 @@ import {
   Button,
   Group,
   Loader,
-  Progress,
   Rating,
   Select,
   Stack,
@@ -18,6 +17,7 @@ import { fetchDiscussionPage, mutateDiscussionItem } from "./api";
 import { resolveDiscussionAuthState } from "../runtime/discussion-auth";
 import { discussionItemCount, formatDiscussionCount } from "./count-labels";
 import { formatDiscussionDate } from "./date-format";
+import { RatingSummaryView } from "./RatingSummaryView";
 import {
   buildDiscussionRatingValues,
   normalizeDiscussionRatingValue,
@@ -852,63 +852,12 @@ export function DiscussionShell({
       {ratingPolicy &&
       attributes.showRatingSummary !== false &&
       ratingSummary ? (
-        <Stack
+        <RatingSummaryView
           className="smartcloud-flow-discussion__rating-summary"
-          gap="xs"
-          aria-label={copy.ratingDistributionLabel}
-        >
-          <Group gap="xs" align="center">
-            <Text fw={600} size="sm">{copy.averageRatingLabel}</Text>
-            {ratingSummary.average !== null ? (
-              <>
-                <Rating
-                  readOnly
-                  count={ratingSummary.maximum}
-                  fractions={ratingSummary.fractions}
-                  value={ratingSummary.average}
-                />
-                <Text size="sm">
-                  {ratingNumberFormatter.format(ratingSummary.average)}
-                </Text>
-              </>
-            ) : null}
-            <Text c="dimmed" size="xs">
-              {formatDiscussionCount({
-                count: ratingSummary.count,
-                singular: copy.ratingCountLabel,
-                plural: copy.ratingCountPluralLabel,
-              })}
-            </Text>
-          </Group>
-          {ratingSummary.buckets
-            .slice()
-            .sort((left, right) => right.value - left.value)
-            .map((bucket) => (
-              <Group
-                key={bucket.value}
-                className="smartcloud-flow-discussion__rating-bucket"
-                gap="xs"
-                wrap="nowrap"
-              >
-                <Text size="xs" w={36} ta="end">
-                  {ratingNumberFormatter.format(bucket.value)}
-                </Text>
-                <Progress
-                  aria-label={replaceTokens(copy.ratingValueTemplate, {
-                    value: ratingNumberFormatter.format(bucket.value),
-                    maximum: ratingNumberFormatter.format(
-                      ratingSummary.maximum,
-                    ),
-                  })}
-                  value={bucket.percentage}
-                  style={{ flex: 1 }}
-                />
-                <Text c="dimmed" size="xs" w={84}>
-                  {bucket.count} ({ratingNumberFormatter.format(bucket.percentage)}%)
-                </Text>
-              </Group>
-            ))}
-        </Stack>
+          summary={ratingSummary}
+          copy={copy}
+          numberFormatter={ratingNumberFormatter}
+        />
       ) : null}
       {ratingPolicy && attributes.showRatingFilter !== false ? (
         <Group

@@ -44,6 +44,7 @@ module.exports = function () {
       view: [
         path.resolve(process.cwd(), "src", "form", "view.tsx"),
         path.resolve(process.cwd(), "src", "discussion", "view.tsx"),
+        path.resolve(process.cwd(), "src", "rating-summary", "view.tsx"),
         path.resolve(process.cwd(), "src", "content-root", "view.tsx"),
         path.resolve(process.cwd(), "src", "operations", "view.tsx")
       ],
