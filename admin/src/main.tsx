@@ -18,6 +18,7 @@ import { notifications } from "@mantine/notifications";
 import type { FlowSettings } from "@smart-cloud/flow-core";
 import {
   getFlowPlugin,
+  resolveBackend,
   sanitizeFlowConfig,
   TEXT_DOMAIN,
   type FlowConfig,
@@ -188,6 +189,15 @@ interface NavigationOption {
   disabled?: boolean;
 }
 
+type BackendCapabilityAvailability = {
+  submissions: boolean;
+  workflows: boolean;
+};
+
+type CapabilityAwareResolver = (
+  capability?: string,
+) => Promise<{ available: boolean }>;
+
 export interface SettingsEditorProps {
   apiUrl: string;
   config: FlowConfig;
@@ -280,6 +290,8 @@ export default function Main({ nonce, settings, store }: MainProps) {
   >(undefined);
 
   const [formConfig, setFormConfig] = useState<FlowConfig>();
+  const [backendCapabilities, setBackendCapabilities] =
+    useState<BackendCapabilityAvailability>();
 
   const loadSiteEnabled = !!accountId && !!siteId && !!siteKey;
 
@@ -310,6 +322,25 @@ export default function Main({ nonce, settings, store }: MainProps) {
   const [settingsFormData, setSettingsFormData] = useState<AdminFlowSettings>(
     initialSettingsFormData,
   );
+
+  useEffect(() => {
+    let active = true;
+    const resolver = resolveBackend as unknown as CapabilityAwareResolver;
+    void Promise.all([
+      resolver("forms.admin"),
+      resolver("workflows.admin"),
+    ]).then(([submissions, workflows]) => {
+      if (active) {
+        setBackendCapabilities({
+          submissions: submissions.available,
+          workflows: workflows.available,
+        });
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [formConfig]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -452,20 +483,29 @@ export default function Main({ nonce, settings, store }: MainProps) {
           value: "submissions",
           label: "Submissions",
           icon: <IconForms size={16} stroke={1.5} />,
-          disabled: paidSettingsDisabled,
+          disabled:
+            paidSettingsDisabled || backendCapabilities?.submissions === false,
         },
         {
           value: "workflows",
           label: "Workflows",
           icon: <IconRouteAltLeft size={16} stroke={1.5} />,
-          disabled: paidSettingsDisabled,
+          disabled:
+            paidSettingsDisabled || backendCapabilities?.workflows === false,
         },
       ]);
       if (paidSettingsDisabled) {
         setActivePage("general");
       }
     });
-  }, [accountId, decryptedConfig, resolvedConfig, siteId, siteKey]);
+  }, [
+    accountId,
+    backendCapabilities,
+    decryptedConfig,
+    resolvedConfig,
+    siteId,
+    siteKey,
+  ]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -660,6 +700,22 @@ export default function Main({ nonce, settings, store }: MainProps) {
           </Card>
         )}
         <Box style={{ flex: 1, width: isMobile ? "100%" : "auto" }} maw={1020}>
+          {backendCapabilities &&
+            (!backendCapabilities.submissions ||
+              !backendCapabilities.workflows) && (
+              <Alert
+                color="yellow"
+                variant="light"
+                title={__("Backend compatibility", TEXT_DOMAIN)}
+                icon={<IconExclamationCircle />}
+                mb="md"
+              >
+                {__(
+                  "Some Flow Pro screens are disabled because the connected backend does not advertise the capabilities they require. Update the backend to enable those functions.",
+                  TEXT_DOMAIN,
+                )}
+              </Alert>
+            )}
           {activePage === "general" && (
             <form name="general" onSubmit={handleUpdateSettings}>
               <Title order={2} mb="md">

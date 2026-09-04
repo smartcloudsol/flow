@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { dispatchBackend } from "../src/protected/backend";
+import { supportsBackendCapability } from "../src/backend-compatibility";
+
+test("legacy fallback permits only pre-discovery Flow capabilities", () => {
+  const legacy = { status: "legacy" as const, reason: "manifest unavailable" };
+  assert.equal(supportsBackendCapability(legacy, "forms.admin"), true);
+  assert.equal(supportsBackendCapability(legacy, "forms.admin", 2), false);
+});
 
 test("fetch GET sends query parameters without a body", async () => {
   const originalFetch = globalThis.fetch;
@@ -78,6 +85,45 @@ test("structured backend errors preserve code, request id, and retryability", as
         );
       },
     );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("verified manifests block paths whose capability is absent", async () => {
+  const originalFetch = globalThis.fetch;
+  let requests = 0;
+  globalThis.fetch = (async () => {
+    requests += 1;
+    return new Response(
+      JSON.stringify({
+        schemaVersion: 1,
+        product: "smartcloud-flow-backend",
+        release: "1.0.1",
+        capabilities: { "forms.submit.frontend": 1 },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+  }) as typeof fetch;
+  try {
+    await assert.rejects(
+      dispatchBackend(
+        {
+          backendAvailable: true,
+          backendTransport: "fetch",
+          backendBaseUrl: "https://capabilities.example.test",
+          reason: "test",
+        },
+        "admin",
+        "/workflows",
+        "GET",
+        undefined,
+      ),
+      (error: unknown) =>
+        (error as { code?: string }).code ===
+        "BACKEND_CAPABILITY_UNAVAILABLE",
+    );
+    assert.equal(requests, 1);
   } finally {
     globalThis.fetch = originalFetch;
   }

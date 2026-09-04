@@ -1,6 +1,26 @@
 import type { Store } from "./store";
 export type ContextKind = "admin" | "frontend";
 export type BackendTransport = "gatey" | "fetch";
+export type FlowBackendCapability = "forms.admin" | "forms.submit.frontend" | "forms.drafts.frontend" | "forms.discussions.frontend" | "forms.uploads.frontend" | "templates.admin" | "workflows.admin" | "webhooks.admin" | "process-maps.admin";
+export interface BackendManifest {
+    schemaVersion: 1;
+    product: "smartcloud-flow-backend";
+    release: string;
+    capabilities: Partial<Record<FlowBackendCapability, number>>;
+}
+export interface BackendCompatibility {
+    status: "verified" | "legacy";
+    manifest?: BackendManifest;
+    reason?: string;
+}
+export interface ResolvedBackend {
+    available: boolean;
+    transport?: BackendTransport;
+    apiName?: string;
+    baseUrl?: string;
+    reason?: string;
+    compatibility?: BackendCompatibility;
+}
 export type FormFieldDefaults = Record<string, unknown>;
 export type FlowHighlightedSubmissionAction = "seen" | "resolved" | "completed";
 export type FlowLanguageCode = "ar" | "en" | "zh" | "nl" | "fr" | "de" | "he" | "hi" | "hu" | "id" | "it" | "ja" | "ko" | "no" | "pl" | "pt" | "ru" | "es" | "sv" | "th" | "tr" | "uk";
@@ -93,6 +113,7 @@ export interface CapabilityDecision {
     backendApiName?: string;
     backendBaseUrl?: string;
     backendReason?: string;
+    backendCompatibility?: BackendCompatibility;
     reason: string;
 }
 export interface AiSuggestion {
@@ -168,14 +189,8 @@ export declare class BackendError extends Error {
     constructor(message: string, decision?: unknown | undefined, code?: string | undefined, statusCode?: number | undefined, requestId?: string | undefined, retryable?: boolean);
 }
 export interface Capabilities {
-    decideCapability: () => Promise<CapabilityDecision>;
-    resolveBackend: () => Promise<{
-        available: boolean;
-        transport?: BackendTransport;
-        apiName?: string;
-        baseUrl?: string;
-        reason?: string;
-    }>;
+    decideCapability: (capability?: FlowBackendCapability) => Promise<CapabilityDecision>;
+    resolveBackend: (capability?: FlowBackendCapability) => Promise<ResolvedBackend>;
 }
 export interface Backend<TResponse> {
     dispatchBackend: (decision: CapabilityDecision, context: ContextKind, customPath: string, method: "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: unknown, options: BackendCallOptions) => Promise<TResponse>;

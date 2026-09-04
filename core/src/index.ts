@@ -45,6 +45,7 @@ export {
 } from "./store";
 
 export * from "./types";
+export * from "./backend-compatibility";
 
 export const LANGUAGE_OPTIONS: { label: string; value: FlowLanguageCode }[] = [
   { label: __("Arabic", TEXT_DOMAIN), value: "ar" },

@@ -5,18 +5,13 @@ import { type Backend, type Capabilities, type FlowLanguageCode, type FormFieldD
 export { getFlowPlugin, getStore, TEXT_DOMAIN, waitForFlowReady, createFlowModalApiStub, type FlowErrorEvent, type FlowPlugin, type FlowReadyEvent, };
 export { getStoreDispatch, getStoreSelect, observeStore, reloadConfig, sanitizeFlowConfig, type CustomTranslations, type FlowConfig, type FormFieldDefaultsByFormId, type State, type Store, type StoreActions, type StoreSelectors, } from "./store";
 export * from "./types";
+export * from "./backend-compatibility";
 export declare const LANGUAGE_OPTIONS: {
     label: string;
     value: FlowLanguageCode;
 }[];
 export declare const decideCapability: (...args: Parameters<Capabilities["decideCapability"]>) => Promise<import("./types").CapabilityDecision>;
-export declare const resolveBackend: (...args: Parameters<Capabilities["resolveBackend"]>) => Promise<{
-    available: boolean;
-    transport?: import("./types").BackendTransport;
-    apiName?: string;
-    baseUrl?: string;
-    reason?: string;
-}>;
+export declare const resolveBackend: (...args: Parameters<Capabilities["resolveBackend"]>) => Promise<import("./types").ResolvedBackend>;
 export declare const dispatchBackend: (...args: Parameters<Backend<unknown>["dispatchBackend"]>) => Promise<unknown>;
 export declare const setFormFieldDefaultValue: (formId: string, fieldName: string, value: unknown) => Promise<void>;
 export declare const setFormFieldDefaultValues: (formId: string, values: FormFieldDefaults) => Promise<void>;
