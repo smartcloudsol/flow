@@ -1,10 +1,11 @@
 import { Anchor, Text } from "@mantine/core";
 import { getFlowPlugin } from "@smart-cloud/flow-core";
-import { I18n } from "aws-amplify/utils";
+import { useFlowI18n } from "../locale-context";
 
 const FLOW_URL = "https://wpsuite.io/flow/";
 
 export function FlowPoweredBy() {
+  const I18n = useFlowI18n();
   const flow = getFlowPlugin();
   const shouldShow = Boolean(flow?.settings?.enablePoweredBy);
 

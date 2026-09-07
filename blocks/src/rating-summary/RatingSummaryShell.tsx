@@ -6,7 +6,9 @@ import {
   type Store,
 } from "@smart-cloud/flow-core";
 import { useSelect } from "@wordpress/data";
-import { I18n } from "aws-amplify/utils";
+import { getLocaleDirection } from "@smart-cloud/wpsuite-core";
+import { FlowLocaleProvider } from "../runtime/locale";
+import { useFlowI18n } from "../runtime/locale-context";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchDiscussionPage } from "../discussion/api";
 import { RatingSummaryView } from "../discussion/RatingSummaryView";
@@ -73,41 +75,28 @@ function authoredOrTranslated(
   return typeof authored === "string" ? authored : translated;
 }
 
-export function RatingSummaryShell({
+export function RatingSummaryShell(props: Parameters<typeof RatingSummaryShellContent>[0]) {
+  return <FlowLocaleProvider language={props.attributes.language} store={props.store}><RatingSummaryShellContent {...props} /></FlowLocaleProvider>;
+}
+
+function RatingSummaryShellContent({
   attributes,
   store,
 }: {
   attributes: RatingSummaryAttributes;
   store: Store;
 }) {
-  const languageInStore = useSelect(
-    () => getStoreSelect(store).getLanguage(),
-    [store],
-  );
+  const I18n = useFlowI18n();
   const directionInStore = useSelect(
     () => getStoreSelect(store).getDirection(),
     [store],
   );
-  const customTranslations = useSelect(
-    () => getStoreSelect(store).getCustomTranslations(),
-    [store],
-  );
-  const currentLanguage = useMemo(() => {
-    if (customTranslations) I18n.putVocabularies(customTranslations);
-    const language = attributes.language || languageInStore;
-    if (!language || language === "system") {
-      I18n.setLanguage("");
-      return undefined;
-    }
-    I18n.setLanguage(language);
-    return language;
-  }, [attributes.language, customTranslations, languageInStore]);
+  const currentLanguage = I18n.language;
+
   const currentDirection = useMemo(() => {
     const direction = attributes.direction || directionInStore;
     if (!direction || direction === "auto") {
-      return currentLanguage === "ar" || currentLanguage === "he"
-        ? "rtl"
-        : "ltr";
+      return getLocaleDirection(currentLanguage);
     }
     return direction as "ltr" | "rtl";
   }, [attributes.direction, currentLanguage, directionInStore]);
@@ -156,7 +145,7 @@ export function RatingSummaryShell({
         I18n.get("Ratings are not enabled for this discussion."),
       ),
     };
-  }, [attributes, currentLanguage]);
+  }, [I18n, attributes, currentLanguage]);
   const contentRef = useMemo(
     () => resolveContentReference(attributes),
     [attributes],

@@ -11,7 +11,9 @@ import {
 } from "@mantine/core";
 import { getStoreSelect, type Store } from "@smart-cloud/flow-core";
 import { useSelect } from "@wordpress/data";
-import { I18n } from "aws-amplify/utils";
+import { getLocaleDirection } from "@smart-cloud/wpsuite-core";
+import { FlowLocaleProvider } from "../runtime/locale";
+import { useFlowI18n } from "../runtime/locale-context";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchDiscussionPage, mutateDiscussionItem } from "./api";
 import { resolveDiscussionAuthState } from "../runtime/discussion-auth";
@@ -92,7 +94,11 @@ function replaceDiscussionItem(
   }));
 }
 
-export function DiscussionShell({
+export function DiscussionShell(props: Parameters<typeof DiscussionShellContent>[0]) {
+  return <FlowLocaleProvider language={props.attributes.language} store={props.store}><DiscussionShellContent {...props} /></FlowLocaleProvider>;
+}
+
+function DiscussionShellContent({
   attributes,
   hostElement,
   store,
@@ -101,36 +107,17 @@ export function DiscussionShell({
   hostElement: HTMLElement;
   store: Store;
 }) {
-  const languageInStore = useSelect(
-    () => getStoreSelect(store).getLanguage(),
-    [store],
-  );
+  const I18n = useFlowI18n();
   const directionInStore = useSelect(
     () => getStoreSelect(store).getDirection(),
     [store],
   );
-  const customTranslations = useSelect(
-    () => getStoreSelect(store).getCustomTranslations(),
-    [store],
-  );
-  const currentLanguage = useMemo(() => {
-    if (customTranslations) {
-      I18n.putVocabularies(customTranslations);
-    }
-    const language = attributes.language || languageInStore;
-    if (!language || language === "system") {
-      I18n.setLanguage("");
-      return undefined;
-    }
-    I18n.setLanguage(language);
-    return language;
-  }, [attributes.language, customTranslations, languageInStore]);
+  const currentLanguage = I18n.language;
+
   const currentDirection = useMemo(() => {
     const direction = attributes.direction || directionInStore;
     if (!direction || direction === "auto") {
-      return currentLanguage === "ar" || currentLanguage === "he"
-        ? "rtl"
-        : "ltr";
+      return getLocaleDirection(currentLanguage);
     }
     return direction as "ltr" | "rtl";
   }, [attributes.direction, currentLanguage, directionInStore]);
@@ -289,7 +276,7 @@ export function DiscussionShell({
         I18n.get("This item is no longer available."),
       ),
     };
-  }, [attributes, currentLanguage]);
+  }, [I18n, attributes, currentLanguage]);
   const contentRef = useMemo(() => resolveContentReference(attributes), [attributes]);
   const channel =
     attributes.discussionChannel?.trim() ||

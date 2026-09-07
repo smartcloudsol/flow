@@ -6,7 +6,6 @@ import { MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
 import { dismissReactFallbackWhenMounted } from "@smart-cloud/wpsuite-blocks";
-import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
 import {
   createFormTheme,
@@ -15,7 +14,6 @@ import {
   hashStringDjb2,
   sanitizeThemeOverrides,
 } from "../form/renderForm";
-import { translations } from "../i18n";
 import { ContentRootShell } from "../runtime/components/ContentRootShell";
 import type { FieldConfig, FormAttributes } from "../shared/types";
 
@@ -63,7 +61,6 @@ export async function renderContentRoot(
     ...customClassNames,
   ].join(" ");
 
-  I18n.putVocabularies(translations);
 
   const store = await getStore();
   const pluginUrl = getFlowPlugin()!.baseUrl;

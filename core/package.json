@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "build:js": "tsup --minify",
     "build:types": "tsc -p tsconfig.types.json",
     "lint": "eslint 'src/**/*.ts' --report-unused-disable-directives --max-warnings 0",
-    "test": "esbuild tests/backend.test.ts --bundle --platform=node --format=cjs --packages=external --outfile=.test-dist/backend.test.cjs && node --test .test-dist/backend.test.cjs",
+    "test": "esbuild tests/*.test.ts --bundle --platform=node --format=cjs --packages=external --outfile=.test-dist/backend.test.cjs && node --test .test-dist/backend.test.cjs",
     "release:npm": "WPSUITE_PREMIUM=true yarn build && npm publish --access=public --registry=https://registry.npmjs.org/"
   },
   "publishConfig": {
@@ -31,6 +31,17 @@
     "access": "public"
   },
   "resolutions": {
+    "@humanfs/node": "^0.16.8",
+    "brace-expansion": "^5.0.9",
+    "esbuild": "^0.28.1",
+    "fast-xml-builder": "^1.3.0",
+    "fast-xml-parser": "^5.10.1",
+    "flatted": "^3.4.4",
+    "picomatch": "^4.0.5",
+    "rollup": "^4.62.3"
+  },
+  "overrides": {
+    "@humanfs/node": "^0.16.8",
     "brace-expansion": "^5.0.9",
     "esbuild": "^0.28.1",
     "fast-xml-builder": "^1.3.0",
@@ -40,34 +51,34 @@
     "rollup": "^4.62.3"
   },
   "dependencies": {
-    "@smart-cloud/gatey-core": "^2.3.4",
-    "@smart-cloud/wpsuite-core": "^2.3.2",
+    "@smart-cloud/gatey-core": "^2.3.6",
+    "@smart-cloud/wpsuite-core": "^2.4.0",
     "aws-amplify": "^6.20.0"
   },
   "peerDependencies": {
-    "@wordpress/data": "^10.52.0",
-    "@wordpress/i18n": "^6.25.0",
+    "@wordpress/data": "^10.54.0",
+    "@wordpress/i18n": "^6.27.0",
     "react": "^18.3.1"
   },
   "devDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "6.15.5",
-    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
+    "@smart-cloud/aws-amplify-ui": "6.15.7-preview.1",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.7-preview.1",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.4.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
-    "@typescript-eslint/parser": "^8.65.0",
-    "@wordpress/data": "^10.52.0",
-    "@wordpress/i18n": "^6.25.0",
-    "eslint": "^10.8.0",
-    "globals": "^17.8.0",
-    "jose": "^6.2.5",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
+    "@wordpress/data": "^10.54.0",
+    "@wordpress/i18n": "^6.27.0",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "jose": "^6.2.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.65.0"
+    "typescript-eslint": "^8.69.0"
   }
 }

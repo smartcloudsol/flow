@@ -1,9 +1,9 @@
+import { LocaleDirectionProvider } from "../LocaleDirectionProvider";
 import {
   ActionIcon,
   Alert,
   Button,
   CopyButton,
-  DirectionProvider,
   Group,
   Paper,
   PasswordInput,
@@ -25,7 +25,9 @@ import {
   type SiteSettings,
 } from "@smart-cloud/wpsuite-core";
 import { useSelect } from "@wordpress/data";
-import { I18n } from "aws-amplify/utils";
+import { getLocaleDirection } from "@smart-cloud/wpsuite-core";
+import { FlowLocaleProvider } from "../locale";
+import { useFlowI18n } from "../locale-context";
 import {
   useCallback,
   useEffect,
@@ -97,7 +99,7 @@ import {
   shouldScrollFlowRequestFailureIntoView,
 } from "../errorHandling";
 import { formReducer, getInitialValues } from "../reducer";
-import { validateField, validateValues } from "../validation";
+import { createFlowValidation } from "../validation";
 import { FlowPoweredBy } from "./FlowPoweredBy";
 import { FieldRenderer } from "./field-renderers";
 import {
@@ -414,7 +416,7 @@ function isEmptyInitialFieldValue(value: unknown): boolean {
   return false;
 }
 
-function humanizeSubmissionStatus(status?: string): string | undefined {
+function humanizeSubmissionStatus(I18n: ReturnType<typeof useFlowI18n>, status?: string): string | undefined {
   if (!status) return undefined;
   if (status === "accepted") {
     return I18n.get("Submission accepted") || "Submission accepted";
@@ -428,12 +430,12 @@ function humanizeSubmissionStatus(status?: string): string | undefined {
   return status;
 }
 
-function humanizeResponseMessage(
+function humanizeResponseMessage(I18n: ReturnType<typeof useFlowI18n>,
   submissionMeta?: SubmissionMetaRuntime | null,
 ): string | undefined {
   if (!submissionMeta) return undefined;
   if (submissionMeta.responseMessage) return submissionMeta.responseMessage;
-  return humanizeSubmissionStatus(submissionMeta.status);
+  return humanizeSubmissionStatus(I18n, submissionMeta.status);
 }
 
 function buildAiSuggestionsSubmissionMetadata(aiSuggestions: {
@@ -458,7 +460,7 @@ function buildAiSuggestionsSubmissionMetadata(aiSuggestions: {
   };
 }
 
-function formatSubmissionMetaValue(
+function formatSubmissionMetaValue(I18n: ReturnType<typeof useFlowI18n>,
   field: string,
   submissionMeta?: SubmissionMetaRuntime | null,
   dateFormat: "localized" | "iso" = "localized",
@@ -474,17 +476,17 @@ function formatSubmissionMetaValue(
       return submissionMeta.acceptedAt;
     }
 
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(I18n.language, {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(parsedDate);
   }
   if (field === "status")
-    return humanizeSubmissionStatus(submissionMeta.status);
+    return humanizeSubmissionStatus(I18n, submissionMeta.status);
   if (field === "formId") return submissionMeta.formId;
   if (field === "formName") return submissionMeta.formName;
   if (field === "responseMessage")
-    return humanizeResponseMessage(submissionMeta);
+    return humanizeResponseMessage(I18n, submissionMeta);
   if (field === "submissionSource") {
     if (submissionMeta.submissionSource === "draft") {
       return I18n.get("Saved draft") || "Saved draft";
@@ -522,7 +524,7 @@ function formatSubmissionMetaValue(
   return undefined;
 }
 
-function hydrateSuccessStateHtml(
+function hydrateSuccessStateHtml(I18n: ReturnType<typeof useFlowI18n>,
   html: string,
   submissionMeta?: SubmissionMetaRuntime | null,
 ): string {
@@ -548,7 +550,7 @@ function hydrateSuccessStateHtml(
       node.dataset.smartcloudFlowSubmissionMetaDateFormat === "iso"
         ? "iso"
         : "localized";
-    const runtimeValue = formatSubmissionMetaValue(
+    const runtimeValue = formatSubmissionMetaValue(I18n,
       field,
       submissionMeta,
       dateFormat,
@@ -681,7 +683,11 @@ function collectFileFields(fields: FieldConfig[]): FileFieldConfig[] {
   });
 }
 
-export function FormShell({
+export function FormShell(props: Parameters<typeof FormShellContent>[0]) {
+  return <FlowLocaleProvider language={props.form.language} store={props.store}><FormShellContent {...props} /></FlowLocaleProvider>;
+}
+
+function FormShellContent({
   form,
   fields: authoredFields,
   states,
@@ -699,17 +705,11 @@ export function FormShell({
   hostElement: HTMLDivElement;
 }) {
   const modals = useModals();
-  const languageInStore = useSelect(
-    () => getStoreSelect(store).getLanguage(),
-    [store],
-  );
+  const I18n = useFlowI18n();
+  const { validateField, validateValues } = useMemo(() => createFlowValidation(I18n.get), [I18n]);
   const isEditorPreview = Boolean(preview);
   const directionInStore = useSelect(
     () => getStoreSelect(store).getDirection(),
-    [store],
-  );
-  const customTranslations = useSelect(
-    () => getStoreSelect(store).getCustomTranslations(),
     [store],
   );
   const fieldDefaultValuesFromStore = useSelect(
@@ -720,32 +720,17 @@ export function FormShell({
     [store, form.formId],
   );
 
-  const currentLanguage = useMemo(() => {
-    if (customTranslations) {
-      I18n.putVocabularies(customTranslations);
-    }
-    const lang = form.language || languageInStore;
-    if (!lang || lang === "system") {
-      I18n.setLanguage("");
-      return undefined;
-    }
-    I18n.setLanguage(lang);
-    return lang;
-  }, [form.language, languageInStore, customTranslations]);
+  const currentLanguage = I18n.language;
 
   const currentDirection = useMemo(() => {
     const dir = form.direction || directionInStore;
     if (!dir || dir === "auto") {
-      return currentLanguage === "ar" || currentLanguage === "he"
-        ? "rtl"
-        : "ltr";
+      return getLocaleDirection(currentLanguage);
     }
     return dir as "ltr" | "rtl";
   }, [form.direction, currentLanguage, directionInStore]);
 
   const discussionCopy = useMemo(() => {
-    // Amplify I18n stores the active locale globally; keep this memo tied to it.
-    void currentLanguage;
     return {
       cancelReplyLabel: authoredOrTranslated(
         form.cancelReplyLabel,
@@ -772,7 +757,7 @@ export function FormShell({
         I18n.get("Sign in to join the discussion."),
       ),
     };
-  }, [form, currentLanguage]);
+  }, [I18n, form]);
 
   const [discussionAuth, setDiscussionAuth] = useState<DiscussionAuthState>({
     loaded: form.discussionAuthMode === "anonymous",
@@ -989,16 +974,22 @@ export function FormShell({
     [conditionalSystemValues, fields, valuesWithActions],
   );
   const state = useMemo(
-    () => ({
+    () => {
+      const localizedErrors = validateValues(fields, valuesWithActions, fieldStates);
+      return ({
       ...reducerState,
+      message: reducerState.messageKey ? I18n.get(reducerState.messageKey) : reducerState.message,
+      aiSuggestions: { ...reducerState.aiSuggestions, rawText: reducerState.aiSuggestions.errorKey ? I18n.get(reducerState.aiSuggestions.errorKey) : reducerState.aiSuggestions.rawText },
+      errors: Object.fromEntries(Object.entries(reducerState.errors).map(([name, error]) => [name, error ? localizedErrors[name] ?? error : error])),
       values: valuesWithActions,
       evaluationValues: {
         ...valuesWithActions,
         ...conditionalSystemValues,
       },
       fieldStates,
-    }),
-    [conditionalSystemValues, fieldStates, reducerState, valuesWithActions],
+    });
+    },
+    [I18n, conditionalSystemValues, fieldStates, reducerState, valuesWithActions, validateValues, fields],
   );
   const hiddenFieldNames = useMemo(() => {
     const visibility = collectFieldVisibility(
@@ -1291,7 +1282,7 @@ export function FormShell({
 
       return (await response.json()) as TResponse;
     },
-    [frontendApiBaseUrl, getRecaptchaHeaders],
+    [I18n, frontendApiBaseUrl, getRecaptchaHeaders],
   );
 
   const prepareSerializableValues = useCallback(
@@ -1373,7 +1364,7 @@ export function FormShell({
 
       return nextValues;
     },
-    [dispatchFrontendRequest, fileFields, form.formId],
+    [I18n, dispatchFrontendRequest, fileFields, form.formId],
   );
 
   const aiSuggestionsRunIdRef = useRef(0);
@@ -1403,7 +1394,7 @@ export function FormShell({
     (action: string, error: unknown, generalFallback?: string) => {
       const feedback = createFlowRequestErrorFeedback(
         error,
-        (message) => I18n.get(message),
+        (message) => message,
         generalFallback,
       );
       if (feedback.details?.kind === "cancelled") {
@@ -1411,7 +1402,8 @@ export function FormShell({
         return feedback;
       }
 
-      const message = feedback.message || I18n.get("An error occurred");
+      const messageKey = feedback.details?.kind === "general" && generalFallback ? undefined : feedback.message || "An error occurred";
+      const message = messageKey ? I18n.get(messageKey) : feedback.message ?? undefined;
       emitFormEvent("smartcloud-flow:error", {
         action,
         formId: form.formId,
@@ -1420,13 +1412,13 @@ export function FormShell({
         code: feedback.details?.code,
         requestId: feedback.details?.requestId,
       });
-      dispatch({ type: "SET_STATUS", status: "error", message });
+      dispatch({ type: "SET_STATUS", status: "error", message, messageKey });
       if (shouldScrollFlowRequestFailureIntoView(action, feedback)) {
         requestViewScrollReset();
       }
       return feedback;
     },
-    [emitFormEvent, form.formId, requestViewScrollReset],
+    [I18n, emitFormEvent, form.formId, requestViewScrollReset],
   );
 
   const actions = useMemo(
@@ -1504,10 +1496,7 @@ export function FormShell({
               pageUrl: window.location.href,
               pageTitle: document.title,
               baseUrl: window.location.origin,
-              locale:
-                document.documentElement.lang ||
-                navigator.language ||
-                undefined,
+              locale: I18n.language,
             },
             metadata: {
               pageUrl: window.location.href,
@@ -1529,9 +1518,8 @@ export function FormShell({
             type: "SET_STATUS",
             status: "success",
             message:
-              response.message ||
-              form.draftSaveSuccessMessage ||
-              I18n.get("Draft saved successfully."),
+              response.message || form.draftSaveSuccessMessage,
+            messageKey: response.message || form.draftSaveSuccessMessage ? undefined : "Draft saved successfully.",
           });
           emitFormEvent("smartcloud-flow:draft-saved", {
             action: "save-draft",
@@ -1561,7 +1549,7 @@ export function FormShell({
           dispatch({
             type: "DRAFT_LOADED",
             values: response.fields,
-            message: I18n.get("Draft loaded successfully."),
+            messageKey: "Draft loaded successfully.",
           });
           emitFormEvent("smartcloud-flow:draft-loaded", {
             action: "load-draft",
@@ -1591,7 +1579,7 @@ export function FormShell({
           dispatch({
             type: "SET_STATUS",
             status: "success",
-            message: I18n.get("Draft deleted."),
+            messageKey: "Draft deleted.",
           });
           emitFormEvent("smartcloud-flow:draft-deleted", {
             action: "delete-draft",
@@ -1686,8 +1674,8 @@ export function FormShell({
           }
           const feedback = createFlowRequestErrorFeedback(
             error,
-            (message) => I18n.get(message),
-            I18n.get("Failed to generate suggestions."),
+            (message) => message,
+            "Failed to generate suggestions.",
           );
           if (feedback.details?.kind === "cancelled") {
             dispatch({ type: "AI_SUGGESTIONS_RESET" });
@@ -1696,8 +1684,7 @@ export function FormShell({
           dispatch({
             type: "AI_SUGGESTIONS_DONE",
             suggestions: [],
-            rawText:
-              feedback.message || I18n.get("Failed to generate suggestions."),
+            errorKey: feedback.message || "Failed to generate suggestions.",
           });
         }
       },
@@ -1745,9 +1732,7 @@ export function FormShell({
           dispatch({
             type: "SET_ERRORS",
             errors,
-            message: I18n.get(
-              "Review the highlighted fields and try again.",
-            ),
+            messageKey: "Review the highlighted fields and try again.",
           });
           return;
         }
@@ -1774,10 +1759,7 @@ export function FormShell({
               pageUrl: window.location.href,
               pageTitle: document.title,
               baseUrl: window.location.origin,
-              locale:
-                document.documentElement.lang ||
-                navigator.language ||
-                undefined,
+              locale: I18n.language,
             },
             metadata: {
               pageUrl: window.location.href,
@@ -1882,8 +1864,10 @@ export function FormShell({
             type: "SUBMIT_SUCCESS",
             message:
               response.publicationStatus === "pending"
-                ? discussionCopy.pendingModerationMessage
+                ? form.pendingModerationMessage
                 : form.successMessage ?? response.message,
+            messageKey: response.publicationStatus === "pending" && typeof form.pendingModerationMessage !== "string"
+              ? "Your submission is awaiting moderation." : undefined,
           });
           emitFormEvent("smartcloud-flow:submit-success", {
             action: "submit",
@@ -1908,7 +1892,7 @@ export function FormShell({
         }
       },
     }),
-    [
+    [I18n, validateField, validateValues,
       clearFormReturnIntent,
       dispatchFrontendRequest,
       draftPassword,
@@ -1922,7 +1906,6 @@ export function FormShell({
       currentLanguage,
       contentRef,
       discussionChannel,
-      discussionCopy.pendingModerationMessage,
       prepareSerializableValues,
       requestViewScrollReset,
       resolvedEndpointHeaders,
@@ -1961,7 +1944,7 @@ export function FormShell({
         void actions.deleteDraft();
       },
     });
-  }, [
+  }, [I18n,
     actions,
     form.draftAllowDelete,
     modals,
@@ -1995,7 +1978,7 @@ export function FormShell({
       : undefined);
   const activeStandaloneHtml = useMemo(
     () =>
-      hydrateSuccessStateHtml(activeStandaloneState?.html || "", {
+      hydrateSuccessStateHtml(I18n, activeStandaloneState?.html || "", {
         submissionId: lastSubmitResponse?.submissionId,
         acceptedAt: lastSubmitResponse?.acceptedAt,
         status: lastSubmitResponse?.status,
@@ -2012,7 +1995,7 @@ export function FormShell({
         aiSuggestionAccepted: state.aiSuggestions.status === "accepted",
         aiSourcesUsed: Boolean(state.aiSuggestions.citations),
       }),
-    [
+    [I18n,
       acceptedAiSuggestion?.description,
       acceptedAiSuggestion?.possibleAnswer,
       acceptedAiSuggestion?.title,
@@ -2122,7 +2105,7 @@ export function FormShell({
       rootElement.removeEventListener("click", handleCopyClick);
       rootElement.removeEventListener("click", handleActionClick);
     };
-  }, [actions, lastCompletedAction, returnToForm, rootElement]);
+  }, [I18n, actions, lastCompletedAction, returnToForm, rootElement]);
 
   useEffect(() => {
     if (isEditorPreview) {
@@ -2166,7 +2149,7 @@ export function FormShell({
   ]);
 
   return (
-    <DirectionProvider initialDirection={currentDirection}>
+    <LocaleDirectionProvider initialDirection={currentDirection}>
       <FormPreviewProvider value={preview}>
         <FormAttributesProvider value={form}>
           <FormStateProvider value={state}>
@@ -2464,6 +2447,6 @@ export function FormShell({
           </FormStateProvider>
         </FormAttributesProvider>
       </FormPreviewProvider>
-    </DirectionProvider>
+    </LocaleDirectionProvider>
   );
 }

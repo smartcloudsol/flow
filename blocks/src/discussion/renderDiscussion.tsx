@@ -4,7 +4,6 @@ import "./styles.css";
 import { MantineProvider } from "@mantine/core";
 import { createRoot, type Root } from "react-dom/client";
 import { dismissReactFallbackWhenMounted } from "@smart-cloud/wpsuite-blocks";
-import { I18n } from "aws-amplify/utils";
 import {
   createFormTheme,
   ensureShadowStylesheets,
@@ -12,7 +11,6 @@ import {
   sanitizeThemeOverrides,
 } from "../form/renderForm";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
-import { translations } from "../i18n";
 import { DiscussionShell } from "./DiscussionShell";
 import type { DiscussionAttributes } from "./types";
 
@@ -24,8 +22,7 @@ export async function renderDiscussion(input: {
   hostElement: HTMLElement;
   attributes: DiscussionAttributes;
 }) {
-  I18n.putVocabularies(translations);
-  const store = await getStore();
+    const store = await getStore();
   const shadow = input.target.shadowRoot ?? input.target.attachShadow({ mode: "open" });
   shadow.innerHTML = "";
   await ensureShadowStylesheets(

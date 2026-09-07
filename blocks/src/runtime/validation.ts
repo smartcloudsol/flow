@@ -1,4 +1,5 @@
-import { I18n } from "aws-amplify/utils";
+import { createTranslator } from "@smart-cloud/wpsuite-core";
+import { translations } from "../i18n";
 import { z } from "zod";
 import type {
   FieldConfig,
@@ -9,6 +10,8 @@ import type {
 } from "../shared/types";
 import { evaluateRule, getRuntimeKey } from "./conditional-engine";
 
+export function createFlowValidation(translate: (key: string) => string = createTranslator("en", translations)) {
+const I18n = { get: translate };
 /**
  * Helper function to get translated string with parameter substitution
  */
@@ -439,7 +442,7 @@ function collectValidatableFields(
   });
 }
 
-export function validateValues(
+function validateValues(
   fields: FieldConfig[],
   values: FormValues,
   fieldStates: RuntimeFieldStateMap = {},
@@ -467,7 +470,7 @@ export function validateValues(
 /**
  * Validate a single field by name
  */
-export function validateField(
+function validateField(
   fieldName: string,
   fields: FieldConfig[],
   values: FormValues,
@@ -592,3 +595,7 @@ export function validateField(
 
   return validateFieldValue(validatedField, values[fieldName], runtimeState);
 }
+
+return { validateValues, validateField };
+}
+export const { validateValues, validateField } = createFlowValidation();

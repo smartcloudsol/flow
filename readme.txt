@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -222,6 +222,10 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.2.3 =
+* Localization: Uses the shared site locale and text direction for frontend runtimes while preserving authored block labels and current form state.
+* Maintenance: Refreshed the shared WP Suite cores, Amplify preview packages, WordPress packages, and build dependencies with React 18 pinned for WordPress compatibility.
+
 = 1.2.2 =
 * Compatibility: Added backend capability discovery and per-operation enforcement so unsupported Pro functions stay unavailable until the connected backend advertises them.
 * Admin: Shows backend compatibility and disables unsupported submissions or workflow screens while preserving configuration access.
@@ -380,6 +384,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.2.3 =
+Automatic frontend language selection now follows the active site or multilingual-provider locale. Authored block labels remain unchanged, and no configuration changes are required.
 
 = 1.2.0 =
 Adds a reusable Rating Summary block for displaying the aggregate ratings already maintained by the Flow backend.

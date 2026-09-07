@@ -7,14 +7,14 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { I18n } from "aws-amplify/utils";
+import { useFlowI18n } from "../locale-context";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { WizardContainerConfig } from "../../shared/types";
 import { getRuntimeKey } from "../conditional-engine";
 import { evaluateRule } from "../conditional-engine";
 import { useFormPreview } from "../context/FormPreviewContext";
 import { useFormRuntime } from "../hooks/useFormRuntime";
-import { validateValues } from "../validation";
+import { createFlowValidation } from "../validation";
 import { FieldRenderer } from "./field-renderers";
 import "./WizardContainer.css";
 
@@ -55,6 +55,8 @@ export function WizardContainer({
   runtimeKey: string;
   path: number[];
 }) {
+  const I18n = useFlowI18n();
+  const { validateValues } = useMemo(() => createFlowValidation(I18n.get), [I18n]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const hasMountedRef = useRef(false);
   const previousStepRef = useRef<number | null>(null);

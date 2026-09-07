@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-main",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "license": "ISC",
   "scripts": {
@@ -16,57 +16,128 @@
     "check-licenses": "wp-scripts check-licenses --prod"
   },
   "dependencies": {
-    "@smart-cloud/flow-core": "^1.1.10",
-    "@smart-cloud/wpsuite-core": "^2.3.2"
+    "@smart-cloud/flow-core": "^1.1.11",
+    "@smart-cloud/wpsuite-core": "^2.4.0"
   },
   "peerDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "6.15.5",
-    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
-    "@wordpress/data": "^10.52.0",
-    "@wordpress/i18n": "^6.25.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.7-preview.1",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.7-preview.1",
+    "@wordpress/data": "^10.54.0",
+    "@wordpress/i18n": "^6.27.0",
     "aws-amplify": "^6.20.0",
-    "jose": "^6.2.5",
-    "react": "^18.3.1"
+    "jose": "^6.2.12",
+    "react": "18.3.1"
   },
   "devDependencies": {
     "@aws-amplify/core": "^6.18.0",
-    "@eslint/js": "^10.0.1",
-    "@smart-cloud/aws-amplify-ui": "6.15.5",
-    "@smart-cloud/aws-amplify-ui-react": "6.15.5",
+    "@emnapi/core": "^2.0.0-alpha.3",
+    "@emnapi/runtime": "^2.0.0-alpha.3",
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.63.0",
+    "@smart-cloud/aws-amplify-ui": "6.15.7-preview.1",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.7-preview.1",
     "@types/jquery": "^4.0.0",
-    "@types/node": "^26.1.2",
-    "@types/react": "^18.3.31",
-    "@types/react-dom": "^18.3.7",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
-    "@typescript-eslint/parser": "^8.65.0",
-    "@wordpress/data": "^10.52.0",
-    "@wordpress/i18n": "^6.25.0",
-    "@wordpress/scripts": "^34.0.0",
+    "@types/node": "^20.19.30",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
+    "@wordpress/data": "^10.54.0",
+    "@wordpress/i18n": "^6.27.0",
+    "@wordpress/scripts": "^34.2.0",
     "ajv": "^8.20.0",
     "aws-amplify": "^6.20.0",
-    "eslint": "^10.8.0",
-    "globals": "^17.8.0",
-    "jose": "^6.2.5",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.0",
+    "globals": "^17.12.0",
+    "jose": "^6.2.12",
     "jquery": "^4.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "playwright": "^1.63.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.65.0"
+    "typescript-eslint": "^8.69.0",
+    "yaml": "^2.8.3"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.62.3"
   },
   "resolutions": {
-    "@wordpress/upload-media": "0.37.0",
-    "brace-expansion": "^5.0.9",
-    "esbuild": "^0.28.1",
+    "@babel/core": "^7.29.6",
+    "@babel/plugin-transform-modules-systemjs": "^7.29.4",
+    "@humanfs/node": "^0.16.8",
+    "@types/node": "^20.19.30",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "browserslist": "^4.28.7",
+    "@wordpress/scripts/@wordpress/eslint-plugin/cosmiconfig/yaml": "^1.10.3",
+    "@wordpress/scripts/postcss-loader/cosmiconfig/yaml": "^1.10.3",
+    "esbuild": "^0.28.2",
     "fast-xml-builder": "^1.3.0",
     "fast-xml-parser": "^5.10.1",
+    "fast-uri": "^3.1.6",
     "flatted": "^3.4.4",
+    "immutable": "^5.1.8",
+    "js-yaml": "^4.3.1",
+    "lighthouse": "^13.4.1",
+    "**/lighthouse/ws": "^7.5.11",
+    "lodash-es": "^4.18.0",
+    "markdownlint-cli": "^0.49.1",
+    "nanoid": "^3.3.18",
     "picomatch": "^4.0.5",
+    "postcss": "^8.5.23",
+    "postcss-selector-parser": "^7.1.6",
     "rollup": "^4.62.3",
-    "undici": "^7.28.0"
+    "serialize-javascript": "^7.1.1",
+    "svgo": "^3.3.5",
+    "undici": "^7.28.0",
+    "@wordpress/scripts/@wordpress/e2e-test-utils-playwright/lighthouse/ws": "^7.5.11",
+    "@wordpress/scripts/jest-environment-jsdom/jsdom/ws": "^8.21.0",
+    "@wordpress/scripts/webpack-bundle-analyzer/ws": "^7.5.11",
+    "webpack-dev-server": "^6.0.0"
+  },
+  "overrides": {
+    "@babel/core": "^7.29.6",
+    "@babel/plugin-transform-modules-systemjs": "^7.29.4",
+    "@humanfs/node": "^0.16.8",
+    "@types/node": "^20.19.30",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "browserslist": "^4.28.7",
+    "cosmiconfig": {
+      "yaml": "^1.10.3"
+    },
+    "esbuild": "^0.28.2",
+    "fast-xml-builder": "^1.3.0",
+    "fast-xml-parser": "^5.10.1",
+    "fast-uri": "^3.1.6",
+    "flatted": "^3.4.4",
+    "immutable": "^5.1.8",
+    "js-yaml": "^4.3.1",
+    "lighthouse": {
+      ".": "^13.4.1",
+      "ws": "^7.5.11"
+    },
+    "lodash-es": "^4.18.0",
+    "markdownlint-cli": "^0.49.1",
+    "nanoid": "^3.3.18",
+    "picomatch": "^4.0.5",
+    "postcss": "^8.5.23",
+    "postcss-selector-parser": "^7.1.6",
+    "rollup": "^4.62.3",
+    "serialize-javascript": "^7.1.1",
+    "svgo": "^3.3.5",
+    "undici": "^7.28.0",
+    "webpack-bundle-analyzer": {
+      "ws": "^7.5.11"
+    },
+    "jest-environment-jsdom": {
+      "jsdom": {
+        "ws": "^8.21.0"
+      }
+    },
+    "webpack-dev-server": "^6.0.0"
   }
 }

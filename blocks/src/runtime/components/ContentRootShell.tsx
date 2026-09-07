@@ -1,7 +1,10 @@
-import { DirectionProvider, Stack } from "@mantine/core";
+import { LocaleDirectionProvider } from "../LocaleDirectionProvider";
+import { Stack } from "@mantine/core";
 import { getStoreSelect, type Store } from "@smart-cloud/flow-core";
 import { useSelect } from "@wordpress/data";
-import { I18n } from "aws-amplify/utils";
+import { getLocaleDirection } from "@smart-cloud/wpsuite-core";
+import { FlowLocaleProvider } from "../locale";
+import { useFlowI18n } from "../locale-context";
 import { useMemo, type ComponentProps } from "react";
 import type { FieldConfig, FormAttributes } from "../../shared/types";
 import { buildRuntimeFieldStates } from "../conditional-engine";
@@ -22,44 +25,27 @@ interface ContentRootShellProps {
 
 type ContentRootActions = ComponentProps<typeof FormActionsProvider>["value"];
 
-export function ContentRootShell({
+export function ContentRootShell(props: ContentRootShellProps) {
+  return <FlowLocaleProvider language={props.rootAttributes.language} store={props.store}><ContentRootShellContent {...props} /></FlowLocaleProvider>;
+}
+
+function ContentRootShellContent({
   rootAttributes,
   fields,
   store,
   isEditorPreview = false,
 }: ContentRootShellProps) {
-  const languageInStore = useSelect(
-    () => getStoreSelect(store).getLanguage(),
-    [store],
-  );
+  const I18n = useFlowI18n();
   const directionInStore = useSelect(
     () => getStoreSelect(store).getDirection(),
     [store],
   );
-  const customTranslations = useSelect(
-    () => getStoreSelect(store).getCustomTranslations(),
-    [store],
-  );
-
-  const currentLanguage = useMemo(() => {
-    if (customTranslations) {
-      I18n.putVocabularies(customTranslations);
-    }
-    const lang = rootAttributes.language || languageInStore;
-    if (!lang || lang === "system") {
-      I18n.setLanguage("");
-      return undefined;
-    }
-    I18n.setLanguage(lang);
-    return lang;
-  }, [rootAttributes.language, languageInStore, customTranslations]);
+  const currentLanguage = I18n.language;
 
   const currentDirection = useMemo(() => {
     const dir = rootAttributes.direction || directionInStore;
     if (!dir || dir === "auto") {
-      return currentLanguage === "ar" || currentLanguage === "he"
-        ? "rtl"
-        : "ltr";
+      return getLocaleDirection(currentLanguage);
     }
     return dir as "ltr" | "rtl";
   }, [rootAttributes.direction, currentLanguage, directionInStore]);
@@ -110,9 +96,8 @@ export function ContentRootShell({
   );
 
   return (
-    <DirectionProvider
+    <LocaleDirectionProvider
       initialDirection={currentDirection || "ltr"}
-      detectDirection={false}
     >
       <FormPreviewProvider>
         <FormAttributesProvider value={rootAttributes}>
@@ -132,6 +117,6 @@ export function ContentRootShell({
           </FormStateProvider>
         </FormAttributesProvider>
       </FormPreviewProvider>
-    </DirectionProvider>
+    </LocaleDirectionProvider>
   );
 }

@@ -13,9 +13,7 @@ import {
 import { ModalsProvider } from "@mantine/modals";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
 import { dismissReactFallbackWhenMounted } from "@smart-cloud/wpsuite-blocks";
-import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
-import { translations } from "../i18n";
 import type { FormPreviewSelection } from "../runtime/context/FormPreviewContext";
 import { FormShell } from "../runtime/components/FormShell";
 import type {
@@ -271,7 +269,6 @@ export async function renderForm(
   ].join(" ");
 
   // Initialize I18n with translations
-  I18n.putVocabularies(translations);
 
   // Resolve store
   const store = await getStore();

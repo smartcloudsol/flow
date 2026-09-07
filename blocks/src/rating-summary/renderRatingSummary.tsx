@@ -4,7 +4,6 @@ import "./styles.css";
 import { MantineProvider } from "@mantine/core";
 import { getFlowPlugin, getStore } from "@smart-cloud/flow-core";
 import { dismissReactFallbackWhenMounted } from "@smart-cloud/wpsuite-blocks";
-import { I18n } from "aws-amplify/utils";
 import { createRoot, type Root } from "react-dom/client";
 import {
   createFormTheme,
@@ -12,7 +11,6 @@ import {
   getFlowRuntimeStylesheetHrefs,
   sanitizeThemeOverrides,
 } from "../form/renderForm";
-import { translations } from "../i18n";
 import {
   RatingSummaryShell,
   type RatingSummaryAttributes,
@@ -25,8 +23,7 @@ export async function renderRatingSummary(input: {
   container: HTMLElement;
   attributes: RatingSummaryAttributes;
 }) {
-  I18n.putVocabularies(translations);
-  const store = await getStore();
+    const store = await getStore();
   const shadow =
     input.target.shadowRoot ?? input.target.attachShadow({ mode: "open" });
   shadow.innerHTML = "";

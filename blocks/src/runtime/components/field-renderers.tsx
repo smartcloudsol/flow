@@ -40,7 +40,7 @@ import {
   RadioIconProps,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { I18n } from "aws-amplify/utils";
+import { useFlowI18n } from "../locale-context";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
@@ -615,6 +615,7 @@ function FieldMessage({
 }
 
 function OptionsLoadingIndicator() {
+  const I18n = useFlowI18n();
   return (
     <Group gap="xs" align="center">
       <Loader size="xs" />
@@ -722,7 +723,7 @@ function normalizeSourceUrl(sourceUrl?: string): string | undefined {
   }
 }
 
-function getAiCitationSources(citations: unknown): AiCitationSource[] {
+function getAiCitationSources(citations: unknown, I18n: ReturnType<typeof useFlowI18n>): AiCitationSource[] {
   const docs = Array.isArray(citations)
     ? citations
     : isRecord(citations) && Array.isArray(citations.docs)
@@ -762,6 +763,7 @@ function getAiCitationSources(citations: unknown): AiCitationSource[] {
 }
 
 const SourcesCard = ({ sources }: { sources: AiCitationSource[] }) => {
+  const I18n = useFlowI18n();
   if (!sources.length) return null;
 
   return (
@@ -1450,6 +1452,7 @@ function CheckboxGroupField({
   field: Extract<FieldConfig, { type: "checkbox-group" }>;
   runtimeKey: string;
 }) {
+  const I18n = useFlowI18n();
   const {
     value,
     error,
@@ -1630,6 +1633,7 @@ function SaveDraftField({
   field: Extract<FieldConfig, { type: "save-draft" }>;
   runtimeKey: string;
 }) {
+  const I18n = useFlowI18n();
   const { allowDrafts, saveDraft, isPending } = useFormRuntime();
   const runtime = useRuntimeByKey(runtimeKey);
   if (isHidden(runtime) || !allowDrafts) return null;
@@ -1660,6 +1664,7 @@ function AiSuggestionsField({
   field: Extract<FieldConfig, { type: "ai-suggestions" }>;
   runtimeKey: string;
 }) {
+  const I18n = useFlowI18n();
   const runtime = useRuntimeByKey(runtimeKey);
   const {
     aiSuggestions,
@@ -1755,7 +1760,7 @@ function AiSuggestionsField({
   const continueWhenEmptyDescription =
     I18n.get("You can continue without selecting a suggestion.") ||
     "You can continue without selecting a suggestion.";
-  const citationSources = getAiCitationSources(aiSuggestions.citations);
+  const citationSources = getAiCitationSources(aiSuggestions.citations, I18n);
   const showSuggestions = aiSuggestions.status === "done";
   const showContinueAction = aiSuggestions.status === "done";
   const showSources =
@@ -2077,6 +2082,7 @@ function SubmitField({
   field: Extract<FieldConfig, { type: "submit" }>;
   runtimeKey: string;
 }) {
+  const I18n = useFlowI18n();
   const { submitLabel, submit, isPending, fields, aiSuggestions, fieldStates } =
     useFormRuntime();
   const runtime = useRuntimeByKey(runtimeKey);
@@ -2336,6 +2342,7 @@ function RadioField({
   field: Extract<FieldConfig, { type: "radio" }>;
   runtimeKey: string;
 }) {
+  const I18n = useFlowI18n();
   const {
     value,
     error,
@@ -2544,6 +2551,7 @@ function FileField({
   field: Extract<FieldConfig, { type: "file" }>;
   runtimeKey: string;
 }) {
+  const I18n = useFlowI18n();
   const { value, error, isPending, setValue, enabled, required, runtime } =
     useFormField(field.name, runtimeKey);
   const uploadedFiles = getUploadedFileReferences(value);
@@ -2853,6 +2861,7 @@ function CollapseContainer({
   runtimeKey: string;
   path: number[];
 }) {
+  const I18n = useFlowI18n();
   const runtime = useRuntimeByKey(runtimeKey);
   const [opened, setOpened] = useState(field.defaultOpened ?? false);
   const isExpanded =
@@ -3811,6 +3820,7 @@ function OverflowListContainer({
   runtimeKey: string;
   path: number[];
 }) {
+  const I18n = useFlowI18n();
   const runtime = useRuntimeByKey(runtimeKey);
   const [expanded, setExpanded] = useState(false);
   if (isHidden(runtime)) return null;

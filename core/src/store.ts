@@ -1,3 +1,4 @@
+import { loadTranslationCatalogs } from "@smart-cloud/wpsuite-core";
 import {
   getConfig,
   getWpSuite,
@@ -64,21 +65,7 @@ const getCustomTranslations = async (): Promise<CustomTranslations | null> => {
   if (!flow) {
     throw new Error("Flow plugin is not available");
   }
-  let translations: CustomTranslations | null = null;
-  if (flow.settings.customTranslationsUrl) {
-    translations = await fetch(
-      flow.settings.customTranslationsUrl +
-        (flow.settings.customTranslationsUrl.includes("?") ? "&" : "?") +
-        "t=" +
-        siteSettings.lastUpdate,
-    )
-      .then((response) => (response.ok ? response.text() : null))
-      .then((response) =>
-        response ? (JSON.parse(response) as CustomTranslations) : null,
-      )
-      .catch(() => null);
-  }
-  return translations ?? null;
+  return loadTranslationCatalogs(flow.settings.customTranslationsUrl, { cacheVersion: siteSettings.lastUpdate });
 };
 
 const getDefaultState = async (): Promise<State> => {

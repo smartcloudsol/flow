@@ -17,6 +17,7 @@ export interface FormRuntimeState {
   fields: FieldConfig[];
   submitCount: number;
   message?: string;
+  messageKey?: string;
   touched: Set<string>;
   fieldStates: RuntimeFieldStateMap;
   aiSuggestions: {
@@ -24,6 +25,7 @@ export interface FormRuntimeState {
     suggestions: AiSuggestionCard[];
     selectedSuggestionId?: string;
     rawText?: string;
+    errorKey?: string;
     citations?: unknown;
     metadata?: Record<string, unknown>;
     lastRunSignature?: string;
@@ -33,14 +35,15 @@ export interface FormRuntimeState {
 export type FormAction =
   | { type: "INIT"; fields: FieldConfig[]; values: FormValues }
   | { type: "SET_VALUE"; name: string; value: unknown }
-  | { type: "SET_ERRORS"; errors: FormErrors; message?: string }
+  | { type: "SET_ERRORS"; errors: FormErrors; message?: string; messageKey?: string }
   | { type: "SET_FIELD_ERROR"; name: string; error: string | undefined }
-  | { type: "SET_STATUS"; status: FormStatus; message?: string }
+  | { type: "SET_STATUS"; status: FormStatus; message?: string; messageKey?: string }
   | { type: "AI_SUGGESTIONS_LOADING"; signature?: string }
   | {
       type: "AI_SUGGESTIONS_DONE";
       suggestions: AiSuggestionCard[];
       rawText?: string;
+    errorKey?: string;
       citations?: unknown;
       metadata?: Record<string, unknown>;
     }
@@ -48,8 +51,8 @@ export type FormAction =
   | { type: "AI_SUGGESTIONS_REJECT" }
   | { type: "AI_SUGGESTIONS_RESET" }
   | { type: "RESET_FIELDS"; values: FormValues; names: string[] }
-  | { type: "DRAFT_LOADED"; values: FormValues; message?: string }
-  | { type: "SUBMIT_SUCCESS"; message?: string }
+  | { type: "DRAFT_LOADED"; values: FormValues; message?: string; messageKey?: string }
+  | { type: "SUBMIT_SUCCESS"; message?: string; messageKey?: string }
   | { type: "RESET"; values: FormValues };
 
 function collectInitialValues(
@@ -172,6 +175,7 @@ export function formReducer(
         errors: action.errors,
         status: "error",
         message: action.message,
+        messageKey: action.messageKey,
         touched: new Set([...state.touched, ...Object.keys(action.errors)]),
       };
     case "SET_FIELD_ERROR":
@@ -187,6 +191,7 @@ export function formReducer(
         ...state,
         status: action.status,
         message: action.message,
+        messageKey: action.messageKey,
       };
 
     case "AI_SUGGESTIONS_LOADING":
@@ -198,6 +203,7 @@ export function formReducer(
           suggestions: [],
           selectedSuggestionId: undefined,
           rawText: undefined,
+          errorKey: undefined,
           citations: undefined,
           metadata: undefined,
           lastRunSignature:
@@ -212,6 +218,7 @@ export function formReducer(
           suggestions: action.suggestions,
           selectedSuggestionId: undefined,
           rawText: action.rawText,
+          errorKey: action.errorKey,
           citations: action.citations,
           metadata: action.metadata,
           lastRunSignature: state.aiSuggestions.lastRunSignature,
@@ -272,6 +279,7 @@ export function formReducer(
         errors: {},
         touched: new Set(),
         message: action.message,
+        messageKey: action.messageKey,
         aiSuggestions: { status: "idle", suggestions: [] },
       };
     case "SUBMIT_SUCCESS":
@@ -281,10 +289,13 @@ export function formReducer(
         submitCount: state.submitCount + 1,
         errors: {},
         message: action.message,
+        messageKey: action.messageKey,
       };
     case "RESET":
       return {
         ...state,
+        message: undefined,
+        messageKey: undefined,
         status: "idle",
         values: action.values,
         evaluationValues: action.values,

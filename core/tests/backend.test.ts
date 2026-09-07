@@ -128,3 +128,71 @@ test("verified manifests block paths whose capability is absent", async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test("flow store actions track locale and field defaults with remote custom translations", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalWpSuite = globalThis.WpSuite;
+  let requestedUrl: string | undefined;
+  const requestCatalogs = {
+    en: { hello: "Hello" },
+  };
+
+  globalThis.WpSuite = {
+    siteSettings: { lastUpdate: 1700000000000 },
+    nonce: "nonce",
+    restUrl: "https://example.test",
+    uploadUrl: "https://example.test/upload",
+    view: "connect",
+    plugins: {
+      flow: {
+        key: "flow",
+        version: "1.0.0",
+        settings: { customTranslationsUrl: "https://translations.test/locales.json" },
+      },
+    },
+  } as typeof globalThis.WpSuite;
+
+  globalThis.fetch = (async (url: string | URL) => {
+    requestedUrl = String(url);
+    return new Response(JSON.stringify(requestCatalogs), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  try {
+    const {
+      createStore,
+      getStoreDispatch,
+      getStoreSelect,
+    } = await import("../src/store");
+    const store = await createStore();
+    const dispatch = getStoreDispatch(store);
+    const select = getStoreSelect(store);
+
+    assert.equal(select.getLanguage(), undefined);
+    dispatch.setLanguage("system");
+    assert.equal(select.getLanguage(), "system");
+    assert.equal(requestedUrl?.includes("https://translations.test/locales.json"), true);
+    assert.equal(select.getDirection(), undefined);
+    dispatch.setDirection("rtl");
+    assert.equal(select.getDirection(), "rtl");
+    dispatch.setFormFieldDefaultValue("form-1", "field-1", "value-1");
+    assert.equal(select.getFormFieldDefaultValue("form-1", "field-1"), "value-1");
+    assert.equal(
+      select.getAllFormFieldDefaultValues()["form-1"]["field-1"],
+      "value-1",
+    );
+    dispatch.setFormFieldDefaultValues("form-1", { fieldFromBulk: "value-bulk" });
+    assert.equal(
+      select.getFormFieldDefaultValue("form-1", "fieldFromBulk"),
+      "value-bulk",
+    );
+    dispatch.clearFormFieldDefaultValues("form-1");
+    assert.equal(select.getAllFormFieldDefaultValues()["form-1"], undefined);
+    assert.deepEqual(select.getCustomTranslations(), requestCatalogs);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.WpSuite = originalWpSuite;
+  }
+});
