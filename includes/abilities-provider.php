@@ -27,6 +27,9 @@ final class Provider extends Product_Provider_Base
     /** @var string[] */
     private array $modal_gallery_blocks = array('smartcloud-flow/modal', 'smartcloud-flow/gallery');
 
+    /** @var string[] */
+    private array $success_content_blocks = array('core/heading', 'core/paragraph', 'core/buttons', 'core/button');
+
     /** @var array<string,string> */
     private array $field_type_blocks = array(
         'text' => 'smartcloud-flow/text-field',
@@ -53,9 +56,9 @@ final class Provider extends Product_Provider_Base
         'wizard-step' => 'smartcloud-flow/wizard-step',
         'fieldset' => 'smartcloud-flow/fieldset',
         'collapse' => 'smartcloud-flow/collapse',
-        'group' => 'smartcloud-flow/group-field',
-        'grid' => 'smartcloud-flow/grid-field',
-        'stack' => 'smartcloud-flow/stack-field',
+        'group' => 'smartcloud-flow/group',
+        'grid' => 'smartcloud-flow/grid',
+        'stack' => 'smartcloud-flow/stack',
     );
 
     /** @var string[] */
@@ -103,9 +106,9 @@ final class Provider extends Product_Provider_Base
         'smartcloud-flow/overflow-list-item',
         'smartcloud-flow/divider',
         'smartcloud-flow/visually-hidden',
-        'smartcloud-flow/stack-field',
-        'smartcloud-flow/group-field',
-        'smartcloud-flow/grid-field',
+        'smartcloud-flow/stack',
+        'smartcloud-flow/group',
+        'smartcloud-flow/grid',
         'smartcloud-flow/fieldset',
         'smartcloud-flow/collapse',
     );
@@ -142,7 +145,7 @@ final class Provider extends Product_Provider_Base
 
     public function get_runtime_capabilities(array $input = array()): array
     {
-        $block_names = array_merge($this->all_owned_blocks(), array('core/group', 'core/image'));
+        $block_names = array_merge($this->all_owned_blocks(), array('core/group', 'core/image'), $this->success_content_blocks);
         $block_status = $this->block_registration_status($block_names);
         $missing = array();
         foreach (array('smartcloud-flow/form', 'smartcloud-flow/discussion', 'smartcloud-flow/content-root', 'smartcloud-flow/success-state') as $required) {
@@ -204,7 +207,12 @@ final class Provider extends Product_Provider_Base
                 array('id' => 'form', 'label' => 'Flow form', 'block_names' => array('smartcloud-flow/form'), 'materializable' => true),
                 array('id' => 'discussion', 'label' => 'Flow discussion', 'block_names' => array('smartcloud-flow/discussion'), 'materializable' => true),
                 array('id' => 'content-root', 'label' => 'Flow content root', 'block_names' => array('smartcloud-flow/content-root'), 'materializable' => true),
-                array('id' => 'success-state', 'label' => 'Flow success state', 'block_names' => array('smartcloud-flow/success-state'), 'materializable' => true),
+                array(
+                    'id' => 'success-state',
+                    'label' => 'Flow success state',
+                    'block_names' => array_merge(array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta'), $this->success_content_blocks),
+                    'materializable' => true,
+                ),
                 array(
                     'id' => 'modal-gallery',
                     'label' => 'Flow modal gallery',
@@ -228,10 +236,10 @@ final class Provider extends Product_Provider_Base
         }
 
         $block_names = match ($component) {
-            'form' => array_merge(array('smartcloud-flow/form'), array_values($this->field_type_blocks), array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta')),
+            'form' => array_merge(array('smartcloud-flow/form'), array_values($this->field_type_blocks), array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta'), $this->success_content_blocks),
             'discussion' => array('smartcloud-flow/discussion'),
             'content-root' => array_merge(array('smartcloud-flow/content-root'), $this->content_blocks),
-            default => array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta'),
+            default => array_merge(array('smartcloud-flow/success-state', 'smartcloud-flow/submission-meta'), $this->success_content_blocks),
         };
 
         $attrs = array();
@@ -724,6 +732,25 @@ final class Provider extends Product_Provider_Base
                 }
                 continue;
             }
+            if (in_array($name, $this->success_content_blocks, true)) {
+                $valid_parent = in_array($name, array('core/heading', 'core/paragraph', 'core/buttons'), true)
+                    ? 'smartcloud-flow/success-state' === $parent
+                    : 'core/buttons' === $parent;
+                if (!$valid_parent) {
+                    $errors[] = $this->validation_issue('smartcloud_flow_success_content_parent_invalid', 'Success-state copy and actions must remain direct children of the Flow success state.', $current_path);
+                    continue;
+                }
+                $children = (array) ($block['innerBlocks'] ?? array());
+                if ('core/buttons' === $name) {
+                    if (empty($children)) {
+                        $errors[] = $this->validation_issue('smartcloud_flow_success_actions_empty', 'A success-state Buttons block requires at least one Button.', $current_path);
+                    }
+                    $this->validate_nodes($children, $current_path . '/innerBlocks', 'core/buttons', $flow_root, $form_allows_drafts, $errors, $fields);
+                } elseif (!empty($children)) {
+                    $errors[] = $this->validation_issue('smartcloud_flow_success_content_not_leaf', 'Success-state headings, paragraphs, and buttons must use their canonical Gutenberg child structure.', $current_path);
+                }
+                continue;
+            }
             if ($name === 'core/group') {
                 $class_name = (string) ($block['attrs']['className'] ?? '');
                 $class_tokens = preg_split('/\\s+/', trim($class_name)) ?: array();
@@ -771,7 +798,7 @@ final class Provider extends Product_Provider_Base
                 continue;
             }
             if (!str_starts_with($name, 'smartcloud-flow/')) {
-                $errors[] = $this->validation_issue('smartcloud_flow_unknown_block', 'Only Flow blocks, the canonical modal body group, and direct core/image Gallery children are accepted.', $current_path);
+                $errors[] = $this->validation_issue('smartcloud_flow_unknown_block', 'Only Flow blocks, declared success-state copy and actions, the canonical modal body group, and direct core/image Gallery children are accepted.', $current_path);
                 continue;
             }
             $node_flow_root = $flow_root;

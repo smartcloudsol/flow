@@ -8,7 +8,7 @@
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0",
     "build-wp": "wp-scripts build --config=webpack.config.cjs --webpack-copy-php --output-path",
     "format": "wp-scripts format",
-    "lint:css": "wp-scripts lint-style",
+    "lint:css": "wp-scripts lint-style --allow-empty-input",
     "lint:js": "wp-scripts lint-js",
     "packages-update": "wp-scripts packages-update",
     "plugin-zip": "wp-scripts plugin-zip",

@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.3
+Stable tag: 1.2.5
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -222,6 +222,16 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
+= 1.2.5 =
+* Packaging: Reissued the governed form registration and localization fixes from 1.2.4 as a clean WordPress.org release.
+
+= 1.2.4 =
+* Composer: Corrected the registered Group, Stack, and Grid block contracts used for governed Flow materialization.
+* Composer: Allows canonical headings, paragraphs, and Buttons inside governed success states so complete localized contact forms validate without Custom HTML.
+* Fix: Registered the shipped Checkbox Group and Hidden Field blocks in the WordPress bootstrap so governed forms using them can be validated, inserted, and rendered.
+* Maintenance: Added release checks that keep the PHP registration list aligned with block metadata, editor imports, implementations, and packaged WordPress build output.
+* Maintenance: Made every Stylelint gate deterministic and excluded generated admin bundles from source CSS linting.
+
 = 1.2.3 =
 * Localization: Uses the shared site locale and text direction for frontend runtimes while preserving authored block labels and current form state.
 * Maintenance: Refreshed the shared WP Suite cores, Amplify preview packages, WordPress packages, and build dependencies with React 18 pinned for WordPress compatibility.
@@ -384,6 +394,12 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.2.5 =
+Use this release instead of 1.2.4 when installing the governed layout, Checkbox Group, Hidden Field, and native success-state localization fixes from WordPress.org.
+
+= 1.2.4 =
+Composer-authored forms can now preserve registered layout, Checkbox Group, Hidden Field, and native success-state blocks during governed localization.
 
 = 1.2.3 =
 Automatic frontend language selection now follows the active site or multilingual-provider locale. Authored block labels remain unchanged, and no configuration changes are required.

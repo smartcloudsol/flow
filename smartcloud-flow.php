@@ -6,7 +6,7 @@
  * Requires at least: 6.9
  * Tested up to:      7.1
  * Requires PHP:      8.1
- * Version:           1.2.3
+ * Version:           1.2.5
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.2.3';
+const VERSION = '1.2.5';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -74,6 +74,7 @@ final class Flow
         'textarea-field',
         'select-field',
         'checkbox-field',
+        'checkbox-group-field',
         'date-field',
         'switch-field',
         'number-field',
@@ -86,6 +87,7 @@ final class Flow
         'range-slider-field',
         'tags-field',
         'rating-field',
+        'hidden-field',
         'save-draft-button',
         'ai-suggestions',
         'submit-button',
