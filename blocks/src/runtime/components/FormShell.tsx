@@ -106,6 +106,11 @@ import {
   resolveFormContentReference,
   sameContentReference,
 } from "../../form/content-reference";
+import {
+  translateAuthoredFormContent,
+  translateAuthoredHtml,
+  translateAuthoredString,
+} from "../authored-content";
 
 interface SubmissionMetaRuntime {
   submissionId?: string;
@@ -528,12 +533,17 @@ function hydrateSuccessStateHtml(I18n: ReturnType<typeof useFlowI18n>,
   html: string,
   submissionMeta?: SubmissionMetaRuntime | null,
 ): string {
-  if (!html || !html.includes("data-smartcloud-flow-submission-meta")) {
-    return html;
+  const translatedHtml = translateAuthoredHtml(html, I18n.get);
+
+  if (
+    !translatedHtml ||
+    !translatedHtml.includes("data-smartcloud-flow-submission-meta")
+  ) {
+    return translatedHtml;
   }
 
   const container = document.createElement("div");
-  container.innerHTML = html;
+  container.innerHTML = translatedHtml;
 
   const placeholders = container.querySelectorAll<HTMLElement>(
     "[data-smartcloud-flow-submission-meta]",
@@ -542,7 +552,10 @@ function hydrateSuccessStateHtml(I18n: ReturnType<typeof useFlowI18n>,
   placeholders.forEach((node) => {
     const field =
       node.dataset.smartcloudFlowSubmissionMetaField || "submissionId";
-    const label = node.dataset.smartcloudFlowSubmissionMetaLabel || "";
+    const label = translateAuthoredString(
+      node.dataset.smartcloudFlowSubmissionMetaLabel || "",
+      I18n.get,
+    );
     const fallback = node.dataset.smartcloudFlowSubmissionMetaFallback || "";
     const copyable =
       node.dataset.smartcloudFlowSubmissionMetaCopyable === "true";
@@ -688,7 +701,7 @@ export function FormShell(props: Parameters<typeof FormShellContent>[0]) {
 }
 
 function FormShellContent({
-  form,
+  form: sourceForm,
   fields: authoredFields,
   states,
   preview,
@@ -706,6 +719,10 @@ function FormShellContent({
 }) {
   const modals = useModals();
   const I18n = useFlowI18n();
+  const { form, fields: translatedAuthoredFields } = useMemo(
+    () => translateAuthoredFormContent(sourceForm, authoredFields, I18n.get),
+    [I18n, authoredFields, sourceForm],
+  );
   const { validateField, validateValues } = useMemo(() => createFlowValidation(I18n.get), [I18n]);
   const isEditorPreview = Boolean(preview);
   const directionInStore = useSelect(
@@ -806,7 +823,7 @@ function FormShellContent({
   const fields = useMemo(
     () => {
       const withAuthenticatedAuthor = applyHiddenFormField(
-        authoredFields,
+        translatedAuthoredFields,
         form.discussionAuthorNameField,
         Boolean(
           form.discussionEnabled &&
@@ -821,7 +838,7 @@ function FormShellContent({
       );
     },
     [
-      authoredFields,
+      translatedAuthoredFields,
       discussionAuth.authenticated,
       form.discussionAuthorNameField,
       form.discussionAuthorNameSource,

@@ -4825,26 +4825,26 @@
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/flow-core@^1.1.11":
-  version "1.1.11"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.11.tgz#f0ea0fa620841bfcc2486e68311886f385172b07"
-  integrity sha512-byPIR0qS+3NoBEGiQQmFUHR8j6s5zDRWEzncvR7g27lXQtC0w7cY0p2JdBKWIgiZOEdaVL2EH1UuHEE7eLrSpQ==
+"@smart-cloud/flow-core@^1.1.12":
+  version "1.1.12"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.12.tgz#c62b257cb321c2e85519d06014f5666582def9e6"
+  integrity sha512-eUKHU+mdRvwAfK0EfjIxC+M9v+2wd+SZ5yLHBMFxHwPQ+Iehe88NKu+O0q5RUihImDrOvt4t9Bm+rIZr0yz4Xw==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.3.6"
-    "@smart-cloud/wpsuite-core" "^2.4.0"
+    "@smart-cloud/gatey-core" "^2.3.7"
+    "@smart-cloud/wpsuite-core" "^2.4.1"
     aws-amplify "^6.20.0"
 
-"@smart-cloud/gatey-core@^2.3.6":
-  version "2.3.6"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.6.tgz#62fe34a7eb8acc898091f03ef1ae58fb4cb814eb"
-  integrity sha512-eccAUq4tY2fUQ8PY5t5Gd5zSPXuxSXO3tuL5Q1Mkbmcd7FpsQ/Ya0h9i4urot+1jmGL4TwyI30zpWuQWpR4NvQ==
+"@smart-cloud/gatey-core@^2.3.7":
+  version "2.3.7"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.7.tgz#e6548f92cdc029794bceae0e00e277df0abd1fa6"
+  integrity sha512-64o+ImbkaIO6yF8IhmD8OTUd3F/NDvgOhb6GtpE9qhz5XDBAb2Wi2B6SdlOIFQMO3XlQvB+1Gj6rX+PvyC8BBA==
   dependencies:
-    "@smart-cloud/wpsuite-core" "^2.4.0"
+    "@smart-cloud/wpsuite-core" "^2.4.1"
 
-"@smart-cloud/wpsuite-core@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-core/-/wpsuite-core-2.4.0.tgz#0f59e97a71e3ff83836ed593cdab06d3d0fe1adf"
-  integrity sha512-ki9O66YTXeAyP10/usDPLGOpbRX4x7yu/xb2483La7vUB9n0sAU4ITrug+NchUhXj5OnOwWklxwHG+FlUdUysw==
+"@smart-cloud/wpsuite-core@^2.4.1", "@smart-cloud/wpsuite-core@^2.4.2":
+  version "2.4.2"
+  resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-core/-/wpsuite-core-2.4.2.tgz#cd48713784e3faf047126d148ba1e736568c8833"
+  integrity sha512-bm0IcBwRUrB5ckciJyNHZPGhAu2Lsid0gtDdDPEDGiZUtcjs7P+6KTe7Iew175WY+okeburVcXBBwgsFwCJstw==
   dependencies:
     tldts "^7.4.12"
 

@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,6 +221,11 @@ Some admin UI modules may originate from shared WP Suite components to support w
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.2.6 =
+* Localization: Added the shared site translation catalog so custom strings resolve consistently across WP Suite plugins and site locales.
+* Forms: Apply matching shared-catalog translations to authored labels, placeholders, descriptions, actions, and success-state content while preserving unmatched authored text.
+* Dependencies: Updated WP Suite Core to 2.4.2, Flow Core to 1.1.12, and the bundled WP Suite Hub to 2.5.14.
 
 = 1.2.5 =
 * Packaging: Reissued the governed form registration and localization fixes from 1.2.4 as a clean WordPress.org release.

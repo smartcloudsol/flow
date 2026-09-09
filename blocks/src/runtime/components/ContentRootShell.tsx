@@ -15,6 +15,7 @@ import { FormStateProvider } from "../context/FormStateContext";
 import { getInitialValues, type FormRuntimeState } from "../reducer";
 import { FlowPoweredBy } from "./FlowPoweredBy";
 import { FieldRenderer } from "./field-renderers";
+import { translateAuthoredFormContent } from "../authored-content";
 
 interface ContentRootShellProps {
   rootAttributes: FormAttributes;
@@ -30,12 +31,21 @@ export function ContentRootShell(props: ContentRootShellProps) {
 }
 
 function ContentRootShellContent({
-  rootAttributes,
-  fields,
+  rootAttributes: authoredRootAttributes,
+  fields: authoredFields,
   store,
   isEditorPreview = false,
 }: ContentRootShellProps) {
   const I18n = useFlowI18n();
+  const { form: rootAttributes, fields } = useMemo(
+    () =>
+      translateAuthoredFormContent(
+        authoredRootAttributes,
+        authoredFields,
+        I18n.get,
+      ),
+    [I18n, authoredFields, authoredRootAttributes],
+  );
   const directionInStore = useSelect(
     () => getStoreSelect(store).getDirection(),
     [store],

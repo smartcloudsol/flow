@@ -138,7 +138,10 @@ test("flow store actions track locale and field defaults with remote custom tran
   };
 
   globalThis.WpSuite = {
-    siteSettings: { lastUpdate: 1700000000000 },
+    siteSettings: {
+      lastUpdate: 1700000000000,
+      customTranslationsUrl: "https://translations.test/locales.json",
+    },
     nonce: "nonce",
     restUrl: "https://example.test",
     uploadUrl: "https://example.test/upload",
@@ -147,7 +150,7 @@ test("flow store actions track locale and field defaults with remote custom tran
       flow: {
         key: "flow",
         version: "1.0.0",
-        settings: { customTranslationsUrl: "https://translations.test/locales.json" },
+        settings: {},
       },
     },
   } as typeof globalThis.WpSuite;

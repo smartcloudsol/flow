@@ -29,7 +29,10 @@ export type FlowLanguageCode = "ar" | "en" | "zh" | "nl" | "fr" | "de" | "he" | 
  * This is what users can configure on the General settings tab.
  */
 export interface FlowSettings {
-    /** Optional URL to custom translations JSON file. */
+    /**
+     * @deprecated Configure the site-wide custom translation URL in WP Suite
+     * settings. Retained temporarily as a fallback for rolling upgrades.
+     */
     customTranslationsUrl?: string;
     /** Whether to show "Powered by WPSuite Flow" branding in UIs. */
     enablePoweredBy?: boolean;

@@ -1,8 +1,7 @@
-import { loadTranslationCatalogs } from "@smart-cloud/wpsuite-core";
 import {
   getConfig,
+  getCustomTranslations as loadCustomTranslations,
   getWpSuite,
-  SiteSettings,
   type SubscriptionType,
 } from "@smart-cloud/wpsuite-core";
 import {
@@ -25,13 +24,6 @@ export interface FlowConfig {
 }
 
 export type FormFieldDefaultsByFormId = Record<string, FormFieldDefaults>;
-
-let siteSettings: SiteSettings;
-if (typeof WpSuite !== "undefined") {
-  siteSettings = WpSuite.siteSettings;
-} else {
-  siteSettings = {} as SiteSettings;
-}
 
 /**
  * Ensures we only keep runtime keys that are part of FlowConfig.
@@ -62,10 +54,9 @@ export const sanitizeFlowConfig = (input: unknown): FlowConfig => {
 
 const getCustomTranslations = async (): Promise<CustomTranslations | null> => {
   const flow = getFlowPlugin();
-  if (!flow) {
-    throw new Error("Flow plugin is not available");
-  }
-  return loadTranslationCatalogs(flow.settings.customTranslationsUrl, { cacheVersion: siteSettings.lastUpdate });
+  return loadCustomTranslations({
+    legacyUrl: flow?.settings.customTranslationsUrl,
+  });
 };
 
 const getDefaultState = async (): Promise<State> => {

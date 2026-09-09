@@ -1,7 +1,7 @@
 {
   "name": "@smart-cloud/flow-admin",
   "private": true,
-  "version": "1.1.12",
+  "version": "1.1.13",
   "type": "module",
   "exports": {
     "./editor-runtime": {
@@ -34,9 +34,9 @@
     "@hello-pangea/dnd": "^18.0.1",
     "@mantine/tiptap": "^8.3.18",
     "@monaco-editor/react": "^4.7.0",
-    "@smart-cloud/flow-core": "^1.1.11",
-    "@smart-cloud/gatey-core": "^2.3.6",
-    "@smart-cloud/wpsuite-core": "^2.4.0",
+    "@smart-cloud/flow-core": "^1.1.12",
+    "@smart-cloud/gatey-core": "^2.3.7",
+    "@smart-cloud/wpsuite-core": "^2.4.2",
     "@tabler/icons-react": "^3.46.0",
     "@tanstack/react-query": "^5.100.14",
     "@tiptap/core": "^3.30.4",
