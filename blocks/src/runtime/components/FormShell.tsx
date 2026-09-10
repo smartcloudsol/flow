@@ -1513,7 +1513,7 @@ function FormShellContent({
               pageUrl: window.location.href,
               pageTitle: document.title,
               baseUrl: window.location.origin,
-              locale: I18n.language,
+              locale: currentLanguage,
             },
             metadata: {
               pageUrl: window.location.href,
@@ -1765,7 +1765,6 @@ function FormShellContent({
             wpSuiteSiteSettings?.accountId,
             wpSuiteSiteSettings?.siteId,
           );
-
           const submitRequest = {
             accountId: wpSuiteSiteSettings?.accountId,
             siteId: wpSuiteSiteSettings?.siteId,
@@ -1776,7 +1775,7 @@ function FormShellContent({
               pageUrl: window.location.href,
               pageTitle: document.title,
               baseUrl: window.location.origin,
-              locale: I18n.language,
+              locale: currentLanguage,
             },
             metadata: {
               pageUrl: window.location.href,
@@ -1801,6 +1800,7 @@ function FormShellContent({
           }
           const logicalFingerprint = JSON.stringify({
             values: serializedValues,
+            locale: currentLanguage || null,
             contentRef: contentRef ?? null,
             parentSubmissionId: replyContext?.parentSubmissionId ?? null,
           });

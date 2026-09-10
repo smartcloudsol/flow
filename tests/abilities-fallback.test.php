@@ -200,6 +200,9 @@ namespace SmartCloud\WPSuite\Flow\Abilities {
     expect(str_contains($loaderSource, "SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY"), 'Flow Hub loader must separate the runtime directory from stable identifiers.');
     expect(str_contains($loaderSource, "'smartcloud-wpsuite'"), 'Flow Hub loader must target the renamed runtime directory.');
     expect(str_contains($loaderSource, "'hub-for-wpsuiteio'"), 'Flow must retain the legacy WP Suite slug alias during migration.');
+    foreach (array('SMARTCLOUD_WPSUITE_VERSION', 'SMARTCLOUD_WPSUITE_PATH', 'SMARTCLOUD_WPSUITE_URL', 'SMARTCLOUD_WPSUITE_READY_HOOK') as $sharedConstant) {
+        expect(str_contains($loaderSource, "if (!defined('{$sharedConstant}'))"), "Flow must guard the shared {$sharedConstant} declaration when another Hub owner already loaded it.");
+    }
     $uninstallSource = file_get_contents(dirname(__DIR__) . '/uninstall.php');
     expect(is_string($uninstallSource), 'Flow uninstall cleanup must be packaged.');
     expect(str_contains($uninstallSource, 'workflows_backend_source_kind'), 'Flow uninstall must remove all backend-sync metadata.');

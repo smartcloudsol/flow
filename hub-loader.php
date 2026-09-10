@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 use SmartCloud\WPSuite\Flow\Logger;
 
-const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.14';
+const SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION = '2.5.15';
 
 final class FlowHubLoader
 {
@@ -263,10 +263,18 @@ final class FlowHubLoader
                     'previous_owner' => $owner ?: 'none'
                 ]);
 
-                define('SMARTCLOUD_WPSUITE_VERSION', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION);
-                define('SMARTCLOUD_WPSUITE_PATH', plugin_dir_path(__FILE__) . SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY . '/');
-                define('SMARTCLOUD_WPSUITE_URL', plugin_dir_url(__FILE__) . SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY . '/');
-                define('SMARTCLOUD_WPSUITE_READY_HOOK', SMARTCLOUD_WPSUITE_CANONICAL_SLUG . '/ready');
+                if (!defined('SMARTCLOUD_WPSUITE_VERSION')) {
+                    define('SMARTCLOUD_WPSUITE_VERSION', SMARTCLOUD_WPSUITE_FLOW_HUB_VERSION);
+                }
+                if (!defined('SMARTCLOUD_WPSUITE_PATH')) {
+                    define('SMARTCLOUD_WPSUITE_PATH', plugin_dir_path(__FILE__) . SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY . '/');
+                }
+                if (!defined('SMARTCLOUD_WPSUITE_URL')) {
+                    define('SMARTCLOUD_WPSUITE_URL', plugin_dir_url(__FILE__) . SMARTCLOUD_WPSUITE_RUNTIME_DIRECTORY . '/');
+                }
+                if (!defined('SMARTCLOUD_WPSUITE_READY_HOOK')) {
+                    define('SMARTCLOUD_WPSUITE_READY_HOOK', SMARTCLOUD_WPSUITE_CANONICAL_SLUG . '/ready');
+                }
 
                 if (file_exists(SMARTCLOUD_WPSUITE_PATH . 'index.php')) {
                     require_once SMARTCLOUD_WPSUITE_PATH . 'index.php';
