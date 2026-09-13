@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Group,
@@ -12,8 +13,9 @@ import {
   Textarea,
   Title,
 } from "@mantine/core";
+import { resolveBackend } from "@smart-cloud/flow-core";
 import { notifications } from "@mantine/notifications";
-import { IconCheck } from "@tabler/icons-react";
+import { IconAlertCircle, IconCheck } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import type { editor, Selection } from "monaco-editor";
@@ -26,24 +28,42 @@ import type {
 } from "../api/types";
 import { t } from "../operations/i18n";
 import HtmlTemplateEditor from "./HtmlTemplateEditor";
+import {
+  addTemplateLocale,
+  canonicalizeTemplateLocale,
+  ENGLISH_LOCALE,
+  getTemplateLocalizationWarnings,
+  hasLegacyIncompatibleLocalizations,
+  normalizeEmailTemplate,
+  removeTemplateLocale,
+  serializeEmailTemplate,
+  syncLegacyTemplateAliases,
+  templateLocaleKeys,
+  updateTemplateLocalization,
+} from "./email-template-localization";
 import MonacoEditor from "./MonacoEditor";
 import { useOperationsComboboxProps } from "./OperationsPortalContext";
 import { TEMPLATE_VARIABLE_POPOVER_EVENT } from "./tiptap/TemplateVariableComponent";
 import TemplateVariablePicker from "./tiptap/TemplateVariablePicker";
 
 function emptyTemplate(boot: BootConfig): EmailTemplate {
-  return {
+  return normalizeEmailTemplate({
     templateKey: "",
     accountId: boot.accountId ?? "",
     siteId: boot.siteId ?? "",
     name: "",
-    subject: "",
-    htmlBody: "<p>Hello {{submission.fields.name}}</p>",
-    textBody: "Hello {{submission.fields.name}}",
+    defaultLocale: ENGLISH_LOCALE,
+    localizations: {
+      en: {
+        subject: "",
+        htmlBody: "<p>Hello {{submission.fields.name}}</p>",
+        textBody: "Hello {{submission.fields.name}}",
+      },
+    },
     templateEngine: "handlebars",
     attachments: [],
     enabled: true,
-  };
+  });
 }
 
 function createTemplateDraftId(): string {
@@ -96,6 +116,11 @@ export default function TemplateEditorModal({
   const comboboxProps = useOperationsComboboxProps(zIndex + 1);
   const variablePickerZIndex = zIndex + 2;
   const [editing, setEditing] = useState<EmailTemplate>(emptyTemplate(boot));
+  const [activeLocale, setActiveLocale] = useState(ENGLISH_LOCALE);
+  const [newLocale, setNewLocale] = useState("");
+  const [supportsLocalizedTemplates, setSupportsLocalizedTemplates] = useState<
+    boolean | null
+  >(null);
   const [preview, setPreview] = useState<TemplatePreviewResponse | null>(null);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [isEditingExisting, setIsEditingExisting] = useState(false);
@@ -129,6 +154,28 @@ export default function TemplateEditorModal({
   }, []);
 
   useEffect(() => {
+    if (!opened) return;
+    let cancelled = false;
+    void resolveBackend("templates.admin")
+      .then((backend) => {
+        if (cancelled) return;
+        const version =
+          backend.compatibility?.status === "verified"
+            ? backend.compatibility.manifest?.capabilities["templates.admin"]
+            : undefined;
+        setSupportsLocalizedTemplates(
+          backend.available && typeof version === "number" && version >= 2,
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setSupportsLocalizedTemplates(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [opened]);
+
+  useEffect(() => {
     if (!opened) {
       return;
     }
@@ -136,6 +183,7 @@ export default function TemplateEditorModal({
     let cancelled = false;
     void (async () => {
       setPreview(null);
+      setNewLocale("");
       setSelectedFormId(null);
       setTemplateVariablePopoverOpen(false);
       setIsUploadingAttachment(false);
@@ -152,7 +200,9 @@ export default function TemplateEditorModal({
             initialTemplate.templateKey,
           );
           if (!cancelled) {
-            setEditing(fullTemplate);
+            const normalized = normalizeEmailTemplate(fullTemplate);
+            setEditing(normalized);
+            setActiveLocale(normalized.defaultLocale ?? ENGLISH_LOCALE);
           }
         } catch (error) {
           if (!cancelled) {
@@ -163,7 +213,9 @@ export default function TemplateEditorModal({
                   : t("Failed to load template"),
               color: "red",
             });
-            setEditing(initialTemplate);
+            const normalized = normalizeEmailTemplate(initialTemplate);
+            setEditing(normalized);
+            setActiveLocale(normalized.defaultLocale ?? ENGLISH_LOCALE);
           }
         } finally {
           if (!cancelled) {
@@ -173,7 +225,11 @@ export default function TemplateEditorModal({
         return;
       }
 
-      setEditing(initialTemplate ?? emptyTemplate(boot));
+      const normalized = normalizeEmailTemplate(
+        initialTemplate ?? emptyTemplate(boot),
+      );
+      setEditing(normalized);
+      setActiveLocale(normalized.defaultLocale ?? ENGLISH_LOCALE);
       setLoadingTemplate(false);
     })();
 
@@ -268,8 +324,12 @@ export default function TemplateEditorModal({
 
   const saveMutation = useMutation({
     mutationFn: (template: EmailTemplate) => {
+      const serializedTemplate = serializeEmailTemplate(
+        template,
+        supportsLocalizedTemplates === true,
+      );
       const sanitizedTemplate: EmailTemplate = {
-        ...template,
+        ...serializedTemplate,
         attachments: (template.attachments ?? []).map((attachment) => ({
           attachmentId: attachment.attachmentId,
           key: attachment.key,
@@ -437,6 +497,29 @@ export default function TemplateEditorModal({
   const hasUploadingAttachments = attachments.some(
     (attachment) => attachment.uploadStatus === "uploading",
   );
+  const localeKeys = templateLocaleKeys(editing);
+  const activeContent = editing.localizations?.[activeLocale] ?? {};
+  const localizationWarnings = getTemplateLocalizationWarnings(
+    editing,
+    activeLocale,
+  );
+  const localizedSaveBlocked =
+    supportsLocalizedTemplates === false &&
+    hasLegacyIncompatibleLocalizations(editing);
+
+  const handleAddLocale = () => {
+    const canonicalLocale = canonicalizeTemplateLocale(newLocale);
+    if (!canonicalLocale) {
+      notifications.show({
+        message: t("Enter a valid BCP 47 locale, for example en, fr, or de-CH."),
+        color: "red",
+      });
+      return;
+    }
+    setEditing((current) => addTemplateLocale(current, canonicalLocale));
+    setActiveLocale(canonicalLocale);
+    setNewLocale("");
+  };
 
   return (
     <Modal
@@ -503,16 +586,7 @@ export default function TemplateEditorModal({
             }
           />
 
-          <SimpleGrid cols={{ base: 1, md: 4 }}>
-            <TextInput
-              label={t("Locale")}
-              description={t("Language code")}
-              placeholder={t("en, hu, de")}
-              value={editing.locale ?? ""}
-              onChange={(e) =>
-                setEditing({ ...editing, locale: e.currentTarget.value })
-              }
-            />
+          <SimpleGrid cols={{ base: 1, md: 3 }}>
             <TextInput
               label={t("From email")}
               description={t("Sender email address")}
@@ -553,6 +627,107 @@ export default function TemplateEditorModal({
             }
           />
 
+          {supportsLocalizedTemplates === false ? (
+            <Alert color="yellow" icon={<IconAlertCircle size={18} />}>
+              {localizedSaveBlocked
+                ? t(
+                    "This backend cannot save multiple localized contents. Update the backend before saving this template.",
+                  )
+                : t(
+                    "The connected backend supports one template locale only. Update it to manage multiple localized contents.",
+                  )}
+            </Alert>
+          ) : null}
+
+          {supportsLocalizedTemplates === true ? (
+            <Card withBorder style={{ overflow: "visible" }}>
+              <Stack gap="sm">
+                <Group align="flex-end" wrap="wrap">
+                  <Select
+                    label={t("Content locale")}
+                    description={t("Choose the language content to edit")}
+                    value={activeLocale}
+                    onChange={(value) => {
+                      if (value) {
+                        setActiveLocale(value);
+                        setPreview(null);
+                      }
+                    }}
+                    data={localeKeys}
+                    searchable
+                    comboboxProps={comboboxProps}
+                  />
+                  <Select
+                    label={t("Default locale")}
+                    description={t("Used when the requested locale is unavailable")}
+                    value={editing.defaultLocale ?? ENGLISH_LOCALE}
+                    onChange={(value) => {
+                      if (!value) return;
+                      setEditing((current) =>
+                        syncLegacyTemplateAliases({
+                          ...current,
+                          defaultLocale: value,
+                        }),
+                      );
+                    }}
+                    data={localeKeys}
+                    comboboxProps={comboboxProps}
+                  />
+                  <Button
+                    variant="light"
+                    color="red"
+                    disabled={activeLocale === ENGLISH_LOCALE}
+                    onClick={() => {
+                      setEditing((current) =>
+                        removeTemplateLocale(current, activeLocale),
+                      );
+                      setActiveLocale(ENGLISH_LOCALE);
+                      setPreview(null);
+                    }}
+                  >
+                    {t("Remove locale")}
+                  </Button>
+                </Group>
+                <Group align="flex-end">
+                  <TextInput
+                    label={t("Add locale")}
+                    description={t("Use a BCP 47 language tag")}
+                    placeholder={t("e.g., fr or de-CH")}
+                    value={newLocale}
+                    onChange={(event) => setNewLocale(event.currentTarget.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleAddLocale();
+                      }
+                    }}
+                  />
+                  <Button onClick={handleAddLocale}>{t("Add language")}</Button>
+                </Group>
+                <Text size="xs" c="dimmed">
+                  {t(
+                    "English is always retained as the final fallback. Attachments and sender settings apply to every locale.",
+                  )}
+                </Text>
+              </Stack>
+            </Card>
+          ) : null}
+
+          {localizationWarnings.incomplete ? (
+            <Alert color="yellow" icon={<IconAlertCircle size={18} />}>
+              {t(
+                "This locale is incomplete. Add a subject and at least one HTML or text body.",
+              )}
+            </Alert>
+          ) : null}
+          {localizationWarnings.placeholderMismatch ? (
+            <Alert color="yellow" icon={<IconAlertCircle size={18} />}>
+              {t(
+                "Template placeholders differ from the default locale. Check that every required variable is present.",
+              )}
+            </Alert>
+          ) : null}
+
           <TextInput
             label={t("Subject")}
             description={t(
@@ -561,9 +736,13 @@ export default function TemplateEditorModal({
             placeholder={t(
               "Thank you {{submission.fields.name | there}} for your submission",
             )}
-            value={editing.subject ?? ""}
+            value={activeContent.subject ?? ""}
             onChange={(e) =>
-              setEditing({ ...editing, subject: e.currentTarget.value })
+              setEditing((current) =>
+                updateTemplateLocalization(current, activeLocale, {
+                  subject: e.currentTarget.value,
+                }),
+              )
             }
           />
 
@@ -677,9 +856,13 @@ export default function TemplateEditorModal({
             </Text>
             <HtmlTemplateEditor
               height="400px"
-              value={editing.htmlBody ?? ""}
+              value={activeContent.htmlBody ?? ""}
               onChange={(value) =>
-                setEditing({ ...editing, htmlBody: value ?? "" })
+                setEditing((current) =>
+                  updateTemplateLocalization(current, activeLocale, {
+                    htmlBody: value ?? "",
+                  }),
+                )
               }
               variablePickerZIndex={variablePickerZIndex}
               placeholder={t(
@@ -705,9 +888,13 @@ export default function TemplateEditorModal({
               language="plaintext"
               height="200px"
               minHeight="160px"
-              value={editing.textBody ?? ""}
+              value={activeContent.textBody ?? ""}
               onChange={(value) =>
-                setEditing({ ...editing, textBody: value ?? "" })
+                setEditing((current) =>
+                  updateTemplateLocalization(current, activeLocale, {
+                    textBody: value ?? "",
+                  }),
+                )
               }
               onMount={(currentEditor) => {
                 textBodyEditorRef.current = currentEditor;
@@ -724,7 +911,9 @@ export default function TemplateEditorModal({
               onClick={() => void saveMutation.mutate(editing)}
               disabled={
                 (!isEditingExisting && existingKeys.has(editing.templateKey)) ||
-                hasUploadingAttachments
+                hasUploadingAttachments ||
+                supportsLocalizedTemplates === null ||
+                localizedSaveBlocked
               }
               loading={saveMutation.isPending}
             >
@@ -737,6 +926,7 @@ export default function TemplateEditorModal({
                 const result = await client.previewTemplate(
                   editing.templateKey,
                   previewVariables,
+                  activeLocale,
                 );
                 setPreview(result);
               }}

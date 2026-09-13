@@ -28,7 +28,11 @@ function loadSource(filename: string): Record<string, unknown> {
   return module.exports;
 }
 
-const { translateAuthoredFormContent, translateAuthoredHtml } = loadSource(
+const {
+  translateAuthoredFormContent,
+  translateAuthoredHtml,
+  translateAuthoredOptions,
+} = loadSource(
   path.join(sourceRoot, "runtime/authored-content.ts"),
 ) as typeof import("../src/runtime/authored-content.ts");
 
@@ -147,6 +151,29 @@ test("missing catalog entries fall back to the exact authored string", () => {
     result.form.successMessage,
     " Thanks, we received your message. ",
   );
+});
+
+test("API-provided option labels use the same shared translation catalog", () => {
+  const options = [
+    { value: "ai-kit", label: "AI-Kit updates" },
+    { value: "flow", label: " Flow updates " },
+  ];
+  const translated = translateAuthoredOptions(options, (key) =>
+    key === "AI-Kit updates"
+      ? "AI-Kit Neuigkeiten"
+      : key === "Flow updates"
+      ? "Flow Neuigkeiten"
+      : key,
+  );
+
+  assert.deepEqual(translated, [
+    { value: "ai-kit", label: "AI-Kit Neuigkeiten" },
+    { value: "flow", label: " Flow Neuigkeiten " },
+  ]);
+  assert.deepEqual(options, [
+    { value: "ai-kit", label: "AI-Kit updates" },
+    { value: "flow", label: " Flow updates " },
+  ]);
 });
 
 test("authored translation preserves whitespace and permits an explicitly empty translation", () => {

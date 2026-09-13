@@ -177,6 +177,25 @@ test("every Flow locale keeps its vocabulary keys in alphabetical order", () => 
   }
 });
 
+test("customer-facing locales use a consistently formal form of address", () => {
+  const informalAddressPatterns: Record<string, RegExp> = {
+    de: /(?<!\p{L})(?:du|dich|dir|dein(?:e|en|em|er|es)?|füge|fülle|gib|stelle|versuche|fahre|prüfe|überprüfe|speichere|melde|erstelle|starte|warte|kontaktiere|kannst|bist|fortfährst|generierst)(?!\p{L})/iu,
+    es: /(?<!\p{L})(?:tú|tu|tus|te|agrega|completa|introduce|inicia|crea|asegúrate|inténtalo|continúa|revisa|guarda|espera|escribe|comprueba|contacta|puedes|tienes|unirte|eres)(?!\p{L})/iu,
+    fr: /(?<!\p{L})(?:tu|toi|ton|ta|tes|tiens|vérifie|essaie|continue|saisis|connecte|crée|peux|es)(?!\p{L})/iu,
+    hu: /(?<!\p{L})(?:add meg|adj meg|töltsd|ellenőrizd|próbáld|folytasd|nézd át|mentsd|jelentkezz|regisztrálj|várj|indíts|kezdj|elérted|jogosultságod|folytathatod|fiókoddal|hozzászólásod|ember vagy)(?!\p{L})/iu,
+  };
+
+  for (const [locale, pattern] of Object.entries(informalAddressPatterns)) {
+    for (const [key, value] of Object.entries(vocabularies[locale] ?? {})) {
+      assert.equal(
+        pattern.test(value),
+        false,
+        `${locale} uses informal address for ${key}: ${value}`,
+      );
+    }
+  }
+});
+
 test("every static Flow runtime I18n key exists in the English vocabulary", () => {
   const missing = [...collectStaticI18nKeys()]
     .filter((key) => !(key in enDict))

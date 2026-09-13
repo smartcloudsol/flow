@@ -125,15 +125,26 @@ export interface TemplateAttachmentUploadTarget {
     headers: Record<string, string>;
     expiresIn: number;
 }
+export interface EmailTemplateLocalization {
+    subject?: string;
+    htmlBody?: string;
+    textBody?: string;
+}
 export interface EmailTemplate {
     templateKey: string;
     accountId: string;
     siteId: string;
     name: string;
     description?: string;
+    defaultLocale?: string;
+    localizations?: Record<string, EmailTemplateLocalization>;
+    /** @deprecated Use defaultLocale. */
     locale?: string;
+    /** @deprecated Use localizations[defaultLocale].subject. */
     subject?: string;
+    /** @deprecated Use localizations[defaultLocale].htmlBody. */
     htmlBody?: string;
+    /** @deprecated Use localizations[defaultLocale].textBody. */
     textBody?: string;
     fromEmail?: string;
     fromName?: string;
@@ -145,6 +156,7 @@ export interface EmailTemplate {
     updatedAt?: string;
 }
 export interface TemplatePreviewResponse {
+    locale?: string;
     subject?: string;
     htmlBody?: string;
     textBody?: string;

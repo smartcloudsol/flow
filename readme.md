@@ -34,6 +34,8 @@ Flow lets you build forms, reusable content surfaces, light-DOM modal shells, an
 
 Free mode supports:
 
+- **22-language frontend localization** that follows the active WordPress or multilingual-provider locale and supports RTL where applicable
+- A **shared WP Suite translation catalog** for overriding matching Gatey, AI-Kit, and Flow strings, setting a site-wide fallback locale, or adding further locales under **SmartCloud → Global Settings → Custom Translations**
 - **Gutenberg form builder** with dedicated layout and field blocks
 - **Front-end form rendering** with Mantine-based UI
 - **Discussion and rating surfaces**, including a standalone Rating Summary block for aggregate scores and distributions
@@ -115,7 +117,7 @@ It lives in the separate Hub repository and is published on npm as `@smart-cloud
 ### Source of Shared WPSuite Hub Code
 
 The shared WordPress Hub code lives in the `wpsuite-admin/`, `wpsuite-main/`, and `wpsuite-*-vendor/` directories of the [SmartCloud WP Suite](https://github.com/smartcloudsol/smartcloud-wpsuite) repository.
-That repository hosts the shared administrative interface, global frontend assets, and vendor bundles used across WPSuite plugins, including Flow.
+That repository hosts the shared administrative interface, site-wide localization catalog, global frontend assets, and vendor bundles used across WP Suite plugins, including Gatey, AI-Kit, and Flow.
 
 ---
 

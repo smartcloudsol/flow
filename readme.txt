@@ -5,12 +5,12 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
 
-Build multi-step forms with save and resume, discussions, ratings, and AWS workflows for dynamic or static WordPress.
+Build 22-language multi-step forms with save and resume, discussions, ratings, and AWS workflows for dynamic or static WordPress.
 
 == Description ==
 
@@ -44,6 +44,8 @@ This lets Flow use Gatey-aware authenticated API access, while keeping the backe
 
 **Key features**
 
+* **22-language frontend localization** — Frontend controls include **22 built-in languages**, follow the active WordPress or multilingual-provider locale, and support RTL where applicable.
+* **Shared WP Suite translation catalog** — Override matching strings once for Gatey, AI-Kit, and Flow, set a site-wide fallback locale, or add further locales from **SmartCloud → Global Settings → Custom Translations** without editing plugin files.
 * **Gutenberg form builder** — Build forms with a dedicated Form block, layout/container blocks, and rich field blocks.
 * **Single React runtime per form** — Front-end forms run as one mounted React tree.
 * **Discussion and rating surfaces** — Publish threaded discussions, collect ratings through a Form, and place a standalone Rating Summary block anywhere the same content target needs an aggregate score and distribution.
@@ -214,13 +216,20 @@ All code that ships in the public (free) version of Flow is available here: http
 **Build & distribution:**
 Flow is shipped to WordPress.org as a pre-built distribution. Build steps and developer notes are maintained in the GitHub repository documentation.
 
-**Shared WP Suite components:**
-Some admin UI modules may originate from shared WP Suite components to support workspace linking, license validation, and subscription management across WP Suite plugins.
+**Shared WP Suite admin and localization:**
+The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in https://github.com/smartcloudsol/smartcloud-wpsuite and is packaged under `smartcloud-wpsuite/`. It owns the site-wide custom translation catalog used by Gatey, AI-Kit, and Flow, alongside shared workspace linking, licence validation, and subscription management.
 
 **Pro-only features (source availability):**
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.2.8 =
+* Email templates: Edit a default locale and any number of localized subject, HTML body, and text body variants in one template editor.
+* Compatibility: Require Flow backend template capability 2 before saving localized variants, while keeping legacy single-language templates editable against older backends.
+* Template editor: Keep the locale menu usable when many language variants are configured.
+* Form options: Apply matching shared-catalog translations to labels loaded from API and autocomplete endpoints while preserving option values and unmatched labels.
+* Localization: Use consistent formal address across the updated German, Spanish, and Hungarian frontend catalogs.
 
 = 1.2.7 =
 * Dependencies: Bundled WP Suite Hub 2.5.15 with the Amplify preview.3 runtime that supplies the corrected Authenticator translations.
@@ -404,6 +413,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.2.8 =
+Localized email templates require Flow backend 1.0.56 or newer with template capability 2. Existing single-language templates remain valid without migration; add any valid BCP 47 locale variants only where localized content is needed.
 
 = 1.2.5 =
 Use this release instead of 1.2.4 when installing the governed layout, Checkbox Group, Hidden Field, and native success-state localization fixes from WordPress.org.

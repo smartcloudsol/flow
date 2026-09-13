@@ -14,6 +14,8 @@ import {
   resolveRuntimeContextValue,
   resolveRuntimeContextUrlString,
 } from "../../shared/runtime-context";
+import { translateAuthoredOptions } from "../authored-content";
+import { useFlowI18n } from "../locale-context";
 import { useFormRuntime } from "./useFormRuntime";
 
 type OptionsFieldConfig =
@@ -325,12 +327,17 @@ export function useOptionsData(
   field: OptionsFieldConfig,
   runtime?: RuntimeFieldState,
 ): UseOptionsDataResult {
+  const I18n = useFlowI18n();
   const { emitFormEvent, formId, values, wpContext } = useFormRuntime();
   const [options, setOptions] = useState<SelectOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSelectionMetadata, setHasSelectionMetadata] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const translatedRemoteOptions = useMemo(
+    () => translateAuthoredOptions(options, I18n.get),
+    [I18n, options],
+  );
 
   const staticOptions = runtime?.options ?? field.options ?? [];
   const manualOptions =
@@ -654,12 +661,15 @@ export function useOptionsData(
   }
 
   return {
-    options: mergeOptions(options, manualOptions),
+    options: mergeOptions(translatedRemoteOptions, manualOptions),
     isLoading,
     error,
     hasSelectionMetadata,
     initialSelectionValue: hasSelectionMetadata
-      ? getInitialSelectionValue(field, mergeOptions(options, manualOptions))
+      ? getInitialSelectionValue(
+          field,
+          mergeOptions(translatedRemoteOptions, manualOptions),
+        )
       : undefined,
     refetch: () => fetchOptions(),
     search: setSearchQuery,

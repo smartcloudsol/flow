@@ -1,4 +1,31 @@
 export const enDict: Record<string, string> = {
+  "Add language": "Add language",
+  "Add locale": "Add locale",
+  "Choose the language content to edit": "Choose the language content to edit",
+  "Content locale": "Content locale",
+  "Default locale": "Default locale",
+  "e.g., fr or de-CH": "e.g., fr or de-CH",
+  "English is always retained as the final fallback. Attachments and sender settings apply to every locale.":
+    "English is always retained as the final fallback. Attachments and sender settings apply to every locale.",
+  "Enter a valid BCP 47 locale, for example en, fr, or de-CH.":
+    "Enter a valid BCP 47 locale, for example en, fr, or de-CH.",
+  Locales: "Locales",
+  "Manage localized subject and body content for outgoing email.":
+    "Manage localized subject and body content for outgoing email.",
+  "Remove locale": "Remove locale",
+  "Template placeholders differ from the default locale. Check that every required variable is present.":
+    "Template placeholders differ from the default locale. Check that every required variable is present.",
+  "The connected backend supports one template locale only. Update it to manage multiple localized contents.":
+    "The connected backend supports one template locale only. Update it to manage multiple localized contents.",
+  "This backend cannot save a template with multiple localized contents.":
+    "This backend cannot save a template with multiple localized contents.",
+  "This backend cannot save multiple localized contents. Update the backend before saving this template.":
+    "This backend cannot save multiple localized contents. Update the backend before saving this template.",
+  "This locale is incomplete. Add a subject and at least one HTML or text body.":
+    "This locale is incomplete. Add a subject and at least one HTML or text body.",
+  "Use a BCP 47 language tag": "Use a BCP 47 language tag",
+  "Used when the requested locale is unavailable":
+    "Used when the requested locale is unavailable",
   "{{submission.email}}": "{{submission.email}}",
   "/app/env/webhook/signing-secret": "/app/env/webhook/signing-secret",
   "A descriptive name for the workflow": "A descriptive name for the workflow",

@@ -150,9 +150,11 @@ export class FlowBackendClient {
   previewTemplate(
     templateKey: string,
     variables: Record<string, unknown>,
+    locale?: string,
   ): Promise<TemplatePreviewResponse> {
     return this.request(`/templates/${templateKey}/preview`, "POST", {
       variables,
+      locale,
     });
   }
 

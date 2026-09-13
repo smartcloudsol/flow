@@ -20,7 +20,7 @@ export declare class FlowBackendClient {
     createTemplate(body: EmailTemplate): Promise<EmailTemplate>;
     updateTemplate(templateKey: string, body: EmailTemplate): Promise<EmailTemplate>;
     deleteTemplate(templateKey: string): Promise<void>;
-    previewTemplate(templateKey: string, variables: Record<string, unknown>): Promise<TemplatePreviewResponse>;
+    previewTemplate(templateKey: string, variables: Record<string, unknown>, locale?: string): Promise<TemplatePreviewResponse>;
     createTemplateAttachmentUploadTarget(input: {
         draftId: string;
         fileName: string;

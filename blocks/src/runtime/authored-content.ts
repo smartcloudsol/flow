@@ -1,4 +1,4 @@
-import type { FieldConfig, FormAttributes } from "../shared/types";
+import type { FieldConfig, FormAttributes, SelectOption } from "../shared/types";
 
 export type FlowTranslate = (key: string) => string;
 
@@ -89,6 +89,16 @@ export function translateAuthoredString(
   translate: FlowTranslate,
 ): string {
   return translateNonEmpty(value, translate) as string;
+}
+
+export function translateAuthoredOptions(
+  options: SelectOption[],
+  translate: FlowTranslate,
+): SelectOption[] {
+  return options.map((option) => ({
+    ...option,
+    label: translateAuthoredString(option.label, translate),
+  }));
 }
 
 function translateHtmlTextNode(value: string, translate: FlowTranslate) {
