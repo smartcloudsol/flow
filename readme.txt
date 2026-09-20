@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.8
+Stable tag: 1.2.9
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -223,6 +223,9 @@ The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in ht
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.2.9 =
+* Dependencies: Bundle WP Suite Hub 2.5.16 so Static Publisher is notified when the shared translation catalog changes.
 
 = 1.2.8 =
 * Email templates: Edit a default locale and any number of localized subject, HTML body, and text body variants in one template editor.
