@@ -4891,10 +4891,10 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@smart-cloud/ai-kit-core@^1.5.14":
-  version "1.5.14"
-  resolved "https://registry.npmjs.org/@smart-cloud/ai-kit-core/-/ai-kit-core-1.5.14.tgz#054ddc0cec22d2eeb516dc70d2e324341260915c"
-  integrity sha512-uA5wo80XeFv5H8u4vCN+Rt0cefa8Tx2VNZ6rnGZ1OcAe0I70oUl5WK+EthucrZPd4lfV0wlVrtsZM9wSC1GBzw==
+"@smart-cloud/ai-kit-core@^1.5.15":
+  version "1.5.15"
+  resolved "https://registry.npmjs.org/@smart-cloud/ai-kit-core/-/ai-kit-core-1.5.15.tgz#1c20f079c51dd99d527a90c5a7a8cca902a93195"
+  integrity sha512-F6I54rIva6LOYFx1YhWdnSXIJF0jvevO3i8E/tJj+2hefYS7oYZ6Jqmlzr+Q7AEedJA6iAh+ZRN4VsvPwYt1Sg==
   dependencies:
     "@smart-cloud/gatey-core" "^2.3.7"
     "@smart-cloud/wpsuite-core" "^2.4.1"
