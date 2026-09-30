@@ -6,7 +6,7 @@
  * Requires at least: 6.9
  * Tested up to:      7.1
  * Requires PHP:      8.1
- * Version:           1.2.11
+ * Version:           1.2.12
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.2.11';
+const VERSION = '1.2.12';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -881,6 +881,13 @@ final class Flow
         return is_string($url) && $url !== '' ? $url : null;
     }
 
+    /** @return string[] */
+    private function getWpsuiteThemeCssHrefs(): array
+    {
+        $urls = apply_filters('smartcloud_wpsuite_theme_css_urls', array());
+        return is_array($urls) ? array_values(array_filter($urls, 'is_string')) : array();
+    }
+
     private function enqueueMainRuntimeScript(): void
     {
         $main_script_asset = array();
@@ -998,6 +1005,7 @@ final class Flow
                 SMARTCLOUD_FLOW_URL . 'admin/operations-runtime.css'
             ),
             'wpsuiteThemeCssHref' => $this->getWpsuiteThemeCssHref(),
+            'wpsuiteThemeCssHrefs' => $this->getWpsuiteThemeCssHrefs(),
         );
 
         $js = 'const __flowGlobal = (typeof globalThis !== "undefined") ? globalThis : window;

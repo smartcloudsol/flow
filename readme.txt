@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.11
+Stable tag: 1.2.12
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -223,6 +223,10 @@ The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in ht
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.2.12 =
+* Styling: Load the shared WP Suite Theme CSS and any additional stylesheet URLs configured in WP Suite General Settings, in order, inside the form, content, discussion, and rating shadow roots.
+* Dependencies: Bundle WP Suite Hub 2.5.17 and refresh the shared core packages.
 
 = 1.2.11 =
 * Dependencies: Refresh the AI Kit core package used by Flow blocks for compatibility with the category-path knowledge contract.

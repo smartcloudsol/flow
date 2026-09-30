@@ -24,6 +24,7 @@ import type {
 
 type FlowRuntimeConstants = {
   wpsuiteThemeCssHref?: string | null;
+  wpsuiteThemeCssHrefs?: string[];
 };
 
 // Sanitize custom CSS to prevent XSS
@@ -76,12 +77,16 @@ function getFlowRuntimeConstants(): FlowRuntimeConstants {
 }
 
 export function getFlowRuntimeStylesheetHrefs(pluginUrl: string): string[] {
-  return [
+  const { wpsuiteThemeCssHref, wpsuiteThemeCssHrefs } = getFlowRuntimeConstants();
+  const shared = Array.isArray(wpsuiteThemeCssHrefs) && wpsuiteThemeCssHrefs.length > 0
+    ? wpsuiteThemeCssHrefs
+    : [wpsuiteThemeCssHref];
+  return Array.from(new Set([
     `${pluginUrl}blocks/view.css`,
-    getFlowRuntimeConstants().wpsuiteThemeCssHref,
+    ...shared,
   ].filter(
     (href): href is string => typeof href === "string" && href.length > 0,
-  );
+  )));
 }
 
 export async function ensureShadowStylesheets(
