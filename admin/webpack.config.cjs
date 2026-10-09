@@ -52,6 +52,7 @@ module.exports = function () {
   return {
     ...defaultConfig,
     entry: {
+      "backend-readiness": [path.resolve(process.cwd(), "src", "backend-readiness-entry.ts")],
       index: [path.resolve(process.cwd(), "src", "index.tsx")],
       "editor-runtime": [path.resolve(process.cwd(), "src", "editor-runtime.ts")],
       "operations-runtime": [

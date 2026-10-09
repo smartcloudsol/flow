@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.12
+Stable tag: 1.3.0
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -149,13 +149,10 @@ Yes. Put a Gallery block inside a Flow Modal, give the gallery a `galleryId`, an
 
 == Screenshots ==
 
-1. Form builder in Gutenberg (container and field blocks)
-2. Front-end form rendered with Mantine styling
-3. Conditional logic editor for a field
-4. Flow Settings → API Settings
-5. Pro: Email templates editor with preview
-6. Pro: Workflow builder (trigger, steps, webhook)
-7. Elementor Flow widget with preview
+1. A visitor form rendered on the frontend.
+2. Forms & Workflows summary with separate backend-access guidance.
+3. Building a form and configuring its fields in Gutenberg.
+4. Component guidance and inspected usage for Flow blocks.
 
 == External Services ==
 
@@ -223,6 +220,17 @@ The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in ht
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.3.0 =
+* Show backend mode, resolved API URL and saved workflow, template and webhook counts in one compact Status panel.
+* Load resource counts only when expanded and reuse cached results; show unavailable counts separately from successful zero results.
+* Show current form and editor screenshots in the Getting started guide, with accessible image dialogs.
+* Improve shared navigation alignment, connection details, inline help and setup field guidance.
+* Bring Forms & Workflows guidance and detailed settings together, with real scoped block-usage counts and Patterns access.
+* Explain supported blocks, widgets and shortcodes through contextual help without repeating generic editor links.
+* Security: Update the bundled ProseMirror editor and DOMPurify sanitizer to patched releases.
+* Add shared product navigation and separate Platform Settings with reCAPTCHA, Styling and Translations tabs.
+* Preserve existing admin links, permissions and compatibility with older plugin menus.
 
 = 1.2.12 =
 * Styling: Load the shared WP Suite Theme CSS and any additional stylesheet URLs configured in WP Suite General Settings, in order, inside the form, content, discussion, and rating shadow roots.
@@ -426,6 +434,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+WP Suite admin navigation now groups everyday tasks by capability and detailed settings under Advanced. Existing settings and bookmarked admin URLs remain available; no configuration migration is required.
 
 = 1.2.8 =
 Localized email templates require Flow backend 1.0.56 or newer with template capability 2. Existing single-language templates remain valid without migration; add any valid BCP 47 locale variants only where localized content is needed.

@@ -50,6 +50,8 @@ import {
 } from "react";
 import { FlowBackendClient } from "./api/backend-client";
 import type { AdminView, BootConfig } from "./api/types";
+import { guardFlowAdminPage, resolveFlowAdminPage, type FlowAdminPage } from "./admin-page";
+import { useAdminSectionHistory } from "./admin-section-history";
 import DocSidebar from "./DocSidebar";
 import classes from "./main.module.css";
 import { NoRegistrationRequiredBanner } from "./noregistration";
@@ -137,9 +139,6 @@ const WorkflowsEditor = lazy(
 );
 
 const SettingsTitle = () => {
-  const isMobile = useMediaQuery(
-    `(max-width: ${DEFAULT_THEME.breakpoints.sm})`,
-  );
   return (
     <Card p="sm" withBorder mt="md" maw={1280}>
       <Group
@@ -158,9 +157,7 @@ const SettingsTitle = () => {
             color: "#218BE6",
           }}
         >
-          {isMobile
-            ? "SmartCloud Flow"
-            : "SmartCloud Flow — Forms & Email Automation for WordPress"}
+          {__("Forms & Workflows", TEXT_DOMAIN)}
         </Title>
         <Text>
           This interface allows you to configure forms, email templates,
@@ -256,7 +253,8 @@ export default function Main({ nonce, settings, store }: MainProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const [site, setSite] = useState<Site | null>();
-  const [activePage, setActivePage] = useState<AdminView>("general");
+  const [requestedPage, setRequestedPage] = useState(() => resolveFlowAdminPage(window.location.search));
+  const [activePage, setActivePage] = useState<AdminView>(requestedPage);
 
   const isMobile = useMediaQuery(
     `(max-width: ${DEFAULT_THEME.breakpoints.sm})`,
@@ -494,9 +492,12 @@ export default function Main({ nonce, settings, store }: MainProps) {
             paidSettingsDisabled || backendCapabilities?.workflows === false,
         },
       ]);
-      if (paidSettingsDisabled) {
-        setActivePage("general");
-      }
+      setActivePage(page => guardFlowAdminPage(
+        page === "templates" ? "workflows" : page,
+        resolvedConfig !== undefined,
+        !paidSettingsDisabled,
+        backendCapabilities,
+      ));
     });
   }, [
     accountId,
@@ -531,14 +532,34 @@ export default function Main({ nonce, settings, store }: MainProps) {
     }
   }, [clearCache, resolvedConfig]);
 
-  const normalizedOperationsPage =
-    activePage === "templates" ? "workflows" : activePage;
+  const navigatePage = useAdminSectionHistory(activePage, resolveFlowAdminPage, next => {
+    const requested = next === "templates" ? "workflows" : next;
+    const accepted = guardFlowAdminPage(requested, resolvedConfig !== undefined,
+      !!(decryptedConfig && accountId && siteId && siteKey) || !!resolvedConfig,
+      backendCapabilities);
+    setRequestedPage(requested);
+    setActivePage(accepted);
+    return accepted;
+  });
+
+  const normalizedOperationsPage = guardFlowAdminPage(
+    activePage === "templates" ? "workflows" : activePage,
+    resolvedConfig !== undefined,
+    !!(decryptedConfig && accountId && siteId && siteKey) || !!resolvedConfig,
+    backendCapabilities,
+  );
 
   const activeOperationsView =
     normalizedOperationsPage === "submissions" ||
     normalizedOperationsPage === "workflows"
       ? (normalizedOperationsPage as OperationsView)
       : null;
+
+  const requestedSectionUnavailable = requestedPage !== "general"
+    && normalizedOperationsPage === "general"
+    && guardFlowAdminPage(requestedPage, resolvedConfig !== undefined,
+      !!(decryptedConfig && accountId && siteId && siteKey) || !!resolvedConfig,
+      backendCapabilities) === "general";
 
   const operationsEditor =
     activeOperationsView === "submissions" ? (
@@ -563,8 +584,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
         page={normalizedOperationsPage as never}
         scrollToId={scrollToId}
       />
-      <SettingsTitle />
-      <FlowOnboarding />
+      {!document.querySelector('#wpsuite-product-details[data-wpsuite-product="forms-workflows"]') && <><SettingsTitle /><FlowOnboarding /></>}
       <Group
         align="flex-start"
         mt="lg"
@@ -598,7 +618,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                       }
                       active={activePage === item.value}
                       onClick={() => {
-                        setActivePage((item.value as AdminView) ?? "general");
+                        navigatePage((item.value as FlowAdminPage) ?? "general");
                       }}
                       disabled={item.disabled}
                     />
@@ -628,7 +648,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                       active={activePage === item.value}
                       onClick={() => {
                         if (!item.disabled) {
-                          setActivePage((item.value as AdminView) ?? "general");
+                          navigatePage((item.value as FlowAdminPage) ?? "general");
                         }
                       }}
                       disabled={item.disabled}
@@ -660,7 +680,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                         }
                         active={activePage === item.value}
                         onClick={() =>
-                          setActivePage((item.value as AdminView) ?? "general")
+                          navigatePage((item.value as FlowAdminPage) ?? "general")
                         }
                         disabled={item.disabled}
                       />
@@ -688,7 +708,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                       active={activePage === item.value}
                       onClick={() => {
                         if (!item.disabled) {
-                          setActivePage((item.value as AdminView) ?? "general");
+                          navigatePage((item.value as FlowAdminPage) ?? "general");
                         }
                       }}
                       disabled={item.disabled}
@@ -700,6 +720,11 @@ export default function Main({ nonce, settings, store }: MainProps) {
           </Card>
         )}
         <Box style={{ flex: 1, width: isMobile ? "100%" : "auto" }} maw={1020}>
+          {requestedSectionUnavailable && (
+            <Alert color="yellow" variant="light" title={__("Requested section unavailable", TEXT_DOMAIN)} icon={<IconExclamationCircle />} mb="md">
+              {__("The linked section is unavailable because the site configuration or required backend capability is missing. General preferences remain available.", TEXT_DOMAIN)}
+            </Alert>
+          )}
           {backendCapabilities &&
             (!backendCapabilities.submissions ||
               !backendCapabilities.workflows) && (
@@ -716,7 +741,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
                 )}
               </Alert>
             )}
-          {activePage === "general" && (
+          {normalizedOperationsPage === "general" && (
             <form name="general" onSubmit={handleUpdateSettings}>
               <Title order={2} mb="md">
                 <InfoLabel
@@ -883,7 +908,7 @@ export default function Main({ nonce, settings, store }: MainProps) {
               </Group>
             </form>
           )}
-          {activePage === "api-settings" && (
+          {normalizedOperationsPage === "api-settings" && (
             <>
               <Title order={2} mb="md">
                 <InfoLabel

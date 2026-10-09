@@ -1,3 +1,5 @@
+import "./backend-readiness-entry";
+import "./introduction-images";
 import { MantineProvider, createTheme } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
@@ -8,6 +10,8 @@ import { createRoot } from "react-dom/client";
 import { getStore, getFlowPlugin } from "@smart-cloud/flow-core";
 import Main from "./main";
 import { initWordPressOperationsI18n } from "./operations/i18n";
+
+
 
 const theme = createTheme({
   respectReducedMotion: true,
@@ -58,4 +62,4 @@ async function init() {
   );
 }
 
-init();
+if (document.getElementById("smartcloud-flow-admin")) void init();

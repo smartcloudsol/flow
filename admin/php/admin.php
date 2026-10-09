@@ -44,7 +44,53 @@ final class Admin
 
         $this->settings = FlowAdminSettings::fromMixed($merged);
         $this->registerRestRoutes();
+        require_once __DIR__ . '/placement-inspection.php';
+        PlacementInspection::registerHooks();
+        add_filter('smartcloud_wpsuite_admin_capabilities', array($this, 'registerHubCapabilities'));
         add_action('pre_get_posts', array($this, 'filterPatternListQuery'));
+    }
+
+    /** Register navigation without depending on a particular hub generation. */
+    public function registerHubCapabilities(array $capabilities): array
+    {
+        require_once __DIR__ . '/surface.php';
+        $capabilities[] = array(
+            'schema_version' => 1,
+            'id' => 'forms-workflows',
+            'configuration_reset' => array(
+                'options' => array(SMARTCLOUD_FLOW_SLUG),
+                'title' => __('Reset all Flow settings?', 'smartcloud-flow'),
+                'consequences' => array(__('Restores all WordPress-stored Flow preferences to defaults, including form synchronization, permanent-deletion preferences, highlighted submission actions, attribution and diagnostics.', 'smartcloud-flow')),
+                'preserved' => array(__('Forms, submissions, discussions, patterns, authored blocks and their settings are preserved. The shared site connection, cloud-managed API settings, workflows, templates, process maps, webhooks and AWS resources are unchanged.', 'smartcloud-flow')),
+            ),
+            'surface_provider' => array(AdminSurface::class, 'read'),
+            'detail_page' => SMARTCLOUD_FLOW_SLUG,
+            'detail_enqueue' => array(self::class, 'enqueueAssets'),
+            'backend_enqueue' => array(self::class, 'enqueueBackendCheck'),
+            'surface_save' => array(AdminSurface::class, 'save'),
+            'surface_capability' => 'manage_options',
+            'product_id' => 'smartcloud-flow',
+            'label' => __('Forms & Workflows', 'smartcloud-flow'),
+            'product' => __('Flow', 'smartcloud-flow'),
+            'description' => __('Build forms and automate what happens after submission.', 'smartcloud-flow'),
+            'order' => 50,
+            'primary_url' => admin_url('admin.php?page=' . SMARTCLOUD_FLOW_SLUG),
+            'primary_label' => __('Configure Forms & Workflows', 'smartcloud-flow'),
+            'required_capability' => 'manage_options',
+            'advanced_links' => array(
+                array('label' => __('General preferences', 'smartcloud-flow'), 'url' => admin_url('admin.php?page=' . SMARTCLOUD_FLOW_SLUG), 'required_capability' => 'manage_options'),
+                array('label' => __('API settings', 'smartcloud-flow'), 'url' => admin_url('admin.php?page=' . SMARTCLOUD_FLOW_SLUG . '&section=api-settings'), 'required_capability' => 'manage_options'),
+                array('label' => __('Submissions', 'smartcloud-flow'), 'url' => admin_url('admin.php?page=' . SMARTCLOUD_FLOW_SLUG . '&section=submissions'), 'required_capability' => 'manage_options'),
+                array('label' => __('Workflows', 'smartcloud-flow'), 'url' => admin_url('admin.php?page=' . SMARTCLOUD_FLOW_SLUG . '&section=workflows'), 'required_capability' => 'manage_options'),
+                array('label' => __('Flow Patterns', 'smartcloud-flow'), 'url' => admin_url('edit.php?post_type=wp_block&s=smartcloud-flow'), 'required_capability' => 'edit_posts'),
+            ),
+            'quick_links' => array(
+                array('label' => __('Create a page with a form', 'smartcloud-flow'), 'url' => admin_url('post-new.php?post_type=page'), 'required_capability' => 'edit_pages'),
+                array('label' => __('Flow Patterns', 'smartcloud-flow'), 'url' => admin_url('edit.php?post_type=wp_block&s=smartcloud-flow'), 'required_capability' => 'edit_posts'),
+            ),
+            'legacy_menu_slugs' => array(SMARTCLOUD_FLOW_SLUG, admin_url('edit.php?post_type=wp_block&s=smartcloud-flow')),
+        );
+        return $capabilities;
     }
 
     public function getSettings(): FlowAdminSettings
@@ -109,38 +155,7 @@ final class Admin
                 return;
             }
 
-            flow()->enqueueAdminRuntimeAssets();
-
-            $script_asset = array();
-            if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'admin/index.asset.php')) {
-                $script_asset = require_once(SMARTCLOUD_FLOW_PATH . 'admin/index.asset.php');
-            }
-            $script_asset['dependencies'] = array_merge(
-                $script_asset['dependencies'],
-                array(
-                    'smartcloud-flow-main-script',
-                    'smartcloud-wpsuite-webcrypto-vendor',
-                    'smartcloud-wpsuite-mantine-vendor'
-                )
-            );
-            wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], SMARTCLOUD_FLOW_VERSION, array('in_footer' => true, 'strategy' => 'defer'));
-
-            if (function_exists('wp_set_script_translations')) {
-                wp_set_script_translations('smartcloud-flow-admin-script', 'smartcloud-flow', SMARTCLOUD_FLOW_PATH . 'languages');
-            }
-
-            wp_enqueue_style(
-                'smartcloud-flow-admin-style',
-                SMARTCLOUD_FLOW_URL . 'admin/index.css',
-                [],
-                SMARTCLOUD_FLOW_VERSION
-            );
-            wp_enqueue_style(
-                'smartcloud-mantine-vendor-style',
-                SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css',
-                [],
-                defined('SMARTCLOUD_WPSUITE_MANTINE_VERSION') ? SMARTCLOUD_WPSUITE_MANTINE_VERSION : SMARTCLOUD_FLOW_VERSION
-            );
+            $this->enqueueAssets();
         });
 
         add_filter('parent_file', array($this, 'highlightMenu'));
@@ -373,6 +388,54 @@ final class Admin
             return admin_url("edit.php?post_type=wp_block&s=smartcloud-flow");
         }
         return $submenu_file;
+    }
+
+    public static function enqueueAssets(): void
+    {
+        flow()->enqueueAdminRuntimeAssets();
+
+        $script_asset = array();
+        if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'admin/index.asset.php')) {
+            $script_asset = require_once(SMARTCLOUD_FLOW_PATH . 'admin/index.asset.php');
+        }
+        $asset_version = $script_asset['version'] ?? SMARTCLOUD_FLOW_VERSION;
+        $script_asset['dependencies'] = array_merge(
+            $script_asset['dependencies'],
+            array(
+                'smartcloud-flow-main-script',
+                'smartcloud-wpsuite-webcrypto-vendor',
+                'smartcloud-wpsuite-mantine-vendor'
+            )
+        );
+        wp_enqueue_script('smartcloud-flow-admin-script', SMARTCLOUD_FLOW_URL . 'admin/index.js', $script_asset['dependencies'], $asset_version, array('in_footer' => true, 'strategy' => 'defer'));
+
+        if (function_exists('wp_set_script_translations')) {
+            wp_set_script_translations('smartcloud-flow-admin-script', 'smartcloud-flow', SMARTCLOUD_FLOW_PATH . 'languages');
+        }
+
+        wp_enqueue_style(
+            'smartcloud-flow-admin-style',
+            SMARTCLOUD_FLOW_URL . 'admin/index.css',
+            [],
+            $asset_version
+        );
+        wp_enqueue_style(
+            'smartcloud-mantine-vendor-style',
+            SMARTCLOUD_WPSUITE_URL . 'assets/css/mantine-vendor.css',
+            [],
+            defined('SMARTCLOUD_WPSUITE_MANTINE_VERSION') ? SMARTCLOUD_WPSUITE_MANTINE_VERSION : SMARTCLOUD_FLOW_VERSION
+        );
+    }
+
+    public static function enqueueBackendCheck(): void
+    {
+        flow()->enqueueAdminRuntimeAssets();
+        $assetPath = SMARTCLOUD_FLOW_PATH . 'admin/backend-readiness.asset.php';
+        if (!file_exists($assetPath)) { return; }
+        $asset = require $assetPath;
+        wp_enqueue_script('smartcloud-flow-backend-check', SMARTCLOUD_FLOW_URL . 'admin/backend-readiness.js',
+            array_merge($asset['dependencies'] ?? array(), array('smartcloud-flow-main-script')),
+            $asset['version'] ?? SMARTCLOUD_FLOW_VERSION, array('in_footer' => true, 'strategy' => 'defer'));
     }
 
     public function renderPage(): void

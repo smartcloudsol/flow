@@ -25,14 +25,8 @@ import { useCallback, useMemo, useState } from "react";
 
 import { TEXT_DOMAIN } from "@smart-cloud/flow-core";
 
-import flowConditionalLogic from "./assets/onboarding/flow-conditional-logic.png";
-import flowEditorInserter from "./assets/onboarding/flow-editor-inserter.png";
-import flowFormBuilder from "./assets/onboarding/flow-form-builder.png";
-import flowProSubmissions from "./assets/onboarding/flow-pro-submissions.png";
-import flowProTemplates from "./assets/onboarding/flow-pro-templates.png";
-import flowProWorkflows from "./assets/onboarding/flow-pro-workflows.png";
-import flowProWorkflowsZapier from "./assets/onboarding/flow-pro-workflows-zapier-integration.png";
-import flowWizard from "./assets/onboarding/flow-wizard-form.png";
+import flowFormCurrent from "./assets/onboarding/form-current.png";
+import flowEditorCurrent from "./assets/onboarding/editor-current.png";
 import classes from "./onboarding.module.css";
 
 const LOCAL_STORAGE_KEY = "flow_onboarding_collapsed";
@@ -73,7 +67,7 @@ function ScreenshotGallery(props: {
   items: OnboardingScreenshot[];
   emptyHint: string;
 }) {
-  const { items, emptyHint } = props;
+  const items = props.items.filter((item) => Boolean(item.src));
   const [opened, { open, close }] = useDisclosure(false);
   const [active, setActive] = useState<OnboardingScreenshot | null>(null);
 
@@ -85,13 +79,7 @@ function ScreenshotGallery(props: {
     [open],
   );
 
-  if (!items?.length) {
-    return (
-      <Text size="sm" c="dimmed">
-        {emptyHint}
-      </Text>
-    );
-  }
+  if (!items.length) return null;
 
   return (
     <>
@@ -162,67 +150,12 @@ export const FlowOnboarding = (props: FlowOnboardingProps) => {
 
     return {
       gettingStarted: shot.gettingStarted ?? [
-        {
-          title: __(
-            "Gutenberg inserter: add the Flow Form block to a page or post.",
-            TEXT_DOMAIN,
-          ),
-          src: flowEditorInserter,
-        },
-        {
-          title: __(
-            "Form builder canvas: arrange fields, containers, labels, and buttons.",
-            TEXT_DOMAIN,
-          ),
-          src: flowFormBuilder,
-        },
+        { title: __("Build a form with Flow blocks in Gutenberg.", TEXT_DOMAIN), src: flowEditorCurrent },
       ],
       freeFeatures: shot.freeFeatures ?? [
-        {
-          title: __(
-            "Wizard form example: multi-step flow with step-by-step progression.",
-            TEXT_DOMAIN,
-          ),
-          src: flowWizard,
-        },
-        {
-          title: __(
-            "Conditional logic setup: show, hide, or require fields dynamically.",
-            TEXT_DOMAIN,
-          ),
-          src: flowConditionalLogic,
-        },
+        { title: __("A visitor form built with Flow blocks.", TEXT_DOMAIN), src: flowFormCurrent },
       ],
-      proFeatures: shot.proFeatures ?? [
-        {
-          title: __(
-            "Submissions screen: review entries collected by the backend.",
-            TEXT_DOMAIN,
-          ),
-          src: flowProSubmissions,
-        },
-        {
-          title: __(
-            "Templates screen: create reusable templates for emails.",
-            TEXT_DOMAIN,
-          ),
-          src: flowProTemplates,
-        },
-        {
-          title: __(
-            "Workflows and automations: status changes, workflow steps, and webhooks.",
-            TEXT_DOMAIN,
-          ),
-          src: flowProWorkflows,
-        },
-        {
-          title: __(
-            "Zapier integration: connect form submissions to 5,000+ apps and services.",
-            TEXT_DOMAIN,
-          ),
-          src: flowProWorkflowsZapier,
-        },
-      ],
+      proFeatures: shot.proFeatures ?? [],
     } satisfies Required<FlowOnboardingScreenshots>;
   }, [props.screenshots]);
 
