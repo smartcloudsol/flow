@@ -375,6 +375,7 @@ final class Provider extends Product_Provider_Base
             if (!isset($attrs[$required_label]) || trim((string) $attrs[$required_label]) === '') {
                 return new WP_Error(
                     'smartcloud_flow_discussion_label_required',
+                    /* translators: %s: Name of the discussion block attribute requiring authored visible text. */
                     sprintf(__('Discussion attribute %s must contain authored visible text.', 'smartcloud-flow'), $required_label)
                 );
             }

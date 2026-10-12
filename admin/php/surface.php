@@ -41,6 +41,7 @@ final class AdminSurface
         $status = static function (array $kinds) use ($usage): string {
             $ids = array();
             foreach ($kinds as $kind) { $ids = array_merge($ids, $usage['matches'][$kind] ?? array()); }
+            /* translators: %d: Number of inspected published pages or posts containing the block. */
             $label = sprintf(__('Found on %d inspected published pages or posts', 'smartcloud-flow'), count(array_unique($ids)));
             return $label . ($usage['partial'] ? ' · ' . __('Partial inspection', 'smartcloud-flow') : '');
         };
