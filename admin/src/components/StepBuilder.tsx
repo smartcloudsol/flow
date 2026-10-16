@@ -4,27 +4,33 @@ import {
   Card,
   Checkbox,
   Group,
+  Modal,
   Select,
   Stack,
   TagsInput,
   Text,
   TextInput,
   Textarea,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   IconBrain,
   IconCloud,
-  IconGripVertical,
+  IconChevronDown,
+  IconChevronRight,
   IconMail,
   IconPlus,
   IconTrash,
   IconWebhook,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { EmailTemplate, WebhookEndpoint } from "../api/types";
 import { t } from "../operations/i18n";
 import JsonDraftEditor from "./JsonDraftEditor";
-import { useOperationsComboboxProps } from "./OperationsPortalContext";
+import {
+  useOperationsComboboxProps,
+  useOperationsDialogPortalProps,
+} from "./OperationsPortalContext";
 
 const AI_AGENT_TOOL_OPTIONS = [
   {
@@ -591,6 +597,8 @@ export interface StepBuilderProps {
   onChange: (steps: WorkflowStep[]) => void;
   templates?: EmailTemplate[];
   webhooks?: WebhookEndpoint[];
+  onConfirmationChange?: (opened: boolean) => void;
+  confirmationZIndex?: number;
 }
 
 const ACTION_TYPES = [
@@ -618,9 +626,22 @@ export default function StepBuilder({
   onChange,
   templates = [],
   webhooks = [],
+  onConfirmationChange,
+  confirmationZIndex = 100100,
 }: StepBuilderProps) {
-  const [expandedStep, setExpandedStep] = useState<number | null>(0);
+  const [expandedSteps, setExpandedSteps] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const [pendingRemoval, setPendingRemoval] = useState<number | null>(null);
+  const removalTrigger = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    onConfirmationChange?.(pendingRemoval !== null);
+    return () => onConfirmationChange?.(false);
+  }, [pendingRemoval, onConfirmationChange]);
+  const closeRemoval = () => setPendingRemoval(null);
+  const editorId = useId();
   const comboboxProps = useOperationsComboboxProps(100001);
+  const dialogPortalProps = useOperationsDialogPortalProps();
   const actionTypeOptions = ACTION_TYPES.map((action) => ({
     ...action,
     label: t(action.label),
@@ -634,7 +655,7 @@ export default function StepBuilder({
         config: getDefaultStepConfig("email.send"),
       },
     ]);
-    setExpandedStep(steps.length);
+    setExpandedSteps((current) => new Set([...current, steps.length]));
   };
 
   const updateStep = (index: number, updates: Partial<WorkflowStep>) => {
@@ -657,9 +678,15 @@ export default function StepBuilder({
 
   const removeStep = (index: number) => {
     onChange(steps.filter((_, i) => i !== index));
-    if (expandedStep === index) {
-      setExpandedStep(null);
-    }
+    setExpandedSteps(
+      (current) =>
+        new Set(
+          [...current]
+            .filter((item) => item !== index)
+            .map((item) => (item > index ? item - 1 : item)),
+        ),
+    );
+    setPendingRemoval(null);
   };
 
   const moveStep = (index: number, direction: "up" | "down") => {
@@ -671,7 +698,14 @@ export default function StepBuilder({
       newSteps[index],
     ];
     onChange(newSteps);
-    setExpandedStep(targetIndex);
+    setExpandedSteps(
+      (current) =>
+        new Set(
+          [...current].map((item) =>
+            item === index ? targetIndex : item === targetIndex ? index : item,
+          ),
+        ),
+    );
   };
 
   const getStepIcon = (actionType: string) => {
@@ -684,6 +718,50 @@ export default function StepBuilder({
     return t(
       ACTION_TYPES.find((a) => a.value === actionType)?.label ?? actionType,
     );
+  };
+
+  const getStepSummary = (step: WorkflowStep): string => {
+    const value = (key: string) =>
+      typeof step.config[key] === "string" ||
+      typeof step.config[key] === "number"
+        ? String(step.config[key])
+        : "";
+    switch (step.actionType) {
+      case "email.send": {
+        const template = templates.find(
+          (item) => item.templateKey === value("templateKey"),
+        );
+        return (
+          [template?.name || value("templateKey"), value("recipientEmail")]
+            .filter(Boolean)
+            .join(" · ") || t("Choose an email template and recipient")
+        );
+      }
+      case "webhook.call": {
+        const webhook = webhooks.find(
+          (item) => item.webhookKey === value("webhookKey"),
+        );
+        return (
+          webhook?.name || value("webhookKey") || t("Choose a webhook endpoint")
+        );
+      }
+      case "status.update":
+        return value("status") || t("Choose a status");
+      case "delay":
+        return value("durationSeconds")
+          ? `${value("durationSeconds")} ${t("seconds")}`
+          : t("Set a duration");
+      case "eventbridge.event":
+        return (
+          [value("detailType"), value("eventBusName")]
+            .filter(Boolean)
+            .join(" · ") || t("Set the event details")
+        );
+      case "ai.agent":
+        return value("text") || t("Configure the AI task");
+      default:
+        return t("Open to edit this step");
+    }
   };
 
   const renderStepConfig = (step: WorkflowStep, index: number) => {
@@ -1422,6 +1500,7 @@ export default function StepBuilder({
           {t("Workflow Steps")}
         </Text>
         <Button
+          type="button"
           size="xs"
           leftSection={<IconPlus size={14} />}
           onClick={addStep}
@@ -1429,6 +1508,11 @@ export default function StepBuilder({
           {t("Add Step")}
         </Button>
       </Group>
+      <Text size="xs" c="dimmed">
+        {t(
+          "Open a step to edit it. Changes remain in this workflow draft until you save the workflow.",
+        )}
+      </Text>
 
       {steps.length === 0 ? (
         <Text size="sm" c="dimmed">
@@ -1442,61 +1526,159 @@ export default function StepBuilder({
             <Card key={index} withBorder p="md" style={{ overflow: "visible" }}>
               <Stack gap="sm">
                 <Group justify="space-between" wrap="nowrap">
-                  <Group gap="xs">
-                    <IconGripVertical size={16} color="gray" />
-                    {getStepIcon(step.actionType)}
-                    <Text size="sm" fw={500}>
-                      {t("Step")} {index + 1}: {getStepLabel(step.actionType)}
+                  <UnstyledButton
+                    type="button"
+                    aria-expanded={expandedSteps.has(index)}
+                    aria-controls={`${editorId}-step-${index}`}
+                    onClick={() =>
+                      setExpandedSteps((current) => {
+                        const next = new Set(current);
+                        if (next.has(index)) next.delete(index);
+                        else next.add(index);
+                        return next;
+                      })
+                    }
+                    style={{ flex: 1, minWidth: 0 }}
+                  >
+                    <Group gap="xs" wrap="nowrap">
+                      {expandedSteps.has(index) ? (
+                        <IconChevronDown size={16} />
+                      ) : (
+                        <IconChevronRight size={16} />
+                      )}
+                      {getStepIcon(step.actionType)}
+                      <Text size="sm" fw={500}>
+                        {t("Step")} {index + 1}: {getStepLabel(step.actionType)}
+                      </Text>
+                    </Group>
+                    <Text
+                      size="xs"
+                      c="dimmed"
+                      lineClamp={2}
+                      mt={4}
+                      style={{ overflowWrap: "anywhere" }}
+                    >
+                      {getStepSummary(step)}
                     </Text>
-                  </Group>
-                  <Group gap="xs">
-                    {index > 0 && (
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        onClick={() => moveStep(index, "up")}
-                      >
-                        ↑
-                      </Button>
-                    )}
-                    {index < steps.length - 1 && (
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        onClick={() => moveStep(index, "down")}
-                      >
-                        ↓
-                      </Button>
-                    )}
+                  </UnstyledButton>
+                  <Group gap="xs" wrap="nowrap">
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="subtle"
+                      aria-label={`${t("Move step up")}: ${index + 1}`}
+                      disabled={index === 0 || pendingRemoval !== null}
+                      onClick={() => moveStep(index, "up")}
+                    >
+                      ↑
+                    </Button>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="subtle"
+                      aria-label={`${t("Move step down")}: ${index + 1}`}
+                      disabled={
+                        index === steps.length - 1 || pendingRemoval !== null
+                      }
+                      onClick={() => moveStep(index, "down")}
+                    >
+                      ↓
+                    </Button>
                     <ActionIcon
+                      type="button"
+                      aria-label={`${t("Remove step")}: ${index + 1}`}
                       color="red"
                       variant="light"
-                      onClick={() => removeStep(index)}
+                      onClick={(event) => {
+                        removalTrigger.current = event.currentTarget;
+                        setPendingRemoval(index);
+                      }}
                     >
                       <IconTrash size={16} />
                     </ActionIcon>
                   </Group>
                 </Group>
 
-                <Select
-                  label={t("Action Type")}
-                  data={actionTypeOptions}
-                  value={step.actionType}
-                  onChange={(value) =>
-                    updateStep(index, {
-                      actionType: value ?? "email.send",
-                      config: getDefaultStepConfig(value ?? "email.send"),
-                    })
-                  }
-                  comboboxProps={comboboxProps}
-                />
+                {expandedSteps.has(index) && (
+                  <Stack id={`${editorId}-step-${index}`} gap="sm">
+                    <Select
+                      label={t("Action Type")}
+                      data={actionTypeOptions}
+                      value={step.actionType}
+                      onChange={(value) =>
+                        updateStep(index, {
+                          actionType: value ?? "email.send",
+                          config: getDefaultStepConfig(value ?? "email.send"),
+                        })
+                      }
+                      comboboxProps={comboboxProps}
+                    />
 
-                {renderStepConfig(step, index)}
+                    {renderStepConfig(step, index)}
+                  </Stack>
+                )}
               </Stack>
             </Card>
           ))}
         </Stack>
       )}
+      <Modal
+        opened={pendingRemoval !== null}
+        onClose={closeRemoval}
+        title={t("Remove workflow step?")}
+        {...dialogPortalProps}
+        zIndex={confirmationZIndex}
+        centered
+        returnFocus={false}
+        onExitTransitionEnd={() => {
+          // Mantine's document.activeElement is the shadow host in Operations.
+          // Keep the actual trigger so focus also returns inside a ShadowRoot.
+          if (removalTrigger.current?.isConnected)
+            removalTrigger.current.focus();
+          removalTrigger.current = null;
+        }}
+        closeOnEscape={false}
+        onFocusCapture={(event) => {
+          // Mantine listens for Escape on window capture, before React's local
+          // key handler. Its target marker protects the parent modal.
+          event.target.setAttribute("data-mantine-stop-propagation", "true");
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            event.stopPropagation();
+            closeRemoval();
+          }
+        }}
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            {t(
+              "Remove this step from the workflow draft? Save the workflow to apply the removal.",
+            )}
+          </Text>
+          {pendingRemoval !== null && steps[pendingRemoval] && (
+            <Text size="sm" fw={500}>
+              {t("Step")} {pendingRemoval + 1}:{" "}
+              {getStepLabel(steps[pendingRemoval].actionType)}
+            </Text>
+          )}
+          <Group justify="flex-end">
+            <Button type="button" variant="default" onClick={closeRemoval}>
+              {t("Cancel")}
+            </Button>
+            <Button
+              type="button"
+              color="red"
+              onClick={() => {
+                if (pendingRemoval !== null) removeStep(pendingRemoval);
+              }}
+            >
+              {t("Remove step")}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }

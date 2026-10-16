@@ -20,6 +20,7 @@ import {
   syncAmplifyOperationsI18n,
 } from "./operations/i18n";
 import OperationsRuntimeApp from "./components/OperationsRuntimeApp";
+import { OperationsPortalTargetContext } from "./components/OperationsPortalContext";
 
 type OperationsTab = "submissions" | "workflows";
 
@@ -477,14 +478,16 @@ async function mountOperationsTarget(
             zIndex: 100505,
           }}
         >
-          <OperationsRuntimeApp
-            store={store}
-            initialTab={initialTab}
-            availableTabs={availableTabs}
-            title={title}
-            language={language}
-            direction={direction}
-          />
+          <OperationsPortalTargetContext.Provider value={rootEl}>
+            <OperationsRuntimeApp
+              store={store}
+              initialTab={initialTab}
+              availableTabs={availableTabs}
+              title={title}
+              language={language}
+              direction={direction}
+            />
+          </OperationsPortalTargetContext.Provider>
         </ModalsProvider>
       </MantineProvider>
     </QueryClientProvider>,

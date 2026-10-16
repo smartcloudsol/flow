@@ -182,6 +182,7 @@ export default function WorkflowEditorModal({
   const [conditions, setConditions] = useState<WorkflowCondition[]>([]);
   const [steps, setSteps] = useState<WorkflowStep[]>([]);
   const [showJsonView, setShowJsonView] = useState(false);
+  const [stepConfirmationOpen, setStepConfirmationOpen] = useState(false);
   const lastInitKeyRef = useRef<string | null>(null);
 
   const defaultConditionsKey = JSON.stringify(defaultConditions ?? null);
@@ -388,7 +389,12 @@ export default function WorkflowEditorModal({
   return (
     <Modal
       opened={opened}
-      onClose={onClose}
+      onClose={() => {
+        if (!stepConfirmationOpen) onClose();
+      }}
+      closeOnEscape={!stepConfirmationOpen}
+      closeOnClickOutside={!stepConfirmationOpen}
+      trapFocus={!stepConfirmationOpen}
       size="xl"
       zIndex={zIndex}
       title={isNew ? t("New workflow") : t("Edit workflow")}
@@ -502,6 +508,8 @@ export default function WorkflowEditorModal({
         <StepBuilder
           steps={steps}
           onChange={setSteps}
+          onConfirmationChange={setStepConfirmationOpen}
+          confirmationZIndex={zIndex + 1}
           templates={templatesQuery.data?.items ?? []}
           webhooks={webhookQuery.data?.items ?? []}
         />

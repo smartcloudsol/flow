@@ -3200,6 +3200,7 @@ function ProcessMapCanvasInner({
   >(null);
   const [detailedStepDraft, setDetailedStepDraft] =
     useState<ProcessDraftStepNode | null>(null);
+  const [stepConfirmationOpen, setStepConfirmationOpen] = useState(false);
   const [wfModalAllowedTriggers, setWfModalAllowedTriggers] = useState<
     string[] | undefined
   >(undefined);
@@ -5140,7 +5141,12 @@ function ProcessMapCanvasInner({
 
           <Modal
             opened={Boolean(detailedStepEditorNodeId && detailedStepDraft)}
-            onClose={handleCloseDetailedStepEditor}
+            onClose={() => {
+              if (!stepConfirmationOpen) handleCloseDetailedStepEditor();
+            }}
+            closeOnEscape={!stepConfirmationOpen}
+            closeOnClickOutside={!stepConfirmationOpen}
+            trapFocus={!stepConfirmationOpen}
             title={t("Detailed step editor")}
             size="xl"
             zIndex={200001}
@@ -5168,6 +5174,8 @@ function ProcessMapCanvasInner({
                   }
                 />
                 <StepBuilder
+                  onConfirmationChange={setStepConfirmationOpen}
+                  confirmationZIndex={200002}
                   steps={[
                     {
                       actionType: detailedStepDraft.actionType,
