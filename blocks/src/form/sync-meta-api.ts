@@ -3,6 +3,7 @@
  */
 
 import { getFlowPlugin } from "@smart-cloud/flow-core";
+import { backendProfileHeaders } from "@smart-cloud/wpsuite-core";
 
 export interface FormSyncMetadata {
   formId: string | null;
@@ -59,6 +60,7 @@ export async function getFormSyncMeta(
     headers: {
       "Content-Type": "application/json",
       "X-WP-Nonce": request.nonce,
+      ...backendProfileHeaders(),
     },
     credentials: "same-origin",
   });
@@ -81,6 +83,7 @@ export async function updateFormSyncMeta(
     headers: {
       "Content-Type": "application/json",
       "X-WP-Nonce": request.nonce,
+      ...backendProfileHeaders(),
     },
     credentials: "same-origin",
     body: JSON.stringify(updates),

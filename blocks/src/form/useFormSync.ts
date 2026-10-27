@@ -9,6 +9,8 @@ import { FormSyncManager } from "./form-sync-manager";
 import type { FieldBlockData } from "./form-extractor";
 import { getFormSyncMeta, updateFormSyncMeta } from "./sync-meta-api";
 import { getWpSuite, type SiteSettings } from "@smart-cloud/wpsuite-core";
+import { assertBackendProfileCurrent, getBackendProfileContext } from "@smart-cloud/wpsuite-core";
+import { profileScopedFormSource } from "./profile-scoped-source";
 import { useSelect } from "@wordpress/data";
 import { store as editorStore } from "@wordpress/editor";
 import { useCallback, useEffect, useRef, useState } from "@wordpress/element";
@@ -160,14 +162,15 @@ export function useFormSync(options: FormSyncOptions) {
       const currentMeta = await getFormSyncMeta(resolvedPostId);
 
       // Extract form configuration from block attributes and fields
-      const formSource = {
+      const profile = getBackendProfileContext();
+      const formSource = profileScopedFormSource({
         postId: resolvedPostId,
         postType,
         postStatus,
         attributes: formAttributes as Record<string, unknown>,
         fields: fields.map(normalizeFieldForSync),
         sourceKind: "post" as const,
-      };
+      }, currentMeta.formId, profile);
 
       // Get plugin config from WpSuite global
       const { getFlowPlugin } = await import("@smart-cloud/flow-core");
@@ -199,6 +202,7 @@ export function useFormSync(options: FormSyncOptions) {
         lastError: currentMeta.lastError || undefined,
         sourceKind: currentMeta.sourceKind,
       });
+      assertBackendProfileCurrent(profile);
 
       if (result.success) {
         const syncedFormId = result.formId || currentMeta.formId || null;
@@ -227,7 +231,7 @@ export function useFormSync(options: FormSyncOptions) {
         });
 
         // Update block attributes with formId
-        if (syncedFormId && setAttributes) {
+        if (!profile && syncedFormId && setAttributes) {
           setAttributes({ formId: syncedFormId });
         }
 
@@ -320,7 +324,7 @@ export function useFormSync(options: FormSyncOptions) {
         });
 
         // Update block attributes with formId from metadata
-        if (meta.formId && setAttributes && !formAttributes.formId) {
+        if (!getBackendProfileContext() && meta.formId && setAttributes && !formAttributes.formId) {
           setAttributes({ formId: meta.formId });
         }
       } catch (error) {

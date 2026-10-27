@@ -18,6 +18,10 @@ $smartcloud_flow_discussion_source = (string) ($smartcloud_flow_discussion_attri
 // A discussion rendered beside its source form shares the form definition
 // synchronized for the current post. Keep an explicitly authored formId, but
 // fill an empty one from the same post meta that the form renderer uses.
+if (class_exists('\\SmartCloud\\WPSuite\\Flow\\BackendProfileState') && \SmartCloud\WPSuite\Flow\BackendProfileState::context() !== null) {
+    unset($smartcloud_flow_discussion_attributes['formId']);
+}
+
 if (
     empty($smartcloud_flow_discussion_attributes['formId'])
     && $smartcloud_flow_discussion_post_id

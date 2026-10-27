@@ -2,6 +2,7 @@
 namespace SmartCloud\WPSuite\Flow;
 
 if (!defined('ABSPATH')) { exit; }
+require_once __DIR__ . '/backend-profile-state.php';
 require_once __DIR__ . '/placement-inspection.php';
 
 /** Local preferences only; service and workflow configuration stays in Advanced. */
@@ -71,7 +72,7 @@ final class AdminSurface
     public static function read(): array|\WP_Error
     {
         if (!current_user_can('manage_options')) { return self::error(__('Forbidden', 'smartcloud-flow'), 403); }
-        $raw = get_option(SMARTCLOUD_FLOW_SLUG, false);
+        $raw = get_option(BackendProfileState::optionName(SMARTCLOUD_FLOW_SLUG), false);
         $settings = FlowAdminSettings::fromMixed($raw);
         $saved = is_object($raw) ? get_object_vars($raw) : (is_array($raw) ? $raw : array());
         $configured = (array_key_exists('formsBackendSyncEnabled', $saved) && is_bool($saved['formsBackendSyncEnabled']))
@@ -114,7 +115,7 @@ final class AdminSurface
     public static function save(array $values, string $revision): array|\WP_Error
     {
         if (!current_user_can('manage_options')) { return self::error(__('Forbidden', 'smartcloud-flow'), 403); }
-        $raw = get_option(SMARTCLOUD_FLOW_SLUG, false);
+        $raw = get_option(BackendProfileState::optionName(SMARTCLOUD_FLOW_SLUG), false);
         if (!hash_equals(self::revision($raw), $revision)) { return self::error(__('Settings changed. Reload before saving.', 'smartcloud-flow'), 409); }
         if (!$values || array_diff(array_keys($values), array('formsBackendSyncEnabled', 'enablePoweredBy'))) {
             return self::error(__('Unsupported setting.', 'smartcloud-flow'));
@@ -126,7 +127,7 @@ final class AdminSurface
         foreach ($values as $key => $value) {
             if (is_array($updated)) { $updated[$key] = $value; } else { $updated->{$key} = $value; }
         }
-        update_option(SMARTCLOUD_FLOW_SLUG, $updated);
+        update_option(BackendProfileState::optionName(SMARTCLOUD_FLOW_SLUG), $updated);
         return self::read();
     }
 }

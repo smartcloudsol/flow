@@ -49,6 +49,11 @@ if ($smartcloud_flow_post_id && class_exists('\SmartCloud\WPSuite\Flow\FormSyncM
     $smartcloud_flow_backend_form_id = \SmartCloud\WPSuite\Flow\FormSyncMeta::getFormId($smartcloud_flow_post_id);
 }
 
+// Shared Gutenberg attributes are not authoritative for another backend profile.
+if (class_exists('\\SmartCloud\\WPSuite\\Flow\\BackendProfileState') && \SmartCloud\WPSuite\Flow\BackendProfileState::context() !== null && empty($smartcloud_flow_attributes['endpointPath'])) {
+    unset($smartcloud_flow_attributes['formId']);
+}
+
 // Add backend formId to attributes if available
 if ($smartcloud_flow_backend_form_id) {
     $smartcloud_flow_attributes['formId'] = $smartcloud_flow_backend_form_id;

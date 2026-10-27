@@ -30,7 +30,20 @@ for (const [plugin, root] of targets) {
         if(path==='@wordpress/api-fetch')return {contents:'export default async ({path})=>path.includes("pages")?[]:{show_on_front:"posts"};'};
         if(path==='@wordpress/data')return {contents:'export const useSelect=()=>null;'};
         if(path==='jquery')return {contents:''};
-        if(path==='@smart-cloud/wpsuite-core')return {contents:'export const SubscriptionType={}; export const getWpSuite=()=>window.WpSuite;'};
+        if(path==='@smart-cloud/wpsuite-core')return {contents:`
+          export const SubscriptionType={};
+          export const getWpSuite=()=>window.WpSuite;
+          export const getBackendProfileContext=()=>undefined;
+          export const assertBackendProfileConfiguration=()=>{};
+          export const resolveBackendProfileLegacyTargets=(apiBaseUrl,configUrl='')=>({apiBaseUrl,configUrl});
+          export const getSitePluginSettings=async({legacyApiBaseUrl,workspaceId,siteId,siteKey,pluginKey})=>{
+            const response=await fetch(legacyApiBaseUrl+'/account/'+encodeURIComponent(workspaceId)+'/site/'+encodeURIComponent(siteId)+'/settings',{
+              method:'GET',headers:{'X-Site-Key':siteKey,'X-Plugin':pluginKey},
+            });
+            if(!response.ok)throw new Error('Site configuration request failed (HTTP '+response.status+').');
+            return response.json();
+          };
+        `};
         if(path==='@smart-cloud/ai-kit-core')return {contents:`export const getAiKitPlugin=()=>({restUrl:'/rest'}); export const TEXT_DOMAIN='test'; export const LANGUAGE_OPTIONS=[{label:'English',value:'en'}]; export const sanitizeAiKitConfig=x=>x; export const reloadConfig=async()=>{};`};
         if(path==='@smart-cloud/flow-core')return {contents:`export const getStoreSelect=()=>({}); export const getFlowPlugin=()=>({restUrl:'/rest'}); export const TEXT_DOMAIN='test'; export const sanitizeFlowConfig=x=>x; export const resolveBackend=async(name)=>{await window.fixtureCapsPromise;return {available:window.fixtureCaps[name==='forms.admin'?'submissions':'workflows']};};`};
         if(path==='@smart-cloud/gatey-core')return {contents:`export const getStoreSelect=()=>({getConfig:()=>null}); export const getGateyPlugin=()=>({restUrl:'/rest'}); export const sanitizeAuthenticatorConfig=x=>x; export const TEXT_DOMAIN='test';`};

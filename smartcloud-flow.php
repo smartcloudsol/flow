@@ -6,7 +6,7 @@
  * Requires at least: 6.9
  * Tested up to:      7.1
  * Requires PHP:      8.1
- * Version:           1.3.5
+ * Version:           1.4.0
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +18,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.3.5';
+const VERSION = '1.4.0';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -495,8 +495,12 @@ final class Flow
 
         // Get backend formId from pattern post meta
         $backend_form_id = null;
-        if (class_exists('FormSyncMeta')) {
+        if (class_exists(FormSyncMeta::class)) {
             $backend_form_id = FormSyncMeta::getFormId($pattern_id);
+        }
+
+        if (class_exists(BackendProfileState::class) && BackendProfileState::context() !== null && empty($block_atts['endpointPath'])) {
+            unset($block_atts['formId']);
         }
 
         // Add backend formId to block attributes if available
@@ -568,6 +572,9 @@ final class Flow
             array('colors', 'primaryShade', 'themeOverrides')
         );
 
+        if (class_exists(FormSyncMeta::class)) {
+            return FormSyncMeta::withRenderSource($pattern_id, fn(): string => $this->renderShortcodeBlock('smartcloud-flow/form', $form_block, $attrs, $is_preview));
+        }
         return $this->renderShortcodeBlock('smartcloud-flow/form', $form_block, $attrs, $is_preview);
     }
 
@@ -642,7 +649,10 @@ final class Flow
             'themeOverrides' => null,
         );
         $defaults = array_merge($defaults, (array) ($discussion_block['attrs'] ?? array()));
-        if (class_exists('FormSyncMeta')) {
+        if (class_exists(BackendProfileState::class) && BackendProfileState::context() !== null) {
+            unset($defaults['formId'], $provided['formid']);
+        }
+        if (class_exists(FormSyncMeta::class)) {
             $backend_form_id = FormSyncMeta::getFormId($pattern_id);
             if ($backend_form_id && empty($provided['formid'])) {
                 $defaults['formId'] = $backend_form_id;
@@ -653,6 +663,9 @@ final class Flow
             $content,
             $defaults
         );
+        if (class_exists(FormSyncMeta::class)) {
+            return FormSyncMeta::withRenderSource($pattern_id, fn(): string => $this->renderShortcodeBlock('smartcloud-flow/discussion', $discussion_block, $attrs, $is_preview));
+        }
         return $this->renderShortcodeBlock(
             'smartcloud-flow/discussion',
             $discussion_block,

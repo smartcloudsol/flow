@@ -24,7 +24,13 @@ import {
   type FlowConfig,
   type Store,
 } from "@smart-cloud/flow-core";
-import type { SiteSettings, SubscriptionType } from "@smart-cloud/wpsuite-core";
+import {
+  getSitePluginSettings,
+  resolveBackendProfileLegacyTargets,
+  getWpSuite,
+  type SiteSettings,
+  type SubscriptionType,
+} from "@smart-cloud/wpsuite-core";
 import {
   IconAlertCircle,
   IconApi,
@@ -104,10 +110,12 @@ if (typeof WpSuite !== "undefined") {
 
 const production = process.env?.NODE_ENV === "production";
 
-const apiUrl =
+const legacyApiUrl =
   !production || window.location.host === "dev.wpsuite.io"
-    ? "https://api.wpsuite.io/dev"
+    ? "https://api-dev.wpsuite.io"
     : "https://api.wpsuite.io";
+
+const apiUrl = resolveBackendProfileLegacyTargets(legacyApiUrl).apiBaseUrl;
 
 const flow = getFlowPlugin();
 
@@ -983,21 +991,14 @@ export default function Main({ nonce, settings, store }: MainProps) {
 
 async function fetchSite(accountId: string, siteId: string, siteKey: string) {
   try {
-    const response = await fetch(
-      `${apiUrl}/account/${accountId}/site/${siteId}/settings`,
-      {
-        headers: {
-          "X-Plugin": "flow",
-          "X-Site-Key": siteKey,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch site: ${response.statusText}`);
-    }
-
-    return (await response.json()) as Site;
+    return await getSitePluginSettings<FlowConfig>({
+      legacyApiBaseUrl: apiUrl,
+      workspaceId: accountId,
+      siteId,
+      siteKey,
+      pluginKey: "flow",
+      connection: getWpSuite()?.siteSettings,
+    });
   } catch (error) {
     console.error("Error fetching site:", error);
     throw error;

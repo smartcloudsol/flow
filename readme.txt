@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.3.5
+Stable tag: 1.4.0
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -220,6 +220,12 @@ The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in ht
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.4.0 =
+* Keep Flow settings and form synchronization metadata separate for each supported backend profile.
+* Do not treat a shared Gutenberg form identifier or another profile's synced state as proof that the current backend has its form definition.
+* Render and synchronize forms using their selected backend state while preserving authored WordPress content and ordinary legacy connections.
+* Update Flow Core to 1.1.14 and shared Hub to 2.7.0. Backend definitions, workflows and runtime state require a separate migration when changing production backends.
 
 = 1.3.5 =
 * Keep workflow steps collapsed into readable summaries and independently open as many steps as needed.
@@ -454,6 +460,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+Update the WP Suite plugins together. Form sync state is profile-specific; synchronize missing form definitions before accepting submissions against a new backend.
 
 = 1.3.5 =
 No backend update or workflow migration is required. Expand a step to edit the unsaved workflow draft, then save the complete workflow to activate changes. Collapsing a step does not save or discard its edits; there is no separate per-step Apply/Cancel action. Existing saved workflows are not rewritten automatically.

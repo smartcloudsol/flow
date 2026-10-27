@@ -9,6 +9,7 @@ use SmartCloud\WPSuite\Flow\Logger;
 if (!defined('ABSPATH')) {
     exit;
 }
+require_once __DIR__ . '/backend-profile-state.php';
 
 if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'admin/model.php')) {
     require_once SMARTCLOUD_FLOW_PATH . 'admin/model.php';
@@ -34,7 +35,7 @@ final class Admin
         );
 
         // WP can return array/object depending on previous versions / serialization.
-        $raw = get_option(SMARTCLOUD_FLOW_SLUG);
+        $raw = get_option(BackendProfileState::optionName(SMARTCLOUD_FLOW_SLUG));
 
         // Merge missing properties from defaultSettings
         $merged = array_merge(
@@ -58,7 +59,7 @@ final class Admin
             'schema_version' => 1,
             'id' => 'forms-workflows',
             'configuration_reset' => array(
-                'options' => array(SMARTCLOUD_FLOW_SLUG),
+                'options' => array(BackendProfileState::optionName(SMARTCLOUD_FLOW_SLUG)),
                 'title' => __('Reset all Flow settings?', 'smartcloud-flow'),
                 'consequences' => array(__('Restores all WordPress-stored Flow preferences to defaults, including form synchronization, permanent-deletion preferences, highlighted submission actions, attribution and diagnostics.', 'smartcloud-flow')),
                 'preserved' => array(__('Forms, submissions, discussions, patterns, authored blocks and their settings are preserved. The shared site connection, cloud-managed API settings, workflows, templates, process maps, webhooks and AWS resources are unchanged.', 'smartcloud-flow')),
@@ -527,7 +528,7 @@ final class Admin
         );
 
         // Frissített beállítások mentése
-        update_option(SMARTCLOUD_FLOW_SLUG, $this->settings);
+        update_option(BackendProfileState::optionName(SMARTCLOUD_FLOW_SLUG), $this->settings);
 
         Logger::info('Flow settings updated', [
             'debugLoggingEnabled' => $debugLoggingEnabled,

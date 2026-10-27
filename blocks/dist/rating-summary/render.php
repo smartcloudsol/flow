@@ -15,6 +15,10 @@ $smartcloud_flow_rating_summary_post_type = !empty($smartcloud_flow_rating_summa
     : sanitize_key((string) get_post_type($smartcloud_flow_rating_summary_post_id));
 $smartcloud_flow_rating_summary_source = (string) ($smartcloud_flow_rating_summary_attributes['contentTargetSource'] ?? 'wordpress-context');
 
+if (class_exists('\\SmartCloud\\WPSuite\\Flow\\BackendProfileState') && \SmartCloud\WPSuite\Flow\BackendProfileState::context() !== null) {
+    unset($smartcloud_flow_rating_summary_attributes['formId']);
+}
+
 if (
     empty($smartcloud_flow_rating_summary_attributes['formId'])
     && $smartcloud_flow_rating_summary_post_id

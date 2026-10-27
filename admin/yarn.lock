@@ -4825,26 +4825,26 @@
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/flow-core@^1.1.13":
-  version "1.1.13"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.13.tgz#3af5cda33a25d2ec7ddf35adb2dde48e613f259c"
-  integrity sha512-+j22wVBJxCy4iRBMmsO938cSTMlLDoIpl2Ohwi8gcK4d6bdunsrdMHgOdAchFBSDMssXDysQVecLPKr1P0OV1w==
+"@smart-cloud/flow-core@^1.1.14":
+  version "1.1.14"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.14.tgz#30efe49c8cac8b576a9c45403f6a9bb17eb6b327"
+  integrity sha512-y/L7YC+FY5YrS7E874eLH+u+LrK5261+uIMNj3xpJxO/iaOc/ZVDoHMMgDdwE2W9QDvFn0TpKlZ03jprLOtzyw==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.3.8"
-    "@smart-cloud/wpsuite-core" "^2.4.3"
+    "@smart-cloud/gatey-core" "^2.4.0"
+    "@smart-cloud/wpsuite-core" "^2.5.0"
     aws-amplify "^6.20.0"
 
-"@smart-cloud/gatey-core@^2.3.8":
-  version "2.3.8"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.3.8.tgz#46c077b241cc380c6144e52b53a1c077fbe1f323"
-  integrity sha512-vsYQ/VfRXS+suqIQmXwO5DhyyAV76ap1MYhGc59HiUSy1VqQhJfnJSroWyNqlXJg/6cW0zEsk6gCHBfQOc+Zsw==
+"@smart-cloud/gatey-core@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.4.0.tgz#4a5ee9374064893cce3c5b15d2779318e6b197eb"
+  integrity sha512-2/e4UosO27V7eG2nvgZZjoVGExo6AAJJTAvGKbQzq8fYasQhrdKY+FbSZ8y3iSItw0Jcrxr9SPHSyS9BoisFIQ==
   dependencies:
-    "@smart-cloud/wpsuite-core" "^2.4.3"
+    "@smart-cloud/wpsuite-core" "^2.5.0"
 
-"@smart-cloud/wpsuite-core@^2.4.3":
-  version "2.4.3"
-  resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-core/-/wpsuite-core-2.4.3.tgz#69d052a512e1d4a1a35729296d464efbe89bf74e"
-  integrity sha512-4Dv8U3inJxVUZvKE/Oq74AU/IkwTOeiHCu8i7fV7aaqQvlebImhq3fwEo75NNrfKIhsBR9jHkVUVyUe/P9HFGQ==
+"@smart-cloud/wpsuite-core@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-core/-/wpsuite-core-2.5.0.tgz#8d2d5c99f245ae6ddcc95e828af404087b1ea89b"
+  integrity sha512-ZNrHjDwuZ2xWXKdtttJkXZEA3RjdhFhqBLfzzgBvE04yRPKdDYRSXoGRery+0UnqkuO36PvVYqimPBYTrQizMQ==
   dependencies:
     tldts "^7.4.12"
 
@@ -9894,10 +9894,10 @@ domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@3.2.7, dompurify@^3.4.16:
-  version "3.4.16"
-  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.16.tgz#c51b3709ea15ee9abb07e804f2ef30ea9b953128"
-  integrity sha512-sqo+pNp3qRhCIpbgRi1y8Tgk27Bo2Ry7w0dC1NBeNTdZChWjz9Xb/KOoZbRP/R6pQZ80Qw8YhXw13hWWBbMRnQ==
+dompurify@3.2.7, dompurify@^3.4.17:
+  version "3.4.17"
+  resolved "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz#074bbb24eaa419535ac19ffe7f663104b0e1543d"
+  integrity sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -17028,10 +17028,10 @@ zod@^3.24.1:
   resolved "https://registry.npmjs.org/zod/-/zod-4.3.6.tgz"
   integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
 
-zod@^4.4.3:
-  version "4.4.3"
-  resolved "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
-  integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==
+zod@^4.6.6:
+  version "4.6.7"
+  resolved "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz#e806cf64a7f4e37635ce9f2f52c04c3766f75e5b"
+  integrity sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==
 
 zustand@^4.4.0:
   version "4.5.7"

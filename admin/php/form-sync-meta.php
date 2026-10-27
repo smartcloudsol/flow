@@ -13,8 +13,21 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/backend-profile-state.php';
+
 class FormSyncMeta
 {
+    private static ?int $renderSourcePostId = null;
+
+    /** Preserve a shortcode pattern's source while rendering inside another post. */
+    public static function withRenderSource(int $post_id, callable $render): mixed
+    {
+        $previous = self::$renderSourcePostId;
+        self::$renderSourcePostId = $post_id;
+        try { return $render(); }
+        finally { self::$renderSourcePostId = $previous; }
+    }
+
     // Meta keys for backend sync
     const META_FORM_ID = 'workflows_backend_form_id';
     const META_SYNC_HASH = 'workflows_backend_sync_hash';
@@ -31,7 +44,8 @@ class FormSyncMeta
      */
     public static function getFormId(int $post_id): ?string
     {
-        $formId = get_post_meta($post_id, self::META_FORM_ID, true);
+        if (BackendProfileState::context() !== null && self::$renderSourcePostId !== null) $post_id = self::$renderSourcePostId;
+        $formId = get_post_meta($post_id, BackendProfileState::metaKey(self::META_FORM_ID), true);
         return $formId ? (string) $formId : null;
     }
 
@@ -45,7 +59,7 @@ class FormSyncMeta
     public static function setFormId(int $post_id, ?string $formId): bool
     {
         if ($formId === null) {
-            return delete_post_meta($post_id, self::META_FORM_ID);
+            return delete_post_meta($post_id, BackendProfileState::metaKey(self::META_FORM_ID));
         }
 
         Logger::debug('Setting form backend sync ID', [
@@ -53,7 +67,7 @@ class FormSyncMeta
             'formId' => $formId
         ]);
 
-        return update_post_meta($post_id, self::META_FORM_ID, $formId);
+        return update_post_meta($post_id, BackendProfileState::metaKey(self::META_FORM_ID), $formId);
     }
 
     /**
@@ -64,7 +78,7 @@ class FormSyncMeta
      */
     public static function getSyncHash(int $post_id): ?string
     {
-        $hash = get_post_meta($post_id, self::META_SYNC_HASH, true);
+        $hash = get_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_HASH), true);
         return $hash ? (string) $hash : null;
     }
 
@@ -78,10 +92,10 @@ class FormSyncMeta
     public static function setSyncHash(int $post_id, ?string $hash): bool
     {
         if ($hash === null) {
-            return delete_post_meta($post_id, self::META_SYNC_HASH);
+            return delete_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_HASH));
         }
 
-        return update_post_meta($post_id, self::META_SYNC_HASH, $hash);
+        return update_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_HASH), $hash);
     }
 
     /**
@@ -92,7 +106,7 @@ class FormSyncMeta
      */
     public static function getSyncStatus(int $post_id): ?string
     {
-        $status = get_post_meta($post_id, self::META_SYNC_STATUS, true);
+        $status = get_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_STATUS), true);
         return $status ? (string) $status : null;
     }
 
@@ -110,7 +124,7 @@ class FormSyncMeta
             'status' => $status
         ]);
 
-        return update_post_meta($post_id, self::META_SYNC_STATUS, $status);
+        return update_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_STATUS), $status);
     }
 
     /**
@@ -121,7 +135,7 @@ class FormSyncMeta
      */
     public static function getLastSynced(int $post_id): ?string
     {
-        $timestamp = get_post_meta($post_id, self::META_LAST_SYNCED, true);
+        $timestamp = get_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_SYNCED), true);
         return $timestamp ? (string) $timestamp : null;
     }
 
@@ -135,10 +149,10 @@ class FormSyncMeta
     public static function setLastSynced(int $post_id, ?string $timestamp): bool
     {
         if ($timestamp === null) {
-            return delete_post_meta($post_id, self::META_LAST_SYNCED);
+            return delete_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_SYNCED));
         }
 
-        return update_post_meta($post_id, self::META_LAST_SYNCED, $timestamp);
+        return update_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_SYNCED), $timestamp);
     }
 
     /**
@@ -149,7 +163,7 @@ class FormSyncMeta
      */
     public static function getLastError(int $post_id): ?string
     {
-        $error = get_post_meta($post_id, self::META_LAST_ERROR, true);
+        $error = get_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_ERROR), true);
         return $error ? (string) $error : null;
     }
 
@@ -170,9 +184,9 @@ class FormSyncMeta
         }
 
         if ($error === null) {
-            return delete_post_meta($post_id, self::META_LAST_ERROR);
+            return delete_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_ERROR));
         }
-        return update_post_meta($post_id, self::META_LAST_ERROR, $error);
+        return update_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_ERROR), $error);
     }
 
     /**
@@ -183,7 +197,7 @@ class FormSyncMeta
      */
     public static function getSourceKind(int $post_id): ?string
     {
-        $kind = get_post_meta($post_id, self::META_SOURCE_KIND, true);
+        $kind = get_post_meta($post_id, BackendProfileState::metaKey(self::META_SOURCE_KIND), true);
         return $kind ? (string) $kind : null;
     }
 
@@ -197,10 +211,10 @@ class FormSyncMeta
     public static function setSourceKind(int $post_id, ?string $kind): bool
     {
         if ($kind === null) {
-            return delete_post_meta($post_id, self::META_SOURCE_KIND);
+            return delete_post_meta($post_id, BackendProfileState::metaKey(self::META_SOURCE_KIND));
         }
 
-        return update_post_meta($post_id, self::META_SOURCE_KIND, $kind);
+        return update_post_meta($post_id, BackendProfileState::metaKey(self::META_SOURCE_KIND), $kind);
     }
 
     /**
@@ -211,7 +225,7 @@ class FormSyncMeta
      */
     public static function getAllSyncMeta(int $post_id): array
     {
-        return [
+        $result = [
             'formId' => self::getFormId($post_id),
             'syncHash' => self::getSyncHash($post_id),
             'syncStatus' => self::getSyncStatus($post_id),
@@ -219,6 +233,9 @@ class FormSyncMeta
             'lastError' => self::getLastError($post_id),
             'sourceKind' => self::getSourceKind($post_id),
         ];
+        $profile = BackendProfileState::context();
+        if ($profile !== null) $result['backendProfile'] = ['id' => $profile['id'], 'bindingRevision' => (int) ($profile['bindingRevision'] ?? 0)];
+        return $result;
     }
 
     /**
@@ -231,11 +248,11 @@ class FormSyncMeta
     {
         Logger::info('Clearing all form sync metadata', ['post_id' => $post_id]);
 
-        delete_post_meta($post_id, self::META_FORM_ID);
-        delete_post_meta($post_id, self::META_SYNC_HASH);
-        delete_post_meta($post_id, self::META_SYNC_STATUS);
-        delete_post_meta($post_id, self::META_LAST_SYNCED);
-        delete_post_meta($post_id, self::META_LAST_ERROR);
-        delete_post_meta($post_id, self::META_SOURCE_KIND);
+        delete_post_meta($post_id, BackendProfileState::metaKey(self::META_FORM_ID));
+        delete_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_HASH));
+        delete_post_meta($post_id, BackendProfileState::metaKey(self::META_SYNC_STATUS));
+        delete_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_SYNCED));
+        delete_post_meta($post_id, BackendProfileState::metaKey(self::META_LAST_ERROR));
+        delete_post_meta($post_id, BackendProfileState::metaKey(self::META_SOURCE_KIND));
     }
 }

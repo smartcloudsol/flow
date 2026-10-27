@@ -1,3 +1,10 @@
+export declare const OperationsPortalTargetContext: import("react").Context<HTMLElement | undefined>;
+export declare function useOperationsDialogPortalProps(): {
+    withinPortal: boolean;
+    portalProps: {
+        target: HTMLElement;
+    } | undefined;
+};
 declare function stopScrollPropagation(event: {
     stopPropagation: () => void;
 }): void;

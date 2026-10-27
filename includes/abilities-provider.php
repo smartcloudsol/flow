@@ -13,6 +13,10 @@ use WP_Error;
 if (!defined('ABSPATH')) {
     exit;
 }
+$profileStateFile = dirname(__DIR__) . '/admin/backend-profile-state.php';
+if (!is_file($profileStateFile)) $profileStateFile = dirname(__DIR__) . '/admin/php/backend-profile-state.php';
+require_once $profileStateFile;
+unset($profileStateFile);
 
 final class Provider extends Product_Provider_Base
 {
@@ -920,12 +924,12 @@ final class Provider extends Product_Provider_Base
         }
 
         return array(
-            'formId' => get_post_meta($post_id, 'workflows_backend_form_id', true) ?: null,
-            'syncHash' => get_post_meta($post_id, 'workflows_backend_sync_hash', true) ?: null,
-            'syncStatus' => get_post_meta($post_id, 'workflows_backend_sync_status', true) ?: null,
-            'lastSynced' => get_post_meta($post_id, 'workflows_backend_last_synced_at', true) ?: null,
-            'lastError' => get_post_meta($post_id, 'workflows_backend_last_error', true) ?: null,
-            'sourceKind' => get_post_meta($post_id, 'workflows_backend_source_kind', true) ?: null,
+            'formId' => get_post_meta($post_id, \SmartCloud\WPSuite\Flow\BackendProfileState::metaKey('workflows_backend_form_id'), true) ?: null,
+            'syncHash' => get_post_meta($post_id, \SmartCloud\WPSuite\Flow\BackendProfileState::metaKey('workflows_backend_sync_hash'), true) ?: null,
+            'syncStatus' => get_post_meta($post_id, \SmartCloud\WPSuite\Flow\BackendProfileState::metaKey('workflows_backend_sync_status'), true) ?: null,
+            'lastSynced' => get_post_meta($post_id, \SmartCloud\WPSuite\Flow\BackendProfileState::metaKey('workflows_backend_last_synced_at'), true) ?: null,
+            'lastError' => get_post_meta($post_id, \SmartCloud\WPSuite\Flow\BackendProfileState::metaKey('workflows_backend_last_error'), true) ?: null,
+            'sourceKind' => get_post_meta($post_id, \SmartCloud\WPSuite\Flow\BackendProfileState::metaKey('workflows_backend_source_kind'), true) ?: null,
         );
     }
 

@@ -8,6 +8,8 @@ export interface StepBuilderProps {
     onChange: (steps: WorkflowStep[]) => void;
     templates?: EmailTemplate[];
     webhooks?: WebhookEndpoint[];
+    onConfirmationChange?: (opened: boolean) => void;
+    confirmationZIndex?: number;
 }
-export default function StepBuilder({ steps, onChange, templates, webhooks, }: StepBuilderProps): import("react").JSX.Element;
+export default function StepBuilder({ steps, onChange, templates, webhooks, onConfirmationChange, confirmationZIndex, }: StepBuilderProps): import("react").JSX.Element;
 //# sourceMappingURL=StepBuilder.d.ts.map
