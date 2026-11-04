@@ -4891,13 +4891,13 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@smart-cloud/ai-kit-core@^1.5.26":
-  version "1.5.26"
-  resolved "https://registry.npmjs.org/@smart-cloud/ai-kit-core/-/ai-kit-core-1.5.26.tgz#112b8ef03b2bca0c352516a2244e77777e385a89"
-  integrity sha512-4JVOknaKtcGpyTWmYr6p03J/TLgz7LAMj8aH1btrohz4PVe9in9d6HBQ+sh2USRQf9uO6vLb2ZxJ2ojtWIUckg==
+"@smart-cloud/ai-kit-core@^1.5.27":
+  version "1.5.27"
+  resolved "https://registry.npmjs.org/@smart-cloud/ai-kit-core/-/ai-kit-core-1.5.27.tgz#3dcf633064134666b66880e7c81bdf6772755cb5"
+  integrity sha512-/WaIz8HLyi1/+YZU7aOoxpoXZWuiVquXnZ8sD3aWlefxZV5nlxuobSjIeJJn0srEwjRn6OpChhvKQWyrwMw6pw==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.4.0"
-    "@smart-cloud/wpsuite-core" "^2.5.0"
+    "@smart-cloud/gatey-core" "^2.4.1"
+    "@smart-cloud/wpsuite-core" "^2.5.1"
     aws-amplify "^6.20.0"
 
 "@smart-cloud/aws-amplify-ui-react-core@3.6.7-preview.1":
@@ -4937,31 +4937,31 @@
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/flow-core@^1.1.14":
-  version "1.1.14"
-  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.14.tgz#30efe49c8cac8b576a9c45403f6a9bb17eb6b327"
-  integrity sha512-y/L7YC+FY5YrS7E874eLH+u+LrK5261+uIMNj3xpJxO/iaOc/ZVDoHMMgDdwE2W9QDvFn0TpKlZ03jprLOtzyw==
+"@smart-cloud/flow-core@^1.1.15":
+  version "1.1.15"
+  resolved "https://registry.npmjs.org/@smart-cloud/flow-core/-/flow-core-1.1.15.tgz#fa523b5819b22765e159efd832ee47c989739fed"
+  integrity sha512-homkEoA3B0qb139h3SMCd+ctktZiQcF3/NKzEdrQviYu0r+xbWe6VjSJ/JmyLGTxQz42X3XVKSau59tYDCehPg==
   dependencies:
-    "@smart-cloud/gatey-core" "^2.4.0"
-    "@smart-cloud/wpsuite-core" "^2.5.0"
+    "@smart-cloud/gatey-core" "^2.4.1"
+    "@smart-cloud/wpsuite-core" "^2.5.1"
     aws-amplify "^6.20.0"
 
-"@smart-cloud/gatey-core@^2.4.0":
-  version "2.4.0"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.4.0.tgz#4a5ee9374064893cce3c5b15d2779318e6b197eb"
-  integrity sha512-2/e4UosO27V7eG2nvgZZjoVGExo6AAJJTAvGKbQzq8fYasQhrdKY+FbSZ8y3iSItw0Jcrxr9SPHSyS9BoisFIQ==
+"@smart-cloud/gatey-core@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.4.1.tgz#b42ceecc44980694faca041cc4edc0d4908281c6"
+  integrity sha512-JLTHaM7C/ozmXVdkRMHXrjO0ui+nDjjtzo9IO5QTPQNkUv8Rxpi1asog0++nPaWl3MzLTV7INW/96cCp0Dz9jg==
   dependencies:
-    "@smart-cloud/wpsuite-core" "^2.5.0"
+    "@smart-cloud/wpsuite-core" "^2.5.1"
 
 "@smart-cloud/wpsuite-blocks@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-blocks/-/wpsuite-blocks-1.0.0.tgz#4cefbd1704f09efdc9407a6c8a5de6aa130fc8e6"
   integrity sha512-vXg0l55FI9KmNp65UpBmlr2o4j0OR4xCA4IDHrr9IBIm8EbFxgCmdFI52nrmp/POuwleIWFONDTOg5+h4bLwVg==
 
-"@smart-cloud/wpsuite-core@^2.5.0":
-  version "2.5.0"
-  resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-core/-/wpsuite-core-2.5.0.tgz#8d2d5c99f245ae6ddcc95e828af404087b1ea89b"
-  integrity sha512-ZNrHjDwuZ2xWXKdtttJkXZEA3RjdhFhqBLfzzgBvE04yRPKdDYRSXoGRery+0UnqkuO36PvVYqimPBYTrQizMQ==
+"@smart-cloud/wpsuite-core@^2.5.1":
+  version "2.5.1"
+  resolved "https://registry.npmjs.org/@smart-cloud/wpsuite-core/-/wpsuite-core-2.5.1.tgz#2ce50938634f61c57d263968417dc39b7e18f0b7"
+  integrity sha512-Y9bCD9Z++nF6UA6lyNU35LEbe0+Zl22EFMKcNEeWLzvFggBMmQyAXHDFcfhI9Vwf2F9S1QTSw+EviVtnrnBleQ==
   dependencies:
     tldts "^7.4.12"
 

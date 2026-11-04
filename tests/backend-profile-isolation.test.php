@@ -46,5 +46,15 @@ namespace {
     $profile = null;
     check(BackendProfileState::optionName('smartcloud-flow') === 'smartcloud-flow', 'Ordinary installations must keep exact legacy option names.');
     check(!isset(FormSyncMeta::getAllSyncMeta(10)['backendProfile']), 'Ordinary installations retain the original metadata response.');
+    $profile = ['enabled' => true, 'id' => 'production', 'namespace' => 'production', 'bindingRevision' => 1];
+    FormSyncMeta::setFormId(11, 'old-production-form');
+    $oldMeta = $meta;
+    $profile['bindingRevision'] = 2; $profile['stateNamespace'] = 'production/bindings/2';
+    check(FormSyncMeta::getFormId(11) === null, 'Replacement binding inherited the old production form ID.');
+    check(BackendProfileState::optionName('smartcloud-flow') === 'wpsuite-profile/production/bindings/2/smartcloud-flow', 'Replacement Flow option reused the old namespace.');
+    FormSyncMeta::setFormId(11, 'new-production-form');
+    check($meta[11]['workflows_backend_form_id__wpsuite_production'] === 'old-production-form', 'Replacement overwrote historical form metadata.');
+    FormSyncMeta::clearAllSyncMeta(11);
+    check($meta === $oldMeta, 'Replacement reset changed historical metadata.');
     echo "Flow backend profile isolation: {$checks} checks PASS\n";
 }

@@ -44,6 +44,46 @@ test("fetch GET sends query parameters without a body", async () => {
   }
 });
 
+test("each frontend submission obtains a fresh submit token", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalWpSuite = globalThis.WpSuite;
+  const originalRecaptcha = (globalThis as any).grecaptcha;
+  const actions: string[] = [];
+  const tokens: string[] = [];
+  globalThis.WpSuite = {
+    siteSettings: { reCaptchaPublicKey: "test-site-key", useRecaptchaEnterprise: true },
+  } as typeof globalThis.WpSuite;
+  (globalThis as any).grecaptcha = {
+    enterprise: {
+      ready: (callback: () => void) => callback(),
+      execute: async (key: string, options: { action: string }) => {
+        assert.equal(key, "test-site-key");
+        actions.push(options.action);
+        return `fixture-${actions.length}`;
+      },
+    },
+  };
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    if (String(url).endsWith("/meta/capabilities")) {
+      return new Response(JSON.stringify({ schemaVersion: 1, product: "smartcloud-flow-backend", release: "test", capabilities: { "forms.submit.frontend": 1 } }));
+    }
+    tokens.push(new Headers(init?.headers).get("X-Recaptcha-Token") ?? "");
+    return new Response(JSON.stringify({ ok: true }));
+  }) as typeof fetch;
+  try {
+    const decision = { backendAvailable: true, backendTransport: "fetch" as const, backendBaseUrl: "https://fresh-token.example.test", reason: "test" };
+    for (let i = 0; i < 2; i++) {
+      await dispatchBackend(decision, "frontend", "/forms/form-1/submit", "POST", {}, { humanVerification: true });
+    }
+    assert.deepEqual(actions, ["submit", "submit"]);
+    assert.deepEqual(tokens, ["fixture-1", "fixture-2"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.WpSuite = originalWpSuite;
+    (globalThis as any).grecaptcha = originalRecaptcha;
+  }
+});
+
 test("structured backend errors preserve code, request id, and retryability", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () =>
