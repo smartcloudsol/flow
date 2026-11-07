@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -220,6 +220,10 @@ The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in ht
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.4.3 =
+* Improve account connection reliability and recovery in WP Suite Hub.
+* Reduce duplicate backend capability checks when opening Forms & Workflows.
 
 = 1.4.2 =
 * Improve reliability and compatibility with WP Suite Hub 2.7.2.
@@ -468,6 +472,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 * Optional Pro integration with the WP Suite Flow Backend and Gatey-aware authenticated API access.
 
 == Upgrade Notice ==
+
+= 1.4.3 =
+Update your WP Suite plugins together, then reload the administration page. If prompted, reconnect your existing site.
 
 = 1.4.1 =
 Update the WP Suite plugins together to use the revised shared admin. Saving a profile preserves the active backend; select Active backend explicitly to switch it.

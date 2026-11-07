@@ -20,6 +20,7 @@ import {
   getFlowPlugin,
   resolveBackend,
   sanitizeFlowConfig,
+  supportsBackendCapability,
   TEXT_DOMAIN,
   type FlowConfig,
   type Store,
@@ -199,10 +200,6 @@ type BackendCapabilityAvailability = {
   workflows: boolean;
 };
 
-type CapabilityAwareResolver = (
-  capability?: string,
-) => Promise<{ available: boolean }>;
-
 export interface SettingsEditorProps {
   apiUrl: string;
   config: FlowConfig;
@@ -330,18 +327,18 @@ export default function Main({ nonce, settings, store }: MainProps) {
   );
 
   useEffect(() => {
+    if (formConfig === undefined) return;
     let active = true;
-    const resolver = resolveBackend as unknown as CapabilityAwareResolver;
-    void Promise.all([
-      resolver("forms.admin"),
-      resolver("workflows.admin"),
-    ]).then(([submissions, workflows]) => {
-      if (active) {
-        setBackendCapabilities({
-          submissions: submissions.available,
-          workflows: workflows.available,
-        });
-      }
+    const unavailable = { submissions: false, workflows: false };
+    void resolveBackend().then((backend) => {
+      if (!active) return;
+      const compatibility = backend.compatibility;
+      setBackendCapabilities(backend.available && compatibility ? {
+        submissions: supportsBackendCapability(compatibility, "forms.admin"),
+        workflows: supportsBackendCapability(compatibility, "workflows.admin"),
+      } : unavailable);
+    }).catch(() => {
+      if (active) setBackendCapabilities(unavailable);
     });
     return () => {
       active = false;

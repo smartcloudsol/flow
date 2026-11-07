@@ -45,7 +45,7 @@ for (const [plugin, root] of targets) {
           };
         `};
         if(path==='@smart-cloud/ai-kit-core')return {contents:`export const getAiKitPlugin=()=>({restUrl:'/rest'}); export const TEXT_DOMAIN='test'; export const LANGUAGE_OPTIONS=[{label:'English',value:'en'}]; export const sanitizeAiKitConfig=x=>x; export const reloadConfig=async()=>{};`};
-        if(path==='@smart-cloud/flow-core')return {contents:`export const getStoreSelect=()=>({}); export const getFlowPlugin=()=>({restUrl:'/rest'}); export const TEXT_DOMAIN='test'; export const sanitizeFlowConfig=x=>x; export const resolveBackend=async(name)=>{await window.fixtureCapsPromise;return {available:window.fixtureCaps[name==='forms.admin'?'submissions':'workflows']};};`};
+        if(path==='@smart-cloud/flow-core')return {contents:`export const getStoreSelect=()=>({}); export const getFlowPlugin=()=>({restUrl:'/rest'}); export const TEXT_DOMAIN='test'; export const sanitizeFlowConfig=x=>x; export const resolveBackend=async(...args)=>{window.fixtureResolverCalls.push(args);if(window.fixtureManual)return await new Promise((resolve,reject)=>window.fixturePendingResolvers.push({resolve,reject}));await window.fixtureCapsPromise;return {available:true,compatibility:{status:'verified',manifest:{capabilities:{'forms.admin':window.fixtureCaps.submissions?1:0,'workflows.admin':window.fixtureCaps.workflows?1:0}}}};}; export const supportsBackendCapability=(c,n)=>c.status==='legacy'||(c.manifest.capabilities[n]||0)>=1;`};
         if(path==='@smart-cloud/gatey-core')return {contents:`export const getStoreSelect=()=>({getConfig:()=>null}); export const getGateyPlugin=()=>({restUrl:'/rest'}); export const sanitizeAuthenticatorConfig=x=>x; export const TEXT_DOMAIN='test';`};
         if(path==='./index')return {contents:'export const signUpAttributes=[];'};
         if(path==='./CognitoAdminSession')return {contents:'export const CognitoAdminSession=()=>null;'};
@@ -53,7 +53,7 @@ for (const [plugin, root] of targets) {
         if(path==='./DocSidebar')return {contents:'export default ()=>null;'};
         if(path==='./onboarding')return {contents:'export const AiKitOnboarding=()=>null; export const FlowOnboarding=()=>null; export const OnboardingBanner=()=>null;'};
         const name=path.split('/').at(-1);
-        return {loader:'jsx',resolveDir:root,contents:`import React from 'react'; export default function Editor(){React.useEffect(()=>{window.fixtureEditorMounts.push('${name}');},[]);return <div data-editor="${name}">${name}</div>;}`};
+        return {loader:'jsx',resolveDir:root,contents:`import React from 'react'; export default function Editor(props){React.useEffect(()=>{window.fixtureEditorMounts.push('${name}');if(props.onSave)window.fixtureSaveConfig=props.onSave;},[props.onSave]);return <div data-editor="${name}">${name}</div>;}`};
       });
     }}],
   });
@@ -71,6 +71,7 @@ const server=createServer((req,res)=>{
     window.WpSuite={siteSettings:{accountId:'fixture',siteId:'fixture',siteKey:'synthetic'},restUrl:'/rest'};
     window.wp={data:{select:()=>({getConfig:()=>null})}};
     window.fixtureEditorMounts=[];window.fixtureSawGeneral=false;window.fixtureDocumentIdentity=crypto.randomUUID();
+    window.fixtureResolverCalls=[];window.fixtureManual=false;window.fixturePendingResolvers=[];
     window.fixtureCaps={submissions:true,workflows:true};
     window.fixtureCapsPromise=new Promise(resolve=>window.fixtureReleaseCaps=resolve);
     window.fixtureConfigPromise=new Promise(resolve=>window.fixtureReleaseConfig=resolve);
@@ -107,6 +108,28 @@ async function testRoute(plugin,query,editor,{denied=false,disconnected=false,lo
   assert.deepEqual(errors,[],`${plugin} ${query} browser errors`);
   await page.close();scenarios++;
 }
+async function testCapabilityChecks() {
+ const page=await browser.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ try {
+  await page.goto(`${origin}/flow?page=smartcloud-wpsuite-capability-forms-workflows&integrated=1&section=api-settings`);
+  await page.waitForFunction(()=>document.querySelector('.mantine-Card-root'));await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(()=>window.fixtureResolverCalls.length),0);
+  await page.evaluate(()=>{window.fixtureManual=true;window.fixtureReleaseConfig({accountId:'fixture',siteId:'fixture',settings:{mode:'cloud'},subscriptionType:'PROFESSIONAL'});});
+  await page.waitForFunction(()=>window.fixturePendingResolvers.length===1 && typeof window.fixtureSaveConfig==='function');
+  assert.deepEqual(await page.evaluate(()=>window.fixtureResolverCalls),[[]]);
+  const result=(f,w)=>({available:true,compatibility:{status:'verified',manifest:{capabilities:{'forms.admin':f?1:0,'workflows.admin':w?1:0}}}});
+  const save=async(name,count)=>{await page.evaluate(name=>window.fixtureSaveConfig({backendApiName:name}),name);await page.waitForFunction(n=>window.fixturePendingResolvers.length===n,count);};
+  const check=async(f,w)=>page.waitForFunction(([f,w])=>{const links=[...document.querySelectorAll('.mantine-NavLink-root')];const disabled=n=>links.find(x=>x.textContent.trim()===n)?.getAttribute('data-disabled')!==null;return disabled('Submissions')===!f && disabled('Workflows')===!w;},[f,w]);
+  await save('changed',2);await page.evaluate(v=>window.fixturePendingResolvers[1].resolve(v),result(false,true));await check(false,true);
+  await page.evaluate(v=>window.fixturePendingResolvers[0].resolve(v),result(true,false));await page.waitForTimeout(100);await check(false,true);
+  await save('third',3);await page.evaluate(v=>window.fixturePendingResolvers[2].resolve(v),result(true,false));await check(true,false);
+  await save('fourth',4);await page.evaluate(()=>window.fixturePendingResolvers[3].reject(new Error('synthetic')));await check(false,false);
+  await save('legacy',5);await page.evaluate(()=>window.fixturePendingResolvers[4].resolve({available:true,compatibility:{status:'legacy'}}));await check(true,true);
+  await save('missing',6);await page.evaluate(()=>window.fixturePendingResolvers[5].resolve({available:true}));await check(false,false);
+  assert.deepEqual(errors,[]);scenarios++;
+ } finally {await page.close();}
+}
+
 async function testHistory(plugin, { legacy = false, disconnected = false, denied = false } = {}) {
   const page = await browser.newPage();
   const errors = [];
@@ -216,6 +239,7 @@ try{
   await testHistory('gatey');
   await testHistory('gatey', { disconnected: true });
  }else{
+  await testCapabilityChecks();
   await testIntegrated('flow');
   for(const [section,editor] of [['api-settings','ApiSettingsEditor'],['chatbot-settings','ChatbotSettingsEditor'],['conversation-profile','ConversationProfileEditor'],['kb-admin','KBAdminEditor']])await testRoute('ai',`section=${section}`,editor);
   await testRoute('ai','aikit-page=kb-admin','KBAdminEditor');
