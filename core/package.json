@@ -1,6 +1,6 @@
 {
   "name": "@smart-cloud/flow-core",
-  "version": "1.1.15",
+  "version": "1.1.16",
   "description": "Flow Core Package",
   "author": "Smart Cloud Solutions Inc.",
   "license": "MIT",
@@ -38,7 +38,11 @@
     "fast-xml-parser": "^5.10.1",
     "flatted": "^3.4.4",
     "picomatch": "^4.0.5",
-    "rollup": "^4.62.3"
+    "rollup": "^4.62.3",
+    "aws-amplify": "6.20.0",
+    "@aws-amplify/core": "6.18.0",
+    "@aws-amplify/api": "6.3.29",
+    "@aws-amplify/api-rest": "4.6.4"
   },
   "overrides": {
     "@humanfs/node": "^0.16.8",
@@ -51,34 +55,34 @@
     "rollup": "^4.62.3"
   },
   "dependencies": {
-    "@smart-cloud/gatey-core": "^2.4.1",
-    "@smart-cloud/wpsuite-core": "^2.5.1",
-    "aws-amplify": "^6.20.0"
+    "@smart-cloud/gatey-core": "^2.4.2",
+    "@smart-cloud/wpsuite-core": "^2.5.2",
+    "aws-amplify": "6.20.0"
   },
   "peerDependencies": {
-    "@wordpress/data": "^10.54.0",
-    "@wordpress/i18n": "^6.27.0",
+    "@wordpress/data": "^10.57.0",
+    "@wordpress/i18n": "^6.30.0",
     "react": "^18.3.1"
   },
   "devDependencies": {
-    "@aws-amplify/core": "^6.18.0",
-    "@smart-cloud/aws-amplify-ui": "6.15.7-preview.1",
-    "@smart-cloud/aws-amplify-ui-react": "6.15.7-preview.1",
+    "@aws-amplify/core": "6.18.0",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.4.1",
+    "@smart-cloud/aws-amplify-ui": "6.15.7",
+    "@smart-cloud/aws-amplify-ui-react": "6.15.7",
+    "@types/node": "^26.6.6",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
-    "@typescript-eslint/eslint-plugin": "^8.69.0",
-    "@typescript-eslint/parser": "^8.69.0",
-    "@wordpress/data": "^10.54.0",
-    "@wordpress/i18n": "^6.27.0",
-    "eslint": "^10.10.0",
-    "globals": "^17.12.0",
-    "jose": "^6.2.12",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "@wordpress/data": "^10.57.0",
+    "@wordpress/i18n": "^6.30.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "jose": "^6.2.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.69.0"
+    "typescript-eslint": "^8.72.1"
   }
 }
