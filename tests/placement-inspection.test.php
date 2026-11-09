@@ -10,6 +10,7 @@ function delete_transient(string $key): bool { unset($GLOBALS['cache'][$key]); r
 function get_posts(array $args): array {
     $GLOBALS['queries']++;
     check($args['posts_per_page'] === 201 && $args['post_status'] === 'publish' && $args['post_type'] === ['page', 'post'], 'Discovery remains bounded and scoped to published pages/posts.');
+    check($args['suppress_filters'] === false && $args['lang'] === '', 'Discovery honors filters while requesting all languages.');
     return array_slice(array_keys(array_filter($GLOBALS['posts'], fn($p) => in_array($p->post_type, ['page', 'post']) && $p->post_status === 'publish')), 0, 201);
 }
 function get_post(int $id): ?object { return $GLOBALS['posts'][$id] ?? null; }

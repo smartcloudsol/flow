@@ -27,7 +27,7 @@ final class PlacementInspection
     {
         $cached = get_transient(self::CACHE_KEY);
         if (is_array($cached) && isset($cached['matches'], $cached['partial'], $cached['inspected'])) { return $cached; }
-        $ids = get_posts(array('post_type' => array('page', 'post'), 'post_status' => 'publish', 'fields' => 'ids', 'posts_per_page' => 201, 'orderby' => 'ID', 'order' => 'ASC', 'no_found_rows' => true, 'suppress_filters' => true));
+        $ids = get_posts(array('post_type' => array('page', 'post'), 'post_status' => 'publish', 'fields' => 'ids', 'posts_per_page' => 201, 'orderby' => 'ID', 'order' => 'ASC', 'no_found_rows' => true, 'suppress_filters' => false, 'lang' => ''));
         $result = array('matches' => array_fill_keys(self::BLOCKS, array()), 'partial' => count($ids) > 200, 'inspected' => 0);
         $budget = array('nodes' => 4000, 'bytes' => 2097152);
         $references = array();

@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -220,6 +220,11 @@ The bundled WP Suite Hub admin originates from the `wpsuite-admin/` module in ht
 Flow Pro includes additional functionality such as backend-powered submissions management, templates, workflows, and webhook dispatching. The code that enables these paid features is distributed to Pro users but is not published in the public repository.
 
 == Changelog ==
+
+= 1.4.6 =
+* Load the UI vendor with rendered frontend components while preserving the global frontend API.
+* Improve WordPress compatibility and shared administration dependencies.
+* Bundle the coordinated WP Suite Hub 2.7.6 update.
 
 = 1.4.5 =
 * Improve update tracking for shared licence, configuration and translation assets.
@@ -480,6 +485,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Upgrade Notice ==
 
+= 1.4.6 =
+Update WP Suite plugins together and reload open administration pages. Existing site connections and settings are preserved.
+
 = 1.4.4 =
 When using multiple WP Suite plugins, update them together and reload open administration pages. Existing forms and workflow configuration are preserved.
 
@@ -494,7 +502,7 @@ Update the WP Suite plugins together to use the revised shared admin. Saving a p
 Update the WP Suite plugins together. Form sync state is profile-specific; synchronize missing form definitions before accepting submissions against a new backend.
 
 = 1.3.5 =
-No backend update or workflow migration is required. Expand a step to edit the unsaved workflow draft, then save the complete workflow to activate changes. Collapsing a step does not save or discard its edits; there is no separate per-step Apply/Cancel action. Existing saved workflows are not rewritten automatically.
+No backend update or migration is required. Expand a step to edit the draft, then save the whole workflow to activate it. Collapsing does not save or discard edits. Existing saved workflows are not rewritten.
 
 = 1.3.2 =
 Static publishing needs exporter and delegated workers 1.1.84 or later. Purge stale source page caches and recrawl affected pages or run a full publish to add missing styles. Existing form settings remain unchanged.

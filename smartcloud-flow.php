@@ -4,9 +4,8 @@
  * Plugin URI:        https://wpsuite.io/flow/
  * Description:       Multi-step forms with save and resume, discussions, ratings, static WordPress delivery, and optional AWS workflows.
  * Requires at least: 6.9
- * Tested up to:      7.1
  * Requires PHP:      8.1
- * Version:           1.4.5
+ * Version:           1.4.6
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -18,7 +17,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.4.5';
+const VERSION = '1.4.6';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -901,7 +900,7 @@ final class Flow
         return is_array($urls) ? array_values(array_filter($urls, 'is_string')) : array();
     }
 
-    private function enqueueMainRuntimeScript(): void
+    private function enqueueMainRuntimeScript(bool $frontend = false): void
     {
         $main_script_asset = array();
         if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'main/index.asset.php')) {
@@ -909,7 +908,8 @@ final class Flow
         }
         $main_script_dependencies = array_merge(
             $main_script_asset['dependencies'] ?? array(),
-            array('smartcloud-wpsuite-webcrypto-vendor', 'smartcloud-wpsuite-amplify-vendor', 'smartcloud-wpsuite-mantine-vendor')
+            array('smartcloud-wpsuite-webcrypto-vendor', 'smartcloud-wpsuite-amplify-vendor'),
+            $frontend ? array() : array('smartcloud-wpsuite-mantine-vendor')
         );
         if (wp_script_is('smartcloud-wpsuite-main-script', 'registered')) {
             $main_script_dependencies[] = 'smartcloud-wpsuite-main-script';
@@ -930,7 +930,7 @@ final class Flow
         }
         $view_script_dependencies = array_merge(
             $view_script_asset['dependencies'] ?? array(),
-            array('smartcloud-flow-main-script')
+            array('smartcloud-flow-main-script', 'smartcloud-wpsuite-mantine-vendor')
         );
         if (wp_script_is('smartcloud-wpsuite-main-script', 'registered')) {
             $view_script_dependencies[] = 'smartcloud-wpsuite-main-script';
@@ -966,7 +966,7 @@ final class Flow
 
         $modal_view_dependencies = array_merge(
             $modal_view_asset['dependencies'] ?? array(),
-            array('smartcloud-flow-main-script')
+            array('smartcloud-flow-main-script', 'smartcloud-wpsuite-mantine-vendor')
         );
 
         if (!wp_script_is('smartcloud-flow-modal-view-script', 'registered') && file_exists(SMARTCLOUD_FLOW_PATH . 'blocks/modal-view.js')) {
@@ -1069,7 +1069,7 @@ __flowGlobal.WpSuite.constants.flow = ' . wp_json_encode($constants) . ';
 
     public function enqueueFrontendAssets(): void
     {
-        $this->enqueueMainRuntimeScript();
+        $this->enqueueMainRuntimeScript(true);
         $this->enqueueFormViewAssets();
     }
 
