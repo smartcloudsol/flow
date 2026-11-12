@@ -5,7 +5,7 @@
  * Description:       Multi-step forms with save and resume, discussions, ratings, static WordPress delivery, and optional AWS workflows.
  * Requires at least: 6.9
  * Requires PHP:      8.1
- * Version:           1.4.6
+ * Version:           1.4.7
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -17,7 +17,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.4.6';
+const VERSION = '1.4.7';
 
 if (!defined('ABSPATH')) {
     exit;
