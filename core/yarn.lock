@@ -1034,27 +1034,27 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.68.0.tgz#3d82b1bb57754a15cd05a5223189cdd3e6e96bcd"
   integrity sha512-e/NRJFl48wL5DFNSzQrvm4kaB5dzNNmqWjIJ6And2Sjuw4klO3w3TXMvCAEF1tHTrQQgpOD4QVkBE/92/yBGrQ==
 
-"@smart-cloud/aws-amplify-ui-react-core@3.6.7":
-  version "3.6.7"
-  resolved "https://registry.npmjs.org/@smart-cloud/aws-amplify-ui-react-core/-/aws-amplify-ui-react-core-3.6.7.tgz#7ebdbcee1a94dd5b24c92b00ef1b47d8c97ad7f5"
-  integrity sha512-zxyq6zl+IAXBRNnsihdk9TBw8QueHEILDfWxCjxp5fXguaMYXeI0zIrNay3JVLxPhgKKQTEtCFr0wvQRcWbi7w==
+"@smart-cloud/aws-amplify-ui-react-core@3.6.8-smart-cloud.0":
+  version "3.6.8-smart-cloud.0"
+  resolved "https://registry.npmjs.org/@smart-cloud/aws-amplify-ui-react-core/-/aws-amplify-ui-react-core-3.6.8-smart-cloud.0.tgz#4f1719224a5d8b13620259dd7a69aaa86e0c82d8"
+  integrity sha512-HX20vBTbvLvlqocbd81G+/mHlqU+ajw9ufCpxpnvkc8DDgVCX2Fc/ENNzb3If2z5R2ZxcAVyi5H0zBcjRxT8Kg==
   dependencies:
-    "@smart-cloud/aws-amplify-ui" "6.15.7"
+    "@smart-cloud/aws-amplify-ui" "6.15.8-smart-cloud.0"
     "@xstate/react" "^3.2.2"
     lodash "4.18.1"
     react-hook-form "7.53.2"
     xstate "^4.33.6"
 
-"@smart-cloud/aws-amplify-ui-react@6.15.7":
-  version "6.15.7"
-  resolved "https://registry.npmjs.org/@smart-cloud/aws-amplify-ui-react/-/aws-amplify-ui-react-6.15.7.tgz#a04dabf132bebe2e8fffa130082fbdca58f7a1e1"
-  integrity sha512-dVA6yFLnaAEFg3TaU0taifENcqk6tGTxKtO/ArdRjjz/iNP7v3sEGecpNXqHGQx52sV6MUyRDgctwwqQyWAaeQ==
+"@smart-cloud/aws-amplify-ui-react@6.15.8-smart-cloud.0":
+  version "6.15.8-smart-cloud.0"
+  resolved "https://registry.npmjs.org/@smart-cloud/aws-amplify-ui-react/-/aws-amplify-ui-react-6.15.8-smart-cloud.0.tgz#1925ee1b07379458862188fc281585abead64eb2"
+  integrity sha512-1sIcAodKr0UHJJyTorNbK2+21Jkun4MImor3bjehOJF+fw2oyht/va6eSQktKriuh56fzeRVMt2lJtIGddX8aQ==
   dependencies:
     "@radix-ui/react-direction" "^1.1.0"
     "@radix-ui/react-dropdown-menu" "^2.1.10"
     "@radix-ui/react-slider" "^1.3.2"
-    "@smart-cloud/aws-amplify-ui" "6.15.7"
-    "@smart-cloud/aws-amplify-ui-react-core" "3.6.7"
+    "@smart-cloud/aws-amplify-ui" "6.15.8-smart-cloud.0"
+    "@smart-cloud/aws-amplify-ui-react-core" "3.6.8-smart-cloud.0"
     "@xstate/react" "^3.2.2"
     country-data-list "^1.6.0"
     country-flag-icons "^1.6.13"
@@ -1062,19 +1062,19 @@
     qrcode "1.5.0"
     tslib "^2.5.2"
 
-"@smart-cloud/aws-amplify-ui@6.15.7":
-  version "6.15.7"
-  resolved "https://registry.npmjs.org/@smart-cloud/aws-amplify-ui/-/aws-amplify-ui-6.15.7.tgz#b12be3734b3b75d1c7e7c7815b622507c1dd0b2d"
-  integrity sha512-9F2Q4yNEFMc6TyZW74HJdBLiekb/b+yVS4zI5MTc+YQDOnChML2+XDhEZZHWKMG9opV7T58oAASWhukHY3Hp5A==
+"@smart-cloud/aws-amplify-ui@6.15.8-smart-cloud.0":
+  version "6.15.8-smart-cloud.0"
+  resolved "https://registry.npmjs.org/@smart-cloud/aws-amplify-ui/-/aws-amplify-ui-6.15.8-smart-cloud.0.tgz#12f322dd6f53c9dddfe43aa156daf083d105e118"
+  integrity sha512-SsrDooRbPjjHeimk9iSWYYHjvwza1x8d3JW2Ds5HNW0fVha1VMgssKM8RE/M1+3DeIgg74fLIqMq+n/TUHkEnQ==
   dependencies:
     csstype "^3.1.1"
     lodash "4.18.1"
     tslib "^2.5.2"
 
-"@smart-cloud/gatey-core@^2.4.2":
-  version "2.4.2"
-  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.4.2.tgz#546b4ab172a69b9e6ffd60695f27865f3f4a77e7"
-  integrity sha512-2Z4NmPRznnpIhc8vdy6kIvrzYQAFmOC0HPHdc50maAFzA1lTztGX5mCbd/XUnXmbVwNx8TRoYN/7/b0IHWoWJw==
+"@smart-cloud/gatey-core@^2.4.3":
+  version "2.4.3"
+  resolved "https://registry.npmjs.org/@smart-cloud/gatey-core/-/gatey-core-2.4.3.tgz#a2d9358e5086b02cd71b5c775206438f003b8405"
+  integrity sha512-VBWunl58PeLJdu8E1VwjeFfyKeSeg/GLS41OXWUZSn07KNwBbgPLhzfEmmHdTB569DXq1Wvrzsah3M+tLKbIqw==
   dependencies:
     "@smart-cloud/wpsuite-core" "^2.5.2"
 
