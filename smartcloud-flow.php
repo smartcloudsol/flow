@@ -5,7 +5,7 @@
  * Description:       Multi-step forms with save and resume, discussions, ratings, static WordPress delivery, and optional AWS workflows.
  * Requires at least: 6.9
  * Requires PHP:      8.1
- * Version:           1.4.10
+ * Version:           1.4.11
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -17,7 +17,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.4.10';
+const VERSION = '1.4.11';
 
 if (!defined('ABSPATH')) {
     exit;
@@ -906,9 +906,15 @@ final class Flow
         if (file_exists(filename: SMARTCLOUD_FLOW_PATH . 'main/index.asset.php')) {
             $main_script_asset = require(SMARTCLOUD_FLOW_PATH . 'main/index.asset.php');
         }
+        $amplify = $frontend && wp_script_is('smartcloud-wpsuite-amplify-sdk', 'registered')
+            ? 'smartcloud-wpsuite-amplify-sdk'
+            : 'smartcloud-wpsuite-amplify-vendor';
+        $crypto = $frontend && wp_script_is('smartcloud-wpsuite-config-crypto', 'registered')
+            ? 'smartcloud-wpsuite-config-crypto'
+            : 'smartcloud-wpsuite-webcrypto-vendor';
         $main_script_dependencies = array_merge(
             $main_script_asset['dependencies'] ?? array(),
-            array('smartcloud-wpsuite-webcrypto-vendor', 'smartcloud-wpsuite-amplify-vendor'),
+            array($crypto, $amplify),
             $frontend ? array() : array('smartcloud-wpsuite-mantine-vendor')
         );
         if (wp_script_is('smartcloud-wpsuite-main-script', 'registered')) {

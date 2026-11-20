@@ -5,7 +5,7 @@ Tags: forms, workflows, gutenberg, aws, automation
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.4.10
+Stable tag: 1.4.11
 License: MIT
 License URI: https://mit-license.org/
 Text Domain: smartcloud-flow
@@ -221,8 +221,9 @@ Flow Pro includes additional functionality such as backend-powered submissions m
 
 == Changelog ==
 
-= 1.4.10 =
+= 1.4.11 =
 
+* Load the smaller authentication SDK for frontend integrations.
 * Update the shared WP Suite Hub.
 
 = 1.4.9 =
