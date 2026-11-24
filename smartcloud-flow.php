@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       SmartCloud Flow – Block‑based Forms & Workflow Automation
- * Plugin URI:        https://wpsuite.io/flow/
+ * Plugin URI:        https://wpsuite.io/forms-and-workflows/
  * Description:       Multi-step forms with save and resume, discussions, ratings, static WordPress delivery, and optional AWS workflows.
  * Requires at least: 6.9
  * Requires PHP:      8.1
- * Version:           1.4.12
+ * Version:           1.4.13
  * Author:            Smart Cloud Solutions Inc.
  * Author URI:        https://smart-cloud-solutions.com
  * License:           MIT
@@ -17,7 +17,7 @@
 
 namespace SmartCloud\WPSuite\Flow;
 
-const VERSION = '1.4.12';
+const VERSION = '1.4.13';
 
 if (!defined('ABSPATH')) {
     exit;
